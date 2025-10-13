@@ -300,7 +300,7 @@ class HistoryDB(Resource):
         return resp_eot_id[len(resp_eot_id) - 1][0]
 
     def get_newest_hot_id(self, unit_addr):
-        sql_hot_id = """SELECT id FROM EOTRecords WHERE 
+        sql_hot_id = """SELECT id FROM HOTRecords WHERE 
                                               unit_addr = %(unit_addr)s
                                                """
         sql_hot_id_args = {"unit_addr": unit_addr}
