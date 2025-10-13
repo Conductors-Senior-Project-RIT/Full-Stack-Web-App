@@ -1,0 +1,114 @@
+.Station-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  height: 100vh; /* Full viewport height */
+  padding: 20px 0; /* Padding at the top and bottom */
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.Station-container h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.Station-container p {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+}
+
+
+.map-image {
+  width: 100%;
+  height: auto;
+}
+
+.dropdown {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  right: 10%;
+  background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1000; /* Ensure it appears on top of the map */
+}
+
+.pop_up {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  right: 10%;
+  background: rgba(255, 255, 255, 0.9); 
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+  z-index: 1001;
+}
+
+.dropdown h2 {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.dropdown ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.dropdown li {
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+.dropdown th {
+  font-size: 15px;
+  margin-top: 0%;
+  padding-top: 0%;
+  padding-bottom: 0%;
+  margin-bottom: 0%;
+}
+
+.close-button {
+  position: absolute;
+  top: 5px; /* Adjusted to move the button upwards */
+  right: 10px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background-color: darkred;
+}
+
+.pin-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.pin-image:active {
+  filter: brightness(75%);
+}
+
+.table {
+    margin-left: auto;
+    margin-right: auto;
+}

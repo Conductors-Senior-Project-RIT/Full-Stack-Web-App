@@ -1,9 +1,7 @@
-
 .data-table-container {
-    max-width: 800px;
+    max-width: 80%;
     margin: 0 auto;
     padding: 20px;
-    border: 1px solid #ccc;
     border-radius: 5px;
     background-color: #d2b48c; /* Soft brown background color */
 }
@@ -17,7 +15,7 @@
 .data-table th, .data-table td {
     border: 1px solid #ddd;
     padding: 8px;
-    text-align: left;
+    text-align: center; /* Center align text in table cells */
 }
 
 .data-table th {
@@ -31,4 +29,9 @@
 
 .data-table tr:hover {
     background-color: #ddd; /* Highlight row on hover */
+}
+
+.data-table thead th {
+    background-color: #8B4513; /* Darker brown for headers */
+    color: white;
 }

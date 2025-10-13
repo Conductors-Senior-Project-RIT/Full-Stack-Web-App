@@ -1,4 +1,4 @@
-
+/* Base styles for the nav bar */
 nav {
     background-color: #8B4513; /* Brown background color */
     padding: 10px 0;
@@ -8,6 +8,7 @@ nav ul {
     list-style: none; /* Remove default list styles */
     display: flex; /* Use flexbox to display links horizontally */
     justify-content: center; /* Center the links horizontally */
+    flex-wrap: wrap; /* Allow links to wrap to the next line on smaller screens */
     padding: 0;
     margin: 0;
 }
@@ -24,4 +25,35 @@ nav ul li a {
 
 nav ul li a:hover {
     text-decoration: underline; /* Underline links on hover */
+}
+
+/* Logout button styles */
+.logout-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.logout-button:hover {
+    color: #a0522d; /* Sienna */
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column; /* Stack links vertically */
+        align-items: center; /* Center the links */
+    }
+
+    nav ul li {
+        margin: 10px 0; /* Add vertical spacing between links */
+    }
+
+    nav ul li a {
+        font-size: 1rem; /* Adjust font size for smaller screens */
+    }
 }

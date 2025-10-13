@@ -1,0 +1,95 @@
+.superuser-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border: 1px solid #8b4513; /* SaddleBrown border */
+    border-radius: 8px;
+    background: linear-gradient(to bottom, #f5deb3, #d2b48c); /* Wheat to Tan gradient */
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.superuser-container h2 {
+    text-align: center;
+    color: #5a3d1a; /* Dark Brown */
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+}
+
+.superuser-container h3 {
+    color: #8b4513; /* SaddleBrown */
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.superuser-container p {
+    color: #5a3d1a; /* Dark Brown */
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.superuser-container .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.superuser-container label {
+    font-weight: bold;
+    color: #5a3d1a; /* Dark Brown */
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.superuser-container input[type="text"],
+.superuser-container select {
+    width: 100%;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    border: 1px solid #8b4513; /* SaddleBrown border */
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.superuser-container input[type="text"]:focus,
+.superuser-container select:focus {
+    outline: none;
+    border-color: #a0522d; /* Sienna */
+    box-shadow: 0 0 5px rgba(160, 82, 45, 0.5);
+}
+
+.superuser-container .button-option {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(to right, #8b4513, #a0522d); /* SaddleBrown to Sienna gradient */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    margin-top: 1rem;
+}
+
+.superuser-container .button-option:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.superuser-container .button-option:active {
+    transform: scale(0.95);
+}
+
+.superuser-container .message {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.superuser-container .message.success {
+    color: green;
+}
+
+.superuser-container .message.error {
+    color: red;
+}

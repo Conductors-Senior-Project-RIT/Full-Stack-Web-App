@@ -1,32 +1,77 @@
+/* General container styling */
 .container {
-    width: 80%;
+    width: 90%;
+    max-width: 1200px;
     margin: auto;
     padding: 20px;
-}
-
-section {
-    margin-bottom: 20px;
-}
-
-h2 {
+    font-family: 'Arial', sans-serif;
     color: #333;
-    font-size: 1.5em;
+    line-height: 1.8;
 }
 
+/* Section styling */
+section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #f5deb3;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Headings */
+h2 {
+    color: #2c3e50;
+    font-size: 2em;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #8B4513;
+    padding-bottom: 5px;
+}
+
+h3 {
+    color: #8B4513;
+    font-size: 1.5em;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Paragraphs */
 p {
     margin: 0 0 15px;
-    line-height: 1.6;
-    font-size: 1em;
+    font-size: 1.1em;
+    color: #555;
 }
 
-/* Media query for larger screens */
+/* Image styling */
+.image-class {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Video styling */
+.video-class {
+    display: block;
+    max-width: 100%;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Accessibility for larger screens */
 @media (min-width: 768px) {
     .container {
-        width: 60%;
+        width: 75%;
     }
 
     h2 {
-        font-size: 2em;
+        font-size: 2.5em;
+    }
+
+    h3 {
+        font-size: 1.8em;
     }
 
     p {
@@ -34,17 +79,28 @@ p {
     }
 }
 
-/* Media query for extra large screens */
+/* Accessibility for extra-large screens */
 @media (min-width: 1200px) {
     .container {
-        width: 50%;
+        width: 60%;
     }
 
     h2 {
-        font-size: 2.5em;
+        font-size: 3em;
+    }
+
+    h3 {
+        font-size: 2em;
     }
 
     p {
-        font-size: 1.5em;
+        font-size: 1.3em;
     }
+}
+
+/* Add hover effects for interactivity */
+section:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }

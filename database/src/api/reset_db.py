@@ -5,5 +5,6 @@ from db.trackSense_db_commands import *
 
 class ResetDB(Resource):
     def get(self):
-        run_sql_file('..\\..\\config\\table.sql')
+        run_sql_file("../../config/table.sql")
         return 200
+    

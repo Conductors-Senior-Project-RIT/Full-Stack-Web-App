@@ -1,0 +1,47 @@
+/* Pagination container */
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+/* Pagination buttons */
+.pagination li {
+    margin: 0 5px;
+}
+
+.pagination li a {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 5px;
+    background-color: #8B4513; /* Dark brown background */
+    color: white; /* White text for readability */
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Hover effect for buttons */
+.pagination li a:hover {
+    background-color: #d2b48c; /* Soft brown for hover */
+    color: #8B4513; /* Dark brown text */
+}
+
+/* Active page button */
+.pagination li.react-paginate__active a {
+    background-color: blue; /* Dark brown for active button */
+    color: white; /* White text for the current page */
+    font-weight: bold;
+    border: 2px solid #d2b48c; /* Soft brown border for contrast */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Add a subtle shadow for emphasis */
+}
+
+/* Disabled buttons (e.g., previous/next when not clickable) */
+.pagination li.react-paginate__disabled a {
+    background-color: #f2f2f2; /* Light gray for disabled buttons */
+    color: #ccc; /* Gray text for disabled state */
+    cursor: not-allowed;
+}

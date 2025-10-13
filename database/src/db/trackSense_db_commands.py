@@ -5,7 +5,7 @@ import yaml
 # helper function, connects to the database
 def create_connection():
     cfg = {}
-    full_config_path = os.path.join(os.path.dirname(__file__), '..\\..\\config\\postgres_config.yml')
+    full_config_path = os.path.join(os.path.dirname(__file__), '../../config/postgres_config.yml')
     with open(full_config_path, 'r') as file:
         cfg = yaml.load(file, Loader=yaml.FullLoader)
         # print(cfg['database'])

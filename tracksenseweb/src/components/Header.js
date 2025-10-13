@@ -5,7 +5,7 @@ const Header = () => {
     return (
         <header>
             <div className="container">
-                <h1>TrackSense Overview</h1>
+                <h1>Follow That FRED! Overview</h1>
             </div>
         </header>
     );
