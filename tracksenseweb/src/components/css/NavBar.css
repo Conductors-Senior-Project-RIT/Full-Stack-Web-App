@@ -1,0 +1,27 @@
+
+nav {
+    background-color: #8B4513; /* Brown background color */
+    padding: 10px 0;
+}
+
+nav ul {
+    list-style: none; /* Remove default list styles */
+    display: flex; /* Use flexbox to display links horizontally */
+    justify-content: center; /* Center the links horizontally */
+    padding: 0;
+    margin: 0;
+}
+
+nav ul li {
+    margin: 0 15px; /* Add horizontal spacing between links */
+}
+
+nav ul li a {
+    color: white; /* White text color */
+    text-decoration: none; /* Remove underline from links */
+    font-size: 1.2em; /* Increase font size */
+}
+
+nav ul li a:hover {
+    text-decoration: underline; /* Underline links on hover */
+}

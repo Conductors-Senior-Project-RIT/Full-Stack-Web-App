@@ -1,0 +1,11 @@
+psycopg
+psycopg[binary]
+flask_restful
+flask_cors
+flask
+pyqt6
+pyside6
+zmq
+requests
+pyaudio
+numpy

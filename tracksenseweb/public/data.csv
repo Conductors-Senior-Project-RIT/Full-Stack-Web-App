@@ -1,0 +1,4 @@
+Unit Address,Pressure,Motion,Marker Light,Turbine,Battery Cond.,Battery Charge,Arm Status
+1234,30,Yes,On,Active,Good,80%,Armed
+5678,25,No,Off,Inactive,Low,50%,Disarmed
+9101,28,Yes,On,Active,Good,90%,Armed

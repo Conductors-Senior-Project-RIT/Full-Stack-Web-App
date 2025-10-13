@@ -1,0 +1,84 @@
+/* App.css */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #d2b48c; /* Default background color */
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.App {
+  text-align: center;
+  min-height: 100vh; /* Ensure App takes full height */
+  display: flex;
+  flex-direction: column;
+}
+
+.App-content {
+  flex: 1; /* Ensure content takes up remaining space */
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #4682b4; /* Header Background */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Background color classes */
+.bg-home {
+  background-color: #d2b48c; /* Light Green */
+}
+
+.bg-data {
+  background-color: #d2b48c; /* Light Blue */
+}
+
+.bg-aboutus {
+  background-color: #d2b48c; /* Beige */
+}
+
+.bg-login {
+  background-color: #d2b48c; /* Khaki */
+}
