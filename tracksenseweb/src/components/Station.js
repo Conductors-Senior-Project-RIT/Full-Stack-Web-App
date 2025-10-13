@@ -124,34 +124,6 @@ const Station = ({ station, image, locationImage }) => {
           </Modal.Footer>
         </Modal>
       </div>
-      <div>
-        <Modal 
-        show={showHOTPopUp} 
-        onHide={handleClosePopUp}
-        backdrop="static"
-        keyboard={false}
-        dialogClassName="modal-top">
-          <Modal.Header>
-            <Modal.Title>Additional Information</Modal.Title>
-            </Modal.Header>
-          <Modal.Body>
-              {popUpRecord.map((rec,index) => (
-                  <p key={index}>
-                    Date Recorded: {rec.date_rec}<br></br>
-                    Station Recorded at: {rec.station_name}<br></br>
-                    Train Symbol: {rec.symbol_name}<br></br>
-                    Unit Address: {rec.unit_addr}<br></br>
-                    Command: {rec.command}<br></br>
-                    Checkbits: {rec.checkbits}<br></br>
-                    Parity: {rec.parity}<br></br>
-                    </p>
-                    ))}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant='primary' onClick={() => handleClosePopUp()}>Close</Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
       <div className="map-container">
         <img src={image} alt={alt_text} className="map-image" />
         <img src={locationImage} alt="Pin" className="pin-image" onClick={() => handlePinClick()} role="button" />
