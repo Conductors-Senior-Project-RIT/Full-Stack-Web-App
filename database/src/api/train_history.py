@@ -1,7 +1,8 @@
 from email.policy import default
 from math import ceil
+from enum import Enum
 
-from flask import jsonify, request
+from flask import Response, jsonify, request
 from flask_restful import Resource, reqparse
 from db.trackSense_db_commands import *
 import datetime, requests
@@ -14,24 +15,106 @@ load_dotenv()
 RESULTS_NUM = 250
 
 
+# An enumeration of train record types
+class RecordTypes(Enum):
+    EOT = 1
+    HOT = 2
+    DPU = 3
+
+
 class HistoryDB(Resource):
     def get(self):
+        """
+        Returns train records of a specified type using provided request parameters.
+        "typ": Specifies what type of train record(s) to return. 1: EOT, 2: HOT, 3: DPU (default -1: collection of EOT)
+        "id": The id of a train record to retrieve.
+        "page": The page of records to return.
 
+        Returns:
+            Response: Returns an individual train record response payload with a status code. Response payload may include a
+            collection of EOT records if "typ" is -1.
+        """
         typ = request.args.get("type", default=-1, type=int)
         id = request.args.get("id", default=-1, type=int)
         page = request.args.get("page", default=1, type=int)
-
-        if id == -1:
-
-            sql = """
-            SELECT EOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
+ 
+ 
+        if typ == -RecordTypes.EOT.value or typ == RecordTypes.EOT.value:
+            return self.get_eot(id, page)
+        elif typ == RecordTypes.HOT.value:
+            return self.get_hot(id, page)
+        elif typ == RecordTypes.DPU.value:
+            return self.get_dpu(id, page)
+        else:
+            return jsonify({"error": "Received invalid ID!"}), 400
+            
+            
+    def get_hot(self, id, page) -> Response:
+        sql = """
+            SELECT HOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, command, checkbits, parity, verified FROM HOTRecords
             INNER JOIN Stations as stat on station_recorded = stat.id
-            ORDER BY date_rec DESC
+            WHERE HOTRecords.id = %(id)s
             LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
             """
-            args = {"results_num": RESULTS_NUM, "offset": page - 1}
-            resp = run_get_cmd(sql, args=args)
-
+        sql_args = {"id": id, "results_num": RESULTS_NUM, "offset": page - 1}
+        resp = run_get_cmd(sql, sql_args)
+        return jsonify(
+            [
+                {
+                    "id": tup[0],
+                    "date_rec": tup[1],
+                    "station_name": tup[2],
+                    "symbol_name": run_get_cmd(
+                        "SELECT symb_name FROM Symbols WHERE id = %(symid)s",
+                        {"symid": tup[3]},
+                    ),
+                    "unit_addr": tup[4],
+                    "command": tup[5],
+                    "checkbits": tup[6],
+                    "parity": tup[7],
+                    "verified": tup[8],
+                }
+                for tup in resp
+            ]
+        ), 200
+    
+    def get_eot(self, id: int, page: int) -> Response:
+        sql = """SELECT EOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
+                INNER JOIN Stations as stat on station_recorded = stat.id"""
+        
+        sql += "WHERE EOTRecords.id = %(id)s ORDER BY EOTRecords.id Desc" if id == RecordTypes.EOT.value else "ORDER BY date_rec DESC"
+        sql += "LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s"
+        
+        sql_args = {"results_num": RESULTS_NUM, "offset": page - 1}
+        if id == RecordTypes.EOT.value:
+            sql_args["id"] = id
+            resp = run_get_cmd(sql, sql_args)
+            return jsonify(
+                [
+                    {
+                        "id": tup[0],
+                        "date_rec": tup[1],
+                        "station_name": tup[2],
+                        "symbol_name": run_get_cmd(
+                            "SELECT symb_name FROM Symbols WHERE id = %(symid)s",
+                            {"symid": tup[3]},
+                        ),
+                        "unit_addr": tup[4],
+                        "brake_pressure": tup[5],
+                        "motion": tup[6],
+                        "marker_light": tup[7],
+                        "turbine": tup[8],
+                        "battery_cond": tup[9],
+                        "battery_charge": tup[10],
+                        "arm_status": tup[11],
+                        "signal_strength": tup[12],
+                        "verified": tup[13],
+                    }
+                    for tup in resp
+                ]
+            ), 200
+              
+        else:
             count_sql = """SELECT COUNT(*) FROM EOTRecords"""
             count = run_get_cmd(count_sql)
 
@@ -58,69 +141,11 @@ class HistoryDB(Resource):
                     ],
                     "totalPages": ceil(count[0][0] / RESULTS_NUM),
                 }
-            )
-        if typ == 1:
-            sql = """
-                        SELECT EOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
-                        INNER JOIN Stations as stat on station_recorded = stat.id
-                        WHERE EOTRecords.id = %(id)s
-                        ORDER BY EOTRecords.id Desc
-                        LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
-                        """
-            sql_args = {"id": id, "results_num": RESULTS_NUM, "offset": page - 1}
-            resp = run_get_cmd(sql, sql_args)
-            return jsonify(
-                [
-                    {
-                        "id": tup[0],
-                        "date_rec": tup[1],
-                        "station_name": tup[2],
-                        "symbol_name": run_get_cmd(
-                            "SELECT symb_name FROM Symbols WHERE id = %(symid)s",
-                            {"symid": tup[3]},
-                        ),
-                        "unit_addr": tup[4],
-                        "brake_pressure": tup[5],
-                        "motion": tup[6],
-                        "marker_light": tup[7],
-                        "turbine": tup[8],
-                        "battery_cond": tup[9],
-                        "battery_charge": tup[10],
-                        "arm_status": tup[11],
-                        "signal_strength": tup[12],
-                        "verified": tup[13],
-                    }
-                    for tup in resp
-                ]
-            )
-        elif typ == 2:
-            sql = """
-            SELECT HOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, command, checkbits, parity, verified FROM HOTRecords
-            INNER JOIN Stations as stat on station_recorded = stat.id
-            WHERE HOTRecords.id = %(id)s
-            LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
-            """
-            sql_args = {"id": id, "results_num": RESULTS_NUM, "offset": page - 1}
-            resp = run_get_cmd(sql, sql_args)
-            return jsonify(
-                [
-                    {
-                        "id": tup[0],
-                        "date_rec": tup[1],
-                        "station_name": tup[2],
-                        "symbol_name": run_get_cmd(
-                            "SELECT symb_name FROM Symbols WHERE id = %(symid)s",
-                            {"symid": tup[3]},
-                        ),
-                        "unit_addr": tup[4],
-                        "command": tup[5],
-                        "checkbits": tup[6],
-                        "parity": tup[7],
-                        "verified": tup[8],
-                    }
-                    for tup in resp
-                ]
-            )
+            ), 200
+        
+    
+    def get_dpu(self, id, page):
+        return jsonify({"error": "DPU not implemented yet!"}), 500
 
     def post(self):
         recovery_request = True
