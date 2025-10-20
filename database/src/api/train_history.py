@@ -1,9 +1,12 @@
+from argparse import Namespace
 from email.policy import default
 from math import ceil
 from enum import Enum
+from typing import Tuple
 
 from flask import Response, jsonify, request
 from flask_restful import Resource, reqparse
+from psycopg import Cursor
 from db.trackSense_db_commands import *
 import datetime, requests
 import http.client, urllib
@@ -32,7 +35,7 @@ class HistoryDB(Resource):
 
         Returns:
             Response: Returns an individual train record response payload with a status code. Response payload may include a
-            collection of EOT records if "typ" is -1.
+            collection of EOT records if "type" is -1.
         """
         typ = request.args.get("type", default=-1, type=int)
         id = request.args.get("id", default=-1, type=int)
@@ -148,10 +151,16 @@ class HistoryDB(Resource):
         return jsonify({"error": "DPU not implemented yet!"}), 500
 
     def post(self):
-        recovery_request = True
+        """
+        Inserts a new train record of a specified type into the database.
+
+        Returns:
+            Response: Returns the status code of the request.
+        """
         resp = None
         date_rec = datetime.datetime.now()
         dt_str = date_rec.strftime("%Y-%m-%d %H:%M:%S")
+        
         parser = reqparse.RequestParser()
         parser.add_argument("date_rec", default=None, type=str)
         parser.add_argument("type", default=-1, type=int)
@@ -171,73 +180,87 @@ class HistoryDB(Resource):
         parser.add_argument("checkbits", type=str, default="")
         parser.add_argument("parity", type=str, default="")
         args = parser.parse_args()
+        
         # right now this has 0 authentication. Too bad!
         typ = args["type"]
         # type --> 1 = EOT, 2 = HOT, 3 = DPU
-        if typ == 1:
-            sql = """
-                INSERT INTO EOTRecords (date_rec, symbol_id, station_recorded, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength) VALUES
-                (%(date)s, %(symbol_id)s, %(station)s,  %(unit_addr)s, %(brake_pressure)s, %(motion)s, %(marker_light)s, %(turbine)s, %(battery_cond)s, %(battery_charge)s, %(arm_status)s, %(signal_strength)s)
-            """
-            sql_args = {
-                "date": args["date_rec"],
-                "station": args["station_id"],
-                "unit_addr": args["unit_addr"],
-                "brake_pressure": args["brake_pressure"],
-                "motion": args["motion"],
-                "marker_light": args["marker_light"],
-                "turbine": args["turbine"],
-                "battery_cond": args["battery_cond"],
-                "battery_charge": args["battery_charge"],
-                "arm_status": args["arm_status"],
-                "signal_strength": args["signal_strength"],
-                "symbol_id": args["symbol_id"],
-            }
-            if args["date_rec"] is None:
-                sql_args["date"] = dt_str
-                recovery_request = False
-            resp = run_exec_cmd(sql, sql_args)
-            # print(resp.statusmessage)
-            # print(run_get_cmd('SELECT * FROM EOTRecords'))
-        elif typ == 2:
-            sql_args = {
-                "date": args["date_rec"],
-                "station": args["station_id"],
-                "frame_sync": args["frame_sync"],
-                "command": args["command"],
-                "checkbits": args["checkbits"],
-                "parity": args["parity"],
-                "unit_addr": args["unit_addr"],
-            }
-            if args["date_rec"] is None:
-                sql_args["date"] = dt_str
-                recovery_request = False
-
-            sql = """
-                INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
-                (%(date)s, %(station)s, %(frame_sync)s, %(unit_addr)s, %(command)s, %(checkbits)s, %(parity)s)
-            """
-            resp = run_exec_cmd(sql, sql_args)
-            return
-        elif typ == 3:
-            return
+        if typ == RecordTypes.EOT.value:
+            resp, recovery_request = self.post_eot(args, dt_str)
+        elif typ == RecordTypes.HOT.value:
+            resp, recovery_request = self.post_hot(args, dt_str)
+            return 200
+        elif typ == RecordTypes.DPU.value:
+            resp, recovery_request = self.post_dpu(args, dt_str)
+            return jsonify({"error": "DPU POST not implemented!"}), 500
         else:
-            print("something is bad in the request")
-            return 400
+            print("Bad request payload!")
+            return jsonify({"error": "Bad request payload!"}), 400
 
-        if resp is not None:
+        if not resp:
             print(recovery_request)
-            # print("EWEWEWEWEWEWEEW")
             print(typ)
-            self.add_new_pin(sql_args["station"], typ, sql_args["unit_addr"])
+            self.add_new_pin(args["station_id"], typ, args["unit_addr"])
             noti = self.check_for_notification(
                 args["unit_addr"], args["station_id"], args["type"]
             )
             # print(noti)
             if not noti and not recovery_request:
-                # print("owo")
+                # print("owo") # lmfao wha
                 self.notif_send(args["station_id"])
+                
         return 200
+    
+    def post_eot(self, args: Namespace, datetime_str: str) -> Tuple[Cursor[Tuple], bool]:
+        recovery_request = True
+        sql = """
+            INSERT INTO EOTRecords (date_rec, symbol_id, station_recorded, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength) VALUES
+            (%(date)s, %(symbol_id)s, %(station)s,  %(unit_addr)s, %(brake_pressure)s, %(motion)s, %(marker_light)s, %(turbine)s, %(battery_cond)s, %(battery_charge)s, %(arm_status)s, %(signal_strength)s)
+        """
+        sql_args = {
+            "date": args["date_rec"],
+            "station": args["station_id"],
+            "unit_addr": args["unit_addr"],
+            "brake_pressure": args["brake_pressure"],
+            "motion": args["motion"],
+            "marker_light": args["marker_light"],
+            "turbine": args["turbine"],
+            "battery_cond": args["battery_cond"],
+            "battery_charge": args["battery_charge"],
+            "arm_status": args["arm_status"],
+            "signal_strength": args["signal_strength"],
+            "symbol_id": args["symbol_id"],
+        }
+        if args["date_rec"] is None:
+            sql_args["date"] = datetime_str
+            recovery_request = False
+            
+        return run_exec_cmd(sql, sql_args), recovery_request
+        # print(resp.statusmessage)
+        # print(run_get_cmd('SELECT * FROM EOTRecords'))
+    
+    def post_hot(self, args: Namespace, datetime_str: str) -> Tuple[Cursor[Tuple], bool]:
+        recovery_request = True
+        sql_args = {
+            "date": args["date_rec"],
+            "station": args["station_id"],
+            "frame_sync": args["frame_sync"],
+            "command": args["command"],
+            "checkbits": args["checkbits"],
+            "parity": args["parity"],
+            "unit_addr": args["unit_addr"],
+        }
+        if args["date_rec"] is None:
+            sql_args["date"] = datetime_str
+            recovery_request = False
+
+        sql = """
+            INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
+            (%(date)s, %(station)s, %(frame_sync)s, %(unit_addr)s, %(command)s, %(checkbits)s, %(parity)s)
+        """
+        return run_exec_cmd(sql, sql_args), recovery_request
+    
+    def post_dpu(self, args: Namespace, datetime_str: str) -> Tuple[Cursor[Tuple], bool]:
+        raise NotImplemented("DPU POST not implemented!") 
 
     def delete(self):  # not sure if this is needed
         print("delete goes here!")
