@@ -32,7 +32,7 @@ def run_sql_file(filename):
     connection.close()
 
 # runs a command to get data
-def run_get_cmd(sql, args={}):
+def run_get_cmd(sql, args={}): # returns list of tuples 
     connection = create_connection()
     cursor = connection.cursor()
     cursor.execute(sql, args)
@@ -41,7 +41,7 @@ def run_get_cmd(sql, args={}):
     return tuples
 
 # runs a sql command to commit changes to the db
-def run_exec_cmd(sql, args={}):
+def run_exec_cmd(sql, args={}): #always returns none https://stackoverflow.com/questions/37965198/python-psycopg2-cursor-execute-returning-none
     connection = create_connection()
     cursor = connection.cursor()
     res = cursor.execute(sql, args)

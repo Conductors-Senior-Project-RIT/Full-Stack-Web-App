@@ -4,8 +4,7 @@ EOT database layer
 This module handles all database CRUD operations for EOT records
 """
 
-from typing import Optional, Any, Tuple
-from psycopg2 import Cursor
+from typing import Any
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 RESULTS_NUM = 250
@@ -53,7 +52,7 @@ def get_eot_data_by_train_id(id: int, page: int) -> list[tuple[Any,...]] | None:
 
     TODO: improve error handling/ documentation 
     TODO: integrate this function to replace sql queries in train_history.py's def get_eot() 
-    TODO: how to go about error handling? DB errors like connceting issues, etc. | handling empty results frmo query | tpye validation and ranges of values allowed? 
+    TODO: Format returned collection
     TODO: what is symbol_id for a train, is it it's unique identifier?
     """
 
@@ -83,7 +82,7 @@ def get_eot_data_by_train_id(id: int, page: int) -> list[tuple[Any,...]] | None:
         print(f"Database error retrieving EOT data for symbol_id ({id}) and page ({page}): {e}")
         return None
 
-def create_eot_record(args: dict[str, Any], datetime_string: str) -> Cursor | None:  #post_eot()
+def create_eot_record(args: dict[str, Any], datetime_string: str) -> None:  #post_eot()
     """Inserts a new eot record in EOTRecords table
 
     Args:
@@ -91,13 +90,13 @@ def create_eot_record(args: dict[str, Any], datetime_string: str) -> Cursor | No
         args: named arguments to pass into parameterized query
 
     Returns:
-        Cursor object if db operation runs correctly, otherwise, None
+        , otherwise, None
 
     Raises:
         No raised exceptions - prints out error and returns None  
 
     TODO: integrate this function to replace sql queries in train_history.py's post_eot() | train_history post() looks gross with parser.add_argument... how to make cleaner?
-    TODO: improve error handling/ documentation 
+    TODO: improve error handling/ documentation | CHANGE RETURN TYPE 
     """
     try:
         recovery_request = True # what is this exactly 
@@ -124,7 +123,7 @@ def create_eot_record(args: dict[str, Any], datetime_string: str) -> Cursor | No
                 sql_args["date"] = datetime_string
                 recovery_request = False
 
-        response = run_exec_cmd(sql, sql_args)
+        response = run_exec_cmd(sql, sql_args) # these guys were tweaking, this literally returns none no matter what lol
 
         if response:
             return response, recovery_request
@@ -229,11 +228,12 @@ def check_for_eot_symbol(unit_addr: str) -> int | None:
         return None
 
 
-def attempt_auto_fill_eot_info(unit_addr: str, symb: int) -> bool:
+def attempt_auto_fill_eot_info_no_symbol(symbol_id: int, hot_id: int) -> bool:
     """Updates latest eot record making sure it's respective train indicates that its the most recently tracked eot device on a train
     
     Args:
         unit_addr: location of train with eot device?
+        symbol_id
 
     Returns:
         True if db operation is successful, otherwise, False if db operation failed
@@ -249,7 +249,7 @@ def attempt_auto_fill_eot_info(unit_addr: str, symb: int) -> bool:
             SET symbol_id = %(symb_id)s
             WHERE id = %(id)s
         """
-        sql_args = {"symb_id": symb, "id": id}
+        sql_args = {"symb_id": symbol_id, "id": hot_id}
         response = run_exec_cmd(sql, sql_args)
 
         if response:
