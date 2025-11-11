@@ -16,7 +16,6 @@ from api.station_auth import StationAuth
 from api.log_verifier import LogVerifier
 from api.time_frame_pull import recent_activities
 from api.symbol_api import SymbolAPI
-from api.symbol_id_api import SymbolRegister
 from api.verifier_hot import LogVerifierHOT
 from api.pushover_updater import PushoverUpdater
 from api.data_collation import DataCollation
@@ -47,7 +46,6 @@ api.add_resource(StationAuth, "/api/station_auth")
 api.add_resource(LogVerifier, "/api/verifier")
 api.add_resource(recent_activities, "/api/recent_activities")
 api.add_resource(SymbolAPI, "/api/symbols")
-api.add_resource(SymbolRegister, "/api/symbol_ids")
 api.add_resource(LogVerifierHOT, "/api/verifier_hot")
 api.add_resource(PushoverUpdater,"/api/PushoverUpdater")
 api.add_resource(DataCollation, "/api/data_collation")
