@@ -15,6 +15,9 @@ def get_symbol_name(id: int) -> str:
     "id": The id of a train record to retrieve.
     """
 
+    if not isinstance(id, int):
+        raise ValueError(f"id ({id}) is not an integer")
+    
     sql = "SELECT symb_name FROM Symbols WHERE id = %(symid)s"
     named_args = {"symid": id}
 
