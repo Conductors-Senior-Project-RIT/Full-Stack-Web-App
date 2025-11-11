@@ -91,7 +91,7 @@ class HistoryDB(Resource):
         sql_args = {"results_num": RESULTS_NUM, "offset": page - 1}
         if id == RecordTypes.EOT.value:
             sql_args["id"] = id
-            resp = run_get_cmd(sql, sql_args)
+            resp = run_get_cmd(sql, sql_args) # BUG: move this LOC above if block so it's accessible by else block as well
             return jsonify(
                 [
                     {
@@ -117,6 +117,7 @@ class HistoryDB(Resource):
                 ]
             ), 200
               
+        # BUG: in the else block it is trying to reference "resp" but it's out of scope...
         else:
             count_sql = """SELECT COUNT(*) FROM EOTRecords"""
             count = run_get_cmd(count_sql)
