@@ -4,7 +4,7 @@ from flask_restful import Resource, Api
 from api.train_history import *
 from api.train_test import *
 from api.reset_db import *
-from api.user import *
+from api.user_api import *
 from api.notification_handler import *
 from api.signal_update_handler import *
 from api.admin_handler import admin_bp  # Import the admin blueprint

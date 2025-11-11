@@ -10,7 +10,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
 )
 from flask_cors import CORS
-from db.trackSense_db_commands import *
+from db.user_db import *
 from dotenv import load_dotenv
 import secrets
 
@@ -35,10 +35,8 @@ def register():
     hashed_password = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
 
     # Insert the new user into the Users table
-    run_exec_cmd(
-        "INSERT INTO Users (email, passwd) VALUES (%s, %s)",
-        (data["email"], hashed_password),
-    )
+    create_new_user(email, hashed_password)
+    
     response = requests.post(
         f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
         auth=("api", MAILGUN_API_KEY),
@@ -51,11 +49,9 @@ def register():
     )
 
     # Fetch the newly created user's ID
-    user = run_get_cmd("SELECT id FROM Users WHERE email = %s", (data["email"],))
-    if not user:
+    user_id = get_user_id(email)
+    if not user_id:
         return jsonify({"message": "Error creating user"}), 500
-
-    user_id = user[0][0]
 
     # Fetch all station IDs from the Stations table
     stations = run_get_cmd("SELECT id FROM Stations")
@@ -86,12 +82,10 @@ def register():
 @user_bp.route("/api/login", methods=["POST"])
 def login():
     data = request.get_json()
-    user = run_get_cmd("SELECT * FROM Users WHERE email = %s", (data["email"],))
+    user = get_user_info(data.get["email"])
     if user and bcrypt.check_password_hash(user[0][2], data["password"]):
         access_token = create_access_token(identity=str(user[0][1]))
-        run_exec_cmd(
-            "UPDATE Users SET token = %s WHERE id = %s", (access_token, user[0][0])
-        )
+        update_session_token(user[0][1, access_token])
         return jsonify({"access_token": access_token})
     else:
         return jsonify({"message": "Invalid credentials"}), 401
@@ -102,9 +96,7 @@ def login():
 def verify_token():
     current_user = get_jwt_identity()
     token = request.headers.get("Authorization").split()[1]
-    user = run_get_cmd(
-        "SELECT * FROM Users WHERE email = %s AND token = %s", (current_user, token)
-    )
+    user = get_authenticated_user(current_user, token)
     if user:
         return jsonify({"valid": True})
     else:
@@ -114,12 +106,11 @@ def verify_token():
 @user_bp.route("/api/forgot-password", methods=["POST"])
 def reset_password_request():
     email = request.get_json()["email"]
-    check_email = "SELECT id FROM users WHERE email = %s"
-    results = run_get_cmd(check_email, (email,))
+    results = get_user_id(email)
     print(results)
     # Response will return the same way regardless if the email actually exists, but it won't be sent if it won't
     # exist
-    if len(results) > 0:
+    if not results:
         userId = results[0][0]
         reset_token = secrets.token_urlsafe(32)
         print(reset_token)
@@ -182,12 +173,7 @@ def reset_password():
         return {"valid": "false"}, 404
 
     userId = results[0][0]
-    update_password_sql = (
-        "UPDATE users SET passwd = %(passwd_hash)s WHERE id = %(user_id)s;"
-    )
-    run_exec_cmd(
-        update_password_sql, args={"passwd_hash": hashed_password, "user_id": userId}
-    )
+    update_user_password(userId, hashed_password)
 
     delete_request = "DELETE FROM reset_requests WHERE uid = %(user_id)s;"
     run_exec_cmd(delete_request, args={"user_id": userId})
@@ -200,24 +186,11 @@ def reset_password():
 def update_times():
     current_user = get_jwt_identity()
     token = request.headers.get("Authorization").split()[1]
-    user = run_get_cmd(
-        "SELECT * FROM Users WHERE email = %s AND token = %s", (current_user, token)
-    )
+    user = get_authenticated_user(current_user, token)
     if user:
-        sql = """
-            UPDATE Users
-            SET starting_time = %(start_time)s,
-            ending_time = %(ending_time)s
-            WHERE id = %(uid)s
-        """
-        uid = user[0][0]
+        user_id = user[0][0]
         data = request.get_json()
-        args = {
-            "start_time": data["starting_time"],
-            "ending_time": data["ending_time"],
-            "uid": uid,
-        }
-        run_exec_cmd(sql, args=args)
+        update_user_times(user_id, data["starting_time"], data["ending_time"])
         return jsonify({"message": "Success"}), 200
     else:
         return jsonify({"message": "Error saving times"}), 500
@@ -227,10 +200,7 @@ def update_times():
 def get_user_role():
     current_user = get_jwt_identity()
     token = request.headers.get("Authorization").split()[1]
-    user = run_get_cmd(
-        "SELECT acc_status FROM Users WHERE email = %s AND token = %s",
-        (current_user, token),
-    )
+    user = get_authenticated_user(current_user, token, "acc_status")
     if user:
         return jsonify({"role": user[0][0]}), 200
     else:
@@ -242,10 +212,7 @@ def get_user_role():
 def elevate_user():
     current_user = get_jwt_identity()
     token = request.headers.get("Authorization").split()[1]
-    user = run_get_cmd(
-        "SELECT acc_status FROM Users WHERE email = %s AND token = %s",
-        (current_user, token),
-    )
+    user = get_authenticated_user(current_user, token, "acc_status")
     if user and user[0][0] == 0:
         data = request.get_json()
         email_to_elevate = data.get("email")
@@ -253,10 +220,7 @@ def elevate_user():
         if new_role not in [1, 2]:
             return jsonify({"message": "Invalid role"}), 400
 
-        run_exec_cmd(
-            "UPDATE Users SET acc_status = %s WHERE email = %s",
-            (new_role, email_to_elevate),
-        )
+        update_account_status(email_to_elevate, new_role)
         return jsonify({"message": "User role updated successfully"}), 200
     else:
         return jsonify({"message": "Unauthorized"}), 403
