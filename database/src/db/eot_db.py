@@ -11,7 +11,18 @@ from trackSense_db_commands import run_get_cmd, run_exec_cmd
 RESULTS_NUM = 250
         
 def get_total_count_of_eot_records() -> int:
-    "TODO: integrate this function to replace sql queries in train_history.py's def get_eot()"
+    """Retrieves total amount of records in EOTRecords table
+
+    Returns:
+        If db operation is successful, number of records in EOTRecords table, otherwise, None
+    
+    Raises:
+        No raised exceptions - prints out error and returns None  
+
+    TODO: integrate this function to replace sql queries in train_history.py's def get_eot()
+    
+    TODO: improve error handling/ documentation 
+    """
 
     try:
         response = run_get_cmd("SELECT COUNT(*) FROM EOTRecords")
@@ -24,21 +35,26 @@ def get_total_count_of_eot_records() -> int:
         print(f"Error getting EOT record count: {e}")
         return -1
     
-def get_eot_data_by_train_id(id: int, page: int) -> Optional[list[tuple[Any,...]]]:
-    """
-    TODO: integrate this function to replace sql queries in train_history.py's def get_eot() 
-    TODO: how to go about error handling? DB errors like connceting issues, etc. | handling empty results frmo query | tpye validation and ranges of values allowed? 
-    TODO: what is symbol_id for a train, is it it's unique identifier?
+def get_eot_data_by_train_id(id: int, page: int) -> list[tuple[Any,...]] | None:
+    """ Retrieves eot records for a specific train id
     
-    Returns either nothing or eot records for a specific train id
-    "id": The id of an eot train record to retrieve.
-    "page": The page of records to return.
+    Args:
+        id: The id of an eot train record to retrieve.
+        page: The page of records to return.
 
     Returns:
-        Either none or a list of tuples containing eot records for a specific train id
+        If db operation is successful, a list of tuples containing eot records for a specific train id is returned, otherwise, None
+    
+    Raises:
+        No raised exceptions - prints out error and returns None  
    
     What it will replace: 
         def get_eot(self, id: int, page: int) -> Response in train_history.py
+
+    TODO: improve error handling/ documentation 
+    TODO: integrate this function to replace sql queries in train_history.py's def get_eot() 
+    TODO: how to go about error handling? DB errors like connceting issues, etc. | handling empty results frmo query | tpye validation and ranges of values allowed? 
+    TODO: what is symbol_id for a train, is it it's unique identifier?
     """
 
     if not isinstance(id, int):
@@ -67,15 +83,21 @@ def get_eot_data_by_train_id(id: int, page: int) -> Optional[list[tuple[Any,...]
         print(f"Database error retrieving EOT data for symbol_id ({id}) and page ({page}): {e}")
         return None
 
-def create_eot_record(args: dict[str, Any], datetime_string: str) -> Cursor:  #post_eot()
-    """
-    TODO: integrate this function to replace sql queries in train_history.py's post_eot() | train_history post() looks gross with parser.add_argument... how to make cleaner?
-    TODO: add error handling 
+def create_eot_record(args: dict[str, Any], datetime_string: str) -> Cursor | None:  #post_eot()
+    """Inserts a new eot record in EOTRecords table
 
-    Inserts a new eot record with lots of telemetry data into db
+    Args:
+        datetime_string: date and time when an eot record is created
+        args: named arguments to pass into parameterized query
 
     Returns:
-        Cursor object if db operation runs correctly, otherwise, None 
+        Cursor object if db operation runs correctly, otherwise, None
+
+    Raises:
+        No raised exceptions - prints out error and returns None  
+
+    TODO: integrate this function to replace sql queries in train_history.py's post_eot() | train_history post() looks gross with parser.add_argument... how to make cleaner?
+    TODO: improve error handling/ documentation 
     """
     try:
         recovery_request = True # what is this exactly 
@@ -113,11 +135,11 @@ def create_eot_record(args: dict[str, Any], datetime_string: str) -> Cursor:  #p
         print(f"Error creating EOT record: {e}")
         return None, recovery_request
 
-def get_newest_eot_id(unit_addr: str) -> int:
+def get_newest_eot_id(unit_addr: str) -> int | None:
     """Retrieves latest train id from an eot record 
     
     Args:
-        unit_addr: unique id of eot device on train used to detect where a train is?
+        unit_addr: location of train with eot device?
 
     Returns: 
         id of a train and its eot record
@@ -125,7 +147,7 @@ def get_newest_eot_id(unit_addr: str) -> int:
     Raises:
         No raised exceptions - prints out error and returns None 
 
-    TODO: ERROR HANDLING
+    TODO: improve error handling/ documentation 
     """
 
     try:
@@ -147,13 +169,15 @@ def check_for_eot_engine(unit_addr: str) -> int | None:
     """Checks for an engine number from the eotrecords table based on recently tracked train and it's unit address
     
     Args:
-        unit_addr: physical location of eot device on train
+        unit_addr: location of train with eot device?
 
     Returns: 
         The engine number for a recently tracked train with an eot device based on unit address if the db operation ran fine. Otherwise, None
 
-    Raises: Exception...
-    TODO: error handling
+    Raises:
+        No raised exceptions - prints out error and returns None  
+
+    TODO: improve error handling/ documentation 
     """
     try:
         sql = """
@@ -176,11 +200,15 @@ def check_for_eot_symbol(unit_addr: str) -> int | None:
     """Checks for a symbol from the eotrecords table based on recently tracked train and it's unit address
     
     Args:
-        unit_addr: physical location of eot device on train
+        unit_addr: location of train with eot device?
 
     Returns: 
-        The id of a symbol if the db operation ran fine, else...
-    TODO: error handling
+        If the db operation is successful, the id of a symbol, otherwise None
+
+    Raises:
+        No raised exceptions - prints out error and returns None  
+    
+    TODO: improve error handling/ documentation 
     """
     try:
         sql = """
@@ -205,12 +233,15 @@ def attempt_auto_fill_eot_info(unit_addr: str, symb: int) -> bool:
     """Updates latest eot record making sure it's respective train indicates that its the most recently tracked eot device on a train
     
     Args:
-        unit_addr: unique id of eot device on train used to detect where a train is?
+        unit_addr: location of train with eot device?
 
     Returns:
         True if db operation is successful, otherwise, False if db operation failed
 
-    TODO: error handling
+    Raises:
+        No raised exceptions - prints out error and returns None  
+    
+    TODO: improve error handling/ documentation 
     """ 
     try:
         sql = """
@@ -235,13 +266,16 @@ def add_new_eot_pin(unit_addr: int, eot_id: int) -> bool:
     """Inserts new eot record indiciating a new eot device was tracked recently 
 
     Args:
-        unit_address: location of train with eot device? 
+        unit_addr: location of train with eot device?
         eot_id: id of an eot record  
     
     Returns:
         True if successful, otherwise, False if the db operation failed.
-    
-    TODO: error handling
+
+    Raises:
+        No raised exceptions - prints out error and returns None  
+
+    TODO: improve error handling/ documentation 
     """
     try: 
         sql = """
@@ -256,6 +290,41 @@ def add_new_eot_pin(unit_addr: int, eot_id: int) -> bool:
             return True
         
         return False
+    except Exception as e:
+        print(f"An error occured trying to update the 'most_recent' field for EOTRecords table for unit_address ({unit_addr}): {e}")
+        return False
+    
+def check_recent_eot_trains(unit_addr: str, station_id: int) -> bool:
+    """Checks if there's any records (trains) from EOTRecords that were detected in the last 10 minutes
+
+    Args:
+        unit_addr: location of train with eot device? 
+        eot_id: id of an eot record  
+    
+    Returns:
+        True if a train with an eot device was recorded within the last 10 minutes, otherwise False
+
+    Raises:
+        No raised exceptions - prints out error and returns None  
+
+    TODO: improve error handling/ documentation 
+    """
+    try: 
+        sql = """
+        SELECT * FROM EOTRecords
+        WHERE unit_addr = %(unit_address)s 
+        AND station_recorded = %(station_id)s AND date_rec >= NOW() - INTERVAL '10 minutes'
+        """
+
+        sql_args = {"unit_address": unit_addr, "station_id": station_id}
+
+        response = run_exec_cmd(sql, sql_args)
+        
+        if response:
+            return True
+        
+        return False
+    
     except Exception as e:
         print(f"An error occured trying to update the 'most_recent' field for EOTRecords table for unit_address ({unit_addr}): {e}")
         return False
