@@ -114,18 +114,6 @@ def attempt_auto_fill_hot_info_no_engine(engine_id: int, hot_id: int) -> bool:
 
     resp = run_exec_cmd(sql_update, update_param)
 
-def check_for_hot_symbol(unit_addr: str) -> int | None:
-    sql_hot_symb = """SELECT symbol_id FROM HOTRecords WHERE 
-                                unit_addr = %(unit_addr)s and most_recent = True
-                                """
-    sql_param = {"unit_addr": unit_addr}
-    resp = run_get_cmd(sql_hot_symb, sql_param)
-    
-    if len(resp) == 1:
-        return resp[0][0]
-
-    return None
-
 def check_recent_hot_trains(unit_addr: str, station_id: int) -> bool:
     sql = """
         SELECT * FROM HOTRecords
