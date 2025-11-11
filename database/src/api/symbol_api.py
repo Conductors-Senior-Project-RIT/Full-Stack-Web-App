@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from flask_restful import Resource, reqparse
-from db.symbols_db import *
+from database.src.db.symbol_db import *
 
 
 class SymbolAPI(Resource):
