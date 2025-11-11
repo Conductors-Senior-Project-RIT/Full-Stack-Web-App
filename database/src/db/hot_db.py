@@ -8,7 +8,7 @@ from typing import Any
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 RESULTS_NUM = 250
-
+# below is train_history.py related
 def get_hot_data_by_train_id(id: int, page: int) -> list[tuple[Any,...]] | None:
     sql = """
             SELECT HOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, command, checkbits, parity, verified FROM HOTRecords
@@ -138,3 +138,18 @@ def check_recent_hot_trains(unit_addr: str, station_id: int) -> bool:
         return True
     
     return False
+
+# below is for station_handler.py
+
+def get_hot_train_data_by_station_id(station_id: str) -> list[tuple[Any,...]]:
+    hot_records = run_get_cmd(
+        "SELECT * FROM HOTRecords WHERE station_recorded = %s", (station_id,)
+    )
+    return hot_records
+
+def get_hot_pin_info_by_station_id(station_id: int) -> list[tuple[Any,...]]:
+    hot_records = run_get_cmd(
+        "SELECT * FROM HOTRecords WHERE station_recorded = %s and most_recent = true",
+        (station_id,),
+    )
+    return hot_records

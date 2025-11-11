@@ -8,7 +8,7 @@ from typing import Any
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 RESULTS_NUM = 250
-        
+# below is train_history.py related
 def get_total_count_of_eot_records() -> int:
     """Retrieves total amount of records in EOTRecords table
 
@@ -328,3 +328,18 @@ def check_recent_eot_trains(unit_addr: str, station_id: int) -> bool:
     except Exception as e:
         print(f"An error occured trying to update the 'most_recent' field for EOTRecords table for unit_address ({unit_addr}): {e}")
         return False
+
+# below is for station_handler.py 
+
+def get_eot_train_data_by_station_id(station_id: str) -> list[tuple[Any,...]]:
+    eot_records = run_get_cmd(
+        "SELECT * FROM EOTRecords WHERE station_recorded = %s", (station_id,)
+    )
+    return eot_records
+
+def get_eot_pin_info_by_station_id(station_id: int) -> list[tuple[Any,...]]:
+    eot_records = run_get_cmd(
+        "SELECT * FROM EOTRecords WHERE station_recorded = %s and most_recent = true INNER JOIN Symbols ON EOTRecords.symbol_id = Symbols.id INNER JOIN Engine_Numbers ON EOTRecords.engine_num = Engine_Numbers.id",
+        (station_id,)
+    )
+    return eot_records
