@@ -229,7 +229,7 @@ def check_for_eot_symbol(unit_addr: str) -> int | None:
     
 
 def update_eot_symbol(record_id: int, symbol_id: int) -> bool:
-    """Updates a record's symbol using the provided record ID and new symbol.
+    """Updates an EOT record's symbol using the provided record ID and new symbol.
     
     Args:
         record_id (int): The ID of the record to update.
@@ -249,7 +249,7 @@ def update_eot_symbol(record_id: int, symbol_id: int) -> bool:
     
     
 def update_eot_engine_num(record_id: int, engine_num: int) -> bool:
-    """Updates a record's engine number using the provided record ID and engine number.
+    """Updates an EOT record's engine number using the provided record ID and engine number.
     
     Args:
         record_id (int): The ID of the record to update.

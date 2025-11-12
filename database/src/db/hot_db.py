@@ -128,6 +128,15 @@ def check_recent_hot_trains(unit_addr: str, station_id: int) -> bool:
     return False
 
 def update_hot_symbol(record_id: int, symbol_id: int) -> NoReturn:
+    """Updates an HOT record's symbol using the provided record ID and new symbol.
+    
+    Args:
+        record_id (int): The ID of the record to update.
+        symbol_id (int): The updated value of the symbol for the EOT record.
+    
+    Returns:
+        bool: True if the update was successful; otherwise, return false if an error occurred.
+    """
     args = {"id": record_id, "symbol_id": symbol_id}
     sql = """
         UPDATE HOTRecords
@@ -138,6 +147,15 @@ def update_hot_symbol(record_id: int, symbol_id: int) -> NoReturn:
     print(resp)
     
 def update_hot_engine_num(record_id: int, engine_num: int) -> NoReturn:
+    """Updates an HOT record's engine number using the provided record ID and engine number.
+    
+    Args:
+        record_id (int): The ID of the record to update.
+        engine_num (int): The updated value of the engine number for the EOT record.
+        
+    Returns:
+        bool: True if the update was successful; otherwise, return false if an error occurred.
+    """
     args = {"id": record_id, "engine_id": engine_num}
     sql = """
         UPDATE HOTRecords
