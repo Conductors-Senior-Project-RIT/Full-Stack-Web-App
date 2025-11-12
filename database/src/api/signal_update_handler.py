@@ -1,15 +1,19 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
-from db.trackSense_db_commands import *
 import json, datetime, requests
 
-from db.trackSense_db_commands import run_exec_cmd, run_get_cmd
+from db.eot_db import update_eot_symbol, update_eot_engine_num
+from db.hot_db import update_hot_symbol, update_hot_engine_num
+from record_types import RecordTypes
 
 
 class SignalUpdater(Resource):
-
     def post(self):
-        resp = None
+        """Updates a record's engine number and/or symbol ID based on the provided arguments in the request body.
+
+        Returns:
+            int: The status code of the request.
+        """
         parser = reqparse.RequestParser()
         parser.add_argument("type", default=-1, type=int)
         parser.add_argument("symbol_id", default=-1, type=int)
@@ -17,61 +21,35 @@ class SignalUpdater(Resource):
         parser.add_argument("engi_number_id", default=-1, type=int)
         args = parser.parse_args()
 
+        # Ensure that a valid record type, a valid record ID, and at least
+        # a valid engine number or symbol ID is provided.
         if (
-            args["type"] <= 0
-            or args["type"] > 2
+            not RecordTypes.has_value(args["type"])
             or args["id_num"] == -1
             or (args["engi_number_id"] == -1 and args["symbol_id"] == -1)
         ):
+            # Invalid arguments provided
             print("bad request")
             return 400
+        
+        # The symbol and engine update functions are stored in a dictionary that can easily be executed via record type
+        symbol_update_funcs = {
+            RecordTypes.EOT.value: lambda i,s: update_eot_symbol(i, s),
+            RecordTypes.HOT.value: lambda i,s: update_hot_symbol(i, s),
+            RecordTypes.DPU.value: lambda _: print("DPU not implemented!")
+        }
+        
+        engine_num_update_funcs = {
+            RecordTypes.EOT.value: lambda i,e: update_eot_engine_num(i, e),
+            RecordTypes.HOT.value: lambda i,e: update_hot_engine_num(i, e),
+            RecordTypes.DPU.value: lambda _: print("DPU not implemented!")
+        }
 
+        # Execute our update functions if a valid symbol and/or engine number is provided
         if args["symbol_id"] != -1:
-
-            sql_args = {
-                "id": args["id_num"],
-                "symbol_id": args["symbol_id"],
-                "engine_id": args["engi_number_id"],
-            }
-
-            if args["type"] == 1:
-                sql_update = """
-                        UPDATE EOTRecords
-                        SET symbol_id = %(symbol_id)s 
-                        WHERE id = %(id)s
-                        """
-
-            if args["type"] == 2:
-                sql_update = """
-                        UPDATE HOTRecords
-                        SET symbol_id = %(symbol_id)s 
-                        WHERE id = %(id)s
-                        """
-
-            resp = run_exec_cmd(sql_update, sql_args)
-            print(resp)
+            symbol_update_funcs[args["type"]](args["id_num"], args["symbol_id"])
 
         if args["engi_number_id"] != -1:
-
-            sql_args = {"id": args["id_num"], "engine_id": args["engi_number_id"]}
-
-            sql_update = ""
-
-            if args["type"] == 1:
-                sql_update = """
-                                UPDATE EOTRecords
-                                SET engine_num = %(engine_id)s 
-                                WHERE id = %(id)s
-                                """
-
-            if args["type"] == 2:
-                sql_update = """
-                                UPDATE HOTRecords
-                                SET engine_num = %(engine_id)s  
-                                WHERE id = %(id)s
-                                """
-
-            resp = run_exec_cmd(sql_update, sql_args)
-            print(resp)
+            engine_num_update_funcs(args["type"])(args["id_num"], args["engi_number_id"])
 
         return 200

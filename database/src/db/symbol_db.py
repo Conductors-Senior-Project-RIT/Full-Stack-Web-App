@@ -4,7 +4,8 @@ Symbols database layer
 This module handles all database CRUD operations for Symbol records
 """
 
-from typing import Optional, Any
+from typing import NoReturn, Optional, Any
+from database.src.api.record_types import RecordTypes
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 
@@ -99,5 +100,37 @@ def insert_new_symbol(symbol_name: str) -> bool:
     # If an exception occurs, print the error and return False indicating the operation failed.
     except Exception as e:
         print(f"An error has occured while inserting a new symbol into the database: {e}")
+        return False
+    
+    
+# TODO: Might be exclusive to HOT and EOT DB files
+def update_record_symbol(record_id: int, record_type: int, symbol_id: int) -> bool:
+    match record_type:
+        case RecordTypes.EOT.value:
+            table_name = "EOTRecords"
+        case RecordTypes.HOT.value:
+            table_name = "HOTRecords"
+        case RecordTypes.DPU.value:
+            table_name = "DPURecords"
+        case _:
+            print("Invalid record table!")
+            return False
+    
+    try:
+        args = {
+            "record_table": table_name,
+            "id": record_id,
+            "symbol_id": symbol_id
+        }
+        sql = """
+            UPDATE %(record_table)s
+            SET symbol_id = %(symbol_id)s 
+            WHERE id = %(id)s
+        """
+        resp = run_exec_cmd(sql, args)
+        print(resp)
+        return True
+    except Exception as e:
+        print("Error occurred while updating record symbol!")
         return False
 

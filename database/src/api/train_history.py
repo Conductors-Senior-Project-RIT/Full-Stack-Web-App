@@ -8,6 +8,7 @@ from flask import Response, jsonify, request
 from flask_restful import Resource, reqparse
 from psycopg import Cursor
 from db.trackSense_db_commands import *
+from record_types import RecordTypes
 import datetime, requests
 import http.client, urllib
 from dotenv import *
@@ -16,13 +17,6 @@ load_dotenv()
 
 # Temporary constant for number of results per page
 RESULTS_NUM = 250
-
-
-# An enumeration of train record types
-class RecordTypes(Enum):
-    EOT = 1
-    HOT = 2
-    DPU = 3
 
 
 class HistoryDB(Resource):

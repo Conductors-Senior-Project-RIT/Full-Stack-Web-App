@@ -4,7 +4,7 @@ HOT database layer
 This module handles all database CRUD operations for HOT records
 """
 
-from typing import Any
+from typing import Any, NoReturn
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 RESULTS_NUM = 250
@@ -126,6 +126,26 @@ def check_recent_hot_trains(unit_addr: str, station_id: int) -> bool:
         return True
     
     return False
+
+def update_hot_symbol(record_id: int, symbol_id: int) -> NoReturn:
+    args = {"id": record_id, "symbol_id": symbol_id}
+    sql = """
+        UPDATE HOTRecords
+        SET symbol_id = %(symbol_id)s 
+        WHERE id = %(id)s
+    """
+    resp = run_exec_cmd(sql, args)
+    print(resp)
+    
+def update_hot_engine_num(record_id: int, engine_num: int) -> NoReturn:
+    args = {"id": record_id, "engine_id": engine_num}
+    sql = """
+        UPDATE HOTRecords
+        SET engine_num = %(engine_id)s 
+        WHERE id = %(id)s
+    """
+    resp = run_exec_cmd(sql, args)
+    print(resp)
 
 # below is for station_handler.py
 

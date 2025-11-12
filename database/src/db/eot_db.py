@@ -4,7 +4,7 @@ EOT database layer
 This module handles all database CRUD operations for EOT records
 """
 
-from typing import Any
+from typing import Any, NoReturn
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 RESULTS_NUM = 250
@@ -226,6 +226,51 @@ def check_for_eot_symbol(unit_addr: str) -> int | None:
     except Exception as e: 
         print(f"An error occured trying to retrieve 'symbol_id' field for EOTRecords table: {e}")
         return None
+    
+
+def update_eot_symbol(record_id: int, symbol_id: int) -> bool:
+    """Updates a record's symbol using the provided record ID and new symbol.
+    
+    Args:
+        record_id (int): The ID of the record to update.
+        symbol_id (int): The updated value of the symbol for the EOT record.
+    
+    Returns:
+        bool: True if the update was successful; otherwise, return false if an error occurred.
+    """
+    args = {"id": record_id, "symbol_id": symbol_id}
+    sql = """
+        UPDATE EOTRecords
+        SET symbol_id = %(symbol_id)s 
+        WHERE id = %(id)s
+    """
+    resp = run_exec_cmd(sql, args)
+    print(resp)
+    
+    
+def update_eot_engine_num(record_id: int, engine_num: int) -> bool:
+    """Updates a record's engine number using the provided record ID and engine number.
+    
+    Args:
+        record_id (int): The ID of the record to update.
+        engine_num (int): The updated value of the engine number for the EOT record.
+        
+    Returns:
+        bool: True if the update was successful; otherwise, return false if an error occurred.
+    """
+    try:
+        args = {"id": record_id, "engine_id": engine_num}
+        sql = """
+            UPDATE EOTRecords
+            SET engine_num = %(engine_id)s 
+            WHERE id = %(id)s
+        """
+        resp = run_exec_cmd(sql, args)
+        print(resp)
+        return True
+    except Exception as e:
+        print(f"An error occurred while updating an EOT record's engine number: {e}")
+        return False
 
 
 def attempt_auto_fill_eot_info_no_symbol(symbol_id: int, hot_id: int) -> bool:
