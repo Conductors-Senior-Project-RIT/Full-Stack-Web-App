@@ -67,27 +67,18 @@ def get_newest_hot_id(unit_addr: str) -> int | None:
 
     return None
 
-def check_for_hot_symbol(unit_addr: str) -> int | None:
-    sql_hot_symb = """
-    SELECT symbol_id FROM HOTRecords 
-    WHERE unit_addr = %(unit_addr)s and most_recent = True
-    """
-    sql_param = {"unit_addr": unit_addr}
-
-    resp = run_get_cmd(sql_hot_symb, sql_param)
-    if len(resp) == 1:
-        return resp[0][0]
+def check_for_hot_field(unit_addr: str, field_type: str):
+    if field_type != "symbol_id" or field_type != "engine_num":
+        print("Incorrect database field!")
+        return None
     
-    return None
-
-def check_for_hot_engine(unit_addr: str) -> int | None:
-    sql_hot_engi = """
-    SELECT engine_num FROM HOTRecords
+    sql = """
+    SELECT %(field_type)s FROM HOTRecords 
     WHERE unit_addr = %(unit_addr)s and most_recent = True
     """
-    sql_param = {"unit_addr": unit_addr}
+    params = {"field_type": field_type, "unit_addr": unit_addr}
 
-    resp = run_get_cmd(sql_hot_engi, sql_param)
+    resp = run_get_cmd(sql, params)
     if len(resp) == 1:
         return resp[0][0]
     

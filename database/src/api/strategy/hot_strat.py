@@ -31,3 +31,6 @@ class HOT_API_Strategy(Record_API_Strategy):
                 for tup in resp
             ]
         ), 200
+        
+    def post_train_history(self, args, datetime_str):
+        return super().post_train_history(args, datetime_str)

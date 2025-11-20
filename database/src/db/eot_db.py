@@ -6,6 +6,7 @@ This module handles all database CRUD operations for EOT records
 
 from typing import Any, NoReturn
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
+from psycopg import sql
 
 RESULTS_NUM = 250
 # below is train_history.py related
@@ -82,7 +83,7 @@ def get_eot_data_by_train_id(id: int, page: int) -> list[tuple[Any,...]] | None:
         print(f"Database error retrieving EOT data for symbol_id ({id}) and page ({page}): {e}")
         return None
 
-def create_eot_record(args: dict[str, Any], datetime_string: str) -> None:  #post_eot()
+def create_eot_record(args: dict[str, Any], datetime_string: str) -> tuple | None:  #post_eot()
     """Inserts a new eot record in EOTRecords table
 
     Args:
@@ -163,6 +164,24 @@ def get_newest_eot_id(unit_addr: str) -> int | None:
         print(f"An error occured trying to retrieve 'symbol_id' field for EOTRecords table: {e}")
         return None
 
+def check_for_eot_field(unit_addr: str, field_type: str) -> int | None:
+    if field_type != "symbol_id" or field_type != "engine_num":
+        print("Incorrect database field!")
+        return None
+    
+    sql = """
+    SELECT %(field_type)s FROM EOTRecords 
+    WHERE unit_addr = %(unit_addr)s and most_recent = True
+    """
+    params = {"field_type": field_type, "unit_addr": unit_addr}
+
+    resp = run_get_cmd(sql, params)
+    if len(resp) == 1:
+        return resp[0][0]
+    
+    return None
+
+
 
 def check_for_eot_engine(unit_addr: str) -> int | None:
     """Checks for an engine number from the eotrecords table based on recently tracked train and it's unit address
@@ -226,7 +245,24 @@ def check_for_eot_symbol(unit_addr: str) -> int | None:
     except Exception as e: 
         print(f"An error occured trying to retrieve 'symbol_id' field for EOTRecords table: {e}")
         return None
+
+def update_eot_field(record_id: int, field_val, field_type: str):
+    if field_type != "symbol_id" or field_type != "engine_num":
+        print("Incorrect database field!")
+        return False
     
+    try:
+        args = {"id": record_id, "field_val": field_val}
+        query = sql.SQL(
+            "UPDATE EOTRecords SET {field_type} = %(field_val)s WHERE id = %(id)s").format(
+            field_type=sql.Identifier(field_type)
+            )
+        resp = run_exec_cmd(query, args)
+        print(resp)
+        return True
+    except Exception as e:
+        print(f"An error occurred while updating an EOT record's engine number: {e}")
+        return False
 
 def update_eot_symbol(record_id: int, symbol_id: int) -> bool:
     """Updates an EOT record's symbol using the provided record ID and new symbol.
@@ -388,3 +424,16 @@ def get_eot_pin_info_by_station_id(station_id: int) -> list[tuple[Any,...]]:
         (station_id,)
     )
     return eot_records
+
+def check_eot_notification(unit_addr: str, station_id: int):
+    sql = """
+        SELECT * FROM EOTRecords
+        WHERE unit_addr = %(unit_address)s AND station_recorded = %(station_id)s AND date_rec >= NOW() - INTERVAL '10 minutes'
+    """
+    resp = run_get_cmd(
+        sql, args={"unit_address": unit_addr, "station_id": station_id}
+    )
+    # print(len(resp))
+    if len(resp) > 1:  # arbitrary number that will make this work
+        return True
+    return False

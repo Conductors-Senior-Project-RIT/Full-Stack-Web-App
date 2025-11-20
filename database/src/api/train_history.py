@@ -78,6 +78,12 @@ class HistoryDB(Resource):
         
         # right now this has 0 authentication. Too bad!
         typ = args["type"]
+        try:
+            record_strat = RecordTypes.get_strategy(typ)
+            resp, recovery_request = record_strat.post_train_history(args, dt_str)
+        except ValueError:
+            return jsonify({"error": "Invalid record type!"}), 400
+        
         # type --> 1 = EOT, 2 = HOT, 3 = DPU
         if typ == RecordTypes.EOT.value:
             resp, recovery_request = self.post_eot(args, dt_str)
