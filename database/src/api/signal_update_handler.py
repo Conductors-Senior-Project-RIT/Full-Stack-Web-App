@@ -4,7 +4,7 @@ import json, datetime, requests
 
 from db.eot_db import update_eot_symbol, update_eot_engine_num
 from db.hot_db import update_hot_symbol, update_hot_engine_num
-from record_types import RecordTypes
+from database.src.api.strategy.record_types import RecordTypes
 
 
 class SignalUpdater(Resource):

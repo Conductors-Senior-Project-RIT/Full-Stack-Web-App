@@ -5,7 +5,7 @@ This module handles all database CRUD operations for Symbol records
 """
 
 from typing import NoReturn, Optional, Any
-from database.src.api.record_types import RecordTypes
+from database.src.api.strategy.record_types import RecordTypes
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 

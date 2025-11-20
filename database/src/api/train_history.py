@@ -8,7 +8,7 @@ from flask import Response, jsonify, request
 from flask_restful import Resource, reqparse
 from psycopg import Cursor
 from db.trackSense_db_commands import *
-from record_types import RecordTypes
+from database.src.api.strategy.record_types import RecordTypes
 import datetime, requests
 import http.client, urllib
 from dotenv import *
@@ -34,112 +34,12 @@ class HistoryDB(Resource):
         typ = request.args.get("type", default=-1, type=int)
         id = request.args.get("id", default=-1, type=int)
         page = request.args.get("page", default=1, type=int)
- 
- 
-        if typ == -RecordTypes.EOT.value or typ == RecordTypes.EOT.value:
-            return self.get_eot(id, page)
-        elif typ == RecordTypes.HOT.value:
-            return self.get_hot(id, page)
-        elif typ == RecordTypes.DPU.value:
-            return self.get_dpu(id, page)
-        else:
-            return jsonify({"error": "Received invalid ID!"}), 400
-            
-            
-    def get_hot(self, id, page) -> Response:
-        sql = """
-            SELECT HOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, command, checkbits, parity, verified FROM HOTRecords
-            INNER JOIN Stations as stat on station_recorded = stat.id
-            WHERE HOTRecords.id = %(id)s
-            LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
-            """
-        sql_args = {"id": id, "results_num": RESULTS_NUM, "offset": page - 1}
-        resp = run_get_cmd(sql, sql_args)
-        return jsonify(
-            [
-                {
-                    "id": tup[0],
-                    "date_rec": tup[1],
-                    "station_name": tup[2],
-                    "symbol_name": run_get_cmd(
-                        "SELECT symb_name FROM Symbols WHERE id = %(symid)s",
-                        {"symid": tup[3]},
-                    ),
-                    "unit_addr": tup[4],
-                    "command": tup[5],
-                    "checkbits": tup[6],
-                    "parity": tup[7],
-                    "verified": tup[8],
-                }
-                for tup in resp
-            ]
-        ), 200
-    
-    def get_eot(self, id: int, page: int) -> Response:
-        sql = """SELECT EOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
-                INNER JOIN Stations as stat on station_recorded = stat.id"""
         
-        sql += "WHERE EOTRecords.id = %(id)s ORDER BY EOTRecords.id Desc" if id == RecordTypes.EOT.value else "ORDER BY date_rec DESC"
-        sql += "LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s"
-        
-        sql_args = {"results_num": RESULTS_NUM, "offset": page - 1}
-        if id == RecordTypes.EOT.value:
-            sql_args["id"] = id
-            resp = run_get_cmd(sql, sql_args) # BUG: move this LOC above if block so it's accessible by else block as well
-            return jsonify(
-                [
-                    {
-                        "id": tup[0],
-                        "date_rec": tup[1],
-                        "station_name": tup[2],
-                        "symbol_name": run_get_cmd(
-                            "SELECT symb_name FROM Symbols WHERE id = %(symid)s",
-                            {"symid": tup[3]},
-                        ),
-                        "unit_addr": tup[4],
-                        "brake_pressure": tup[5],
-                        "motion": tup[6],
-                        "marker_light": tup[7],
-                        "turbine": tup[8],
-                        "battery_cond": tup[9],
-                        "battery_charge": tup[10],
-                        "arm_status": tup[11],
-                        "signal_strength": tup[12],
-                        "verified": tup[13],
-                    }
-                    for tup in resp
-                ]
-            ), 200
-              
-        # BUG: in the else block it is trying to reference "resp" but it's out of scope...
-        else:
-            count_sql = """SELECT COUNT(*) FROM EOTRecords"""
-            count = run_get_cmd(count_sql)
-
-            return jsonify(
-                {
-                    "results": [
-                        {
-                            "id": tup[0],
-                            "date_rec": tup[1],
-                            "station_name": tup[2],
-                            "symbol_name": tup[3],
-                            "unit_addr": tup[4],
-                            "brake_pressure": tup[5],
-                            "motion": tup[6],
-                            "marker_light": tup[7],
-                            "turbine": tup[8],
-                            "battery_cond": tup[9],
-                            "battery_charge": tup[10],
-                            "arm_status": tup[11],
-                            "signal_strength": tup[12],
-                            "verified": tup[13],
-                        }
-                        for tup in resp
-                    ],
-                    "totalPages": ceil(count[0][0] / RESULTS_NUM),
-                }
-            ), 200
+        try:
+            record_strat = RecordTypes.get_strategy(typ)
+            return record_strat.get_train_history(id, page, RESULTS_NUM)
+        except ValueError:
+            return jsonify({"error": "Invalid record type!"}), 400
         
     
     def get_dpu(self, id, page):
