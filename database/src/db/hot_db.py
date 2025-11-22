@@ -5,19 +5,55 @@ This module handles all database CRUD operations for HOT records
 """
 
 from typing import Any, NoReturn
+
+from psycopg import Error, sql
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 RESULTS_NUM = 250
 # below is train_history.py related
-def get_hot_data_by_train_id(id: int, page: int) -> list[tuple[Any,...]] | None:
-    sql = """
-            SELECT HOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, command, checkbits, parity, verified FROM HOTRecords
-            INNER JOIN Stations as stat on station_recorded = stat.id
-            WHERE HOTRecords.id = %(id)s
-            LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
-            """
-    sql_args = {"id": id, "results_num": RESULTS_NUM, "offset": page - 1}
-    resp = run_get_cmd(sql, sql_args)
+def get_hot_data_by_train_id(id: int, page: int, num_results: int) -> list[tuple[Any,...]] | None:
+    if not isinstance(id, int):
+        raise ValueError(f"id ({id}) is not an integer")
+    
+    if not isinstance(page, int):
+        raise ValueError(f"page ({page}), is not an integer")
+    
+    if not isinstance(num_results, int):
+        raise ValueError(f"num_results ({num_results}), is not an integer")
+    
+    try:
+        sql = """
+                SELECT HOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, command, checkbits, parity, verified FROM HOTRecords
+                INNER JOIN Stations as stat on station_recorded = stat.id
+                WHERE HOTRecords.id = %(id)s
+                LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
+                """
+        sql_args = {"id": id, "results_num": num_results, "offset": page - 1}
+        resp = run_get_cmd(sql, sql_args)
+        return [
+                    {
+                        "id": tup[0],
+                        "date_rec": tup[1],
+                        "station_name": tup[2],
+                        "symbol_name": run_get_cmd(
+                            "SELECT symb_name FROM Symbols WHERE id = %(symid)s",
+                            {"symid": tup[3]},
+                        ),
+                        "unit_addr": tup[4],
+                        "command": tup[5],
+                        "checkbits": tup[6],
+                        "parity": tup[7],
+                        "verified": tup[8],
+                    }
+                    for tup in resp
+                ]
+        
+    except Error as e:
+        print(f"Encountered a database error when attempting to retrieve HOT records: {e}")
+    except Exception as e:
+        print(f"Encountered an exception when attempting to retrieve HOT records: {e}")
+    return None
+    
 
 def create_hot_record(args: dict[str, Any], datetime_string: str) -> None:
     """
@@ -117,6 +153,24 @@ def check_recent_hot_trains(unit_addr: str, station_id: int) -> bool:
         return True
     
     return False
+
+def update_hot_field(record_id: int, field_val, field_type: str):
+    if field_type != "symbol_id" or field_type != "engine_num":
+        print("Incorrect database field!")
+        return False
+    
+    try:
+        args = {"id": record_id, "field_val": field_val}
+        query = sql.SQL(
+            "UPDATE HOTRecords SET {field_type} = %(field_val)s WHERE id = %(id)s").format(
+            field_type=sql.Identifier(field_type)
+            )
+        resp = run_exec_cmd(query, args)
+        print(resp)
+        return True
+    except Exception as e:
+        print(f"An error occurred while updating an EOT record's engine number: {e}")
+        return False
 
 def update_hot_symbol(record_id: int, symbol_id: int) -> NoReturn:
     """Updates an HOT record's symbol using the provided record ID and new symbol.

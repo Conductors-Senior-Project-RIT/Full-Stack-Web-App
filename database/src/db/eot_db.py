@@ -4,9 +4,11 @@ EOT database layer
 This module handles all database CRUD operations for EOT records
 """
 
+from math import ceil
 from typing import Any, NoReturn
+from database.src.db.symbol_db import get_symbol_name
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
-from psycopg import sql
+from psycopg import Error, sql
 
 RESULTS_NUM = 250
 # below is train_history.py related
@@ -35,7 +37,7 @@ def get_total_count_of_eot_records() -> int:
         print(f"Error getting EOT record count: {e}")
         return -1
     
-def get_eot_data_by_train_id(id: int, page: int) -> list[tuple[Any,...]] | None:
+def get_eot_data_by_train_id(id: int, page: int, num_results: int) -> list[tuple[Any,...]] | None:
     """ Retrieves eot records for a specific train id
     
     Args:
@@ -61,27 +63,76 @@ def get_eot_data_by_train_id(id: int, page: int) -> list[tuple[Any,...]] | None:
         raise ValueError(f"id ({id}) is not an integer")
     
     if not isinstance(page, int):
-        raise ValueError(f"page ({page}), are not integer")
+        raise ValueError(f"page ({page}), is not an integer")
+    
+    if not isinstance(num_results, int):
+        raise ValueError(f"num_results ({num_results}), is not an integer")
 
+    # TODO: Move  to db
     try:
-        sql = """
-            SELECT EOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified 
-            FROM EOTRecords
-            INNER JOIN Stations as stat on station_recorded = stat.id
-            WHERE EOTRecords.id = %(id)s ORDER BY EOTRecords.id Desc" if id == RecordTypes.EOT.value else "ORDER BY date_rec DESC
-            LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
-        """
-        sql_args = {"results_num": RESULTS_NUM, "offset": page - 1, "id": id}
-        data = run_get_cmd(sql, sql_args)
+        sql = """SELECT EOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
+                INNER JOIN Stations as stat on station_recorded = stat.id"""
+        
+        sql += "WHERE EOTRecords.id = %(id)s ORDER BY EOTRecords.id Desc" if id == 1 else "ORDER BY date_rec DESC"
+        sql += "LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s"
+        
+        sql_args = {"results_num": num_results, "offset": page - 1}
+        if id == 1:
+            sql_args["id"] = id
+            resp = run_get_cmd(sql, sql_args) # BUG: move this LOC above if block so it's accessible by else block as well
+            # TODO: Fix inconsistent return payload
+            return [
+                    {
+                        "id": tup[0],
+                        "date_rec": tup[1],
+                        "station_name": tup[2],
+                        "symbol_name": get_symbol_name(tup[3]),
+                        "unit_addr": tup[4],
+                        "brake_pressure": tup[5],
+                        "motion": tup[6],
+                        "marker_light": tup[7],
+                        "turbine": tup[8],
+                        "battery_cond": tup[9],
+                        "battery_charge": tup[10],
+                        "arm_status": tup[11],
+                        "signal_strength": tup[12],
+                        "verified": tup[13],
+                    }
+                    for tup in resp
+                ]
+                
+        # BUG: in the else block it is trying to reference "resp" but it's out of scope...
+        else:
+            count_sql = """SELECT COUNT(*) FROM EOTRecords"""
+            count = run_get_cmd(count_sql)
 
-        if data:
-            return data
-    
-        return None
-    
+            return {
+                    "results": [
+                        {
+                            "id": tup[0],
+                            "date_rec": tup[1],
+                            "station_name": tup[2],
+                            "symbol_name": tup[3],
+                            "unit_addr": tup[4],
+                            "brake_pressure": tup[5],
+                            "motion": tup[6],
+                            "marker_light": tup[7],
+                            "turbine": tup[8],
+                            "battery_cond": tup[9],
+                            "battery_charge": tup[10],
+                            "arm_status": tup[11],
+                            "signal_strength": tup[12],
+                            "verified": tup[13],
+                        }
+                        for tup in resp
+                    ],
+                    "totalPages": ceil(count[0][0] / num_results),
+                }
+    except Error as e:
+        print(f"Encountered a database error when attempting to retrieve EOT records: {e}")
     except Exception as e:
-        print(f"Database error retrieving EOT data for symbol_id ({id}) and page ({page}): {e}")
-        return None
+        print(f"Encountered an exception when attempting to retrieve EOT records: {e}")
+    return None
 
 def create_eot_record(args: dict[str, Any], datetime_string: str) -> tuple | None:  #post_eot()
     """Inserts a new eot record in EOTRecords table
@@ -261,7 +312,7 @@ def update_eot_field(record_id: int, field_val, field_type: str):
         print(resp)
         return True
     except Exception as e:
-        print(f"An error occurred while updating an EOT record's engine number: {e}")
+        print(f"An error occurred while updating an HOT record's engine number: {e}")
         return False
 
 def update_eot_symbol(record_id: int, symbol_id: int) -> bool:
@@ -424,16 +475,3 @@ def get_eot_pin_info_by_station_id(station_id: int) -> list[tuple[Any,...]]:
         (station_id,)
     )
     return eot_records
-
-def check_eot_notification(unit_addr: str, station_id: int):
-    sql = """
-        SELECT * FROM EOTRecords
-        WHERE unit_addr = %(unit_address)s AND station_recorded = %(station_id)s AND date_rec >= NOW() - INTERVAL '10 minutes'
-    """
-    resp = run_get_cmd(
-        sql, args={"unit_address": unit_addr, "station_id": station_id}
-    )
-    # print(len(resp))
-    if len(resp) > 1:  # arbitrary number that will make this work
-        return True
-    return False
