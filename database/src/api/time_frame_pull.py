@@ -2,9 +2,8 @@ from email.policy import default
 
 from flask import jsonify, request
 from flask_restful import Resource, reqparse
-from db.trackSense_db_commands import *
+from src.db.trackSense_db_commands import *
 import json, datetime, requests
-from db.trackSense_db_commands import run_exec_cmd, run_get_cmd
 
 
 class recent_activities(Resource):

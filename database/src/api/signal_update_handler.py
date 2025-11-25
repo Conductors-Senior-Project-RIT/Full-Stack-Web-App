@@ -1,9 +1,7 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
-from db.trackSense_db_commands import *
+from src.db.trackSense_db_commands import *
 import json, datetime, requests
-
-from db.trackSense_db_commands import run_exec_cmd, run_get_cmd
 
 
 class SignalUpdater(Resource):

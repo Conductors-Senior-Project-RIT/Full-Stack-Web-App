@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from db.trackSense_db_commands import run_get_cmd, run_exec_cmd
+from src.db.trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 
 class UserPreferences(Resource):
