@@ -48,9 +48,9 @@ class StationAuth(Resource):
             random.choice(string.ascii_uppercase + string.digits)
             for _ in range(string_len)
         )
-        print(f"Raw password String: {password_string}")
+        # print(f"Raw password String: {password_string}")
         hasher = hashlib.new("sha256")
         hasher.update(password_string.encode())
         hashed_pw = hasher.hexdigest()
-        print(f"hashed_pw: {hashed_pw}")
-        return [password_string, hashed_pw]
+        # print(f"hashed_pw: {hashed_pw}")
+        return (password_string, hashed_pw)
