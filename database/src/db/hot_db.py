@@ -101,8 +101,6 @@ def get_newest_hot_id(unit_addr: str) -> int | None:
     resp_hot_id = run_get_cmd(sql_hot_id, sql_hot_id_args)
     return resp_hot_id[len(resp_hot_id) - 1][0]
 
-    return None
-
 def check_for_hot_field(unit_addr: str, field_type: str):
     if field_type != "symbol_id" or field_type != "engine_num":
         print("Incorrect database field!")

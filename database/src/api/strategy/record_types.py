@@ -11,17 +11,25 @@ class RecordTypes(Enum):
     HOT = 2
     DPU = 3
     
-    @classmethod
-    def has_value(cls, value: int):
-        return any(value == item.value for item in RecordTypes)
-    
-    @classmethod
-    def get_strategy(cls, value: int) -> Record_API_Strategy:
-        match value:
-            case RecordTypes.EOT.value:
-                return EOT_API_Strategy()
-            case RecordTypes.HOT.value:
-                return HOT_API_Strategy()
-            case RecordTypes.DPU.value:
-                return DPU_API_Strategy()
-        raise ValueError("Unknown type!")
+def has_value(value: int):
+    return any(value == item.value for item in RecordTypes)
+
+def get_strategy(value: int) -> Record_API_Strategy:
+    match value:
+        case RecordTypes.EOT.value:
+            return EOT_API_Strategy()
+        case RecordTypes.HOT.value:
+            return HOT_API_Strategy()
+        case RecordTypes.DPU.value:
+            return DPU_API_Strategy()
+    raise ValueError("Unknown type!")
+
+def get_table_name(value: int) -> str:
+    match value:
+        case RecordTypes.EOT.value:
+            return "EOTRecords"
+        case RecordTypes.HOT.value:
+            return "HOTRecords"
+        case RecordTypes.DPU.value:
+            return "DPURecords"
+    raise ValueError("Unknown type!")
