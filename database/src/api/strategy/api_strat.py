@@ -8,10 +8,9 @@ import database.src.db.generic_record_db as generic_db
 
 
 class Record_API_Strategy(ABC):
-    def __init__(self, value: int):
-        self.record_type = value
-        self.table_name = record_types.get_table_name(self.record_type)
-    
+    def __init__(self, table_name: str):
+        self.table_name = table_name
+        
     @abstractmethod
     def get_train_history(self, id: int, page: int, results_num: int) -> Response:
         pass

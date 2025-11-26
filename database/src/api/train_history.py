@@ -8,7 +8,7 @@ from flask import Response, jsonify, request
 from flask_restful import Resource, reqparse
 from psycopg import Cursor
 from db.trackSense_db_commands import *
-from database.src.api.strategy.record_types import RecordTypes
+import database.src.api.strategy.record_types as record_types
 import datetime, requests
 import http.client, urllib
 from dotenv import *
@@ -36,14 +36,11 @@ class HistoryDB(Resource):
         page = request.args.get("page", default=1, type=int)
         
         try:
-            record_strat = RecordTypes.get_strategy(typ)
+            record_strat = record_types.get_strategy(typ)
             return record_strat.get_train_history(id, page, RESULTS_NUM)
         except ValueError:
             return jsonify({"error": "Invalid record type!"}), 400
         
-    
-    def get_dpu(self, id, page):
-        return jsonify({"error": "DPU not implemented yet!"}), 500
 
     def post(self):
         """
@@ -79,89 +76,26 @@ class HistoryDB(Resource):
         # right now this has 0 authentication. Too bad!
         typ = args["type"]
         try:
-            record_strat = RecordTypes.get_strategy(typ)
-            resp, recovery_request = record_strat.post_train_history(args, dt_str)
+            record_strat = record_types.get_strategy(typ)
+            return record_strat.post_train_history(args, dt_str)
         except ValueError:
             return jsonify({"error": "Invalid record type!"}), 400
         
-        # type --> 1 = EOT, 2 = HOT, 3 = DPU
-        if typ == RecordTypes.EOT.value:
-            resp, recovery_request = self.post_eot(args, dt_str)
-        elif typ == RecordTypes.HOT.value:
-            resp, recovery_request = self.post_hot(args, dt_str)
-            return 200
-        elif typ == RecordTypes.DPU.value:
-            resp, recovery_request = self.post_dpu(args, dt_str)
-            return jsonify({"error": "DPU POST not implemented!"}), 500
-        else:
-            print("Bad request payload!")
-            return jsonify({"error": "Bad request payload!"}), 400
 
-        if not resp:
-            print(recovery_request)
-            print(typ)
-            self.add_new_pin(args["station_id"], typ, args["unit_addr"])
-            noti = self.check_for_notification(
-                args["unit_addr"], args["station_id"], args["type"]
-            )
-            # print(noti)
-            if not noti and not recovery_request:
-                # print("owo") # lmfao wha
-                self.notif_send(args["station_id"])
+        # if not resp:
+        #     print(recovery_request)
+        #     print(typ)
+        #     self.add_new_pin(args["station_id"], typ, args["unit_addr"])
+        #     noti = self.check_for_notification(
+        #         args["unit_addr"], args["station_id"], args["type"]
+        #     )
+        #     # print(noti)
+        #     if not noti and not recovery_request:
+        #         # print("owo") # lmfao wha
+        #         self.notif_send(args["station_id"])
                 
         return 200
     
-    def post_eot(self, args: Namespace, datetime_str: str) -> Tuple[Cursor[Tuple], bool]:
-        recovery_request = True
-        sql = """
-            INSERT INTO EOTRecords (date_rec, symbol_id, station_recorded, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength) VALUES
-            (%(date)s, %(symbol_id)s, %(station)s,  %(unit_addr)s, %(brake_pressure)s, %(motion)s, %(marker_light)s, %(turbine)s, %(battery_cond)s, %(battery_charge)s, %(arm_status)s, %(signal_strength)s)
-        """
-        sql_args = {
-            "date": args["date_rec"],
-            "station": args["station_id"],
-            "unit_addr": args["unit_addr"],
-            "brake_pressure": args["brake_pressure"],
-            "motion": args["motion"],
-            "marker_light": args["marker_light"],
-            "turbine": args["turbine"],
-            "battery_cond": args["battery_cond"],
-            "battery_charge": args["battery_charge"],
-            "arm_status": args["arm_status"],
-            "signal_strength": args["signal_strength"],
-            "symbol_id": args["symbol_id"],
-        }
-        if args["date_rec"] is None:
-            sql_args["date"] = datetime_str
-            recovery_request = False
-            
-        return run_exec_cmd(sql, sql_args), recovery_request
-        # print(resp.statusmessage)
-        # print(run_get_cmd('SELECT * FROM EOTRecords'))
-    
-    def post_hot(self, args: Namespace, datetime_str: str) -> Tuple[Cursor[Tuple], bool]:
-        recovery_request = True
-        sql_args = {
-            "date": args["date_rec"],
-            "station": args["station_id"],
-            "frame_sync": args["frame_sync"],
-            "command": args["command"],
-            "checkbits": args["checkbits"],
-            "parity": args["parity"],
-            "unit_addr": args["unit_addr"],
-        }
-        if args["date_rec"] is None:
-            sql_args["date"] = datetime_str
-            recovery_request = False
-
-        sql = """
-            INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
-            (%(date)s, %(station)s, %(frame_sync)s, %(unit_addr)s, %(command)s, %(checkbits)s, %(parity)s)
-        """
-        return run_exec_cmd(sql, sql_args), recovery_request
-    
-    def post_dpu(self, args: Namespace, datetime_str: str) -> Tuple[Cursor[Tuple], bool]:
-        raise NotImplemented("DPU POST not implemented!") 
 
     def delete(self):  # not sure if this is needed
         print("delete goes here!")

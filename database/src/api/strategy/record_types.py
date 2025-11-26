@@ -17,19 +17,9 @@ def has_value(value: int):
 def get_strategy(value: int) -> Record_API_Strategy:
     match value:
         case RecordTypes.EOT.value:
-            return EOT_API_Strategy()
+            return EOT_API_Strategy("EOTRecords")
         case RecordTypes.HOT.value:
-            return HOT_API_Strategy()
+            return HOT_API_Strategy("HOTRecords")
         case RecordTypes.DPU.value:
-            return DPU_API_Strategy()
-    raise ValueError("Unknown type!")
-
-def get_table_name(value: int) -> str:
-    match value:
-        case RecordTypes.EOT.value:
-            return "EOTRecords"
-        case RecordTypes.HOT.value:
-            return "HOTRecords"
-        case RecordTypes.DPU.value:
-            return "DPURecords"
+            return DPU_API_Strategy("DPURecords")
     raise ValueError("Unknown type!")
