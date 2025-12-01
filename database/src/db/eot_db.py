@@ -462,14 +462,14 @@ def check_recent_eot_trains(unit_addr: str, station_id: int) -> bool:
         return False
 
 # below is for station_handler.py 
+"""
+TODO: remove code that was moved into generic_record_db.py 
+"""
 
-def get_eot_train_data_by_station_id(station_id: str) -> list[tuple[Any,...]]:
-    eot_records = run_get_cmd(
-        "SELECT * FROM EOTRecords WHERE station_recorded = %s", (station_id,)
-    )
-    return eot_records
+def get_most_recent_eot_records(station_id: int) -> list[tuple[Any,...]]:
+    """Retrieves most recent eot records for a given station id.
 
-def get_eot_pin_info_by_station_id(station_id: int) -> list[tuple[Any,...]]:
+    """
     eot_records = run_get_cmd(
         "SELECT * FROM EOTRecords WHERE station_recorded = %s and most_recent = true INNER JOIN Symbols ON EOTRecords.symbol_id = Symbols.id INNER JOIN Engine_Numbers ON EOTRecords.engine_num = Engine_Numbers.id",
         (station_id,)

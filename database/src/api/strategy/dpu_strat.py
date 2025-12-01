@@ -1,5 +1,6 @@
 from flask import Response
 from api_strat import Record_API_Strategy
+from typing import Any
 
 class DPU_API_Strategy(Record_API_Strategy):
     def get_train_history(self, id, page, results_num) -> Response:
@@ -7,3 +8,6 @@ class DPU_API_Strategy(Record_API_Strategy):
     
     def post_train_history(self, args, datetime_str):
         return super().post_train_history(args, datetime_str)
+
+    def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]] | None:
+        return None

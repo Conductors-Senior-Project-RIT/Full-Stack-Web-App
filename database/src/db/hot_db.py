@@ -210,13 +210,10 @@ def update_hot_engine_num(record_id: int, engine_num: int) -> NoReturn:
 
 # below is for station_handler.py
 
-def get_hot_train_data_by_station_id(station_id: str) -> list[tuple[Any,...]]:
-    hot_records = run_get_cmd(
-        "SELECT * FROM HOTRecords WHERE station_recorded = %s", (station_id,)
-    )
-    return hot_records
+def get_most_recent_hot_records(station_id: int) -> list[tuple[Any,...]]:
+    """Retrieves the most recent HOT records for a given station id.
 
-def get_hot_pin_info_by_station_id(station_id: int) -> list[tuple[Any,...]]:
+    """
     hot_records = run_get_cmd(
         "SELECT * FROM HOTRecords WHERE station_recorded = %s and most_recent = true",
         (station_id,),

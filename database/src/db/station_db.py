@@ -74,3 +74,23 @@ def update_station_password(station_id: str, hashed_password: str) -> bool:
     except Exception as e:
         print(f"An error occurred while updating a station: {e}")
     return False
+
+def get_station_id(station_name: str | None ) -> int | None:
+    """Returns the ID of a station given its name.
+
+    Args:
+        station_name (str): The name of the station.
+
+    Returns:
+        str: The ID of the station given its name.
+    """
+    try:
+        sql = "SELECT id FROM Stations WHERE station_name = %(station_name)s)"
+        results = run_get_cmd(sql, args={"station_name": station_name})
+        if not results:
+            return None
+
+        return results[0][0]
+    except Error as e:
+        print(f"A database error occurred while retrieving a station id from a station name: {e}")
+        return None

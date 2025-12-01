@@ -1,6 +1,7 @@
 from psycopg import Error, sql
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
-
+import database.src.db.station_db as station_db
+from typing import Any
 
 def get_newest_record_id(table_name: str, unit_addr: str) -> int:
     query = sql.SQL(
@@ -88,3 +89,20 @@ def update_record_field(record_table: str, record_id: int, field_value, field_ty
     except Exception as e:
         print(f"An error occurred while updating an EOT record's engine number: {e}")
         return False
+
+def get_records_for_station(record_table: str, station_id: int) -> list[tuple[Any, ...]] | None:
+    """
+    todo: remove methods from eot_db.py and hot_db.py that can be turned into generic handlers here.
+    """
+    try:
+
+        query = sql.SQL(
+            "SELECT * FROM {record_table} WHERE station_recorded = {station_id}").format(
+            record_table=sql.Identifier(record_table),
+            station_id=sql.Literal(station_id)
+        )
+        resp = run_get_cmd(query)
+        return resp
+    except Exception as e:
+        print(f"An error occurred while fetching records for a specific station id{e}")
+        return None

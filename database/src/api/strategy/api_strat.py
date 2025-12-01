@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
 from argparse import Namespace
+from typing import Any
 
-from flask import Response
+from flask import Response, jsonify
 
 import database.src.api.strategy.record_types as record_types
 import database.src.db.generic_record_db as generic_db
+from db.trackSense_db_commands import run_get_cmd
 
 
 class Record_API_Strategy(ABC):
@@ -18,7 +20,13 @@ class Record_API_Strategy(ABC):
     @abstractmethod
     def post_train_history(self, args: Namespace, datetime_str: str):
         pass
-    
+
+    @abstractmethod
+    def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]] | None:
+        """EOT and HOT station records parsed differently
+        """
+        pass
+
     def check_recent_notification(self, unit_addr: str, station_id: int) -> bool:
         return generic_db.check_recent_trains(self.table_name, unit_addr, station_id)
     
@@ -40,3 +48,14 @@ class Record_API_Strategy(ABC):
             resp = generic_db.update_record_field(self.table_name, unit_addr, engi, "engine_num")
         else:
             print("No engine number to update!")
+
+    def get_station_records(self, station_id: int | None) -> list[dict[str, Any]] | None:
+        """Template Method design pattern to deal with generalization/ code dupe (very similar database accessing logic)
+        Get EOT & HOT records from specified station
+
+        todo: left off at needing to finish: get_most_recent_station_records(), there's some overlap in code there so need to review
+        """
+        station_records = generic_db.get_records_for_station(self.table_name, station_id)
+        if not station_records:
+            return None
+        return self.parse_station_records(station_records)

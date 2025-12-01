@@ -3,6 +3,7 @@ from math import ceil
 from flask import Response, jsonify
 from api_strat import Record_API_Strategy
 import database.src.db.eot_db as eot_db
+from typing import Any
 import database.src.db.generic_record_db as generic_db
 from database.src.db.trackSense_db_commands import run_exec_cmd, run_get_cmd
 
@@ -34,7 +35,28 @@ class EOT_API_Strategy(Record_API_Strategy):
                 pass
                 
         return 200
-    
-    
-    
+
+    def parse_station_records(self, station_records) -> list[dict[str, Any]] | None:
+        try:
+            if not station_records:
+                return None
+            eot_records = [
+                {
+                    "date_rec": record[1],
+                    "unit_addr": record[4],
+                    "brake_pressure": record[5],
+                    "motion": record[6],
+                    "marker_light": record[7],
+                    "turbine": record[8],
+                    "battery_cond": record[9],
+                    "battery_charge": record[10],
+                    "arm_status": record[11],
+                    "signal_stength": record[12],
+                }
+                for record in station_records
+            ]
+            return eot_records
+        except Exception as e:
+            print(f"Error occurred when attempting to parse eot station records: {e}")
+            return None
     
