@@ -13,6 +13,7 @@ class Record_API_Strategy(ABC):
     def __init__(self, table_name: str):
         self.table_name = table_name
         
+    # ---- TRAIN HISTORY ---- #
     @abstractmethod
     def get_train_history(self, id: int, page: int, results_num: int) -> Response:
         pass
@@ -49,13 +50,28 @@ class Record_API_Strategy(ABC):
         else:
             print("No engine number to update!")
 
+    # ---- STATION HANDLER ---- #
     def get_station_records(self, station_id: int | None) -> list[dict[str, Any]] | None:
         """Template Method design pattern to deal with generalization/ code dupe (very similar database accessing logic)
         Get EOT & HOT records from specified station
 
         todo: left off at needing to finish: get_most_recent_station_records(), there's some overlap in code there so need to review
         """
+        # This should never happen
+        if station_id is None:
+            raise ValueError("Invalid station ID provided!")
+        
         station_records = generic_db.get_records_for_station(self.table_name, station_id)
         if not station_records:
             return None
         return self.parse_station_records(station_records)
+    
+    # ---- RECORD COLLATION ---- #
+    @abstractmethod
+    def get_record_collation(self, page: int) -> dict[str, Any]:
+        pass
+    
+    # ---- RECORD VERIFICATION ---- #
+    @abstractmethod
+    def get_unverified_records(self, page: int) -> dict[str, Any]
+        

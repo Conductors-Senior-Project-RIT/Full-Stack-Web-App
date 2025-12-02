@@ -59,3 +59,14 @@ class HOT_API_Strategy(Record_API_Strategy):
         except Exception as e:
             print(f"An error occurred while attempting to parse hot station records: {e}")
             return None
+    
+    def get_record_collation(self, page: int):
+        results = hot_db.get_hot_record_collation(page)
+        
+        if results is None:
+            return jsonify({"error": "Error occured when attempting to collate HOT records!"}), 500
+
+        return jsonify(results), 200
+    
+    def get_unverified_records(self, page):
+        pass
