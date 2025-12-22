@@ -11,7 +11,7 @@ from db.trackSense_db_commands import run_get_cmd
 
 class Record_API_Strategy(ABC):
     def __init__(self, table_name: str):
-        self.table_name = table_name
+        self._table_name = table_name
         
     # ---- TRAIN HISTORY ---- #
     @abstractmethod
@@ -29,24 +29,24 @@ class Record_API_Strategy(ABC):
         pass
 
     def check_recent_notification(self, unit_addr: str, station_id: int) -> bool:
-        return generic_db.check_recent_trains(self.table_name, unit_addr, station_id)
+        return generic_db.check_recent_trains(self._table_name, unit_addr, station_id)
     
     def add_new_pin(self, unit_addr: str):
         self.attempt_auto_fill(unit_addr)
         
-        resp_id = generic_db.get_newest_record_id(self.table_name, unit_addr)
-        result = generic_db.add_new_pin(self.table_name, resp_id, unit_addr)
+        resp_id = generic_db.get_newest_record_id(self._table_name, unit_addr)
+        result = generic_db.add_new_pin(self._table_name, resp_id, unit_addr)
         
     def attempt_auto_fill(self, unit_addr: str):
-        symb = generic_db.check_for_record_field(self.table_name, unit_addr, "symbol_id")
-        engi = generic_db.check_for_record_field(self.table_name, unit_addr, "engine_num")
-        record_id = generic_db.get_newest_record_id(self.table_name, unit_addr)
+        symb = generic_db.check_for_record_field(self._table_name, unit_addr, "symbol_id")
+        engi = generic_db.check_for_record_field(self._table_name, unit_addr, "engine_num")
+        record_id = generic_db.get_newest_record_id(self._table_name, unit_addr)
         
         if symb:
-            resp = generic_db.update_record_field(self.table_name, record_id, symb, "symbol_id")
+            resp = generic_db.update_record_field(self._table_name, record_id, symb, "symbol_id")
             
         if engi:
-            resp = generic_db.update_record_field(self.table_name, unit_addr, engi, "engine_num")
+            resp = generic_db.update_record_field(self._table_name, unit_addr, engi, "engine_num")
         else:
             print("No engine number to update!")
 
@@ -61,7 +61,7 @@ class Record_API_Strategy(ABC):
         if station_id is None:
             raise ValueError("Invalid station ID provided!")
         
-        station_records = generic_db.get_records_for_station(self.table_name, station_id)
+        station_records = generic_db.get_records_for_station(self._table_name, station_id)
         if not station_records:
             return None
         return self.parse_station_records(station_records)
@@ -73,5 +73,6 @@ class Record_API_Strategy(ABC):
     
     # ---- RECORD VERIFICATION ---- #
     @abstractmethod
-    def get_unverified_records(self, page: int) -> dict[str, Any]
+    def get_unverified_records(self, page: int) -> dict[str, Any]:
+        pass
         

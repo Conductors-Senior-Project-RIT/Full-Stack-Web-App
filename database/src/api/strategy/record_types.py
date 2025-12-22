@@ -14,7 +14,7 @@ class RecordTypes(Enum):
 def has_value(value: int):
     return any(value == item.value for item in RecordTypes)
 
-def get_strategy(value: int) -> Record_API_Strategy:
+def get_strategy(value: int | RecordTypes) -> Record_API_Strategy:
     match value:
         case RecordTypes.EOT.value:
             return EOT_API_Strategy("EOTRecords")
