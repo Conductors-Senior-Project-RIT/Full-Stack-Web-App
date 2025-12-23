@@ -1,6 +1,7 @@
 # An enumeration of train record types
 from enum import Enum
 from api_strat import Record_API_Strategy
+from database.src.service.service_status import InvalidRecordError
 from dpu_strat import DPU_API_Strategy
 from hot_strat import HOT_API_Strategy
 from eot_strat import EOT_API_Strategy
@@ -17,9 +18,9 @@ def has_value(value: int):
 def get_strategy(value: int | RecordTypes) -> Record_API_Strategy:
     match value:
         case RecordTypes.EOT.value:
-            return EOT_API_Strategy("EOTRecords")
+            return EOT_API_Strategy()
         case RecordTypes.HOT.value:
-            return HOT_API_Strategy("HOTRecords")
+            return HOT_API_Strategy()
         case RecordTypes.DPU.value:
-            return DPU_API_Strategy("DPURecords")
-    raise ValueError("Unknown type!")
+            return DPU_API_Strategy()
+    raise InvalidRecordError(value)

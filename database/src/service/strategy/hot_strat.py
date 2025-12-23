@@ -1,38 +1,27 @@
 from typing import Any
 
-from flask import Response, jsonify
+from flask import jsonify
 from api_strat import Record_API_Strategy
-import database.src.db.hot_db as hot_db
-import database.src.db.generic_record_db as generic_db
-from database.src.db.trackSense_db_commands import run_get_cmd
+from database.src.db.hot_repo import HOTRepository, HOTRepositoryError
+from database.src.service.service_status import ServiceStatusCode
 
-class HOT_API_Strategy(Record_API_Strategy):
-    def __init__(self, value):
-        super().__init__(value)
+class HOT_API_Strategy(Record_API_Strategy[HOTRepository]):
+    def __init__(self):
+        super().__init__(HOTRepository())
     
-    def get_train_history(self, id: int, page: int, results_num: int) -> Response:
+    def get_train_history(self, id: int, page: int, results_num: int):
         try:
-            results = hot_db.get_hot_data_by_train_id(id, page, results_num)
-            if not results:
-                return jsonify({"error": "Error occurred when attempting to retrieve HOT records from the db!"}), 500
-            return jsonify(results), 200
-        except ValueError as e:
-            return jsonify({"error": str(e)}), 400
+            return self.repo.get_train_hot_data(id, page, results_num)
+        except HOTRepositoryError as e:
+            raise RuntimeError(str(e))
         
-    def post_train_history(self, args, datetime_str):
+    def post_train_record(self, args: dict, datetime_str: str) -> tuple:
         # TODO: Implement better parsing and response handling
-        resp, recovery_request = hot_db.create_hot_record(dict(args), datetime_str)
-        # Do error handling etc.
-        if not resp:
-            self.add_new_pin(args["unit_addr"])
-            
-            has_notification = self.check_recent_notification(args["unit_addr"], args["station_id"])
-            
-            if not has_notification and not recovery_request:
-                # Send notification for HOT
-                pass
-                
-        return 200
+        try:
+            return self.repo.create_hot_record(args, datetime_str)
+        except HOTRepositoryError as e:
+            raise RuntimeError(str(e))
+        
     
     def add_new_pin(self, unit_addr):
         return super().add_new_pin(unit_addr)
@@ -61,7 +50,7 @@ class HOT_API_Strategy(Record_API_Strategy):
             return None
     
     def get_record_collation(self, page: int):
-        results = hot_db.get_hot_record_collation(page)
+        results = self.repo.get_hot_record_collation(page)
         
         if results is None:
             return jsonify({"error": "Error occured when attempting to collate HOT records!"}), 500

@@ -2,18 +2,21 @@ from argparse import Namespace
 from math import ceil
 from flask import Response, jsonify
 from api_strat import Record_API_Strategy
-import database.src.db.eot_db as eot_db
+import database.src.db.eot_repo as eot_repo
 from typing import Any
-import database.src.db.generic_record_db as generic_db
+import database.src.db.base_record_repo as generic_db
+from database.src.db.eot_repo import EOTRepository
 from database.src.db.trackSense_db_commands import run_exec_cmd, run_get_cmd
 
-class EOT_API_Strategy(Record_API_Strategy):
+class EOT_API_Strategy(Record_API_Strategy[EOTRepository]):
+    def __init__(self):
+        super().__init__(EOTRepository())
     
     ## Train History API Implementation
     
     def get_train_history(self, id, page, results_num) -> Response:
         try:
-            results = eot_db.get_eot_data_by_train_id(id, page, results_num)
+            results = self.repo.get_eot_data_by_train_id(id, page, results_num)
             if not results:
                 jsonify({"error": "Error occurred when attempting to retrieve EOT records from the db!"}), 500
             jsonify(results), 200
@@ -23,7 +26,7 @@ class EOT_API_Strategy(Record_API_Strategy):
             
     def post_train_history(self, args: Namespace, datetime_str: str):
         # TODO: Implement better parsing and response handling
-        resp, recovery_request = eot_db.create_eot_record(dict(args), datetime_str)
+        resp, recovery_request = self.repo.create_eot_record(dict(args), datetime_str)
         # Do error handling etc.
         if not resp:
             self.add_new_pin(args["unit_addr"])
@@ -61,7 +64,7 @@ class EOT_API_Strategy(Record_API_Strategy):
             return None
         
     def get_record_collation(self, page: int):
-        results = eot_db.get_eot_record_collation(page)
+        results = self.repo.get_eot_record_collation(page)
         
         if results is None:
             return jsonify({"error": "Error occured when attempting to collate EOT records!"}), 500

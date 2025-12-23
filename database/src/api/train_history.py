@@ -8,16 +8,20 @@ from flask import Response, jsonify, request
 from flask_restful import Resource, reqparse
 from psycopg import Cursor
 from db.trackSense_db_commands import *
-import database.src.api.strategy.record_types as record_types
+import database.src.service.strategy.record_types as record_types
+import database.src.service.train_history_service as th_service
 import datetime, requests
 import http.client, urllib
 from dotenv import *
 
 load_dotenv()
 
-# Temporary constant for number of results per page
-RESULTS_NUM = 250
 
+def validate_int_argument(value: int, name: int, min_value: int):
+    if not isinstance(value, int):
+        raise ValueError(f"{name} ({value}) is not an integer!")
+    if value < min_value:
+        raise ValueError(f"Provided {name} must be greater than {min_value} but was given {value}...")
 
 class HistoryDB(Resource):
     def get(self):
@@ -31,15 +35,22 @@ class HistoryDB(Resource):
             Response: Returns an individual train record response payload with a status code. Response payload may include a
             collection of EOT records if "type" is -1.
         """
+        # Argument checking goes here
         typ = request.args.get("type", default=-1, type=int)
         id = request.args.get("id", default=-1, type=int)
         page = request.args.get("page", default=1, type=int)
         
         try:
-            record_strat = record_types.get_strategy(typ)
-            return record_strat.get_train_history(id, page, RESULTS_NUM)
-        except ValueError:
-            return jsonify({"error": "Invalid record type!"}), 400
+            # Check our type and page arguments (typ checked in strategy creation)
+            validate_int_argument(id, "type", 1)
+            validate_int_argument(page, "page", 1)
+            
+            results = th_service.get_train_history(typ, id, page)
+            return jsonify(results), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        except RuntimeError as e:
+            return jsonify({"error": str(e)}), 500
         
 
     def post(self):
@@ -71,15 +82,17 @@ class HistoryDB(Resource):
         parser.add_argument("command", type=str, default="")
         parser.add_argument("checkbits", type=str, default="")
         parser.add_argument("parity", type=str, default="")
-        args = parser.parse_args()
+        args = vars(parser.parse_args())
         
         # right now this has 0 authentication. Too bad!
         typ = args["type"]
         try:
-            record_strat = record_types.get_strategy(typ)
-            return record_strat.post_train_history(args, dt_str)
-        except ValueError:
-            return jsonify({"error": "Invalid record type!"}), 400
+            results = th_service.post_train_history(typ, args, dt_str)
+            return jsonify(results), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        except RuntimeError as e:
+            return jsonify({"error": str(e)}), 500
         
 
         # if not resp:
