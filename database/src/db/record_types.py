@@ -1,10 +1,9 @@
 # An enumeration of train record types
 from enum import Enum
-from api_strat import Record_API_Strategy
+from database.src.db.base_record_repo import RecordRepository
+from database.src.db.eot_repo import EOTRepository
+from database.src.db.hot_repo import HOTRepository
 from database.src.service.service_status import InvalidRecordError
-from dpu_strat import DPU_API_Strategy
-from hot_strat import HOT_API_Strategy
-from eot_strat import EOT_API_Strategy
 
 
 class RecordTypes(Enum):
@@ -15,12 +14,12 @@ class RecordTypes(Enum):
 def has_value(value: int):
     return any(value == item.value for item in RecordTypes)
 
-def get_strategy(value: int | RecordTypes) -> Record_API_Strategy:
+def get_record_repository(value: int | RecordTypes) -> RecordRepository:
     match value:
         case RecordTypes.EOT.value:
-            return EOT_API_Strategy()
+            return EOTRepository()
         case RecordTypes.HOT.value:
-            return HOT_API_Strategy()
+            return HOTRepository()
         case RecordTypes.DPU.value:
-            return DPU_API_Strategy()
+            return NotImplementedError("DPU repository not implemented!")
     raise InvalidRecordError(value)

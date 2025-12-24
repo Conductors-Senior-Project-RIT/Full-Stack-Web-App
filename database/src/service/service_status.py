@@ -1,6 +1,6 @@
 from enum import Enum
 
-from database.src.service.strategy.record_types import RecordTypes
+from database.src.db.record_types import RecordTypes
 
 
 class ServiceStatusCode(Enum):
@@ -9,10 +9,16 @@ class ServiceStatusCode(Enum):
     INVALID_RECORD_ID = "Invalid Record ID"
     UNKNOWN_ERROR = "Unknown Error"
     
+    
+class ServiceError(Exception):
+    def __init__(self, *args):
+        super().__init__(*args)
+
 
 class InvalidRecordError(Exception):
     def __init__(self, value):
         valid_types = list(RecordTypes._value2member_map_)
         super().__init__(f"Invalid record type provided: {value}! Must be between {valid_types[0]} and {valid_types[-1]}")
+
 
     

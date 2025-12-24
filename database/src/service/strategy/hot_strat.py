@@ -1,11 +1,11 @@
 from typing import Any
 
 from flask import jsonify
-from api_strat import Record_API_Strategy
+from api_strat import Record_Service_Strategy
 from database.src.db.hot_repo import HOTRepository, HOTRepositoryError
 from database.src.service.service_status import ServiceStatusCode
 
-class HOT_API_Strategy(Record_API_Strategy[HOTRepository]):
+class HOT_Service_Strategy(Record_Service_Strategy[HOTRepository]):
     def __init__(self):
         super().__init__(HOTRepository())
     

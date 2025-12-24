@@ -1,16 +1,9 @@
-from argparse import Namespace
-from email.policy import default
-from math import ceil
-from enum import Enum
-from typing import Tuple
-
-from flask import Response, jsonify, request
+from flask import jsonify, request
 from flask_restful import Resource, reqparse
-from psycopg import Cursor
 from db.trackSense_db_commands import *
-import database.src.service.strategy.record_types as record_types
-import database.src.service.train_history_service as th_service
-import datetime, requests
+from database.src.service.train_history_service import TrainHistoryService
+from database.src.service.service_status import ServiceError
+import datetime
 import http.client, urllib
 from dotenv import *
 
@@ -45,6 +38,7 @@ class HistoryDB(Resource):
             validate_int_argument(id, "type", 1)
             validate_int_argument(page, "page", 1)
             
+            th_service = TrainHistoryService(typ)
             results = th_service.get_train_history(typ, id, page)
             return jsonify(results), 200
         except ValueError as e:
@@ -87,11 +81,12 @@ class HistoryDB(Resource):
         # right now this has 0 authentication. Too bad!
         typ = args["type"]
         try:
+            th_service = TrainHistoryService(typ)
             results = th_service.post_train_history(typ, args, dt_str)
             return jsonify(results), 200
         except ValueError as e:
             return jsonify({"error": str(e)}), 400
-        except RuntimeError as e:
+        except ServiceError as e:
             return jsonify({"error": str(e)}), 500
         
 

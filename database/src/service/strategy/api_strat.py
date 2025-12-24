@@ -5,7 +5,7 @@ from database.src.db.base_record_repo import RecordRepository
 
 R = TypeVar("R", bound=RecordRepository)
 
-class Record_API_Strategy(Generic[R], ABC):
+class Record_Service_Strategy(Generic[R], ABC):
     def __init__(self, repo: R):
         self.repo: R = repo
         

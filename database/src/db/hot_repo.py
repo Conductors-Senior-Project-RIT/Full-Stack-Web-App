@@ -8,21 +8,18 @@ from math import ceil
 from typing import Any, NoReturn
 
 from psycopg import Error, sql
-from database.src.db.base_record_repo import RecordRepository
+from database.src.db.base_record_repo import RecordRepository, RepositoryError
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 RESULTS_NUM = 250
 
-class HOTRepositoryError(Exception):
-    def __init__(self, error_desc: str):
-        super().__init__(f"An error occurred in HOTRecords while {error_desc}!")
 
 class HOTRepository(RecordRepository):
     def __init__(self):
         super().__init__("HOTRecords")
         
     # below is train_history.py related
-    def get_train_hot_data(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
+    def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
         sql = """
                 SELECT HOTRecords.id, date_rec, stat.station_name, sym.symb_name, unit_addr, command, checkbits, parity, verified FROM HOTRecords
                 INNER JOIN Stations as stat on station_recorded = stat.id
@@ -49,13 +46,13 @@ class HOTRepository(RecordRepository):
                         for tup in resp
             ]
         except Error as e:
-            raise HOTRepositoryError(f"retrieving HOT train history: {e}")
+            raise RepositoryError(f"Could not retrieve HOT train history: {e}")
         except (IndexError, ValueError) as e:
-            raise HOTRepositoryError(f"parsing results: {e}")
+            raise RepositoryError(f"Could not parse results: {e}")
             
 
 
-    def create_hot_record(self, args: dict[str, Any], datetime_string: str) -> None:
+    def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple:
         """
         TODO: Namespace is the type for args for post methods in train_history... look more into this
         TODO: run_exec_cmd returns none always... think of what to return lol
@@ -63,6 +60,10 @@ class HOTRepository(RecordRepository):
         recovery_request = True # what is this lol
 
         try:
+            sql = """
+                INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
+                (%(date)s, %(station)s, %(frame_sync)s, %(unit_addr)s, %(command)s, %(checkbits)s, %(parity)s)
+            """
             sql_args = {
                 "date": args["date_rec"],
                 "station": args["station_id"],
@@ -76,142 +77,14 @@ class HOTRepository(RecordRepository):
             if args["date_rec"] is None:
                 sql_args["date"] = datetime_string
                 recovery_request = False
-        except (IndexError, ValueError) as e:
-            raise HOTRepositoryError(f"parsing arguments: {e}")
 
-        sql = """
-                INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
-                (%(date)s, %(station)s, %(frame_sync)s, %(unit_addr)s, %(command)s, %(checkbits)s, %(parity)s)
-            """
-        try:
             return run_exec_cmd(sql, sql_args), recovery_request
+        
         except Error as e:
-            raise HOTRepositoryError(f"creating new HOT record: {e}")
+            raise RepositoryError(f"Could not create new HOT record: {e}")
+        except (IndexError, ValueError) as e:
+            raise RepositoryError(f"Could not parse arguments: {e}")
 
-    def add_new_hot_pin(self, unit_addr: int, hot_id: int) -> bool:
-        update_args = {"id": hot_id, "unit_addr": unit_addr}
-        sql_update = """
-                    UPDATE HOTRecords
-                    SET most_recent = false
-                    WHERE id != %(id)s and unit_addr = %(unit_addr)s and most_recent = true
-                    """
-        run_exec_cmd(sql_update, update_args)
-
-    def get_newest_hot_id(self, unit_addr: str) -> int | None:
-        sql_hot_id = """
-            SELECT id FROM HOTRecords
-            WHERE unit_addr = %(unit_addr)s
-        """
-        sql_hot_id_args = {"unit_addr": unit_addr}
-        resp_hot_id = run_get_cmd(sql_hot_id, sql_hot_id_args)
-        return resp_hot_id[len(resp_hot_id) - 1][0]
-
-    def check_for_hot_field(self, unit_addr: str, field_type: str):
-        if field_type != "symbol_id" or field_type != "engine_num":
-            print("Incorrect database field!")
-            return None
-        
-        sql = """
-        SELECT %(field_type)s FROM HOTRecords 
-        WHERE unit_addr = %(unit_addr)s and most_recent = True
-        """
-        params = {"field_type": field_type, "unit_addr": unit_addr}
-
-        resp = run_get_cmd(sql, params)
-        if len(resp) == 1:
-            return resp[0][0]
-        
-        return None
-
-    def attempt_auto_fill_hot_info_no_symbol(self, symbol_id: int, hot_id: int) -> bool:
-        # id = self.get_newest_eot_id(unit_addr)
-        sql_update = """
-        UPDATE HOTRecords
-        SET symbol_id = %(symb_id)s
-        WHERE id = %(id)s
-        """
-        update_param = {"symb_id": symbol_id, "id": hot_id}
-
-        resp = run_exec_cmd(sql_update, update_param)
-
-    def attempt_auto_fill_hot_info_no_engine(self, engine_id: int, hot_id: int) -> bool:
-        sql_update = """
-        UPDATE HOTRecords
-        SET engine_num = %(engi_id)s
-        WHERE id = %(id)s
-        """
-        update_param = {"engi_id": engine_id, "id": hot_id}
-
-        resp = run_exec_cmd(sql_update, update_param)
-
-    def check_recent_hot_trains(self, unit_addr: str, station_id: int) -> bool:
-        sql = """
-            SELECT * FROM HOTRecords
-            WHERE unit_addr = %(unit_address)s AND station_recorded = %(station_id)s AND date_rec >= NOW() - INTERVAL '10 minutes'
-        """
-        resp = run_get_cmd(
-            sql, args={"unit_address": unit_addr, "station_id": station_id}
-        )
-        if resp:  # arbitrary number that will make this work
-            return True
-        
-        return False
-
-    def update_hot_field(self, record_id: int, field_val, field_type: str):
-        if field_type != "symbol_id" or field_type != "engine_num":
-            print("Incorrect database field!")
-            return False
-        
-        try:
-            args = {"id": record_id, "field_val": field_val}
-            query = sql.SQL(
-                "UPDATE HOTRecords SET {field_type} = %(field_val)s WHERE id = %(id)s").format(
-                field_type=sql.Identifier(field_type)
-                )
-            resp = run_exec_cmd(query, args)
-            print(resp)
-            return True
-        except Exception as e:
-            print(f"An error occurred while updating an EOT record's engine number: {e}")
-            return False
-
-    def update_hot_symbol(self, record_id: int, symbol_id: int) -> NoReturn:
-        """Updates an HOT record's symbol using the provided record ID and new symbol.
-        
-        Args:
-            record_id (int): The ID of the record to update.
-            symbol_id (int): The updated value of the symbol for the EOT record.
-        
-        Returns:
-            bool: True if the update was successful; otherwise, return false if an error occurred.
-        """
-        args = {"id": record_id, "symbol_id": symbol_id}
-        sql = """
-            UPDATE HOTRecords
-            SET symbol_id = %(symbol_id)s 
-            WHERE id = %(id)s
-        """
-        resp = run_exec_cmd(sql, args)
-        print(resp)
-        
-    def update_hot_engine_num(self, record_id: int, engine_num: int) -> NoReturn:
-        """Updates an HOT record's engine number using the provided record ID and engine number.
-        
-        Args:
-            record_id (int): The ID of the record to update.
-            engine_num (int): The updated value of the engine number for the EOT record.
-            
-        Returns:
-            bool: True if the update was successful; otherwise, return false if an error occurred.
-        """
-        args = {"id": record_id, "engine_id": engine_num}
-        sql = """
-            UPDATE HOTRecords
-            SET engine_num = %(engine_id)s 
-            WHERE id = %(id)s
-        """
-        resp = run_exec_cmd(sql, args)
-        print(resp)
 
     # below is for station_handler.py
 

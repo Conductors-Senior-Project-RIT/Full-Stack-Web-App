@@ -1,14 +1,14 @@
 from argparse import Namespace
 from math import ceil
 from flask import Response, jsonify
-from api_strat import Record_API_Strategy
+from api_strat import Record_Service_Strategy
 import database.src.db.eot_repo as eot_repo
 from typing import Any
 import database.src.db.base_record_repo as generic_db
 from database.src.db.eot_repo import EOTRepository
 from database.src.db.trackSense_db_commands import run_exec_cmd, run_get_cmd
 
-class EOT_API_Strategy(Record_API_Strategy[EOTRepository]):
+class EOT_Service_Strategy(Record_Service_Strategy[EOTRepository]):
     def __init__(self):
         super().__init__(EOTRepository())
     
@@ -24,9 +24,9 @@ class EOT_API_Strategy(Record_API_Strategy[EOTRepository]):
             return jsonify({"error": str(e)}), 400
         
             
-    def post_train_history(self, args: Namespace, datetime_str: str):
+    def post_train_record(self, args: dict, datetime_str: str):
         # TODO: Implement better parsing and response handling
-        resp, recovery_request = self.repo.create_eot_record(dict(args), datetime_str)
+        resp, recovery_request = self.repo.create_eot_record(args, datetime_str)
         # Do error handling etc.
         if not resp:
             self.add_new_pin(args["unit_addr"])
