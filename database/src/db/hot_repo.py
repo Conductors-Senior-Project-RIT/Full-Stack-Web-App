@@ -90,8 +90,7 @@ class HOTRepository(RecordRepository):
 
 
     # below is for station_handler.py
-
-    def get_most_recent_hot_records(self, station_id: int) -> list[tuple[Any,...]]:
+    def get_recent_station_records(self, station_id: int) -> list[tuple[Any,...]]:
         """Retrieves the most recent HOT records for a given station id.
 
         """
@@ -100,6 +99,26 @@ class HOTRepository(RecordRepository):
             (station_id,),
         )
         return hot_records
+    
+    def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]] | None:
+        try:
+            if station_records is None:
+                return []
+            hot_records = [
+                {
+                    "id": record[0],
+                    "date_rec": record[1],
+                    "frame_sync": record[3],
+                    "unit_addr": record[4],
+                    "command": record[5],
+                    "checkbits": record[6],
+                    "parity": record[7],
+                }
+                for record in station_records
+            ]
+            return hot_records
+        except IndexError as e:
+            raise RepositoryError(f"Could not parse HOT station records: {e}")
 
     # below is for record collation
     def get_hot_record_collation(self, page: int) -> dict[str, Any]:

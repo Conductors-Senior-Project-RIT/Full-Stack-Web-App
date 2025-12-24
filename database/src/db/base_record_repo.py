@@ -126,12 +126,9 @@ class RecordRepository(ABC):
             raise RepositoryError(f"Could not update {field_type}: {e}")
 
 
-    def get_records_for_station(self, station_id: int) -> list[tuple[Any, ...]] | None:
-        """
-        todo: remove methods from eot_db.py and hot_db.py that can be turned into generic handlers here.
-        """
+    # Station Handler
+    def get_station_records(self, station_id: int) -> list[tuple[Any, ...]]:
         try:
-
             query = sql.SQL(
                     "SELECT * FROM {record_table} WHERE station_recorded = {station_id}"
                 ).format(
@@ -140,6 +137,17 @@ class RecordRepository(ABC):
                 )
             resp = run_get_cmd(query)
             return resp
-        except Exception as e:
-            print(f"An error occurred while fetching records for a specific station id{e}")
-            return None
+        except Error as e:
+            raise RepositoryError(f"Could not fetch records for a specific station {station_id}: {e}")
+        except ValueError as e:
+            raise RepositoryError(f"Could not parse query: {e}")
+        
+    
+    @abstractmethod
+    def get_recent_station_records(self, station_id: int) -> list[tuple[Any, ...]]:
+        pass
+        
+        
+    @abstractmethod
+    def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
+        pass

@@ -177,8 +177,7 @@ class EOTRepository(RecordRepository):
 
 
     # below is for station_handler.py 
-
-    def get_most_recent_eot_records(self, station_id: int) -> list[tuple[Any,...]]:
+    def get_recent_station_records(self, station_id: int) -> list[tuple[Any,...]]:
         """Retrieves most recent eot records for a given station id.
 
         """
@@ -187,6 +186,31 @@ class EOTRepository(RecordRepository):
             (station_id,)
         )
         return eot_records
+    
+    
+    def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
+        try:
+            if station_records is None:
+                return []
+            eot_records = [
+                {
+                    "date_rec": record[1],
+                    "unit_addr": record[4],
+                    "brake_pressure": record[5],
+                    "motion": record[6],
+                    "marker_light": record[7],
+                    "turbine": record[8],
+                    "battery_cond": record[9],
+                    "battery_charge": record[10],
+                    "arm_status": record[11],
+                    "signal_stength": record[12],
+                }
+                for record in station_records
+            ]
+            return eot_records
+        except IndexError as e:
+            raise RepositoryError(f"Could not parse EOT station records: {e}")
+
 
     # below is for eot_collation
     def get_eot_record_collation(self, page: int) -> dict[str, Any]:

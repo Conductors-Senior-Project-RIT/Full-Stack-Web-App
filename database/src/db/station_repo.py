@@ -63,13 +63,13 @@ def update_station_password(station_id: str, hashed_password: str) -> str:
         """
         result = run_exec_cmd(sql, args={"hashed_pw": hashed_password, "id": station_id})
         if result == 0:
-            raise NotFoundError("Station could not be found!")
+            raise NotFoundError(f"Station {station_id}")
         
     # If a database error or another error occurs, print the error and return False
     except Error as e:
         raise RepositoryError(f"Could not update a station: {e}")  
 
-def get_station_id(station_name: str | None ) -> int | None:
+def get_station_id(station_name: str) -> int:
     """Returns the ID of a station given its name.
 
     Args:
@@ -79,12 +79,12 @@ def get_station_id(station_name: str | None ) -> int | None:
         str: The ID of the station given its name.
     """
     try:
-        sql = "SELECT id FROM Stations WHERE station_name = %(station_name)s)"
+        sql = "SELECT id FROM Stations WHERE station_name = %(station_name)s"
         results = run_get_cmd(sql, args={"station_name": station_name})
-        if not results:
-            return None
-
+        if len(results) < 1:
+            raise NotFoundError(station_name)
         return results[0][0]
     except Error as e:
-        print(f"A database error occurred while retrieving a station id from a station name: {e}")
-        return None
+        raise RepositoryError(f"Could not retrieve a station id for {station_name}: {e}")
+    except IndexError as e:
+        raise RepositoryError(f"Could not parse station ID: {e}")
