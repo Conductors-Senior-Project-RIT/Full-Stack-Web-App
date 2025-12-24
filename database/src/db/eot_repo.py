@@ -123,7 +123,7 @@ class EOTRepository(RecordRepository):
         except (IndexError, ValueError, TypeError) as e:
             raise RepositoryError(f"Could not parse results: {e}")
 
-    def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple:  #post_eot()
+    def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:  #post_eot()
         """Inserts a new eot record in EOTRecords table
 
         Args:
@@ -165,7 +165,10 @@ class EOTRepository(RecordRepository):
                     sql_args["date"] = datetime_string
                     recovery_request = False
 
-            return run_exec_cmd(sql, sql_args), recovery_request
+            results = run_exec_cmd(sql, sql_args)
+            if results < 1:
+                raise RepositoryError("Could not create new train record, 0 rows created!")
+            return results, recovery_request
         
         except Error as e:
             raise RepositoryError(f"Could not create new EOT record: {e}")

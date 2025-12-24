@@ -20,6 +20,6 @@ def get_record_repository(value: int | RecordTypes) -> RecordRepository:
             return EOTRepository()
         case RecordTypes.HOT.value:
             return HOTRepository()
-        case RecordTypes.DPU.value:
-            return NotImplementedError("DPU repository not implemented!")
+        # case RecordTypes.DPU.value:
+        #     raise InvalidRecordError(value)
     raise InvalidRecordError(value)

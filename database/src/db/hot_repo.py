@@ -78,7 +78,10 @@ class HOTRepository(RecordRepository):
                 sql_args["date"] = datetime_string
                 recovery_request = False
 
-            return run_exec_cmd(sql, sql_args), recovery_request
+            results = run_exec_cmd(sql, sql_args)
+            if results < 1:
+                raise RepositoryError("Could not create new train record, 0 rows created!")
+            return results, recovery_request
         
         except Error as e:
             raise RepositoryError(f"Could not create new HOT record: {e}")

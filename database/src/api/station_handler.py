@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 
 import database.src.api.strategy.record_types as record_types
-import database.src.db.station_db as station_db
+import database.src.db.station_repo as station_repo
 from db.trackSense_db_commands import *
 
 station_bp = Blueprint("station_bp", __name__)
@@ -15,7 +15,7 @@ def get_trains():
         return jsonify({"message": "Station not specified"}), 400
 
     "refactored part"
-    station_id = station_db.get_station_id(station)
+    station_id = station_repo.get_station_id(station)
     if not station_id:
         return jsonify({"error": "Station not found"}), 404
 

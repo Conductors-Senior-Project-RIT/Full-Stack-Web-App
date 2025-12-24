@@ -1,7 +1,8 @@
 from psycopg import Error
+from database_status import NotFoundError, RepositoryError
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
-def get_station_id_name_pairs() -> list[tuple[int, str]] | None:
+def get_stations() -> list[tuple[int, str]] | None:
     """Returns a collection of ID and station name pairs from the Stations table.
 
     Returns:
@@ -18,13 +19,12 @@ def get_station_id_name_pairs() -> list[tuple[int, str]] | None:
     
     # If a database error or another error occurs, print the error and return None
     except Error as e:
-        print(f"A database error occurred while retrieving ID and name pairs from Stations table: {e}")
-    except Exception as e:
-        print(f"A error occurred while retrieving ID and name pairs from Stations table: {e}")
-    return None
+        raise RepositoryError(f"Could not retrieve station ID and name pairs: {e}")
+    except (ValueError, IndexError) as e:
+        raise RepositoryError(f"Could not parse station ID and name pairs: {e}")
         
 
-def create_new_station(station_name: str, hashed_password: str) -> bool:
+def create_new_station(station_name: str, hashed_password: str):
     """Creates a new station given a station name and a hashed password in the Stations table.
     
     Args:
@@ -40,25 +40,19 @@ def create_new_station(station_name: str, hashed_password: str) -> bool:
             INSERT INTO Stations (station_name, passwd) VALUES
             (%(station_name)s, %(passwd)s)
         """
-        run_exec_cmd(sql, args={"station_name": station_name, "passwd": hashed_password})
-        return True
-    # If a database error or another error occurs, print the error and return False
+        result = run_exec_cmd(sql, args={"station_name": station_name, "passwd": hashed_password})
+        if result == 0:
+            raise RepositoryError(f"Could not create a new station, 0 rows created.")
+
     except Error as e:
-        print(f"A database error occurred while creating a new station: {e}")  
-    except Exception as e:
-        print(f"An error occurred while creating a new station: {e}")
-    return False
+        raise RepositoryError(f"Could not create a new station: {e}")  
 
-
-def update_station_password(station_id: str, hashed_password: str) -> bool:
+def update_station_password(station_id: str, hashed_password: str) -> str:
     """Updates a station's password given its respective ID.
     
     Args:
         station_name (str): The ID of the station to update.
         hashed_password (str): The new hashed password for the station.
-        
-    Returns:
-        bool: Returns True if the station's password was updated without error; otherwise, return False if an error occurred.
     """
     # Attempt to update a station's password and return True if successful.
     try:
@@ -67,13 +61,13 @@ def update_station_password(station_id: str, hashed_password: str) -> bool:
             SET passwd = %(hashed_pw)s
             WHERE id = %(id)s
         """
-        run_exec_cmd(sql, args={"hashed_pw": hashed_password, "id": station_id})
+        result = run_exec_cmd(sql, args={"hashed_pw": hashed_password, "id": station_id})
+        if result == 0:
+            raise NotFoundError("Station could not be found!")
+        
     # If a database error or another error occurs, print the error and return False
     except Error as e:
-        print(f"A database error occurred while updating a station: {e}")  
-    except Exception as e:
-        print(f"An error occurred while updating a station: {e}")
-    return False
+        raise RepositoryError(f"Could not update a station: {e}")  
 
 def get_station_id(station_name: str | None ) -> int | None:
     """Returns the ID of a station given its name.

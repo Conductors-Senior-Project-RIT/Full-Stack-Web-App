@@ -1,17 +1,8 @@
 from abc import ABC, abstractmethod
 from psycopg import Error, sql
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
-import database.src.db.station_db as station_db
+from database_status import RepositoryError, NotFoundError
 from typing import Any
-
-
-class RepositoryError(Exception):
-    def __init__(self, error_desc: str):
-        super().__init__(f"An error occurred: {error_desc}")
-        
-class NotFoundError(Exception):
-    def __init__(self, value):
-        super().__init__(f"{value} was not found!")
 
 class RecordRepository(ABC):
     def __init__(self, table_name: str):
@@ -65,7 +56,7 @@ class RecordRepository(ABC):
         except Error as e:
             raise RepositoryError(f"Could not get recent trains: {e}")    
 
-    def add_new_pin(self, record_id: int, unit_addr: int) -> bool:
+    def add_new_pin(self, record_id: int, unit_addr: int) -> int:
         try:
             args = {"id": record_id, "unit_addr": unit_addr}
             query = sql.SQL(
@@ -77,7 +68,10 @@ class RecordRepository(ABC):
             ).format(
                 table_name=sql.Identifier(self._table_name)
             )
-            run_exec_cmd(query, args)
+            results = run_exec_cmd(query, args)
+            if results < 1:
+                raise RepositoryError(f"Could not add new pin, 0 rows were created!")
+            return results
             
         except Error as e:
             raise RepositoryError(f"Could not add new pin: {e}")
@@ -111,7 +105,7 @@ class RecordRepository(ABC):
         return resp[0][0] if len(resp) == 1 else None
 
 
-    def update_record_field(self, record_id: int, field_value, field_type: str):
+    def update_record_field(self, record_id: int, field_value: Any, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
             print("Incorrect database field!")
             return False
@@ -125,11 +119,12 @@ class RecordRepository(ABC):
                     field_type=sql.Identifier(field_type)
                 )
             resp = run_exec_cmd(query, args)
-            print(resp)
-            return True
-        except Exception as e:
-            print(f"An error occurred while updating an EOT record's engine number: {e}")
-            return False
+            if resp < 1:
+                raise RepositoryError(f"Could not update {field_type}, 0 rows updated!")
+            return resp
+        except Error as e:
+            raise RepositoryError(f"Could not update {field_type}: {e}")
+
 
     def get_records_for_station(self, station_id: int) -> list[tuple[Any, ...]] | None:
         """

@@ -13,6 +13,7 @@ class TrainHistoryService:
         except InvalidRecordError as e:
             raise ValueError(str(e))
 
+
     def get_train_history(self, record_id: int, page_num: int):
         try:
             return self.repo.get_train_history(record_id, page_num, RESULTS_NUM)
@@ -22,17 +23,15 @@ class TrainHistoryService:
         
     def post_train_history(self, args: dict, datetime_str: str):
         try:
-            response, recovery_request = self.repo.create_train_record(args, datetime_str)
+            # Don't need to check num results, creation errors are checked in repo
+            _, recovery_request = self.repo.create_train_record(args, datetime_str)
+            self.add_new_pin(args["unit_addr"])
             
-            # Do error handling etc.
-            if not response:
-                self.add_new_pin(args["unit_addr"])
-                
-                has_notification = self.check_recent_notification(args["unit_addr"], args["station_id"])
-                
-                if not has_notification and not recovery_request:
-                    # Send notification for HOT
-                    pass
+            has_notification = self.check_recent_notification(args["unit_addr"], args["station_id"])
+            
+            if not has_notification and not recovery_request:
+                # Send notification for HOT
+                pass
             
         except RepositoryError as e:
             raise ServiceError(str(e))

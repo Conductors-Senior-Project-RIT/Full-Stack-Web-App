@@ -41,10 +41,11 @@ def run_get_cmd(sql, args={}): # returns list of tuples
     return tuples
 
 # runs a sql command to commit changes to the db
-def run_exec_cmd(sql, args={}): #always returns none https://stackoverflow.com/questions/37965198/python-psycopg2-cursor-execute-returning-none
+def run_exec_cmd(sql, args={}): # returns affected row count
     connection = create_connection()
     cursor = connection.cursor()
-    res = cursor.execute(sql, args)
+    _ = cursor.execute(sql, args)
+    affected = cursor.rowcount
     connection.commit()
     connection.close()
-    return res
+    return affected
