@@ -52,7 +52,7 @@ class HOTRepository(RecordRepository):
             
 
 
-    def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple:
+    def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:
         """
         TODO: Namespace is the type for args for post methods in train_history... look more into this
         TODO: run_exec_cmd returns none always... think of what to return lol

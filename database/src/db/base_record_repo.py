@@ -13,7 +13,7 @@ class RecordRepository(ABC):
         pass
     
     @abstractmethod
-    def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple:
+    def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:
         pass
 
     def get_unit_record_ids(self, unit_addr: str, most_recent=False) -> int:
