@@ -1,7 +1,7 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
-from database.src.service.service_status import ServiceError
-import database.src.service.station_service as station_service
+from database.src.service.station_service import StationService
+from database.src.service.service_core import *
 
 
 class StationAuth(Resource):
@@ -13,9 +13,11 @@ class StationAuth(Resource):
             an error message is returned.
         """
         try:  
-            results = station_service.get_stations()
+            results = StationService().get_stations()
             return jsonify(results), 200
-        except ServiceError as e:
+        except ServiceTimeoutError:
+            return jsonify({"error": "Request timed out!"}), 408
+        except ServiceInternalError as e:
             return jsonify({"error": str(e)}), 500
 
     def post(self):
@@ -30,11 +32,13 @@ class StationAuth(Resource):
             parser.add_argument("station_name", type=str, default="unnamed")
             args = parser.parse_args()
             
-            pw = station_service.create_station(args["station_name"])
+            pw = StationService().create_station(args["station_name"])
             return jsonify({"password": pw}), 200
         
-        except ServiceError as e:
-            return jsonify({"error", str(e)}), 500
+        except ServiceTimeoutError:
+            return jsonify({"error": "Request timed out!"}), 408
+        except ServiceInternalError as e:
+            return jsonify({"error": str(e)}), 500
       
       
     def put(self):
@@ -47,15 +51,16 @@ class StationAuth(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("id", type=int, default=-1)
         args = parser.parse_args()
-        unhashed_pw, hashed_pw = self.generate_password_string()
         
-        if args["id"] == -1:
+        if args["id"] < 1:
             return jsonify({"error": "An invalid station ID was provided!"}), 400
         
         try:
-            pw = station_service.update_station_password(args["id"])
+            pw = StationService().update_station_password(args["id"])
             return jsonify({"new_pw": pw}), 200
-        except ValueError as e:
+        except ServiceTimeoutError:
+            return jsonify({"error": "Request timed out!"}), 408
+        except ServiceResourceNotFound as e:
             return jsonify({"error": str(e)}), 404
-        except ServiceError as e:
+        except ServiceInternalError as e:
             return jsonify({"error": str(e)}), 500

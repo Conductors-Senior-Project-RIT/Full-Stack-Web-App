@@ -2,38 +2,45 @@ from flask import request, jsonify
 from flask_restful import Resource
 from datetime import date
 
+from database.src.service.service_core import ServiceTimeoutError, ServiceInternalError, ServiceResourceNotFound
+from database.src.service.station_service import StationService
 from db.trackSense_db_commands import run_exec_cmd, run_get_cmd
 
 
 class StationOnline(Resource):
     def get(self):
-        station = request.args.get("station_name", default=None, type=str)
-        if station is None:
-            return 400, {"message": "Station name not provided"}
-        sql = "SELECT last_seen FROM stations WHERE station_name = %s;"
-        results = run_get_cmd(sql, (station,))
+        try:
+            station = request.args.get("station_name", default=None, type=str)
+            if station is None:
+                return jsonify({"message": "Station name not provided"}), 400
 
-        if len(results) == 0:
-            return 400, {"message", "Station not found"}
+            formatted_date = StationService().get_last_seen(station)
+            return jsonify({"last_seen": formatted_date}), 200
+        
+        except ServiceTimeoutError:
+            return ({"error": "Request timed out!"}), 408
+        except ServiceInternalError as e:
+            return ({"error": str(e)}), 500
+        except ServiceResourceNotFound as e:
+            return ({"error": str(e)}), 404
 
-        seen_date = results[0][0]
-
-        formatted_date = seen_date.strftime("%I:%M %p") if seen_date.date() == date.today() \
-            else seen_date.strftime("%b %d, %Y at %I:%M %p")
-
-        return jsonify(
-            {
-                "last_seen": formatted_date
-            }
-        )
-
+    #TODO: Should be PUT
     def post(self):
+        try:
+            data = request.get_json()
+            stat_id = int(data.get("station_id"))
+            
+            if stat_id < 1:
+                raise ValueError()
 
-        data = request.get_json()
-        stat_id = data.get("station_id")
-
-        sql = "UPDATE stations SET last_seen = NOW() WHERE id = %s;"
-
-        run_exec_cmd(sql, (stat_id,))
-
-        return 200
+            StationService().update_last_seen(stat_id)
+            return 200
+        
+        except (ValueError, TypeError, MemoryError, OverflowError):
+            return ({"error": "Invalid station ID!"}), 400
+        except ServiceTimeoutError:
+            return ({"error": "Request timed out!"}), 408
+        except ServiceInternalError as e:
+            return ({"error": str(e)}), 500
+        except ServiceResourceNotFound as e:
+            return ({"error": str(e)}), 404

@@ -1,12 +1,16 @@
 from abc import ABC, abstractmethod
-from psycopg import Error, sql
+from psycopg import Error, OperationalError, sql
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
-from database_status import RepositoryError, NotFoundError
+from database_status import *
 from typing import Any
 
 class RecordRepository(ABC):
-    def __init__(self, table_name: str):
+    def __init__(self, table_name: str, record_name: str):
         self._table_name = table_name
+        self._record_name = record_name
+        
+    def get_record_name(self) -> str:
+        return self._record_name
         
     @abstractmethod
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
@@ -29,12 +33,16 @@ class RecordRepository(ABC):
             resp_id = run_get_cmd(query, args)
             
             if len(resp_id) < 1:
-                raise NotFoundError(unit_addr)
+                raise RepositoryNotFoundError(unit_addr)
                 
             return resp_id[-1][0] if most_recent else [resp_id[i][0] for i in resp_id]
-            
-        except (Error, TypeError, IndexError) as e:
-            raise RepositoryError(f"Could not get unit record IDs: {e}")
+        
+        except OperationalError:
+            raise RepositoryTimeoutError()
+        except Error as e:
+            raise RepositoryInternalError(f"Could not get unit record IDs: {e}")
+        except (TypeError, IndexError) as e:
+            raise RepositoryParsingError(f"Could not parse unit record IDs: {e}")
         
 
     def get_recent_trains(self, unit_addr: str, station_id: int) -> list:
@@ -53,8 +61,10 @@ class RecordRepository(ABC):
             
             return run_get_cmd(query, args)
         
+        except OperationalError:
+            raise RepositoryTimeoutError()
         except Error as e:
-            raise RepositoryError(f"Could not get recent trains: {e}")    
+            raise RepositoryInternalError(f"Could not get recent trains: {e}")    
 
     def add_new_pin(self, record_id: int, unit_addr: int) -> int:
         try:
@@ -70,11 +80,13 @@ class RecordRepository(ABC):
             )
             results = run_exec_cmd(query, args)
             if results < 1:
-                raise RepositoryError(f"Could not add new pin, 0 rows were created!")
+                raise RepositoryInternalError(f"Could not add new pin, 0 rows were created!")
             return results
-            
+        
+        except OperationalError:
+            raise RepositoryTimeoutError()
         except Error as e:
-            raise RepositoryError(f"Could not add new pin: {e}")
+            raise RepositoryInternalError(f"Could not add new pin: {e}")
 
 
     def check_for_record_field(self, unit_addr: str, field_type: str):
@@ -96,13 +108,16 @@ class RecordRepository(ABC):
                     )
             params = {"unit_addr": unit_addr}
 
-
             resp = run_get_cmd(query, params)
+            return resp[0][0] if len(resp) == 1 else None
         
+        except OperationalError:
+            raise RepositoryTimeoutError()
         except Error as e:
-            raise RepositoryError(f"Could not check a record field: {e}")    
+            raise RepositoryInternalError(f"Could not check a record field: {e}")    
+        except IndexError as e:
+            raise RepositoryParsingError(f"Could not parse record field results: {e}")
         
-        return resp[0][0] if len(resp) == 1 else None
 
 
     def update_record_field(self, record_id: int, field_value: Any, field_type: str):
@@ -120,15 +135,21 @@ class RecordRepository(ABC):
                 )
             resp = run_exec_cmd(query, args)
             if resp < 1:
-                raise RepositoryError(f"Could not update {field_type}, 0 rows updated!")
+                raise RepositoryInternalError(f"Could not update {field_type}, 0 rows updated!")
             return resp
+        
+        except OperationalError:
+            raise RepositoryTimeoutError()
         except Error as e:
-            raise RepositoryError(f"Could not update {field_type}: {e}")
+            raise RepositoryInternalError(f"Could not update {field_type}: {e}")
 
 
     # Station Handler
-    def get_station_records(self, station_id: int) -> list[tuple[Any, ...]]:
+    def get_station_records(self, station_id: int, recent=False) -> list[tuple[Any, ...]]:
         try:
+            if recent:
+                return self.get_recent_station_records(station_id)
+            
             query = sql.SQL(
                     "SELECT * FROM {record_table} WHERE station_recorded = {station_id}"
                 ).format(
@@ -137,10 +158,13 @@ class RecordRepository(ABC):
                 )
             resp = run_get_cmd(query)
             return resp
+        
+        except OperationalError:
+            raise RepositoryTimeoutError()
         except Error as e:
-            raise RepositoryError(f"Could not fetch records for a specific station {station_id}: {e}")
+            raise RepositoryInternalError(f"Could not fetch records for a specific station {station_id}: {e}")
         except ValueError as e:
-            raise RepositoryError(f"Could not parse query: {e}")
+            raise RepositoryParsingError(f"Could not parse query: {e}")
         
     
     @abstractmethod

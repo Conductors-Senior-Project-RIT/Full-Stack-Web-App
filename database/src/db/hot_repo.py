@@ -7,16 +7,17 @@ This module handles all database CRUD operations for HOT records
 from math import ceil
 from typing import Any, NoReturn
 
-from psycopg import Error, sql
+from psycopg import Error, OperationalError, sql
 from database.src.db.base_record_repo import RecordRepository, RepositoryError
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
+from database.src.db.database_status import *
 
 RESULTS_NUM = 250
 
 
 class HOTRepository(RecordRepository):
     def __init__(self):
-        super().__init__("HOTRecords")
+        super().__init__("HOTRecords", "HOT Record")
         
     # below is train_history.py related
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
@@ -45,10 +46,13 @@ class HOTRepository(RecordRepository):
                         }
                         for tup in resp
             ]
+            
+        except OperationalError as e:
+            raise RepositoryTimeoutError()
         except Error as e:
-            raise RepositoryError(f"Could not retrieve HOT train history: {e}")
+            raise RepositoryInternalError(f"Could not retrieve HOT train history: {e}")
         except (IndexError, ValueError) as e:
-            raise RepositoryError(f"Could not parse results: {e}")
+            raise RepositoryParsingError(f"Could not parse results: {e}")
             
 
 
@@ -80,13 +84,15 @@ class HOTRepository(RecordRepository):
 
             results = run_exec_cmd(sql, sql_args)
             if results < 1:
-                raise RepositoryError("Could not create new train record, 0 rows created!")
+                raise RepositoryInternalError("Could not create new train record, 0 rows created!")
             return results, recovery_request
         
+        except OperationalError as e:
+            raise RepositoryTimeoutError()
         except Error as e:
-            raise RepositoryError(f"Could not create new HOT record: {e}")
+            raise RepositoryInternalError(f"Could not create new HOT record: {e}")
         except (IndexError, ValueError) as e:
-            raise RepositoryError(f"Could not parse arguments: {e}")
+            raise RepositoryParsingError(f"Could not parse arguments: {e}")
 
 
     # below is for station_handler.py
@@ -100,6 +106,7 @@ class HOTRepository(RecordRepository):
         )
         return hot_records
     
+        
     def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]] | None:
         try:
             if station_records is None:
@@ -118,7 +125,7 @@ class HOTRepository(RecordRepository):
             ]
             return hot_records
         except IndexError as e:
-            raise RepositoryError(f"Could not parse HOT station records: {e}")
+            raise RepositoryParsingError(f"Could not parse HOT station records: {e}")
 
     # below is for record collation
     def get_hot_record_collation(self, page: int) -> dict[str, Any]:

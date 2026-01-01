@@ -2,7 +2,7 @@ from flask import jsonify, request
 from flask_restful import Resource, reqparse
 from db.trackSense_db_commands import *
 from database.src.service.train_history_service import TrainHistoryService
-from database.src.service.service_status import ServiceError
+from database.src.service.service_core import *
 import datetime
 import http.client, urllib
 from dotenv import *
@@ -41,10 +41,14 @@ class HistoryDB(Resource):
             th_service = TrainHistoryService(typ)
             results = th_service.get_train_history(typ, id, page)
             return jsonify(results), 200
-        except ValueError as e:
+        
+        except ServiceInvalidArgument as e:
             return jsonify({"error": str(e)}), 400
-        except RuntimeError as e:
+        except ServiceTimeoutError:
+             return jsonify({"error": "Request timed out!"}), 408
+        except ServiceInternalError as e:
             return jsonify({"error": str(e)}), 500
+
         
 
     def post(self):
@@ -84,11 +88,15 @@ class HistoryDB(Resource):
             th_service = TrainHistoryService(typ)
             results = th_service.post_train_history(typ, args, dt_str)
             return jsonify(results), 200
-        except ValueError as e:
-            return jsonify({"error": str(e)}), 400
-        except ServiceError as e:
-            return jsonify({"error": str(e)}), 500
         
+        except ServiceInvalidArgument as e:
+            return jsonify({"error": str(e)}), 400
+        except ServiceResourceNotFound as e:
+            return jsonify({"error": str(e)}), 404
+        except ServiceTimeoutError:
+             return jsonify({"error": "Request timed out!"}), 408
+        except ServiceInternalError as e:
+            return jsonify({"error": str(e)}), 500
 
         # if not resp:
         #     print(recovery_request)

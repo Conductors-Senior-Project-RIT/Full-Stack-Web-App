@@ -1,9 +1,9 @@
 # An enumeration of train record types
 from enum import Enum
 from database.src.db.base_record_repo import RecordRepository
+from database.src.db.database_status import RepositoryRecordInvalid
 from database.src.db.eot_repo import EOTRepository
 from database.src.db.hot_repo import HOTRepository
-from database.src.service.service_status import InvalidRecordError
 
 
 class RecordTypes(Enum):
@@ -22,4 +22,4 @@ def get_record_repository(value: int | RecordTypes) -> RecordRepository:
             return HOTRepository()
         # case RecordTypes.DPU.value:
         #     raise InvalidRecordError(value)
-    raise InvalidRecordError(value)
+    raise RepositoryRecordInvalid(value)

@@ -8,14 +8,15 @@ from math import ceil
 from typing import Any, NoReturn
 from database.src.db.base_record_repo import RecordRepository, RepositoryError
 from database.src.db.symbol_db import get_symbol_name
+from database.src.db.database_status import *
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
-from psycopg import Error, sql
+from psycopg import Error, OperationalError, sql
 
 RESULTS_NUM = 250
 
 class EOTRepository(RecordRepository):
     def __init__(self):
-        super().__init__("EOTRecords")
+        super().__init__("EOTRecords", "EOT Record")
 
     # below is train_history.py related
     def get_total_count_of_eot_records(self) -> int:
@@ -64,16 +65,7 @@ class EOTRepository(RecordRepository):
         TODO: Format returned collection
         TODO: what is symbol_id for a train, is it it's unique identifier?
         """
-
-        if not isinstance(id, int):
-            raise ValueError(f"id ({id}) is not an integer")
         
-        if not isinstance(page, int):
-            raise ValueError(f"page ({page}), is not an integer")
-        
-        if not isinstance(num_results, int):
-            raise ValueError(f"num_results ({num_results}), is not an integer")
-
         # TODO: Move  to db
         sql = """SELECT EOTRecords.id, date_rec, stat.station_name, sym.symb_name, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
                 INNER JOIN Stations as stat on station_recorded = stat.id
@@ -117,11 +109,13 @@ class EOTRepository(RecordRepository):
                     "results": results,
                     "totalPages": ceil(count[0][0] / num_results),
                 }
-                
+        
+        except OperationalError as e:
+            raise RepositoryTimeoutError()
         except Error as e:
-            raise RepositoryError(f"Could not retrieve HOT train history: {e}")
+            raise RepositoryInternalError(f"Could not retrieve EOT train history: {e}")
         except (IndexError, ValueError, TypeError) as e:
-            raise RepositoryError(f"Could not parse results: {e}")
+            raise RepositoryParsingError(f"Could not parse results: {e}")
 
     def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:  #post_eot()
         """Inserts a new eot record in EOTRecords table
@@ -167,13 +161,15 @@ class EOTRepository(RecordRepository):
 
             results = run_exec_cmd(sql, sql_args)
             if results < 1:
-                raise RepositoryError("Could not create new train record, 0 rows created!")
+                raise RepositoryInternalError("Could not create new train record, 0 rows created!")
             return results, recovery_request
         
+        except OperationalError as e:
+            raise RepositoryTimeoutError()
         except Error as e:
-            raise RepositoryError(f"Could not create new EOT record: {e}")
+            raise RepositoryInternalError(f"Could not create new EOT record: {e}")
         except (IndexError, ValueError) as e:
-            raise RepositoryError(f"Could not parse arguments: {e}")
+            raise RepositoryParsingError(f"Could not parse arguments: {e}")
 
 
     # below is for station_handler.py 
@@ -208,8 +204,9 @@ class EOTRepository(RecordRepository):
                 for record in station_records
             ]
             return eot_records
+        
         except IndexError as e:
-            raise RepositoryError(f"Could not parse EOT station records: {e}")
+            raise RepositoryParsingError(f"Could not parse EOT station records: {e}")
 
 
     # below is for eot_collation

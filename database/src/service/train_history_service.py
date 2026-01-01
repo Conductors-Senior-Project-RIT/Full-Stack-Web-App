@@ -1,24 +1,26 @@
-from database.src.db.base_record_repo import NotFoundError
-from database.src.db.hot_repo import RepositoryError
-from database.src.service.service_status import InvalidRecordError, ServiceError, ServiceStatusCode
-from database.src.db import record_types
+import database.src.db.record_types as record_types
+from database.src.db.database_status import *
+from database.src.service.service_core import *
 
 # Temporary constant for number of results per page
 RESULTS_NUM = 250
 
-class TrainHistoryService:
+class TrainHistoryService(BaseService):
     def __init__(self, record_type: int):
         try:
             self.repo = record_types.get_record_repository(record_type)
-        except InvalidRecordError as e:
-            raise ValueError(str(e))
+            super().__init__("Train History")
+        except RepositoryRecordInvalid(record_type) as e:
+            raise ServiceInvalidArgument(self, str(e))
 
 
     def get_train_history(self, record_id: int, page_num: int):
         try:
             return self.repo.get_train_history(record_id, page_num, RESULTS_NUM)
-        except RepositoryError as e:
-            raise ServiceError(str(e))
+        except RepositoryTimeoutError:
+            raise ServiceTimeoutError(self)
+        except (RepositoryInternalError, RepositoryParsingError) as e:
+            raise ServiceInternalError(self, str(e))
         
         
     def post_train_history(self, args: dict, datetime_str: str):
@@ -32,11 +34,15 @@ class TrainHistoryService:
             if not has_notification and not recovery_request:
                 # Send notification for HOT
                 pass
-            
-        except RepositoryError as e:
-            raise ServiceError(str(e))
-        except NotFoundError as e:
-            raise ValueError(str(e))
+        
+        except RepositoryTimeoutError:
+            raise ServiceTimeoutError(self)
+        except (RepositoryInternalError, RepositoryParsingError) as e:
+            raise ServiceInternalError(self, str(e))
+        except RepositoryNotFoundError as e:
+            raise ServiceResourceNotFound(self, str(e))
+        except KeyError as e:
+            raise ServiceInvalidArgument(self, e.args[0])
         
         
     def check_recent_notification(self, unit_addr: str, station_id: int) -> bool:

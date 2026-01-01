@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
-from database.src.service.service_status import ServiceError
-import database.src.service.station_service as station_service
+from database.src.service.station_service import StationService
+from database.src.service.service_core import *
 
 station_bp = Blueprint("station_bp", __name__)
 CORS(station_bp)  # Enable CORS for the station_bp blueprint
@@ -13,11 +13,13 @@ def get_trains():
         return jsonify({"message": "Station not specified"}), 400
 
     try:
-        results = station_service.get_trains_from_station(station)
+        results = StationService().get_trains_from_station(station)
         return jsonify(results), 200
-    except ValueError as e:
+    except ServiceTimeoutError:
+        return jsonify({"error": "Request timed out!"}), 408
+    except ServiceResourceNotFound as e:
         return jsonify({"error": str(e)}), 404
-    except ServiceError as e:
+    except (ServiceInternalError, ServiceParsingError) as e:
         return jsonify({"error": str(e)}), 500
 
     # # Fetch the station ID for the specified station
@@ -76,11 +78,13 @@ def get_pin_info():
         return jsonify({"message": "Station not specified"}), 400
 
     try:
-        results = station_service.get_trains_from_station(station, recent=True)
+        results = StationService().get_trains_from_station(station, recent=True)
         return jsonify(results), 200
-    except ValueError as e:
+    except ServiceTimeoutError:
+        return jsonify({"error": "Request timed out!"}), 408
+    except ServiceResourceNotFound as e:
         return jsonify({"error": str(e)}), 404
-    except ServiceError as e:
+    except (ServiceInternalError, ServiceParsingError) as e:
         return jsonify({"error": str(e)}), 500
     
 
