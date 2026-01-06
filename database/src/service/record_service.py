@@ -1,11 +1,11 @@
-import database.src.db.record_types as record_types
-from database.src.db.database_status import *
-from database.src.service.service_core import *
+import db.record_types as record_types
+from db.database_status import *
+from service.service_core import *
 
 # Temporary constant for number of results per page
 RESULTS_NUM = 250
 
-class TrainHistoryService(BaseService):
+class RecordService(BaseService):
     def __init__(self, record_type: int):
         try:
             self.repo = record_types.get_record_repository(record_type)
@@ -47,7 +47,7 @@ class TrainHistoryService(BaseService):
         
     def check_recent_notification(self, unit_addr: str, station_id: int) -> bool:
         results = self.repo.get_recent_trains(unit_addr, station_id)
-        return results is not None or len(results) > 0
+        return results is not None and len(results) > 0
         
     def add_new_pin(self, unit_addr: str):
         self.attempt_auto_fill(unit_addr)
@@ -60,10 +60,24 @@ class TrainHistoryService(BaseService):
         engi = self.repo.check_for_record_field(unit_addr, "engine_num")
         record_id = self.repo.get_unit_record_ids(unit_addr, True)
         
-        if symb:
-            resp = self.repo.update_record_field(record_id, symb, "symbol_id")
+        symb = symb if symb is not None else -1
+        engi = engi if engi is not None else -1
+        
+        # Use the signal update function used in signal updater because the perform the same task
+        self.signal_update(record_id, symb, engi)
             
-        if engi:
-            resp = self.repo.update_record_field(unit_addr, engi, "engine_num")
-        else:
-            print("No engine number to update!")
+    # Signal Updater
+    def signal_update(self, record_id: int, symbol_id: int, engine_id: int):
+        try:
+            if symbol_id != -1:
+                self.repo.update_record_field(record_id, symbol_id, "symbol_id")
+            
+            if engine_id != -1:
+                self.repo.update_record_field(record_id, engine_id, "engine_num")
+        
+        except RepositoryTimeoutError:
+            raise ServiceTimeoutError()
+        except RepositoryInternalError as e:
+            raise ServiceInternalError(str(e))
+
+            

@@ -1,9 +1,9 @@
 # An enumeration of train record types
 from enum import Enum
-from database.src.db.base_record_repo import RecordRepository
-from database.src.db.database_status import RepositoryRecordInvalid
-from database.src.db.eot_repo import EOTRepository
-from database.src.db.hot_repo import HOTRepository
+from base_record_repo import RecordRepository
+from database_status import RepositoryRecordInvalid
+from eot_repo import EOTRepository
+from hot_repo import HOTRepository
 
 
 class RecordTypes(Enum):
@@ -15,6 +15,9 @@ def has_value(value: int):
     return any(value == item.value for item in RecordTypes)
 
 def get_record_repository(value: int | RecordTypes) -> RecordRepository:
+    if not isinstance(value, (int, RecordTypes)):
+        raise RepositoryRecordInvalid(value)
+    
     match value:
         case RecordTypes.EOT.value:
             return EOTRepository()

@@ -1,4 +1,4 @@
-from database.src.db.record_types import RecordTypes
+from record_types import RecordTypes
 
 
 class RepositoryError(Exception):

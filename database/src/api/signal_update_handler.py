@@ -1,10 +1,8 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
-import json, datetime, requests
 
-from database.src.db.eot_repo import update_eot_symbol, update_eot_engine_num
-from database.src.db.hot_repo import update_hot_symbol, update_hot_engine_num
-from database.src.api.strategy.record_types import RecordTypes
+from service.record_service import RecordService
+from service.service_core import *
 
 
 class SignalUpdater(Resource):
@@ -21,35 +19,23 @@ class SignalUpdater(Resource):
         parser.add_argument("engi_number_id", default=-1, type=int)
         args = parser.parse_args()
 
+        if args["id_num"] < 1:
+            return jsonify({"error": f"Ivalid record ID: {args["id_num"]}"}), 400
+        
+        if args["engi_number_id"] == -1 and args["symbol_id"] == -1:
+            return jsonify(
+                {"error": f"Both engine [{args['engi_number_id']}] and symbol ID [{args['id_num']}] cannot be undefined (-1)"}
+            ), 400
+
         # Ensure that a valid record type, a valid record ID, and at least
         # a valid engine number or symbol ID is provided.
-        if (
-            not RecordTypes.has_value(args["type"])
-            or args["id_num"] == -1
-            or (args["engi_number_id"] == -1 and args["symbol_id"] == -1)
-        ):
-            # Invalid arguments provided
-            print("bad request")
-            return 400
+        try:
+            service = RecordService(args["type"])
+            service.signal_update(args["id_num"], args["symbol_id"], args["engi_number_id"])
+            return 200
         
-        # The symbol and engine update functions are stored in a dictionary that can easily be executed via record type
-        symbol_update_funcs = {
-            RecordTypes.EOT.value: lambda i,s: update_eot_symbol(i, s),
-            RecordTypes.HOT.value: lambda i,s: update_hot_symbol(i, s),
-            RecordTypes.DPU.value: lambda _: print("DPU not implemented!")
-        }
+        except ServiceTimeoutError:
+            return jsonify({"error": "Request timed out!"}), 408
+        except ServiceInternalError as e:
+            return jsonify({"error": str(e)}), 500
         
-        engine_num_update_funcs = {
-            RecordTypes.EOT.value: lambda i,e: update_eot_engine_num(i, e),
-            RecordTypes.HOT.value: lambda i,e: update_hot_engine_num(i, e),
-            RecordTypes.DPU.value: lambda _: print("DPU not implemented!")
-        }
-
-        # Execute our update functions if a valid symbol and/or engine number is provided
-        if args["symbol_id"] != -1:
-            symbol_update_funcs[args["type"]](args["id_num"], args["symbol_id"])
-
-        if args["engi_number_id"] != -1:
-            engine_num_update_funcs(args["type"])(args["id_num"], args["engi_number_id"])
-
-        return 200

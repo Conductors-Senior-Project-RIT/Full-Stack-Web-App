@@ -1,7 +1,6 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
 from db.trackSense_db_commands import *
-import json, datetime
 import http.client, urllib
 import os
 from dotenv import *

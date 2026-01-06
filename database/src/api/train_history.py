@@ -1,8 +1,8 @@
 from flask import jsonify, request
 from flask_restful import Resource, reqparse
 from db.trackSense_db_commands import *
-from database.src.service.train_history_service import TrainHistoryService
-from database.src.service.service_core import *
+from database.src.service.record_service import RecordService
+from service.service_core import *
 import datetime
 import http.client, urllib
 from dotenv import *
@@ -38,7 +38,7 @@ class HistoryDB(Resource):
             validate_int_argument(id, "type", 1)
             validate_int_argument(page, "page", 1)
             
-            th_service = TrainHistoryService(typ)
+            th_service = TrainService(typ)
             results = th_service.get_train_history(typ, id, page)
             return jsonify(results), 200
         
@@ -85,7 +85,7 @@ class HistoryDB(Resource):
         # right now this has 0 authentication. Too bad!
         typ = args["type"]
         try:
-            th_service = TrainHistoryService(typ)
+            th_service = RecordService(typ)
             results = th_service.post_train_history(typ, args, dt_str)
             return jsonify(results), 200
         

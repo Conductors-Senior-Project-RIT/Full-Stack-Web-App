@@ -175,3 +175,4 @@ class RecordRepository(ABC):
     @abstractmethod
     def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
         pass
+    

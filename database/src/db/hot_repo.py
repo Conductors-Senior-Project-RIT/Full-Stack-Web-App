@@ -8,9 +8,9 @@ from math import ceil
 from typing import Any, NoReturn
 
 from psycopg import Error, OperationalError, sql
-from database.src.db.base_record_repo import RecordRepository, RepositoryError
+from base_record_repo import RecordRepository, RepositoryError
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
-from database.src.db.database_status import *
+from database_status import *
 
 RESULTS_NUM = 250
 

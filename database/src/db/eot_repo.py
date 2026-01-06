@@ -5,12 +5,11 @@ This module handles all database CRUD operations for EOT records
 """
 
 from math import ceil
-from typing import Any, NoReturn
-from database.src.db.base_record_repo import RecordRepository, RepositoryError
-from database.src.db.symbol_db import get_symbol_name
-from database.src.db.database_status import *
+from typing import Any
+from base_record_repo import RecordRepository
+from database_status import *
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
-from psycopg import Error, OperationalError, sql
+from psycopg import Error, OperationalError
 
 RESULTS_NUM = 250
 
