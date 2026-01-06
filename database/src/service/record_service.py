@@ -132,12 +132,11 @@ class RecordService(BaseService):
                 if station_name:
                     station_id = station_repo.get_station_id(station_name)
             
-            if record_type == -1:
-                chosen_repos = (
-                    record_types.get_all_repositories()
-                    if record_type == -1 else
-                    [record_types.get_record_repository(record_type)]
-                )
+            chosen_repos = (
+                record_types.get_all_repositories()
+                if record_type == -1 else
+                [record_types.get_record_repository(record_type)]
+            )
                 
             # Should never occur, but to be safe..
             if len(chosen_repos) < 1:
