@@ -21,7 +21,9 @@ const Station = ({ station, image, locationImage }) => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    fetch(`${config.apiUrl}/station_online?station_name=${station}`)
+    fetch(`${config.apiUrl}/station_online?station_name=${station}`, {
+      method: "PUT"
+    })
       .then(response => response.json())
       .then(data => {
         setLastSeen(data.last_seen);

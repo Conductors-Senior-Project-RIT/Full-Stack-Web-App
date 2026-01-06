@@ -24,8 +24,7 @@ class StationOnline(Resource):
         except ServiceResourceNotFound as e:
             return ({"error": str(e)}), 404
 
-    #TODO: Should be PUT
-    def post(self):
+    def put(self):
         try:
             data = request.get_json()
             stat_id = int(data.get("station_id"))
