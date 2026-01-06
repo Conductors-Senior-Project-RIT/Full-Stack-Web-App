@@ -76,8 +76,36 @@ class RecordService(BaseService):
                 self.repo.update_record_field(record_id, engine_id, "engine_num")
         
         except RepositoryTimeoutError:
-            raise ServiceTimeoutError()
+            raise ServiceTimeoutError(self)
         except RepositoryInternalError as e:
             raise ServiceInternalError(str(e))
 
-            
+
+    # Data Collation
+    def collate_records(self, page: int) -> list[dict[str, str]]:
+        try:
+            return self.repo.get_record_collation(page)
+        except RepositoryTimeoutError:
+            raise ServiceTimeoutError(self)
+        except (RepositoryInternalError, RepositoryParsingError) as e:
+            raise ServiceInternalError(self, str(e))
+    
+    
+    # Log Verification
+    def get_unverified_records(self, page: int) -> list[dict[str, str]]:
+        try:
+            return self.repo.get_records_by_verification(page, False)
+        except RepositoryTimeoutError:
+            raise ServiceTimeoutError(self)
+        except (RepositoryInternalError, RepositoryParsingError) as e:
+            raise ServiceInternalError(self, str(e))
+        
+    def verify_record(self, record_id: int, symbol_id: int, engine_id: int):
+        try:
+            self.repo.verify_record(record_id, symbol_id, engine_id)
+        except RepositoryTimeoutError:
+            raise ServiceTimeoutError(self)
+        except RepositoryNotFoundError as e:
+            raise ServiceResourceNotFound(self, str(e))
+        except RepositoryInternalError as e:
+            raise ServiceInternalError(self, str(e))

@@ -43,13 +43,14 @@ const Admin = () => {
         console.log("symbolID: " + symbolId);
         console.log("modalID: " + modalId);
         fetch(
-          `${config.apiUrl}/verifier`, {
+          `${config.apiUrl}/record_verifier`, {
             method:"PUT",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
               "id": modalId,
+              "type": 1,
               "symbol": symbolId,
               "engine_number": modalLocomotiveNum
             })
@@ -117,7 +118,7 @@ const Admin = () => {
   }
 
   useEffect(() => {
-    fetch(`${config.apiUrl}/verifier?page=${page}`)
+    fetch(`${config.apiUrl}/record_verifier?page=${page}&type=1`)
     .then(response => response.json())
     .then(data => {
       setData(data.results);

@@ -6,8 +6,9 @@ class RepositoryError(Exception):
         super().__init__(message)
         
 class RepositoryTimeoutError(RepositoryError):
-    def __init__(self):
-        super().__init__(f"Database connection timed out!")
+    def __init__(self, point_of_error=None):
+        message = "Database connection timed out" + f":{point_of_error}" if point_of_error else "!"
+        super().__init__(message)
 
 class RepositoryInternalError(RepositoryError):
     def __init__(self, error_desc: str):

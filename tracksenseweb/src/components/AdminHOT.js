@@ -28,7 +28,7 @@ const AdminHOT = () => {
 
   // Fetch data from the API
   useEffect(() => {
-    fetch(`${config.apiUrl}/verifier_hot?page=${page}`)
+    fetch(`${config.apiUrl}/record_verifier?page=${page}&type=2`)
       .then(response => response.json())
       .then(data => {
         setData(data.results);
@@ -50,13 +50,14 @@ const AdminHOT = () => {
       .then(data => {
         symbolId = data.id;
         if (symbolId !== -1) {
-          fetch(`${config.apiUrl}/verifier_hot`, {
+          fetch(`${config.apiUrl}/record_verifier`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
               id: modalId,
+              type: 2,
               symbol: symbolId,
               engine_number: modalEngineNum,
             }),

@@ -13,12 +13,12 @@ from api.load_example_data import (
     LoadExampleData,
 )  # Import the load example data resource
 from api.station_auth import StationAuth
-from api.log_verifier import LogVerifier
+from database.src.api.record_verifier import RecordVerifier
 from api.time_frame_pull import recent_activities
 from api.symbol_api import SymbolAPI
 from api.verifier_hot import LogVerifierHOT
 from api.pushover_updater import PushoverUpdater
-from api.data_collation import DataCollation
+from database.src.api.record_collation import RecordCollation
 from api.UserPreferencesAPI import UserPreferences
 from api.station_online import StationOnline
 from api.hot_collation import HotCollation
@@ -43,15 +43,13 @@ api.add_resource(
 )  # Register the load example data resource
 api.add_resource(SignalUpdater, "/api/add_signal_info")
 api.add_resource(StationAuth, "/api/station_auth")
-api.add_resource(LogVerifier, "/api/verifier")
+api.add_resource(RecordVerifier, "/api/record_verifier")
 api.add_resource(recent_activities, "/api/recent_activities")
 api.add_resource(SymbolAPI, "/api/symbols")
-api.add_resource(LogVerifierHOT, "/api/verifier_hot")
 api.add_resource(PushoverUpdater,"/api/PushoverUpdater")
-api.add_resource(DataCollation, "/api/data_collation")
+api.add_resource(RecordCollation, "/api/record_collation")
 api.add_resource(UserPreferences, '/api/user_preferences')
 api.add_resource(StationOnline, "/api/station_online")
-api.add_resource(HotCollation, '/api/hot_collation')
 
 app.register_blueprint(user_bp)
 app.register_blueprint(admin_bp)

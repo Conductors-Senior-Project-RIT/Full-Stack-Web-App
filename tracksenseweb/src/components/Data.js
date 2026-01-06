@@ -16,7 +16,7 @@ const Data = () => {
 
     useEffect(() => {
         // Fetch data from the API
-        fetch(`${config.apiUrl}/data_collation?page=${page}`)
+        fetch(`${config.apiUrl}/record_collation?page=${page}&type=1`)
             .then(response => response.json())
             .then(data => {
                 console.log('Fetched data:', data); // Log the fetched data for debugging

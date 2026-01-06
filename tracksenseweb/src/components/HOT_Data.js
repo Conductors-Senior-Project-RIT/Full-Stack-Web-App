@@ -15,8 +15,8 @@ const HotData = () => {
     const page = parseInt(searchParams.get("page") || "1");
 
     useEffect(() => {
-        // Fetch data from the hot_collation API
-        fetch(`${config.apiUrl}/hot_collation?page=${page}`)
+        // Fetch data from the record_collation API
+        fetch(`${config.apiUrl}/record_collation?page=${page}&type=2`)
             .then(response => response.json())
             .then(data => {
                 console.log('Fetched HOT data:', data); // Log the fetched data for debugging

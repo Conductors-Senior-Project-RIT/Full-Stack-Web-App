@@ -176,3 +176,40 @@ class RecordRepository(ABC):
     def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
         pass
     
+    @abstractmethod
+    def get_record_collation(self, page: int) -> list[dict[str, str]]:
+        pass
+    
+    
+    # Record Verification
+    @abstractmethod
+    def get_records_by_verification(self, page: int, verified: bool) -> list[dict[str, str]]:
+        pass
+    
+    def verify_record(self, record_id: int, symbol_id: int, engine_id: int):
+        try:
+            args = {
+                "id": record_id,
+                "symbol": symbol_id,
+                "engine_num": engine_id,
+            }
+
+            query = sql.SQL(
+                """
+                UPDATE {table_name}
+                SET symbol_id = %(symbol)s, 
+                locomotive_num = %(engine_num)s,
+                verified = true
+                WHERE id = %(id)s
+                """
+            ).format(
+                table_name=sql.Identifier(self._table_name)
+            )
+            
+            result = run_exec_cmd(query, args)
+            if result < 1:
+                raise RepositoryNotFoundError(record_id)
+        except OperationalError:
+            raise RepositoryTimeoutError()
+        except Error as e:
+            raise RepositoryInternalError(f"Could not verify {self._record_name} {record_id}: {str(e)}")
