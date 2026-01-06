@@ -2,7 +2,6 @@
 from flask import jsonify, request
 from flask_restful import Resource
 from service.service_core import *
-from db.trackSense_db_commands import *
 from service.record_service import RecordService
 
 

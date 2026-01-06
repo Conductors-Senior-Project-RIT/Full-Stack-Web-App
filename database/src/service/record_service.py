@@ -138,6 +138,10 @@ class RecordService(BaseService):
                     if record_type == -1 else
                     [record_types.get_record_repository(record_type)]
                 )
+                
+            # Should never occur, but to be safe..
+            if len(chosen_repos) < 1:
+                raise ServiceInternalError("Could not find valid record access!")
 
             results = []
             for repo in chosen_repos:
