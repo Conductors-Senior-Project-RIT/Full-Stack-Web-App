@@ -26,3 +26,10 @@ def get_record_repository(value: int | RecordTypes) -> RecordRepository:
         # case RecordTypes.DPU.value:
         #     raise InvalidRecordError(value)
     raise RepositoryRecordInvalid(value)
+
+
+def get_all_repositories() -> list[RecordRepository]:
+    valid_types = list(RecordTypes._value2member_map_)
+    return [get_record_repository(valid_types[i]) for i in range(valid_types[0], valid_types[len(valid_types)])]
+
+

@@ -15,7 +15,7 @@ RESULTS_NUM = 250
 
 class EOTRepository(RecordRepository):
     def __init__(self):
-        super().__init__("EOTRecords", "EOT Record")
+        super().__init__("EOTRecords", "EOT Record", "eot")
 
     # below is train_history.py related
     def get_total_count_of_eot_records(self) -> int:

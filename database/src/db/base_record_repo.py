@@ -5,13 +5,17 @@ from database_status import *
 from typing import Any
 
 class RecordRepository(ABC):
-    def __init__(self, table_name: str, record_name: str):
+    def __init__(self, table_name: str, record_name: str, record_identifier: str):
         self._table_name = table_name
         self._record_name = record_name
+        self._record_identifier = record_identifier
         
     def get_record_name(self) -> str:
         return self._record_name
         
+    def get_record_identifier(self) -> str:
+        return self._record_identifier
+    
     @abstractmethod
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
         pass
@@ -213,3 +217,50 @@ class RecordRepository(ABC):
             raise RepositoryTimeoutError()
         except Error as e:
             raise RepositoryInternalError(f"Could not verify {self._record_name} {record_id}: {str(e)}")
+        
+        
+    # Time frame
+    def get_records_in_timeframe(self, station_id: int, datetime_str: str, recent: bool) -> list[dict[str, Any]]:
+        try:
+            query = sql.SQL(
+                """
+                SELECT {table_name}.id, unit_addr, date_rec, stat.station_name, sym.symb_name, engine_num, locomotive_num FROM {table_name}
+                INNER JOIN Stations as stat on station_recorded = stat.id
+                INNER JOIN Symbols as sym on symbol_id = sym.id
+                WHERE date_rec >= %(date_stamp)s 
+                """
+            ).format(
+                table_name=sql.Identifier(self._table_name)
+            )
+            
+            args = {"date_stamp": datetime_str}
+            if station_id != -1:  
+                query += " AND stat.id = %(station_id)s" if station_id != -1 else ""
+                args["station_id"] = station_id
+            
+            if recent:
+                query += " AND most_recent = TRUE"
+                
+            results = run_get_cmd(query, args)
+            if results < 1:
+                raise RepositoryNotFoundError(station_id)
+            
+            return [
+                {
+                    "id": tup[0],
+                    "unit_addr": tup[1],
+                    "date_rec": str(tup[2].time())[0:5],
+                    "station_name": tup[3],
+                    "symbol_id": tup[4],
+                    "engine_num": tup[5],
+                    "locomotive_num": tup[6],
+                    "Data_type": self._record_identifier.upper()
+                } for tup in results
+            ]
+            
+        except OperationalError:
+            raise RepositoryTimeoutError()
+        except Error as e:
+            raise RepositoryInternalError(f"Could not retrieve {self._record_name}s in timeframe: {e}")
+        except (IndexError, ValueError, TypeError) as e:
+            raise RepositoryParsingError(f"Could not parse record results in timeframe: {e}")

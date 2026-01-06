@@ -17,7 +17,7 @@ RESULTS_NUM = 250
 
 class HOTRepository(RecordRepository):
     def __init__(self):
-        super().__init__("HOTRecords", "HOT Record")
+        super().__init__("HOTRecords", "HOT Record", "hot")
         
     # below is train_history.py related
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:

@@ -1,4 +1,6 @@
+import datetime
 import db.record_types as record_types
+import db.station_repo as station_repo
 from db.database_status import *
 from service.service_core import *
 
@@ -8,7 +10,7 @@ RESULTS_NUM = 250
 class RecordService(BaseService):
     def __init__(self, record_type: int):
         try:
-            self.repo = record_types.get_record_repository(record_type)
+            self.repo = record_types.get_record_repository(record_type) if record_type is not None else None
             super().__init__("Train History")
         except RepositoryRecordInvalid(record_type) as e:
             raise ServiceInvalidArgument(self, str(e))
@@ -109,3 +111,48 @@ class RecordService(BaseService):
             raise ServiceResourceNotFound(self, str(e))
         except RepositoryInternalError as e:
             raise ServiceInternalError(self, str(e))
+        
+        
+    # Time frame pull
+    def time_frame_pull(self, record_type: int, time_range: str, recent: bool, station_id: int, station_name: str):
+        try:
+            time_increments = time_range.split(":")
+            
+            curr_date = datetime.datetime.now()
+            delta = datetime.timedelta(
+                hours=int(time_increments[0]),
+                minutes=int(time_increments[1]),
+                seconds=int(time_increments[2]),
+            )
+            altered_time = curr_date - delta
+            dt_str = altered_time.strftime("%Y-%m-%d %H:%M:%S")
+            
+            
+            if station_id == -1:
+                if station_name:
+                    station_id = station_repo.get_station_id(station_name)
+            
+            if record_type == -1:
+                chosen_repos = (
+                    record_types.get_all_repositories()
+                    if record_type == -1 else
+                    [record_types.get_record_repository(record_type)]
+                )
+
+            results = []
+            for repo in chosen_repos:
+                repo_resp = repo.get_records_in_timeframe(station_id, dt_str, recent)
+                results.append(repo_resp)
+            
+            results.sort(key=lambda x: x["date_rec"], reverse=True)
+            return results
+        
+        except (IndexError, KeyError) as e:
+            raise ServiceParsingError(self, str(e))
+        except RepositoryRecordInvalid as e:
+            raise ServiceInvalidArgument(self, str(e))
+        except RepositoryTimeoutError:
+            raise ServiceTimeoutError(self)
+        except (RepositoryInternalError, RepositoryParsingError) as e:
+            raise ServiceInternalError(self, str(e))
+        
