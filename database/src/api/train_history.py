@@ -38,7 +38,7 @@ class HistoryDB(Resource):
             validate_int_argument(id, "type", 1)
             validate_int_argument(page, "page", 1)
             
-            th_service = TrainService(typ)
+            th_service = RecordService(typ)
             results = th_service.get_train_history(typ, id, page)
             return jsonify(results), 200
         
