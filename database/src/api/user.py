@@ -37,18 +37,20 @@ def register():
     # Insert the new user into the Users table
     run_exec_cmd(
         "INSERT INTO Users (email, passwd) VALUES (%s, %s)",
-        (data["email"], hashed_password),
+        (email, hashed_password),
     )
-    response = requests.post(
-        f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
-        auth=("api", MAILGUN_API_KEY),
-        data={
-            "from": f"Follow That FRED! <no-reply@{MAILGUN_DOMAIN}>",
-            "to": email,
-            "subject": "Welcome to Our App!",
-            "text": f"Hi {email},\n\nThank you for registering with our app! We're excited to have you on board.\n\nBest regards,\nThe Team",
-        },
-    )
+    # Remove this for now.
+    #
+    # response = requests.post(
+    #     f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
+    #     auth=("api", MAILGUN_API_KEY),
+    #     data={
+    #         "from": f"Follow That FRED! <no-reply@{MAILGUN_DOMAIN}>",
+    #         "to": email,
+    #         "subject": "Welcome to Our App!",
+    #         "text": f"Hi {email},\n\nThank you for registering with our app! We're excited to have you on board.\n\nBest regards,\nThe Team",
+    #     },
+    # )
 
     # Fetch the newly created user's ID
     user = run_get_cmd("SELECT id FROM Users WHERE email = %s", (data["email"],))
@@ -70,17 +72,14 @@ def register():
             (user_id, station_id),
         )
 
-    if response.status_code == 200:
-        return (
-            jsonify(
-                {
-                    "message": "User registered successfully! A welcome email has been sent."
-                }
-            ),
-            201,
-        )
-    else:
-        return jsonify({"message": "User registered, but failed to send email."}), 500
+    return (
+        jsonify(
+            {
+                "message": "User registered successfully!"
+            }
+        ),
+        201,
+    )
 
 
 @user_bp.route("/api/login", methods=["POST"])
