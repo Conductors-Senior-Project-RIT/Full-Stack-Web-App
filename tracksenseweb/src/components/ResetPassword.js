@@ -98,7 +98,7 @@ const ResetPassword = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <button type="submit">Reset Password</button>
+                    <button type="submit" onClick={handlePasswordReset}>Reset Password</button>
                 </div>
             </form>
             {message && <p className="success-message">{message}</p>}
