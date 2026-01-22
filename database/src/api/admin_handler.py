@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_cors import CORS
-from db.trackSense_db_commands import *
+from src.db.trackSense_db_commands import *
 
 admin_bp = Blueprint("admin_bp", __name__)
 CORS(admin_bp)  # Enable CORS for the admin_bp blueprint
