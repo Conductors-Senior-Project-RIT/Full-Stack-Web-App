@@ -16,6 +16,8 @@ import Macedon from './components/Macedon';
 import Rotterdam from './components/Rotterdam';
 import SilverSprings from './components/SilverSprings';
 import Hornell from './components/Hornell';
+import Pittsford from './components/Pittsford';
+import Fairgrounds from './components/Fairgrounds';
 import { AuthProvider } from './components/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ForgotPassword from './components/ForgotPassword';
@@ -48,6 +50,8 @@ const App = () => {
             <Route path="/rotterdam" element={<Rotterdam />} />
             <Route path="/silver-springs" element={<SilverSprings />} />
             <Route path="/hornell" element={<Hornell />} />
+            <Route path="/pittsford" element={<Pittsford />} />
+            <Route path="/fairgrounds" element={<Fairgrounds />} />
             <Route path="/admin_hot" element={<ProtectedRoute element={AdminHOT} requiredRole={1}/>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />

@@ -7,6 +7,8 @@ import macedon_marker from '../media/images/blackpin.png';
 import rotterdam_marker from '../media/images/blackpin.png';
 import silversprings_marker from '../media/images/blackpin.png';
 import fairport_marker from '../media/images/blackpin.png';
+import pittsford_marker from '../media/images/blackpin.png';
+import fairgrounds_marker from '../media/images/blackpin.png';
 
 const Home = () => {
   const [hoveredStation, setHoveredStation] = useState(null);
@@ -84,6 +86,24 @@ const Home = () => {
           style={{ position: "absolute", top: '54.2043%', left: '22.2176%', objectfit:"contain", width:25, height:25 }}
           onClick={() => handlePinClick('hornell')}
           onMouseEnter={(e) => handleMouseEnter('Hornell', e)}
+          onMouseLeave={handleMouseLeave}
+        />
+        <img
+          src={pittsford_marker}
+          alt="Pin"
+          className="location-image"
+          style={{ position: "absolute", top: '40%', left: '23%', objectfit:"contain", width:25, height:25 }}
+          onClick={() => handlePinClick('pittsford')}
+          onMouseEnter={(e) => handleMouseEnter('Pittsford', e)}
+          onMouseLeave={handleMouseLeave}
+        />
+        <img
+          src={fairgrounds_marker}
+          alt="Pin"
+          className="location-image"
+          style={{ position: "absolute", top: '38.25%', left: '34.85%', objectfit:"contain", width:25, height:25 }}
+          onClick={() => handlePinClick('fairgrounds')}
+          onMouseEnter={(e) => handleMouseEnter('Fairgrounds', e)}
           onMouseLeave={handleMouseLeave}
         />
       </div>
