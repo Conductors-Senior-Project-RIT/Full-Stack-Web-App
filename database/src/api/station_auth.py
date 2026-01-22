@@ -1,6 +1,6 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
-from db.trackSense_db_commands import *
+from src.db.trackSense_db_commands import *
 import json, datetime, requests
 import random, string, hashlib
 
@@ -48,9 +48,9 @@ class StationAuth(Resource):
             random.choice(string.ascii_uppercase + string.digits)
             for _ in range(string_len)
         )
-        print(f"Raw password String: {password_string}")
+        # print(f"Raw password String: {password_string}")
         hasher = hashlib.new("sha256")
         hasher.update(password_string.encode())
         hashed_pw = hasher.hexdigest()
-        print(f"hashed_pw: {hashed_pw}")
-        return [password_string, hashed_pw]
+        # print(f"hashed_pw: {hashed_pw}")
+        return (password_string, hashed_pw)

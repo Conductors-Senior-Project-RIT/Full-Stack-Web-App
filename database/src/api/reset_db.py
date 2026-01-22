@@ -1,6 +1,6 @@
 # THIS SHOULD ONLY BE USED FOR TESTING!!!
 from flask_restful import Resource
-from db.trackSense_db_commands import *
+from src.db.trackSense_db_commands import *
 
 
 class ResetDB(Resource):
