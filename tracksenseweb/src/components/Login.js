@@ -85,7 +85,7 @@ const Login = () => {
           />
         </div>
         <div className="form-group">
-          <button type="submit">Login</button>
+          <button onClick={handleLogin}>Login</button>
         </div>
         <a href="/forgot-password" className="forgot-password-link">
           Forgot password?

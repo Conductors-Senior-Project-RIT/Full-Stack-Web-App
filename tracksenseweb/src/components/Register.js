@@ -75,7 +75,7 @@ const Register = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <button type="submit">Register</button>
+                    <button onClick={handleRegister}>Register</button>
                 </div>
             </form>
         </div>
