@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
-from src.db.trackSense_db_commands import *
+from db.trackSense_db_commands import *
 
 station_bp = Blueprint("station_bp", __name__)
 CORS(station_bp)  # Enable CORS for the station_bp blueprint

@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from src.db.trackSense_db_commands import *
+from db.trackSense_db_commands import *
 class LoadExampleData(Resource):
     def get(self):
         # Existing stations

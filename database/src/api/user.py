@@ -10,7 +10,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
 )
 from flask_cors import CORS
-from src.db.trackSense_db_commands import *
+from db.trackSense_db_commands import *
 from dotenv import load_dotenv
 import secrets
 
