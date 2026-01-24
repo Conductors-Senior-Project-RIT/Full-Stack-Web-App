@@ -1,6 +1,6 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse, request
-from src.db.trackSense_db_commands import *
+from db.trackSense_db_commands import *
 
 
 class SymbolRegister(Resource):

@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from flask_restful import Resource
-from src.db.trackSense_db_commands import *
+from db.trackSense_db_commands import *
 from math import ceil
 
 RESULTS_NUM = 250
