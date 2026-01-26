@@ -7,7 +7,7 @@ from flask_jwt_extended import (
     JWTManager,
     create_access_token,
     jwt_required,
-    get_jwt_identity,
+    get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies,
 )
 from flask_cors import CORS
 from db.user_db import *
@@ -37,6 +37,9 @@ files/functionality to divide:
 
 lets ditch the storing session token from database... im not sure why they did that as it beats the purpose of using
 jwt lol 
+
+TODO: need to create a decorator to place on routes that only admins should be able to touch 
+
 """
 @user_bp.route("/api/register", methods=["POST"])
 def register():
@@ -63,35 +66,39 @@ def login():
     email = data.get("email")
     password = data.get("password")
 
-    user = is_registered(email, password)
+    user = is_registered(email, password) # need to find a clean way to stop double indexing, db models should help with this but cant do it now
 
     if not user:
         return jsonify({"message": "Invalid credentials"}), 401
 
+    user_id = user[0][0]
+    user_role = user[0][4]
+
+    response = jsonify({"msg": "login successful"})
+    additional_claims = {"user_role": user_role} # a user role is set based on what's in the database
+    # identity being user_id makes it easier to retrieve user info from db for whatever reason, and can store their user_role here as it's not a security risk and makes it easier to protect certain routes later
+    access_token = create_access_token(identity=str(user_id), additional_claims=additional_claims) # user_id as eventually want to replace incrementing id with uuid if possible
+    set_access_cookies(response, access_token)
+    return response
+    return jsonify(access_token=access_token)
 
     """
     will modify everywhere that stories token in db and see if i can rewrite logic
     """
-    user = get_user_info(data.get["email"])
-
-    if user and bcrypt.check_password_hash(user[0][2], data["password"]):
-        access_token = create_access_token(identity=str(user[0][1]))
-        update_session_token(user[0][1], access_token)
-        return jsonify({"access_token": access_token})
-    else:
-        return jsonify({"message": "Invalid credentials"}), 401
 
 
-@user_bp.route("/api/verify-token", methods=["POST"])
-@jwt_required()
-def verify_token():
-    current_user = get_jwt_identity()
-    token = request.headers.get("Authorization").split()[1]
-    user = get_authenticated_user(current_user, token)
-    if user:
-        return jsonify({"valid": True})
-    else:
-        return jsonify({"valid": False}), 401
+#
+# never used and jwt-flask library does this for us automatically with jwt_required()
+# @user_bp.route("/api/verify-token", methods=["POST"])
+# @jwt_required()
+# def verify_token():
+#     current_user = get_jwt_identity()
+#     token = request.headers.get("Authorization").split()[1]
+#     user = get_authenticated_user(current_user, token)
+#     if user:
+#         return jsonify({"valid": True})
+#     else:
+#         return jsonify({"valid": False}), 401
 
 
 @user_bp.route("/api/forgot-password", methods=["POST"])
@@ -127,22 +134,23 @@ def reset_password_request():
 
     data = {"message": "If an account with that email exists, a reset link was sent."}
     return data, 200
-
-
-@user_bp.route("/api/validate-reset-token", methods=["GET"])
-def token_validation():
-    token = request.args.get("token")
-    token_hash = hashlib.sha256(token.encode()).hexdigest()
-    validate_token_sql = """
-    SELECT * FROM reset_requests as r
-    INNER JOIN users AS u ON r.uid = u.id
-    WHERE r.token = %(token_hash)s AND r.expiration >= NOW();
-    """
-    results = run_get_cmd(validate_token_sql, args={"token_hash": token_hash})
-    if len(results) == 0:
-        return {"valid": "false"}, 404
-
-    return {"valid": "true"}, 200
+#
+# never used and again, this can be handled by jwt-flask library
+#
+# @user_bp.route("/api/validate-reset-token", methods=["GET"])
+# def token_validation():
+#     token = request.args.get("token")
+#     token_hash = hashlib.sha256(token.encode()).hexdigest()
+#     validate_token_sql = """
+#     SELECT * FROM reset_requests as r
+#     INNER JOIN users AS u ON r.uid = u.id
+#     WHERE r.token = %(token_hash)s AND r.expiration >= NOW();
+#     """
+#     results = run_get_cmd(validate_token_sql, args={"token_hash": token_hash})
+#     if len(results) == 0:
+#         return {"valid": "false"}, 404
+#
+#     return {"valid": "true"}, 200
 
 
 @user_bp.route("/api/reset-password", methods=["PUT"])
@@ -171,7 +179,8 @@ def reset_password():
 
     return {"message": "Password changed successfully. Please log in."}, 200
 
-
+# not sure why they're updating times for users... maybe ... what is the point of this lol /api/user_preferences/time
+# delete this route?
 @user_bp.route("/api/user_preferences/time", methods=["PUT"])
 @jwt_required()
 def update_times():
@@ -185,33 +194,39 @@ def update_times():
         return jsonify({"message": "Success"}), 200
     else:
         return jsonify({"message": "Error saving times"}), 500
-    
-@user_bp.route("/api/role", methods=["GET"])
-@jwt_required()
-def get_user_role():
-    current_user = get_jwt_identity()
-    token = request.headers.get("Authorization").split()[1]
-    user = get_authenticated_user(current_user, token, "acc_status")
-    if user:
-        return jsonify({"role": user[0][0]}), 200
-    else:
-        return jsonify({"message": "Invalid user or token"}), 401
 
+
+@user_bp.route("/api/role", methods=["GET"])
+@jwt_required() # a user can only access this route with a jwt token and by default everyone has a role. so no way this throws an error ever... right? lol
+def get_user_role():
+    claims = get_jwt()
+    user_role = claims.get("user_role")
+    return jsonify({"role": user_role}), 200
 
 @user_bp.route("/api/elevate-user", methods=["PUT"])
 @jwt_required()
 def elevate_user():
-    current_user = get_jwt_identity()
-    token = request.headers.get("Authorization").split()[1]
-    user = get_authenticated_user(current_user, token, "acc_status")
-    if user and user[0][0] == 0:
-        data = request.get_json()
-        email_to_elevate = data.get("email")
-        new_role = data.get("role")
-        if new_role not in [1, 2]:
-            return jsonify({"message": "Invalid role"}), 400
+    claims = get_jwt()
+    user_role = claims.get("user_role")
 
-        update_account_status(email_to_elevate, new_role)
-        return jsonify({"message": "User role updated successfully"}), 200
-    else:
-        return jsonify({"message": "Unauthorized"}), 403
+    if user_role != 0: #admin role
+        return jsonify({"message": "Unauthorized role"}), 403
+
+    data = request.get_json()
+    email_to_elevate = data.get("email")
+    new_role = data.get("role")
+
+    if new_role not in [1, 2]: # elevate user seems like a... not so accurate description for this route as it seems you can demote users to different roles as well?
+        return jsonify({"message": "Invalid role"}), 400
+
+    if not update_account_status(email_to_elevate, new_role): #if None is returned
+        return jsonify({"message": "The email you're trying to change role's for does not exist in our database"}), 404
+
+    return jsonify({"message": "User role updated successfully"}), 200
+
+@user_bp.route("/api/logout", methods=["POST"])
+@jwt_required()
+def logout():
+    response = jsonify({"msg": "logout successful"})
+    unset_jwt_cookies(response)
+    return response

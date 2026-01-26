@@ -34,7 +34,7 @@ def get_authenticated_user(email: str, token: str, return_info="*"):
         "SELECT %s FROM Users WHERE email = %s AND token = %s", (return_info, email, token)
     )
     
-def update_account_status(email: int, new_role: int):
+def update_account_status(email: str, new_role: int):
     run_exec_cmd(
             "UPDATE Users SET acc_status = %s WHERE email = %s",
             (new_role, email),

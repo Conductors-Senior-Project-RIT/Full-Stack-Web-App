@@ -1,14 +1,17 @@
+from typing import Any
+
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from db.station_repo import get_stations
-from db.user_db import create_new_user, get_user_id, create_user_station_preference, get_user_info
+from db.user_db import create_new_user, get_user_id, create_user_station_preference, get_user_info, \
+    update_account_status
 from service.email_service import send_welcome_email
-
 
 def register_user(email: str, password: str):
     """
     After a user signs up, by default they have all stations set as their default preference
-    Error handling
+
+    TODO: remove auto incrementing from DB for "id" field and instead generate UUID here.
     """
     hashed_password = generate_password_hash(password)
 
@@ -43,14 +46,25 @@ def is_registered(email: str, password: str):
     """
     user = get_user_info(email)
 
-    if not user: #invalid email
+    if not user: # invalid email
         return None
 
     user_hashed_password = user[0][2] #list of tuple, 3rd element is passwd
 
-    if check_password_hash(user_hashed_password, password): # validates user password
+    if check_password_hash(user_hashed_password, password):  # validates user password
         return user
 
     return None
+
+def update_user_role(email: str, new_role: str):
+    """
+    If none is returned, that means user email doesn't exist in our database. Hence, user must sign up
+    """
+    if get_user_id(email) is None: #  trying to elevate role for this specific email does not exist
+        return None
+
+    update_account_status(email, int(new_role)) #must cast role to int as "additional_claims" from JWT only accepts that or something else that was funky and i don't remember
+
+    return True
 
 

@@ -29,8 +29,9 @@ CREATE TABLE IF NOT EXISTS Users(
     id              SERIAL PRIMARY KEY,
     email           VARCHAR(240) NOT NULL UNIQUE,
     passwd          VARCHAR(240) NOT NULL,
-    token           VARCHAR(480) DEFAULT NULL,            
-    acc_status      INT NOT NULL DEFAULT 2, -- 2 is normal user, 1 is volunteer, 0 is admin (ken)
+    token           VARCHAR(480) DEFAULT NULL,     -- unnecessary (might be useful for blacklisting?)
+    acc_sta
+    tus      INT NOT NULL DEFAULT 2, -- 2 is normal user, 1 is volunteer, 0 is admin (ken) | This is user_roles table i guess lol
     starting_time   TIME WITH TIME ZONE DEFAULT '00:00 EST', 
     ending_time     TIME WITH TIME ZONE DEFAULT '23:59 EST',
     pushover_id     VARCHAR(240) DEFAULT NULL -- only used for volunteers and ken, normal users arent using this
