@@ -21,7 +21,7 @@ def get_user_id(email: str) -> int | None:
     
     return user[0][0]
 
-def get_user_info(email: str) -> list[TupleRow]:
+def get_user_info(email: str): #-> list[TupleRow]
     return run_get_cmd("SELECT * FROM Users WHERE email = %s", (email,))
 
 def update_session_token(user_id: int, token: str):

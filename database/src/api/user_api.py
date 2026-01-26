@@ -14,6 +14,8 @@ from db.user_db import *
 from dotenv import load_dotenv
 import secrets
 
+from service.user_service import register_user, is_registered
+
 bcrypt = Bcrypt()
 jwt = JWTManager()
 
@@ -25,67 +27,56 @@ MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
 MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
 WEBSITE_DOMAIN = os.getenv("WEBSITE_DOMAIN")
 
+"""
+api routes should be thin
+read request (maybe simply input validation) --> call service --> translate service result --> http response  
 
+files/functionality to divide:
+* email_service for emails
+* user_service
+
+lets ditch the storing session token from database... im not sure why they did that as it beats the purpose of using
+jwt lol 
+"""
 @user_bp.route("/api/register", methods=["POST"])
 def register():
-    data = request.get_json()
+    data = request.get_json() # frontend's mimetype indicates JSON
     email = data.get("email")
+    password = data.get("password")
 
-    # Hash the user's password
-    hashed_password = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
+    if not email or not password:
+        return jsonify({"message": "Email and password required"}), 500
 
-    # Insert the new user into the Users table
-    create_new_user(email, hashed_password)
-    
-    response = requests.post(
-        f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
-        auth=("api", MAILGUN_API_KEY),
-        data={
-            "from": f"Follow That FRED! <no-reply@{MAILGUN_DOMAIN}>",
-            "to": email,
-            "subject": "Welcome to Our App!",
-            "text": f"Hi {email},\n\nThank you for registering with our app! We're excited to have you on board.\n\nBest regards,\nThe Team",
-        },
-    )
+    try:
+        result = register_user(email, password) #service
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500 # use derived error message since an error can come from a few different sources
 
-    # Fetch the newly created user's ID
-    user_id = get_user_id(email)
-    if not user_id:
-        return jsonify({"message": "Error creating user"}), 500
+    if result.get("email_sent"):
+        jsonify({"message": "User registered successfully! A welcome email has been sent."}), 201
 
-    # Fetch all station IDs from the Stations table
-    stations = run_get_cmd("SELECT id FROM Stations")
-    if not stations:
-        return jsonify({"message": "No stations available to subscribe to"}), 500
-
-    # Insert all stations into the UserPreferences table for the new user
-    for station in stations:
-        station_id = station[0]
-        run_exec_cmd(
-            "INSERT INTO UserPreferences (user_id, station_id) VALUES (%s, %s)",
-            (user_id, station_id),
-        )
-
-    if response.status_code == 200:
-        return (
-            jsonify(
-                {
-                    "message": "User registered successfully! A welcome email has been sent."
-                }
-            ),
-            201,
-        )
-    else:
-        return jsonify({"message": "User registered, but failed to send email."}), 500
-
+    return jsonify({"message": "User registered, but failed to send email."}), 500
 
 @user_bp.route("/api/login", methods=["POST"])
 def login():
     data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    user = is_registered(email, password)
+
+    if not user:
+        return jsonify({"message": "Invalid credentials"}), 401
+
+
+    """
+    will modify everywhere that stories token in db and see if i can rewrite logic
+    """
     user = get_user_info(data.get["email"])
+
     if user and bcrypt.check_password_hash(user[0][2], data["password"]):
         access_token = create_access_token(identity=str(user[0][1]))
-        update_session_token(user[0][1, access_token])
+        update_session_token(user[0][1], access_token)
         return jsonify({"access_token": access_token})
     else:
         return jsonify({"message": "Invalid credentials"}), 401

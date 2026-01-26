@@ -1,9 +1,11 @@
 from datetime import date
+from typing import Any
+
 from psycopg import Error, OperationalError
 from database_status import *
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
-def get_stations() -> list[tuple[int, str]] | None:
+def get_stations() -> list[dict[str, Any]]:
     """Returns a collection of ID and station name pairs from the Stations table.
 
     Returns:
