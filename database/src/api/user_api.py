@@ -36,10 +36,12 @@ files/functionality to divide:
 * user_service
 
 lets ditch the storing session token from database... im not sure why they did that as it beats the purpose of using
-jwt lol 
+jwt lol.
 
 TODO: need to create a decorator to place on routes that only admins should be able to touch 
-
+TODO: refresh token 30 mins before it expires (check docs where it uses an `after_request` callback)
+@app.after_request
+def refresh_expiring_jwts(response)
 """
 @user_bp.route("/api/register", methods=["POST"])
 def register():
@@ -80,26 +82,6 @@ def login():
     access_token = create_access_token(identity=str(user_id), additional_claims=additional_claims) # user_id as eventually want to replace incrementing id with uuid if possible
     set_access_cookies(response, access_token)
     return response
-    return jsonify(access_token=access_token)
-
-    """
-    will modify everywhere that stories token in db and see if i can rewrite logic
-    """
-
-
-#
-# never used and jwt-flask library does this for us automatically with jwt_required()
-# @user_bp.route("/api/verify-token", methods=["POST"])
-# @jwt_required()
-# def verify_token():
-#     current_user = get_jwt_identity()
-#     token = request.headers.get("Authorization").split()[1]
-#     user = get_authenticated_user(current_user, token)
-#     if user:
-#         return jsonify({"valid": True})
-#     else:
-#         return jsonify({"valid": False}), 401
-
 
 @user_bp.route("/api/forgot-password", methods=["POST"])
 def reset_password_request():
@@ -135,7 +117,8 @@ def reset_password_request():
     data = {"message": "If an account with that email exists, a reset link was sent."}
     return data, 200
 #
-# never used and again, this can be handled by jwt-flask library
+# never used and again, this can be handled by jwt-flask library -- will delete later and replace this!
+
 #
 # @user_bp.route("/api/validate-reset-token", methods=["GET"])
 # def token_validation():
