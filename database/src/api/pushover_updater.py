@@ -1,8 +1,6 @@
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
-from db.trackSense_db_commands import *
-
 from db.trackSense_db_commands import run_exec_cmd, run_get_cmd
 
 

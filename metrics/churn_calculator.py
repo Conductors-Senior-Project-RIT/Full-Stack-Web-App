@@ -21,6 +21,9 @@ def calculate_churn(start_date, end_date, out_file, commit_details_mode=False):
             # Filter out non-code files
             if ".py" not in file and ".css" not in file and ".js" not in file and ".sql" not in file:
                 continue
+            # Filter out .pyc and .json, which match .py and .js and need to be filtered separately
+            if ".pyc" in file or ".json" in file:
+                continue
             if file not in churn:
                 churn[file] = {
                     "Total Lines Added": 0,

@@ -92,3 +92,4 @@ venv.bak/
 .pypirc
 
 # ===Python===
+*.pyc

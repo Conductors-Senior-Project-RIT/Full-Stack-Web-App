@@ -1,0 +1,1 @@
+Git doesn't commit empty folders, so this is a placeholder to ensure the file structure is preserved.

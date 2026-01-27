@@ -1,0 +1,20 @@
+{
+ "metrics/churn_calculator.py": {
+  "Total Lines Added": 6,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 6,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 3.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 3.0
+ },
+ "database/src/api/user.py": {
+  "Total Lines Added": 42,
+  "Total Lines Deleted": 44,
+  "Total Lines Changed": 86,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 21.0,
+  "Avg Lines Deleted Per Commit": 22.0,
+  "Avg Lines Changed Per Commit": 43.0
+ }
+}
