@@ -7,7 +7,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from db.station_repo import get_stations
 from db.user_db import create_new_user, get_user_id, create_user_station_preference, get_user_info, \
     update_account_status, create_user_reset_token, get_user_id_from_valid_reset_request_token, update_user_password, \
-    delete_user_id_from_reset_requests
+    delete_user_id_from_reset_requests, get_station_id_from_user_preferences, get_user_start_and_end_times, \
+    delete_user_preferences
 from service.email_service import send_welcome_email, send_forgot_password_email
 
 """
@@ -121,5 +122,37 @@ def reset_user_password(reset_token, password):
     delete_user_id_from_reset_requests(user_id) #after resetting password, delete the user id from the reset requests table
 
     return True
+
+def get_user_preferences(user_id: int):
+    """
+    todo: create class for custom error handling, just rushing through this so i can get testing ready to go lol
+    todo: also... this is all can be done in 1 sql query... bruh
+    """
+    station_preferences = get_station_id_from_user_preferences(user_id)
+
+    all_stations = get_stations()
+
+    starting_time, ending_time = get_user_start_and_end_times(user_id) #unpack tuple
+
+    # Format the response
+    preferences_set = {pref[0] for pref in station_preferences}
+    response = [
+        {
+            "station_id": station.get("id"),
+            "station_name": station.get("name"),
+            "selected": station.get("id") in preferences_set,
+            "start_time": starting_time.strftime("%H:%M"),
+            "end_time": ending_time.strftime("%H:%M"),
+        }
+        for station in all_stations
+    ]
+
+    return response
+
+def reset_and_update_user_preferences(user_id: int, new_station_preferences):
+    delete_user_preferences(user_id)
+
+    for station_id in new_station_preferences:
+        create_user_station_preference(user_id, station_id)
 
 
