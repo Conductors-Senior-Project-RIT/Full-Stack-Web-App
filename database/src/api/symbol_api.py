@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from flask_restful import Resource, reqparse
-from database.src.db.symbol_db import *
+from service.service_core import *
+from service.symbol_service import SymbolService
 
 
 class SymbolAPI(Resource):
@@ -16,19 +17,16 @@ class SymbolAPI(Resource):
         # Attempt to get the symbol name from the request args if present
         symbol_name = request.args.get("symbol_name", type=str, default=None)
         
-        # If a symbol name is not provided, then attempt to return a list of symbol names in the databse.
-        if not symbol_name:
-            results = get_symbol_names()
-            if not results:
-                return jsonify({"error": "The server encountered an error when fetching symbol names!"}), 500
-            return results, 200
+        # Instantiate a new symbol service
+        service = SymbolService()
         
-        # Otherwise, attempt to return the ID that corresponds to a provided symbol name.
-        else:
-            symbol_id = get_symbol_id_by_name(symbol_name)
-            if not symbol_id:
-                return jsonify({"error": "The server encountered an error when fetching a symbol ID!"}), 500
-            return jsonify({"id": symbol_id}), 200
+        try:
+            results = service.get_symbol(symbol_name)
+            return jsonify({"results": results}), 200
+        except ServiceTimeoutError:
+            return jsonify({"error": "Request timed out!"}), 408
+        except ServiceInternalError as e:
+            return jsonify({"error": str(e)}), 500
         
 
     def post(self):
@@ -44,8 +42,16 @@ class SymbolAPI(Resource):
         args = parser.parse_args()
 
         # If there is no name provided, then return a 400 error
-        if not args["name"]:
+        if not args.name:
             return jsonify({"error": "Must provide a symbol name for a new symbol!"}), 400
         
-        # Otherwise, attempt to insert the new symbol and return the status
-        return 200 if insert_new_symbol() else 500
+        # Create our symbol service
+        service = SymbolService()
+        
+        try:
+            service.create_symbol(args.name)
+            return 200
+        except ServiceTimeoutError:
+            return jsonify({"error": "Request timed out!"}), 408
+        except ServiceInternalError as e:
+            return jsonify({"error": str(e)}), 500

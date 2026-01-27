@@ -5,8 +5,11 @@ This module handles all database CRUD operations for Symbol records
 """
 
 from typing import NoReturn, Optional, Any
+
+from psycopg import Error, OperationalError
 from record_types import RecordTypes
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
+from database_status import *
 
 
 def get_symbol_name(id: int) -> str:
@@ -16,10 +19,19 @@ def get_symbol_name(id: int) -> str:
     "id": The id of a train record to retrieve.
     """
 
-    sql = "SELECT symb_name FROM Symbols WHERE id = %(symid)s"
-    named_args = {"symid": id}
+    try:
+        sql = "SELECT symb_name FROM Symbols WHERE id = %(symid)s"
+        named_args = {"symid": id}
 
-    return run_get_cmd(sql, named_args)
+        return run_get_cmd(sql, named_args)[0]
+    
+    except OperationalError:
+        raise RepositoryTimeoutError()
+    except Error as e:
+        raise RepositoryInternalError(f"Could not retrieve symbol name for ({id}): {e}")
+    except IndexError as e:
+        raise RepositoryParsingError(f"Could not parse symbol ID result: {e}")
+    
 
 
 def get_symbol_names() -> list | None:
@@ -39,21 +51,19 @@ def get_symbol_names() -> list | None:
         ret_val = [
             tup[0] for tup in resp
         ]  # run_get_cmd() returns a list of tuples, doing this gives us an array of symbols.
-        print(ret_val)  # testing print
         
         return ret_val
     
     # If an index error occurs while parsing, print that an index error occurred and return None
-    except IndexError:
-        print("Index error has while parsing symbol names!")
-        return None
-    # If another exception occurs, print the exception and return None
-    except Exception as e:
-        print(f"An exception has occured while retrieving symbol names: {e}")
-        return None
+    except OperationalError:
+        raise RepositoryTimeoutError()
+    except Error as e:
+        raise RepositoryInternalError(f"Could not retrieve symbol names: {e}")
+    except IndexError as e:
+        raise RepositoryParsingError(f"Could not parse symbol results: {e}")
     
     
-def get_symbol_id_by_name(symbol_name: str) -> int | None:
+def get_symbol_id(symbol_name: str) -> int | None:
     """Retrieves a symbol ID given the name of a symbol from the Symbols table.
     
     Args:
@@ -72,13 +82,17 @@ def get_symbol_id_by_name(symbol_name: str) -> int | None:
     try:
         symbol_id = run_get_cmd(sql, args={"name": symbol_name})[0][0]  # Variable assigned if further debugging is implemented
         return symbol_id
+    
     # Otherwise, we encountered an error while retrieving
-    except Exception as e:
-        print(f"An exception has occured while retrieving a symbol ID: {e}")
-        return None
+    except OperationalError:
+        raise RepositoryTimeoutError()
+    except Error as e:
+        raise RepositoryInternalError(f"Could not retrieve symbol ID for {symbol_name}: {e}")
+    except IndexError as e:
+        raise RepositoryParsingError(f"Could not parse resulting symbol name: {e}")
     
     
-def insert_new_symbol(symbol_name: str) -> bool:
+def insert_new_symbol(symbol_name: str):
     """Inserts a new symbol row into the Symbols table.
     
     Args:
@@ -93,44 +107,13 @@ def insert_new_symbol(symbol_name: str) -> bool:
         (%(name)s)
     """
     
-    # Attempt to insert the new symbol, if successful return True indicating the operation was successful.
+    # Attempt to insert the new symbol into the Symbols table
     try:
         run_exec_cmd(sql, args={"name": symbol_name})
-        return True
-    # If an exception occurs, print the error and return False indicating the operation failed.
-    except Exception as e:
-        print(f"An error has occured while inserting a new symbol into the database: {e}")
-        return False
+    # If an exception occurs, raise a repository layer exception
+    except OperationalError:
+        raise RepositoryTimeoutError()
+    except Error as e:
+        raise RepositoryInternalError(f"Could not retrieve symbol ID for {symbol_name}: {e}")
     
-    
-# TODO: Might be exclusive to HOT and EOT DB files
-def update_record_symbol(record_id: int, record_type: int, symbol_id: int) -> bool:
-    match record_type:
-        case RecordTypes.EOT.value:
-            table_name = "EOTRecords"
-        case RecordTypes.HOT.value:
-            table_name = "HOTRecords"
-        case RecordTypes.DPU.value:
-            table_name = "DPURecords"
-        case _:
-            print("Invalid record table!")
-            return False
-    
-    try:
-        args = {
-            "record_table": table_name,
-            "id": record_id,
-            "symbol_id": symbol_id
-        }
-        sql = """
-            UPDATE %(record_table)s
-            SET symbol_id = %(symbol_id)s 
-            WHERE id = %(id)s
-        """
-        resp = run_exec_cmd(sql, args)
-        print(resp)
-        return True
-    except Exception as e:
-        print("Error occurred while updating record symbol!")
-        return False
 

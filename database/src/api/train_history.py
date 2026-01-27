@@ -41,8 +41,8 @@ class HistoryDB(Resource):
             th_service = RecordService(typ)
             results = th_service.get_train_history(typ, id, page)
             return jsonify(results), 200
-        
-        except ServiceInvalidArgument as e:
+            
+        except (ServiceInvalidArgument, ValueError) as e:
             return jsonify({"error": str(e)}), 400
         except ServiceTimeoutError:
              return jsonify({"error": "Request timed out!"}), 408

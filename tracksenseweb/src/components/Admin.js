@@ -31,14 +31,18 @@ const Admin = () => {
   const performVerification = () => {
     //first get the symbol id
     let symbolId = -1;
-    fetch(`${config.apiUrl}/symbol_ids?symbol_name=${modalSymbol}`)
+    fetch(`${config.apiUrl}/symbols?symbol_name=${modalSymbol}`)
     .then(response => {
       return response.json()
     })
     .then(data => {
       // ensure we get a proper return - in theory this will always give a proper return
       // TODO: add error handling here
-      symbolId = data.id
+      
+      if (!data || !data.results)
+        throw new Error("No results we returned!");
+      
+      symbolId = data.results[0]
       if (symbolId != -1) {
         console.log("symbolID: " + symbolId);
         console.log("modalID: " + modalId);
@@ -64,8 +68,9 @@ const Admin = () => {
             window.location.reload() //reload the page
           }
         })
+        .catch(error => console.error(error));
       }
-    })
+    });
   }
 
 
@@ -127,7 +132,13 @@ const Admin = () => {
     .catch(error => console.error('Error fetching data:', error));
     fetch(`${config.apiUrl}/symbols`)
     .then(response => response.json())
-    .then(symbols => setSymbols(symbols))
+    .then((data) => {
+      if (data && data.results) {
+        setSymbols(data.results);
+      } else {
+        console.error('Response payload empty!');
+      }
+    })
     .catch(error => console.error("A problem has occurred: ", error))
   }, [page]);
     return (
