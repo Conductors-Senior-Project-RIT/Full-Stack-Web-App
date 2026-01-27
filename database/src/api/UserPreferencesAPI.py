@@ -2,7 +2,10 @@ from flask import jsonify, request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.trackSense_db_commands import run_get_cmd, run_exec_cmd
-
+"""
+ current_user = get_jwt_identity()
+ simply grab the user_id from this and in the service layer u can get the user from it
+"""
 
 class UserPreferences(Resource):
     @jwt_required()

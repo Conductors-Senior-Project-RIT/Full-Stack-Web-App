@@ -24,4 +24,22 @@ def send_welcome_email(email) -> bool:
 
     return response.status_code == 200
 
+def send_forgot_password_email(email: str, reset_token) -> bool:
+    """
+    Email sent to user who wants to reset their password
+    """
+    response = requests.post(
+        f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
+        auth=("api", MAILGUN_API_KEY),
+        data={
+            "from": f"Follow That FRED! <no-reply@{MAILGUN_DOMAIN}>",
+            "to": email,
+            "subject": "Password Reset Request",
+            "text": f"""Hi {email},\n\nA password reset request was made from your account. If you wish to reset your password, please click the following link: {WEBSITE_DOMAIN}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email.""",
+            "html": f"<html><body><h3>Hi {email},</h3>\n\n<p>A password reset request was made from your account. If you wish to reset your password, please click the following link: {WEBSITE_DOMAIN}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email.</p></body></html>",
+        },
+    )
+
+    return response.status_code == 200
+
 

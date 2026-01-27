@@ -112,3 +112,32 @@ def create_user_station_preference(user_id: int, station_id: int):
         "station_id": station_id,
     }
     run_exec_cmd(sql,args)
+
+
+def create_user_reset_token(user_id, hashed_token):
+    """
+    TODO: Move helpers like this function and the ones below somewhere else
+    """
+    reset_token_sql = """
+            INSERT INTO reset_requests (uid, token, expiration) VALUES 
+            (%(user_id)s, %(token_hash)s, NOW() + INTERVAL '1 hour');
+            """
+    run_exec_cmd(
+        reset_token_sql, args={"user_id": user_id, "token_hash": hashed_token}
+    )
+
+def get_user_id_from_valid_reset_request_token(token_hash):
+    """
+    look into later
+    """
+    validate_token_sql = """
+            SELECT u.id FROM reset_requests as r
+            INNER JOIN users AS u ON r.uid = u.id
+            WHERE r.token = %(token_hash)s AND r.expiration >= NOW();
+        """
+    # results = run_get_cmd(validate_token_sql, args={"token_hash": token_hash})
+    return run_get_cmd(validate_token_sql, args={"token_hash": token_hash})
+
+def delete_user_id_from_reset_requests(user_id):
+    delete_request = "DELETE FROM reset_requests WHERE uid = %(user_id)s;"
+    run_exec_cmd(delete_request, args={"user_id": user_id})
