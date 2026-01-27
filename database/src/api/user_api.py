@@ -12,29 +12,30 @@ from flask_jwt_extended import (
 from flask_cors import CORS
 from db.user_db import *
 from dotenv import load_dotenv
-import secrets
 
-from service.user_service import register_user, is_registered
+from service.user_service import register_user, is_registered, create_user_password_reset_token, \
+    is_user_password_reset_token_valid, reset_user_password
 
-bcrypt = Bcrypt()
+"""
+TODO: mention below:
+Switching security handling of passwords, easiest thing to do is for everyone to RESET THEIR PASSWORD
+werkzeug is good enough security at the moment, future teams can switch back to bcrypt.
+why? werkzeug doesn't require us to use another external dependency and don't have time to understand everything about bcrypt and I don't trust how the last group 
+handled security as i had to rewrite most of what they did relating to jwt....
+
+user_repo.py needs custom error handling so it can be caught here
+
+storing jwt in database for "get_authentication" defeats the whole purpose of storing it securely with cookies (using the helper function from werkzeug security library)
+"""
+
+# bcrypt = Bcrypt()
 jwt = JWTManager()
 
 load_dotenv()
 user_bp = Blueprint("user_bp", __name__)
 CORS(user_bp)  # Enable CORS for the user_bp blueprint
 
-MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
-MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
-WEBSITE_DOMAIN = os.getenv("WEBSITE_DOMAIN")
-
 """
-api routes should be thin
-read request (maybe simply input validation) --> call service --> translate service result --> http response  
-
-files/functionality to divide:
-* email_service for emails
-* user_service
-
 lets ditch the storing session token from database... im not sure why they did that as it beats the purpose of using
 jwt lol.
 
@@ -68,97 +69,59 @@ def login():
     email = data.get("email")
     password = data.get("password")
 
-    user = is_registered(email, password) # need to find a clean way to stop double indexing, db models should help with this but cant do it now
-
+    user = is_registered(email, password)
     if not user:
         return jsonify({"message": "Invalid credentials"}), 401
 
-    user_id = user[0][0]
+    user_id = user[0][0] # need to find a clean way to stop double indexing, index the query results from the repo/db layer so we stop double indexing here.
     user_role = user[0][4]
 
-    response = jsonify({"msg": "login successful"})
+    response = jsonify({"message": "login successful"})
+
     additional_claims = {"user_role": user_role} # a user role is set based on what's in the database
+
     # identity being user_id makes it easier to retrieve user info from db for whatever reason, and can store their user_role here as it's not a security risk and makes it easier to protect certain routes later
     access_token = create_access_token(identity=str(user_id), additional_claims=additional_claims) # user_id as eventually want to replace incrementing id with uuid if possible
     set_access_cookies(response, access_token)
     return response
 
+# the bottom 3 routes confuse me, need to look at frontend and see if i should remove one of the routes...
 @user_bp.route("/api/forgot-password", methods=["POST"])
 def reset_password_request():
     email = request.get_json()["email"]
-    results = get_user_id(email)
-    print(results)
-    # Response will return the same way regardless if the email actually exists, but it won't be sent if it won't
-    # exist
-    if not results:
-        userId = results[0][0]
-        reset_token = secrets.token_urlsafe(32)
-        print(reset_token)
-        hashed_token = hashlib.sha256(reset_token.encode()).hexdigest()
-        reset_token_sql = """
-        INSERT INTO reset_requests (uid, token, expiration) VALUES 
-        (%(user_id)s, %(token_hash)s, NOW() + INTERVAL '1 hour');
-        """
-        run_exec_cmd(
-            reset_token_sql, args={"user_id": userId, "token_hash": hashed_token}
-        )
-        requests.post(
-            f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
-            auth=("api", MAILGUN_API_KEY),
-            data={
-                "from": f"Follow That FRED! <no-reply@{MAILGUN_DOMAIN}>",
-                "to": email,
-                "subject": "Password Reset Request",
-                "text": f"""Hi {email},\n\nA password reset request was made from your account. If you wish to reset your password, please click the following link: {WEBSITE_DOMAIN}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email.""",
-                "html": f"<html><body><h3>Hi {email},</h3>\n\n<p>A password reset request was made from your account. If you wish to reset your password, please click the following link: {WEBSITE_DOMAIN}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email.</p></body></html>",
-            },
-        )
 
-    data = {"message": "If an account with that email exists, a reset link was sent."}
-    return data, 200
-#
-# never used and again, this can be handled by jwt-flask library -- will delete later and replace this!
+    if not email:
+        return jsonify({"message": "Email required"}), 400
 
-#
-# @user_bp.route("/api/validate-reset-token", methods=["GET"])
-# def token_validation():
-#     token = request.args.get("token")
-#     token_hash = hashlib.sha256(token.encode()).hexdigest()
-#     validate_token_sql = """
-#     SELECT * FROM reset_requests as r
-#     INNER JOIN users AS u ON r.uid = u.id
-#     WHERE r.token = %(token_hash)s AND r.expiration >= NOW();
-#     """
-#     results = run_get_cmd(validate_token_sql, args={"token_hash": token_hash})
-#     if len(results) == 0:
-#         return {"valid": "false"}, 404
-#
-#     return {"valid": "true"}, 200
+    # we don't want to let the user now if an email exists or not (idk y but im following how this was done lol), so we handle email checking silently (return nothing)
+    create_user_password_reset_token(email)
 
+    return jsonify({"message": "If an account with that email exists, a reset link was sent."}), 200
+
+@user_bp.route("/api/validate-reset-token", methods=["GET"])
+def token_validation():
+    token = request.args.get("token")
+    is_valid = is_user_password_reset_token_valid(token)
+
+    if is_valid:
+        return jsonify({"message": "Password reset token is valid"}), 200
+
+    return jsonify({"message": "Password reset token is not valid"}), 404
 
 @user_bp.route("/api/reset-password", methods=["PUT"])
 def reset_password():
     token = request.args.get("token")
+
     if token is None:
-        return {"msg": "No token provided"}, 400
-    token_hash = hashlib.sha256(token.encode()).hexdigest()
+        return {"message": "No token provided"}, 400 # by default this jsonify's the result i think? (we can test it out later so we can have a standard to follow for the returns in API layer)
+
     data = request.get_json()
-    hashed_password = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
+    password = data.get("password")
 
-    validate_token_sql = """
-        SELECT u.id FROM reset_requests as r
-        INNER JOIN users AS u ON r.uid = u.id
-        WHERE r.token = %(token_hash)s AND r.expiration >= NOW();
-    """
-    results = run_get_cmd(validate_token_sql, args={"token_hash": token_hash})
-    if len(results) == 0:
+    result = reset_user_password(token, password) #again add custom error handling, don't want any of this "is none" or boolean checking
+
+    if not result:
         return {"valid": "false"}, 404
-
-    userId = results[0][0]
-    update_user_password(userId, hashed_password)
-
-    delete_request = "DELETE FROM reset_requests WHERE uid = %(user_id)s;"
-    run_exec_cmd(delete_request, args={"user_id": userId})
 
     return {"message": "Password changed successfully. Please log in."}, 200
 
@@ -167,22 +130,22 @@ def reset_password():
 @user_bp.route("/api/user_preferences/time", methods=["PUT"])
 @jwt_required()
 def update_times():
-    current_user = get_jwt_identity()
-    token = request.headers.get("Authorization").split()[1]
-    user = get_authenticated_user(current_user, token)
-    if user:
-        user_id = user[0][0]
-        data = request.get_json()
-        update_user_times(user_id, data["starting_time"], data["ending_time"])
-        return jsonify({"message": "Success"}), 200
-    else:
-        return jsonify({"message": "Error saving times"}), 500
+    current_user_id = int(get_jwt_identity()) # user_id is stored as a string for it to be an identity; so convert back to int
+    data = request.get_json()
+    starting_time = data.get("starting_time")
+    ending_time = data.get("ending_time")
+
+    if not starting_time or not ending_time:
+        return jsonify({"message": "starting_time and ending_time required"}), 400
+
+    update_user_times(current_user_id, starting_time, ending_time)
+    return jsonify({"message": "Success"}), 200
 
 
 @user_bp.route("/api/role", methods=["GET"])
 @jwt_required() # a user can only access this route with a jwt token and by default everyone has a role. so no way this throws an error ever... right? lol
 def get_user_role():
-    claims = get_jwt()
+    claims = get_jwt() # maybe current_user_* prefix is good when calling get_jwt() and get_jwt_identity()
     user_role = claims.get("user_role")
     return jsonify({"role": user_role}), 200
 
@@ -202,7 +165,7 @@ def elevate_user():
     if new_role not in [1, 2]: # elevate user seems like a... not so accurate description for this route as it seems you can demote users to different roles as well?
         return jsonify({"message": "Invalid role"}), 400
 
-    if not update_account_status(email_to_elevate, new_role): #if None is returned
+    if update_account_status(email_to_elevate, new_role) is None: #if None is returned (again change all the "is None" with custom error handling...)
         return jsonify({"message": "The email you're trying to change role's for does not exist in our database"}), 404
 
     return jsonify({"message": "User role updated successfully"}), 200
@@ -210,6 +173,6 @@ def elevate_user():
 @user_bp.route("/api/logout", methods=["POST"])
 @jwt_required()
 def logout():
-    response = jsonify({"msg": "logout successful"})
+    response = jsonify({"message": "logout successful"})
     unset_jwt_cookies(response)
     return response
