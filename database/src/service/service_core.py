@@ -14,7 +14,8 @@ class BaseService(ABC):
 
 class ServiceError(Exception):
     def __init__(self, service: BaseService, message: str):
-        super().__init__(f"[{service.get_name().capitalize()}]: {message}")
+        self._caller = service.get_name()
+        super().__init__(message)
 
 
 class ServiceInternalError(Exception):
@@ -34,7 +35,7 @@ class ServiceParsingError(Exception):
         
 class ServiceResourceNotFound(Exception):
     def __init__(self, service, *args):
-        super().__init__(service, *args)
+        super().__init__(service, str(args))
 
 
 class ServiceInvalidArgument(Exception):

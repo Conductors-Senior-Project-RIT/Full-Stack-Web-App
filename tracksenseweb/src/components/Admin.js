@@ -31,7 +31,7 @@ const Admin = () => {
   const performVerification = () => {
     //first get the symbol id
     let symbolId = -1;
-    fetch(`${config.apiUrl}/symbols?symbol_name=${modalSymbol}`)
+    fetch(`${config.apiUrl}/symbol?symbol_name=${modalSymbol}`)
     .then(response => {
       return response.json()
     })
@@ -42,7 +42,9 @@ const Admin = () => {
       if (!data || !data.results)
         throw new Error("No results we returned!");
       
-      symbolId = data.results[0]
+      // The Symbol API route always returns an array, get the ID from the first index
+      symbolId = parseInt(data.results[0]);
+
       if (symbolId != -1) {
         console.log("symbolID: " + symbolId);
         console.log("modalID: " + modalId);
@@ -94,13 +96,13 @@ const Admin = () => {
     }
     else {
       // api call to add symbol
-      fetch (`${config.apiUrl}/symbols`, {
+      fetch (`${config.apiUrl}/symbol`, {
         method:"POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          'name': modalSymbol
+          'symbol_name': modalSymbol
         })
       })
       .then(
@@ -130,13 +132,13 @@ const Admin = () => {
       setTotalPages(data.totalPages);
     })
     .catch(error => console.error('Error fetching data:', error));
-    fetch(`${config.apiUrl}/symbols`)
+    fetch(`${config.apiUrl}/symbol`)
     .then(response => response.json())
     .then((data) => {
       if (data && data.results) {
         setSymbols(data.results);
       } else {
-        console.error('Response payload empty!');
+        throw new Error('Response payload empty!');
       }
     })
     .catch(error => console.error("A problem has occurred: ", error))

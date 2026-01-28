@@ -13,12 +13,13 @@ from api.load_example_data import (
     LoadExampleData,
 )  # Import the load example data resource
 from api.station_auth import StationAuth
-from database.src.api.record_verifier import RecordVerifier
+from api.error_handler import register_error_handlers
+from api.record_verifier import RecordVerifier
 from api.time_frame_pull import recent_activities
 from api.symbol_api import SymbolAPI
 from api.verifier_hot import LogVerifierHOT
 from api.pushover_updater import PushoverUpdater
-from database.src.api.record_collation import RecordCollation
+from api.record_collation import RecordCollation
 from api.UserPreferencesAPI import UserPreferences
 from api.station_online import StationOnline
 from api.hot_collation import HotCollation
@@ -54,6 +55,8 @@ api.add_resource(StationOnline, "/api/station_online")
 app.register_blueprint(user_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(station_bp)
+
+register_error_handlers(app)
 
 if __name__ == "__main__":
     app.run(debug=True)
