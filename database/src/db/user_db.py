@@ -64,15 +64,14 @@ def update_user_times(user_id: int, start_time: str, end_time: str):
 
 # below is related to userpreferencesapi.py, they get user_id many different ways lol
 
-def get_user_id_and_times_from_jwt_and_email(email: str, token: str) -> list[tuple[Any,...]]:
+def get_user_start_and_end_times(user_id: int) -> tuple[Any,...]:
     sql = """
-    SELECT id, starting_time, ending_time FROM Users WHERE email = %(email)s AND token = %(token)s
+    SELECT starting_time, ending_time FROM Users WHERE id = %(user_id)s
     """
     args = {
-        "email": email,
-        "token": token,
+        "user_id": user_id,
     }
-    return run_get_cmd(sql,args)
+    return run_get_cmd(sql,args)[0] #just return tuple as there's only 1 row within the list of tuples
 
 def get_user_id_from_jwt_and_email(email:str, token: str) -> list[tuple[Any,...]]:
     sql = """
