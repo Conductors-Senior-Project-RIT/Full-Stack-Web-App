@@ -8,16 +8,16 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from flask_cors import CORS
 from db.trackSense_db_commands import *
 
-admin_bp = Blueprint("admin_bp", __name__)
-CORS(admin_bp)  # Enable CORS for the admin_bp blueprint
+volunteer_bp = Blueprint("volunteer_bp", __name__)
+CORS(volunteer_bp)  # Enable CORS for the volunteer_bp blueprint
 
 # This class should use JWT volunteer authentication
-@admin_bp.before_request
+@volunteer_bp.before_request
 def check_auth():
     pass
 
 
-@admin_bp.route("/api/add-pin", methods=["POST"])
+@volunteer_bp.route("/api/add-pin", methods=["POST"])
 @jwt_required()
 def add_pin():
     data = request.get_json()
@@ -32,13 +32,13 @@ def add_pin():
     return jsonify({"message": "Pin added successfully"}), 201
 
 
-@admin_bp.route("/api/get-pins", methods=["GET"])
+@volunteer_bp.route("/api/get-pins", methods=["GET"])
 def get_pins():
     pins = run_get_cmd("SELECT lat, lng FROM Pins")
     return jsonify([{"lat": pin[0], "lng": pin[1]} for pin in pins])
 
 
-@admin_bp.route("/symbol", methods=["GET", "POST"])
+@volunteer_bp.route("/symbol", methods=["GET", "POST"])
 @jwt_required()
 def get_symbol():
     # Retrieve the provided query parameters (if it exists)
@@ -64,7 +64,7 @@ def get_symbol():
         return 200
 
 
-@admin_bp.get("/record_verifier")
+@volunteer_bp.get("/record_verifier")
 @jwt_required()
 def get_records():
     page = request.args.get("page", default=1, type=int)
@@ -78,7 +78,7 @@ def get_records():
     return jsonify(results), 200
 
 
-@admin_bp.post("/record_verifier")
+@volunteer_bp.post("/record_verifier")
 @jwt_required()
 def post_record():
     parser = reqparse.RequestParser()

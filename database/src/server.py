@@ -7,7 +7,7 @@ from api.reset_db import *
 from api.user_api import *
 from api.notification_handler import *
 from api.signal_update_handler import *
-from api.admin_handler import admin_bp  # Import the admin blueprint
+from database.src.api.volunteer_handler import volunteer_bp  # Import the admin blueprint
 from api.station_handler import station_bp
 from api.load_example_data import (
     LoadExampleData,
@@ -53,7 +53,7 @@ api.add_resource(UserPreferences, '/api/user_preferences')
 api.add_resource(StationOnline, "/api/station_online")
 
 app.register_blueprint(user_bp)
-app.register_blueprint(admin_bp)
+app.register_blueprint(volunteer_bp)
 app.register_blueprint(station_bp)
 
 register_error_handlers(app)
