@@ -4,21 +4,35 @@ from database.src.api.error_handler import MethodNotAllowedError, InvalidArgumen
 from service.record_service import RecordService
 from service.service_core import *
 from service.symbol_service import SymbolService
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt, verify_jwt_in_request
 from flask_cors import CORS
 from db.trackSense_db_commands import *
+from werkzeug.exceptions import Unauthorized
 
 volunteer_bp = Blueprint("volunteer_bp", __name__)
 CORS(volunteer_bp)  # Enable CORS for the volunteer_bp blueprint
 
 # This class should use JWT volunteer authentication
 @volunteer_bp.before_request
-def check_auth():
-    pass
+def check_jwt_auth():
+    # Verify that a JWT was provided
+    verify_jwt_in_request()
+    
+    # Access the set of additional claims created with JWT
+    claims = get_jwt()
+    # Obtain user's role from JWT if exists
+    user_role = claims.get("user_role")
+    
+    # If user role is not present in claims, None is returned (error in authentication)
+    if user_role is None:
+        raise Unauthorized("User role undefined!")
+    
+    # Check if user unauthorized, not volunteer (1) or admin (0)
+    if user_role > 1:
+        raise Unauthorized("User is unauthorized!")
 
 
 @volunteer_bp.route("/api/add-pin", methods=["POST"])
-@jwt_required()
 def add_pin():
     data = request.get_json()
     lat = data.get("lat")
@@ -39,7 +53,6 @@ def get_pins():
 
 
 @volunteer_bp.route("/symbol", methods=["GET", "POST"])
-@jwt_required()
 def get_symbol():
     # Retrieve the provided query parameters (if it exists)
     symbol_name = request.args.get("symbol_name", default=None, type=str)
@@ -65,7 +78,6 @@ def get_symbol():
 
 
 @volunteer_bp.get("/record_verifier")
-@jwt_required()
 def get_records():
     page = request.args.get("page", default=1, type=int)
     typ = request.args.get("type", default=-1, type=int)
@@ -79,7 +91,6 @@ def get_records():
 
 
 @volunteer_bp.post("/record_verifier")
-@jwt_required()
 def post_record():
     parser = reqparse.RequestParser()
     parser.add_argument("id", type=int, default=-1)
