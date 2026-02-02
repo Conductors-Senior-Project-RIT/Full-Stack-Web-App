@@ -23,7 +23,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import Options from './components/Options';
-import Superuser from './components/SuperUser';
+import Admin from './components/Admin';
 import HotData from './components/HOT_Data';
 
 //reorder to the right order
@@ -56,7 +56,7 @@ const App = () => {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/options" element={<ProtectedRoute element={Options} requiredRole={2} />} />
-            <Route path="/Superuser" element={<ProtectedRoute element={Superuser} requiredRole={0} />} />
+            <Route path="/admin" element={<ProtectedRoute element={Admin} requiredRole={0} />} />
           </Routes>
         </div>
       </Router>

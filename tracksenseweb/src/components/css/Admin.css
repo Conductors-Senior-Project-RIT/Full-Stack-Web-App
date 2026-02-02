@@ -1,4 +1,4 @@
-.superuser-container {
+.admin-container {
     max-width: 800px;
     margin: 2rem auto;
     padding: 2rem;
@@ -9,38 +9,38 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.superuser-container h2 {
+.admin-container h2 {
     text-align: center;
     color: #5a3d1a; /* Dark Brown */
     margin-bottom: 1.5rem;
     font-size: 2rem;
 }
 
-.superuser-container h3 {
+.admin-container h3 {
     color: #8b4513; /* SaddleBrown */
     margin-bottom: 1rem;
     font-size: 1.5rem;
 }
 
-.superuser-container p {
+.admin-container p {
     color: #5a3d1a; /* Dark Brown */
     margin-bottom: 1rem;
     font-size: 1rem;
 }
 
-.superuser-container .form-group {
+.admin-container .form-group {
     margin-bottom: 1.5rem;
 }
 
-.superuser-container label {
+.admin-container label {
     font-weight: bold;
     color: #5a3d1a; /* Dark Brown */
     display: block;
     margin-bottom: 0.5rem;
 }
 
-.superuser-container input[type="text"],
-.superuser-container select {
+.admin-container input[type="text"],
+.admin-container select {
     width: 100%;
     padding: 0.5rem;
     margin: 0.5rem 0;
@@ -50,14 +50,14 @@
     box-sizing: border-box;
 }
 
-.superuser-container input[type="text"]:focus,
-.superuser-container select:focus {
+.admin-container input[type="text"]:focus,
+.admin-container select:focus {
     outline: none;
     border-color: #a0522d; /* Sienna */
     box-shadow: 0 0 5px rgba(160, 82, 45, 0.5);
 }
 
-.superuser-container .button-option {
+.admin-container .button-option {
     display: inline-block;
     padding: 0.5rem 1rem;
     background: linear-gradient(to right, #8b4513, #a0522d); /* SaddleBrown to Sienna gradient */
@@ -71,25 +71,25 @@
     margin-top: 1rem;
 }
 
-.superuser-container .button-option:hover {
+.admin-container .button-option:hover {
     opacity: 0.9;
     transform: scale(1.05);
 }
 
-.superuser-container .button-option:active {
+.admin-container .button-option:active {
     transform: scale(0.95);
 }
 
-.superuser-container .message {
+.admin-container .message {
     text-align: center;
     font-weight: bold;
     margin-bottom: 1rem;
 }
 
-.superuser-container .message.success {
+.admin-container .message.success {
     color: green;
 }
 
-.superuser-container .message.error {
+.admin-container .message.error {
     color: red;
 }

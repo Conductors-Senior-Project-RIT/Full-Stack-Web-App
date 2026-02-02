@@ -21,13 +21,13 @@ const NavBar = () => {
                 )}
                 {isAuthenticated && (
                     <>
-                        {userRole <= 1 && ( // Only show verification link for Volunteers (1) and Superusers (0)
+                        {userRole <= 1 && ( // Only show verification link for Volunteers (1) and Admins (0)
                             <li><Link to="/verify-eot">Verify EOT</Link></li>
-                        )}{userRole <= 1 && ( // Only show verification link for Volunteers (1) and Superusers (0)
+                        )}{userRole <= 1 && ( // Only show verification link for Volunteers (1) and Admins (0)
                             <li><Link to="/verify-hot">Verify HOT</Link></li>
                         )}
-                        {userRole === 0 && ( // Only show Superuser link for Superusers (0)
-                            <li><Link to="/superuser">Superuser</Link></li>
+                        {userRole === 0 && ( // Only show Admin link for Admins (0)
+                            <li><Link to="/admin">Admin</Link></li>
                         )}
                         <li><Link to="/options">Options</Link></li>
                         <li><button onClick={logout} className="logout-button">Log Out</button></li>

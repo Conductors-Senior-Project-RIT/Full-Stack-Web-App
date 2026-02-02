@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import './css/SuperUser.css';
+import './css/Admin.css';
 import config from '../config';
 
-const Superuser = () => {
+const Admin = () => {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState(1); // Default to Volunteer
   const [message, setMessage] = useState('');
@@ -22,7 +22,7 @@ const Superuser = () => {
   };
 
   return (
-    <div className="superuser-container">
+    <div className="admin-container">
       <h2>Elevate User Role</h2>
       <div className="form-group">
         <label>Email:</label>
@@ -46,4 +46,4 @@ const Superuser = () => {
   );
 };
 
-export default Superuser;
+export default Admin;
