@@ -1,4 +1,4 @@
-.admin-container {
+.volunteer-container {
   position: relative;
 }
 
@@ -38,7 +38,7 @@
   z-index: 1050 !important;
 }
 
-.admin-button {
+.verify-button {
   width: 10%;
   margin-left: 10px;
 }

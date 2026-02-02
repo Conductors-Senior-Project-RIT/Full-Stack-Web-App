@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './css/Admin.css';
+import './css/Verification.css';
 import config from '../config';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button'
@@ -10,7 +10,7 @@ import ReactPaginate from 'react-paginate';
 import './css/Paginate.css'
 import { useSearchParams } from 'react-router-dom';
 
-const Admin = () => {
+const VerifyEOT = () => {
   //data
   const [data, setData] = useState([]);
   const [symbols, setSymbols] = useState([])
@@ -166,7 +166,7 @@ const Admin = () => {
             <Button variant="secondary" onClick={handleClose}>
               Close
             </Button>
-            <Button className="button-admin" variant="primary" onClick={handleVerify}>Verify</Button>
+            <Button className="verify-button" variant="primary" onClick={handleVerify}>Verify</Button>
           </Modal.Footer>
         </Modal>
         <div className="data-table-container">
@@ -218,4 +218,4 @@ const Admin = () => {
 
 };
 
-export default Admin;
+export default VerifyEOT;

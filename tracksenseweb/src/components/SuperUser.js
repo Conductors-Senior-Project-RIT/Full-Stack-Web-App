@@ -4,7 +4,7 @@ import config from '../config';
 
 const Superuser = () => {
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState(1); // Default to Admin
+  const [role, setRole] = useState(1); // Default to Volunteer
   const [message, setMessage] = useState('');
 
   const handleElevate = () => {
@@ -36,7 +36,7 @@ const Superuser = () => {
       <div className="form-group">
         <label>Role:</label>
         <select value={role} onChange={(e) => setRole(Number(e.target.value))}>
-          <option value={1}>Admin</option>
+          <option value={1}>Volunteer</option>
           <option value={2}>Regular User</option>
         </select>
       </div>
