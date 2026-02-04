@@ -8,8 +8,8 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Data from './components/Data';
 import Home from './components/Home';
-import Admin from './components/Admin';
-import AdminHOT from './components/AdminHOT';
+import VerifyEOT from './components/VerifyEOT';
+import VerifyHOT from './components/VerifyHOT';
 import Fairport from './components/Fairport';
 import Churchville from './components/Churchville';
 import Macedon from './components/Macedon';
@@ -23,7 +23,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import Options from './components/Options';
-import Superuser from './components/SuperUser';
+import Admin from './components/Admin';
 import HotData from './components/HOT_Data';
 
 //reorder to the right order
@@ -43,7 +43,8 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/eot-data" element={<ProtectedRoute element={Data} requiredRole={2}/>} />
             <Route path="/hot-data" element={<ProtectedRoute element={HotData} requiredRole={2}/>} />
-            <Route path="/admin" element={<ProtectedRoute element={Admin} requiredRole={1}/>} />
+            <Route path="/verify-eot" element={<ProtectedRoute element={VerifyEOT} requiredRole={1}/>} />
+            <Route path="/verify-hot" element={<ProtectedRoute element={VerifyHOT} requiredRole={1}/>} />
             <Route path="/fairport" element={<Fairport />} />
             <Route path="/churchville" element={<Churchville />} />
             <Route path="/macedon" element={<Macedon />} />
@@ -52,11 +53,10 @@ const App = () => {
             <Route path="/hornell" element={<Hornell />} />
             <Route path="/pittsford" element={<Pittsford />} />
             <Route path="/fairgrounds" element={<Fairgrounds />} />
-            <Route path="/admin_hot" element={<ProtectedRoute element={AdminHOT} requiredRole={1}/>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/options" element={<ProtectedRoute element={Options} requiredRole={2} />} />
-            <Route path="/Superuser" element={<ProtectedRoute element={Superuser} requiredRole={0} />} />
+            <Route path="/admin" element={<ProtectedRoute element={Admin} requiredRole={0} />} />
           </Routes>
         </div>
       </Router>

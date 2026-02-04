@@ -1,44 +1,95 @@
 .admin-container {
-  position: relative;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border: 1px solid #8b4513; /* SaddleBrown border */
+    border-radius: 8px;
+    background: linear-gradient(to bottom, #f5deb3, #d2b48c); /* Wheat to Tan gradient */
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.data-table-container {
-  margin: auto;
+.admin-container h2 {
+    text-align: center;
+    color: #5a3d1a; /* Dark Brown */
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
+.admin-container h3 {
+    color: #8b4513; /* SaddleBrown */
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
 }
 
-.data-table th, .data-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center; /* Center align text in table cells */
+.admin-container p {
+    color: #5a3d1a; /* Dark Brown */
+    margin-bottom: 1rem;
+    font-size: 1rem;
 }
 
-.data-table th {
-  background-color: #f2f2f2;
-  color: black;
+.admin-container .form-group {
+    margin-bottom: 1.5rem;
 }
 
-.modal-top .modal-dialog {
-  position: fixed;
-  top: 10%; /* Adjust this value to move the modal further down or up */
-  left: 50%;
-  transform: translate(-50%, 0);
-  z-index: 1050;
+.admin-container label {
+    font-weight: bold;
+    color: #5a3d1a; /* Dark Brown */
+    display: block;
+    margin-bottom: 0.5rem;
 }
 
-.modal-backdrop {
-  z-index: 1040 !important;
+.admin-container input[type="text"],
+.admin-container select {
+    width: 100%;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    border: 1px solid #8b4513; /* SaddleBrown border */
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
 }
 
-.modal-content {
-  z-index: 1050 !important;
+.admin-container input[type="text"]:focus,
+.admin-container select:focus {
+    outline: none;
+    border-color: #a0522d; /* Sienna */
+    box-shadow: 0 0 5px rgba(160, 82, 45, 0.5);
 }
 
-.admin-button {
-  width: 10%;
-  margin-left: 10px;
+.admin-container .button-option {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(to right, #8b4513, #a0522d); /* SaddleBrown to Sienna gradient */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    margin-top: 1rem;
+}
+
+.admin-container .button-option:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.admin-container .button-option:active {
+    transform: scale(0.95);
+}
+
+.admin-container .message {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.admin-container .message.success {
+    color: green;
+}
+
+.admin-container .message.error {
+    color: red;
 }
