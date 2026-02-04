@@ -1,17 +1,18 @@
 import datetime
 import db.record_types as record_types
-import db.station_repo as station_repo
-from db.database_status import *
+from db.station_repo import StationRepository
+from database.src.db.database_core import *
 from service.service_core import *
 
 # Temporary constant for number of results per page
 RESULTS_NUM = 250
 
 class RecordService(BaseService):
-    def __init__(self, record_type: int):
+    def __init__(self, session, record_type: int):
         try:
-            self.repo = record_types.get_record_repository(record_type) if record_type is not None else None
-            super().__init__("Train History")
+            self.repo = record_types.get_record_repository(session, record_type) if record_type is not None else None
+            self._session = session
+            super().__init__(session, "Train History")
         except RepositoryRecordInvalid(record_type) as e:
             raise ServiceInvalidArgument(self, str(e))
 
@@ -127,15 +128,14 @@ class RecordService(BaseService):
             altered_time = curr_date - delta
             dt_str = altered_time.strftime("%Y-%m-%d %H:%M:%S")
             
-            
             if station_id == -1:
                 if station_name:
-                    station_id = station_repo.get_station_id(station_name)
+                    station_id = StationRepository(self._session).get_station_id(station_name)
             
             chosen_repos = (
-                record_types.get_all_repositories()
+                record_types.get_all_repositories(self._session)
                 if record_type == -1 else
-                [record_types.get_record_repository(record_type)]
+                [record_types.get_record_repository(self._session, record_type)]
             )
                 
             # Should never occur, but to be safe..

@@ -1,10 +1,22 @@
 from record_types import RecordTypes
+from sqlalchemy.orm.scoping import scoped_session
+from functools import wraps
 
+class BaseRepository:
+    def __init__(self, session: scoped_session):
+        if self.session is None:
+            raise RepositorySessionError()
+        self.session = session
+        
 
 class RepositoryError(Exception):
     def __init__(self, message):
         super().__init__(message)
         
+        
+class RepositorySessionError(RepositoryError):
+    def __init__(self):
+        super().__init__("Session was not initialized to database!")
         
 class RepositoryTimeoutError(RepositoryError):
     def __init__(self, point_of_error=None):

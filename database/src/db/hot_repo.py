@@ -10,14 +10,19 @@ from typing import Any, NoReturn
 from psycopg import Error, OperationalError, sql
 from base_record_repo import RecordRepository, RepositoryError
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
-from database_status import *
+from database.src.db.database_core import *
 
 RESULTS_NUM = 250
 
 
 class HOTRepository(RecordRepository):
-    def __init__(self):
-        super().__init__("HOTRecords", "HOT Record", "hot")
+    def __init__(self, session):
+        super().__init__(
+            session,
+            "HOTRecords", 
+            "HOT Record", 
+            "hot"
+        )
         
     # below is train_history.py related
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:

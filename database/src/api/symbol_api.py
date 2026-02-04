@@ -2,6 +2,7 @@ from flask import request, jsonify
 from flask_restful import Resource, reqparse
 from service.service_core import *
 from service.symbol_service import SymbolService
+from db.db import db
 
 
 class SymbolAPI(Resource):
@@ -17,8 +18,10 @@ class SymbolAPI(Resource):
         # Attempt to get the symbol name from the request args if present
         symbol_name = request.args.get("symbol_name", type=str, default=None)
         
+        session = db.session
+        
         # Instantiate a new symbol service
-        service = SymbolService()
+        service = SymbolService(session)
         
         try:
             results = service.get_symbol(symbol_name)
@@ -45,8 +48,10 @@ class SymbolAPI(Resource):
         if not args.name:
             return jsonify({"error": "Must provide a symbol name for a new symbol!"}), 400
         
+        session = db.session
+        
         # Create our symbol service
-        service = SymbolService()
+        service = SymbolService(session)
         
         try:
             service.create_symbol(args.name)

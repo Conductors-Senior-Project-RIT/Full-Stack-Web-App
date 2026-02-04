@@ -1,6 +1,7 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
 
+from db.db import db
 from service.record_service import RecordService
 from service.service_core import *
 
@@ -30,7 +31,9 @@ class SignalUpdater(Resource):
         # Ensure that a valid record type, a valid record ID, and at least
         # a valid engine number or symbol ID is provided.
         try:
-            service = RecordService(args["type"])
+            session = db.session
+            
+            service = RecordService(session, args["type"])
             service.signal_update(args["id_num"], args["symbol_id"], args["engi_number_id"])
             return 200
         

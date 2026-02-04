@@ -3,7 +3,7 @@ from flask import jsonify, request
 from flask_restful import Resource
 from service.service_core import *
 from service.record_service import RecordService
-
+from db.db import db
 
 class recent_activities(Resource):
     # expects time as hours:minutes:seconds
@@ -28,7 +28,9 @@ class recent_activities(Resource):
             return jsonify({"error", "Invalid time range!"}), 400
         
         try:
-            record_service = RecordService(None)
+            session = db.session
+            
+            record_service = RecordService(session, None)
             results = record_service.time_frame_pull(
                 typ, time_range, recent, stat_id, station
             )

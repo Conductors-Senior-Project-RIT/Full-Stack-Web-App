@@ -2,10 +2,18 @@ import os
 from dotenv import load_dotenv
 import requests
 
+from service_core import BaseService
+
 load_dotenv()
 MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
 MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
 WEBSITE_DOMAIN = os.getenv("WEBSITE_DOMAIN")
+
+
+# class EmailService(BaseService):
+#     def __init__(self, session):
+#         super().__init__("Email")
+
 
 def send_welcome_email(email) -> bool:
     """

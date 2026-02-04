@@ -7,15 +7,20 @@ This module handles all database CRUD operations for EOT records
 from math import ceil
 from typing import Any
 from base_record_repo import RecordRepository
-from database_status import *
+from database.src.db.database_core import *
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 from psycopg import Error, OperationalError
 
 RESULTS_NUM = 250
 
 class EOTRepository(RecordRepository):
-    def __init__(self):
-        super().__init__("EOTRecords", "EOT Record", "eot")
+    def __init__(self, session):
+        super().__init__(
+            session,
+            "EOTRecords", 
+            "EOT Record", 
+            "eot",
+        )
 
     # below is train_history.py related
     def get_total_count_of_eot_records(self) -> int:

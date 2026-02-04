@@ -14,15 +14,14 @@ from api.load_example_data import (
 )  # Import the load example data resource
 from api.station_auth import StationAuth
 from api.error_handler import register_error_handlers
-from api.record_verifier import RecordVerifier
 from api.time_frame_pull import recent_activities
 from api.symbol_api import SymbolAPI
-from api.verifier_hot import LogVerifierHOT
 from api.pushover_updater import PushoverUpdater
 from api.record_collation import RecordCollation
 from api.UserPreferencesAPI import UserPreferences
 from api.station_online import StationOnline
-from api.hot_collation import HotCollation
+from database.src.db.db import db, db_uri
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -30,6 +29,10 @@ api = Api(app)
 # Replace with your actual PostgreSQL credentials
 app.config["SECRET_KEY"] = "your_secret_key"
 app.config["JWT_SECRET_KEY"] = "your_jwt_secret_key"
+app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+
+# Initialize our Flask app with our PostgreSQL
+db.init_app(app)
 
 CORS(app)
 bcrypt.init_app(app)
@@ -44,7 +47,6 @@ api.add_resource(
 )  # Register the load example data resource
 api.add_resource(SignalUpdater, "/api/add_signal_info")
 api.add_resource(StationAuth, "/api/station_auth")
-api.add_resource(RecordVerifier, "/api/record_verifier")
 api.add_resource(recent_activities, "/api/recent_activities")
 api.add_resource(SymbolAPI, "/api/symbols")
 api.add_resource(PushoverUpdater,"/api/PushoverUpdater")

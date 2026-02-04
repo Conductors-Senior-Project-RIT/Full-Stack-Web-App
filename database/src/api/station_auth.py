@@ -2,6 +2,7 @@ from flask import jsonify
 from flask_restful import Resource, reqparse
 from database.src.service.station_service import StationService
 from database.src.service.service_core import *
+from db.db import db
 
 
 class StationAuth(Resource):
@@ -12,8 +13,9 @@ class StationAuth(Resource):
             Response: Returns a collection of ID and name pairs if the retrieval was successful; otherwise,
             an error message is returned.
         """
-        try:  
-            results = StationService().get_stations()
+        try:
+            session = db.session
+            results = StationService(session).get_stations()
             return jsonify(results), 200
         except ServiceTimeoutError:
             return jsonify({"error": "Request timed out!"}), 408
@@ -32,7 +34,9 @@ class StationAuth(Resource):
             parser.add_argument("station_name", type=str, default="unnamed")
             args = parser.parse_args()
             
-            pw = StationService().create_station(args["station_name"])
+            session = db.session
+            
+            pw = StationService(session).create_station(args["station_name"])
             return jsonify({"password": pw}), 200
         
         except ServiceTimeoutError:
@@ -56,7 +60,8 @@ class StationAuth(Resource):
             return jsonify({"error": "An invalid station ID was provided!"}), 400
         
         try:
-            pw = StationService().update_station_password(args["id"])
+            session = db.session
+            pw = StationService(session).update_station_password(args["id"])
             return jsonify({"new_pw": pw}), 200
         except ServiceTimeoutError:
             return jsonify({"error": "Request timed out!"}), 408

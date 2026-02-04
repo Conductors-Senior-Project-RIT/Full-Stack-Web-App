@@ -1,10 +1,4 @@
-from abc import ABC
-from enum import Enum
-
-from database.src.db.record_types import RecordTypes
-    
-    
-class BaseService(ABC):
+class BaseService:
     def __init__(self, name: str):
         self._name = f"{name} Service"
         

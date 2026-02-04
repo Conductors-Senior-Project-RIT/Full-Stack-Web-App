@@ -1,20 +1,28 @@
-from flask import Blueprint, abort, json, request, jsonify
-from flask_restful import Resource, reqparse
-from database.src.api.error_handler import MethodNotAllowedError, InvalidArgumentError
+from flask import Blueprint, abort, request, jsonify
+from flask_restful import reqparse
+from flask_jwt_extended import get_jwt, verify_jwt_in_request
+from flask_cors import CORS
+from werkzeug.exceptions import Unauthorized
 from service.record_service import RecordService
 from service.service_core import *
 from service.symbol_service import SymbolService
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt, verify_jwt_in_request
-from flask_cors import CORS
 from db.trackSense_db_commands import *
-from werkzeug.exceptions import Unauthorized
+from database.src.db.db import db
+
 
 volunteer_bp = Blueprint("volunteer_bp", __name__)
 CORS(volunteer_bp)  # Enable CORS for the volunteer_bp blueprint
 
-# This class should use JWT volunteer authentication
+
 @volunteer_bp.before_request
 def check_jwt_auth():
+    """Before a request is made to any route in this blueprint, this function checks 
+    whether the request includes a JWT with sufficient user privileges.
+
+    Raises:
+        Unauthorized: An exception will be raised if the user role is not provided or if it does not have
+        the necessary user privileges.
+    """
     # Verify that a JWT was provided
     verify_jwt_in_request()
     
@@ -29,7 +37,7 @@ def check_jwt_auth():
     
     # Check if user unauthorized, not volunteer (1) or admin (0)
     if user_role > 1:
-        raise Unauthorized("User is unauthorized!")
+        raise Unauthorized("User is not permitted!")
 
 
 @volunteer_bp.route("/api/add-pin", methods=["POST"])
@@ -54,8 +62,15 @@ def get_pins():
 
 @volunteer_bp.route("/symbol", methods=["GET", "POST"])
 def get_symbol():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
     # Retrieve the provided query parameters (if it exists)
     symbol_name = request.args.get("symbol_name", default=None, type=str)
+    
+    session = db.session
     
     # Instantiate a symbol service
     service = SymbolService()

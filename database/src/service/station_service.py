@@ -1,20 +1,26 @@
 import hashlib
 import random
 import string
-from database.src.db.record_types import RecordTypes, get_record_repository
-import database.src.db.station_repo as repo
-from database.src.db.database_status import *
-from database.src.service.service_core import *
+from db.record_types import RecordTypes, get_record_repository
+from db.station_repo import StationRepository
+from db.database_core import *
+from service_core import *
 
 
 class StationService(BaseService):
-    def __init__(self):
-        super().__init__("Station")
+    def __init__(self, session):
+        self._station_repo = StationRepository(session)
+        self._record_repos = {
+            "eot": get_record_repository(session, RecordTypes.EOT),
+            "hot": get_record_repository(session, RecordTypes.HOT)
+        }
+            
+        super().__init__(session, "Station")
     
     # -- Station Auth -- #
     def get_stations(self):
         try:
-            return repo.get_stations()
+            return self._station_repo.get_stations()
         except RepositoryTimeoutError:
             raise ServiceTimeoutError(self)
         except (RepositoryInternalError, RepositoryParsingError) as e:
@@ -24,7 +30,7 @@ class StationService(BaseService):
     def create_station(self, station_name: str) -> str:
         try:
             unhashed_pw, hashed_pw = self.generate_password_string()
-            repo.create_new_station(station_name, hashed_pw)
+            self._station_repo.create_new_station(station_name, hashed_pw)
             return unhashed_pw
         except RepositoryTimeoutError:
             raise ServiceTimeoutError(self)
@@ -35,7 +41,7 @@ class StationService(BaseService):
     def update_station_password(self, station_id: int) -> str:
         try:
             unhashed_pw, hashed_pw = self.generate_password_string()
-            repo.update_station_password(station_id, hashed_pw)
+            self._station_repo.update_station_password(station_id, hashed_pw)
             return unhashed_pw
         except RepositoryTimeoutError:
             raise ServiceTimeoutError(self)
@@ -63,15 +69,11 @@ class StationService(BaseService):
     # -- Station Handler -- #
     def get_trains_from_station(self, station_name: str, recent=False) -> dict:
         try:
-            station_id = repo.get_station_id(station_name)
+            station_id = self._station_repo.get_station_id(station_name)
             
-            repos = {
-                "eot": get_record_repository(RecordTypes.EOT),
-                "hot": get_record_repository(RecordTypes.HOT)
-            }
             results = {
                 f"{t}_records": r.get_station_records(station_id, recent=recent)
-                for t, r in repos.items()
+                for t, r in self._record_repos.items()
             }
             
             return results
@@ -89,17 +91,13 @@ class StationService(BaseService):
     # TODO: Probably not neeeded
     def get_pin_info(self, station_name: str) -> dict:
         try:
-            station_id = repo.get_station_id(station_name)
-            
-            repos = {
-                "eot": get_record_repository(RecordTypes.EOT), 
-                "hot": get_record_repository(RecordTypes.HOT)
-            }
+            station_id = self._station_repo.get_station_id(station_name)
+
             results = {
                 f"{t}_records": r.parse_station_records(
                     r.get_recent_station_records(station_id)
                 )
-                for t, r in repos.items()
+                for t, r in self._record_repos.items()
             }
             
             return results
@@ -115,7 +113,7 @@ class StationService(BaseService):
     # -- Station Online -- #
     def get_last_seen(self, station_name: str) -> str:
         try:
-            return repo.get_last_seen(station_name)
+            return self._station_repo.get_last_seen(station_name)
         except RepositoryTimeoutError:
             raise ServiceTimeoutError(self)
         except (RepositoryInternalError, RepositoryParsingError) as e:
@@ -126,7 +124,7 @@ class StationService(BaseService):
         
     def update_last_seen(self, station_id: int):
         try:
-            repo.update_last_seen(station_id)
+            self._station_repo.update_last_seen(station_id)
         except RepositoryTimeoutError:
             raise ServiceTimeoutError()
         except RepositoryInternalError as e:

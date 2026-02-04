@@ -5,7 +5,7 @@ from datetime import date
 from database.src.service.service_core import ServiceTimeoutError, ServiceInternalError, ServiceResourceNotFound
 from database.src.service.station_service import StationService
 from db.trackSense_db_commands import run_exec_cmd, run_get_cmd
-
+from db.db import db
 
 class StationOnline(Resource):
     def get(self):
@@ -14,7 +14,9 @@ class StationOnline(Resource):
             if station is None:
                 return jsonify({"message": "Station name not provided"}), 400
 
-            formatted_date = StationService().get_last_seen(station)
+            session = db.session
+
+            formatted_date = StationService(session).get_last_seen(station)
             return jsonify({"last_seen": formatted_date}), 200
         
         except ServiceTimeoutError:
@@ -32,7 +34,9 @@ class StationOnline(Resource):
             if stat_id < 1:
                 raise ValueError()
 
-            StationService().update_last_seen(stat_id)
+            session = db.session
+
+            StationService(session).update_last_seen(stat_id)
             return 200
         
         except (ValueError, TypeError, MemoryError, OverflowError):

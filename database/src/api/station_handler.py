@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 from database.src.service.station_service import StationService
 from database.src.service.service_core import *
+from db.db import db
 
 station_bp = Blueprint("station_bp", __name__)
 CORS(station_bp)  # Enable CORS for the station_bp blueprint
@@ -13,7 +14,8 @@ def get_trains():
         return jsonify({"message": "Station not specified"}), 400
 
     try:
-        results = StationService().get_trains_from_station(station)
+        session = db.session
+        results = StationService(session).get_trains_from_station(station)
         return jsonify(results), 200
     except ServiceTimeoutError:
         return jsonify({"error": "Request timed out!"}), 408
@@ -78,7 +80,8 @@ def get_pin_info():
         return jsonify({"message": "Station not specified"}), 400
 
     try:
-        results = StationService().get_trains_from_station(station, recent=True)
+        session = db.session
+        results = StationService(session).get_trains_from_station(station, recent=True)
         return jsonify(results), 200
     except ServiceTimeoutError:
         return jsonify({"error": "Request timed out!"}), 408

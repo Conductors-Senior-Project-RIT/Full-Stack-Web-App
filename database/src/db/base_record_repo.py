@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
 from psycopg import Error, OperationalError, sql
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
-from database_status import *
+from database_core import *
 from typing import Any
 
-class RecordRepository(ABC):
-    def __init__(self, table_name: str, record_name: str, record_identifier: str):
+class RecordRepository(BaseRepository):
+    def __init__(self, session, table_name: str, record_name: str, record_identifier: str):
         self._table_name = table_name
         self._record_name = record_name
         self._record_identifier = record_identifier
+        super().__init__(session)
         
     def get_record_name(self) -> str:
         return self._record_name
@@ -24,6 +25,7 @@ class RecordRepository(ABC):
     def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:
         pass
 
+    
     def get_unit_record_ids(self, unit_addr: str, most_recent=False) -> int:
         try:
             query = sql.SQL(
@@ -49,6 +51,7 @@ class RecordRepository(ABC):
             raise RepositoryParsingError(f"Could not parse unit record IDs: {e}")
         
 
+    
     def get_recent_trains(self, unit_addr: str, station_id: int) -> list:
         try:
             query = sql.SQL(
@@ -70,6 +73,8 @@ class RecordRepository(ABC):
         except Error as e:
             raise RepositoryInternalError(f"Could not get recent trains: {e}")    
 
+
+    
     def add_new_pin(self, record_id: int, unit_addr: int) -> int:
         try:
             args = {"id": record_id, "unit_addr": unit_addr}
@@ -93,6 +98,7 @@ class RecordRepository(ABC):
             raise RepositoryInternalError(f"Could not add new pin: {e}")
 
 
+    
     def check_for_record_field(self, unit_addr: str, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
             raise ValueError("Incorrect database field!")
@@ -123,7 +129,7 @@ class RecordRepository(ABC):
             raise RepositoryParsingError(f"Could not parse record field results: {e}")
         
 
-
+    
     def update_record_field(self, record_id: int, field_value: Any, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
             print("Incorrect database field!")
@@ -190,6 +196,7 @@ class RecordRepository(ABC):
     def get_records_by_verification(self, page: int, verified: bool) -> list[dict[str, str]]:
         pass
     
+    
     def verify_record(self, record_id: int, symbol_id: int, engine_id: int):
         try:
             args = {
@@ -220,6 +227,7 @@ class RecordRepository(ABC):
         
         
     # Time frame
+    
     def get_records_in_timeframe(self, station_id: int, datetime_str: str, recent: bool) -> list[dict[str, Any]]:
         try:
             query = sql.SQL(
