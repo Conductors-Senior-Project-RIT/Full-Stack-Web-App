@@ -9,11 +9,22 @@ def calculate_churn(start_date, end_date, out_file, commit_details_mode=False):
     total_lines_added = 0
     total_lines_deleted = 0
     total_lines_changed = 0
+    commit_num = 0
+    churn["Overall"] = {
+        "Total Lines Added": 0,
+        "Total Lines Deleted": 0,
+        "Total Lines Changed": 0,
+        "Commits": 0,
+        "Avg Lines Added Per Commit": 0,
+        "Avg Lines Deleted Per Commit": 0,
+        "Avg Lines Changed Per Commit": 0
+    }
     for commit in commits:
         stats = commit.stats
         total_lines_added += stats.total["insertions"]
         total_lines_deleted += stats.total["deletions"]
         total_lines_changed += stats.total["lines"]
+        commit_num += 1
         for file in stats.files:
             # Filter out metrics reports
             if "metrics/reports/" in file:
@@ -53,6 +64,13 @@ def calculate_churn(start_date, end_date, out_file, commit_details_mode=False):
                 commit_details["Lines Changed"] = stats.files[file]["lines"]
                 commit_details["Change Type"] = stats.files[file]["change_type"]
                 churn[file]["Commits"].append(commit_details)
+    churn["Overall"]["Total Lines Added"] = total_lines_added
+    churn["Overall"]["Total Lines Deleted"] = total_lines_deleted
+    churn["Overall"]["Total Lines Changed"] = total_lines_changed
+    churn["Overall"]["Commits"] = commit_num
+    churn["Overall"]["Avg Lines Added Per Commit"] = total_lines_added / commit_num
+    churn["Overall"]["Avg Lines Deleted Per Commit"] = total_lines_deleted / commit_num
+    churn["Overall"]["Avg Lines Changed Per Commit"] = total_lines_changed / commit_num
     with open(out_file, "w+", newline="") as out:
         json.dump(churn, out, indent=1)
     print("Total Lines Added During Period: " + str(total_lines_added))
