@@ -7,17 +7,16 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from db.database_core import *
 from service.service_core import *
 from db.station_repo import StationRepository
-from db.user_db import UserRepository
+from db.user_repo import UserRepository
 from service.email_service import send_welcome_email, send_forgot_password_email
 
 """
 TODO: move everything from user_db.py to user_repo.py for custom error handling!
 """
 class UserService(BaseService):
-    def __init__(self, session, name):
+    def __init__(self, session):
         self._user_repo = UserRepository(session)
         self._station_repo = StationRepository(session)
-        super().__init__(name)
     
     def register_user(self, email: str, password: str):
         """
