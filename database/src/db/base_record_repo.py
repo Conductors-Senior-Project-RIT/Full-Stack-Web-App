@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
 from psycopg import Error, OperationalError, sql
+from sqlalchemy import text
+from sqlalchemy.orm.scoping import scoped_session
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 from database_core import *
 from typing import Any
 
 class RecordRepository(BaseRepository):
-    def __init__(self, session, table_name: str, record_name: str, record_identifier: str):
+    def __init__(self, session: scoped_session, table_name: str, record_name: str, record_identifier: str):
         self._table_name = table_name
         self._record_name = record_name
         self._record_identifier = record_identifier
@@ -28,20 +30,20 @@ class RecordRepository(BaseRepository):
     
     def get_unit_record_ids(self, unit_addr: str, most_recent=False) -> int:
         try:
-            query = sql.SQL(
+            query = text(
+                f"""
+                SELECT id FROM {self._table_name}
+                WHERE unit_addr = :unit_addr
                 """
-                SELECT id FROM {table_name}
-                WHERE unit_addr = %(unit_addr)s
-                """
-            ).format(table_name=sql.Identifier(self._table_name))
+            )
             
             args = {"unit_addr": unit_addr}
-            resp_id = run_get_cmd(query, args)
+            resp_id = self.session.execute(query, args).scalars()
             
             if len(resp_id) < 1:
                 raise RepositoryNotFoundError(unit_addr)
                 
-            return resp_id[-1][0] if most_recent else [resp_id[i][0] for i in resp_id]
+            return resp_id[-1] if most_recent else resp_id
         
         except OperationalError:
             raise RepositoryTimeoutError()
@@ -54,19 +56,20 @@ class RecordRepository(BaseRepository):
     
     def get_recent_trains(self, unit_addr: str, station_id: int) -> list:
         try:
-            query = sql.SQL(
+            query = text(
+                f"""
+                SELECT * FROM {self._table_name}
+                WHERE unit_addr = :unit_addr AND station_recorded = :station_id AND date_rec >= NOW() - INTERVAL '10 minutes'
                 """
-                SELECT * FROM {table_name}
-                WHERE unit_addr = %(unit_address)s AND station_recorded = %(station_id)s AND date_rec >= NOW() - INTERVAL '10 minutes'
-                """
-            ).format(table_name=sql.Identifier(self._table_name))
+            )
             
             args = {
-                "unit_address": unit_addr, 
+                "unit_addr": unit_addr, 
                 "station_id": station_id
             }
             
-            return run_get_cmd(query, args)
+            results = self.session.execute(query, args).all()
+            return [row._asdict() for row in results]
         
         except OperationalError:
             raise RepositoryTimeoutError()
@@ -78,18 +81,19 @@ class RecordRepository(BaseRepository):
     def add_new_pin(self, record_id: int, unit_addr: int) -> int:
         try:
             args = {"id": record_id, "unit_addr": unit_addr}
-            query = sql.SQL(
-                """
-                UPDATE {table_name}
+            
+            query = text(
+                f"""
+                UPDATE {self._table_name}
                 SET most_recent = false
-                WHERE id != %(id)s and unit_addr = %(unit_addr)s and most_recent = true
+                WHERE id != :id and unit_addr = :unit_addr and most_recent = true
+                RETURNING id
                 """
-            ).format(
-                table_name=sql.Identifier(self._table_name)
             )
-            results = run_exec_cmd(query, args)
-            if results < 1:
-                raise RepositoryInternalError(f"Could not add new pin, 0 rows were created!")
+            
+            results = self.session.execute(query, args).scalar()
+            if len(results) < 1:
+                raise RepositoryInternalError(f"Could not add new pin, 0 rows were updated!")
             return results
         
         except OperationalError:
@@ -101,25 +105,22 @@ class RecordRepository(BaseRepository):
     
     def check_for_record_field(self, unit_addr: str, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
-            raise ValueError("Incorrect database field!")
+            raise RepositoryNotFoundError(field_type)
         
         # sql = """
         # SELECT %(field_type)s FROM {record_table} 
         # WHERE unit_addr = %(unit_addr)s and most_recent = True
         # """
         try:
-            query = sql.SQL(
-                    """
-                    SELECT {field_type} FROM {record_table} 
-                    WHERE unit_addr = %(unit_addr)s and most_recent = True
-                    """).format(
-                        field_type=sql.Identifier(field_type),
-                        record_table=sql.Identifier(self._table_name)
-                    )
+            query = text(
+                f"""
+                SELECT {field_type} FROM {self._table_name} 
+                WHERE unit_addr = :unit_addr and most_recent = True
+                """
+            )
             params = {"unit_addr": unit_addr}
-
-            resp = run_get_cmd(query, params)
-            return resp[0][0] if len(resp) == 1 else None
+            
+            return self.session.execute(query, params).scalar()
         
         except OperationalError:
             raise RepositoryTimeoutError()
@@ -132,21 +133,23 @@ class RecordRepository(BaseRepository):
     
     def update_record_field(self, record_id: int, field_value: Any, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
-            print("Incorrect database field!")
-            return False
+            raise RepositoryNotFoundError(field_type)
         
         try:
             args = {"id": record_id, "field_val": field_value}
-            query = sql.SQL(
-                    "UPDATE {record_table} SET {field_type} = %(field_val)s WHERE id = %(id)s"
-                ).format(
-                    record_table=sql.Identifier(self._table_name),
-                    field_type=sql.Identifier(field_type)
-                )
-            resp = run_exec_cmd(query, args)
-            if resp < 1:
+            query = text(
+                f"""
+                UPDATE {self._table_name} 
+                SET {field_type} = :field_val 
+                WHERE id = :id
+                RETURNING id, {field_type}
+                """
+            )
+
+            results = self.session.execute(query, args).all()
+            if results < 1:
                 raise RepositoryInternalError(f"Could not update {field_type}, 0 rows updated!")
-            return resp
+            return [row._asdict() for row in results]
         
         except OperationalError:
             raise RepositoryTimeoutError()
@@ -160,14 +163,13 @@ class RecordRepository(BaseRepository):
             if recent:
                 return self.get_recent_station_records(station_id)
             
-            query = sql.SQL(
-                    "SELECT * FROM {record_table} WHERE station_recorded = {station_id}"
-                ).format(
-                    record_table=sql.Identifier(self._table_name),
-                    station_id=sql.Literal(station_id)
-                )
-            resp = run_get_cmd(query)
-            return resp
+            args = {"station_id": station_id}
+            query = text(
+                f"SELECT * FROM {self._table_name} WHERE station_recorded = :station_id"
+            )
+            
+            results = self.session.execute(query, args).all()
+            return [row._asdict() for row in results]
         
         except OperationalError:
             raise RepositoryTimeoutError()
@@ -204,22 +206,23 @@ class RecordRepository(BaseRepository):
                 "symbol": symbol_id,
                 "engine_num": engine_id,
             }
-
-            query = sql.SQL(
-                """
-                UPDATE {table_name}
-                SET symbol_id = %(symbol)s, 
-                locomotive_num = %(engine_num)s,
-                verified = true
-                WHERE id = %(id)s
-                """
-            ).format(
-                table_name=sql.Identifier(self._table_name)
-            )
             
-            result = run_exec_cmd(query, args)
-            if result < 1:
+            query = text(
+                f"""
+                UPDATE {self._table_name}
+                SET symbol_id = :symbol, 
+                locomotive_num = :engine_num,
+                verified = true
+                WHERE id = :id
+                RETURNING id, symbol_id, locomotive_num
+                """
+            )
+
+            results = self.session.execute(query, args).all()
+            if results < 1:
                 raise RepositoryNotFoundError(record_id)
+            return [row._asdict() for row in results]
+            
         except OperationalError:
             raise RepositoryTimeoutError()
         except Error as e:
@@ -230,27 +233,25 @@ class RecordRepository(BaseRepository):
     
     def get_records_in_timeframe(self, station_id: int, datetime_str: str, recent: bool) -> list[dict[str, Any]]:
         try:
-            query = sql.SQL(
-                """
-                SELECT {table_name}.id, unit_addr, date_rec, stat.station_name, sym.symb_name, engine_num, locomotive_num FROM {table_name}
+            query_str = f"""
+                SELECT {self._table_name}.id, unit_addr, date_rec, stat.station_name, sym.symb_name, engine_num, locomotive_num FROM {self._table_name}
                 INNER JOIN Stations as stat on station_recorded = stat.id
                 INNER JOIN Symbols as sym on symbol_id = sym.id
-                WHERE date_rec >= %(date_stamp)s 
+                WHERE date_rec >= :date_stamp 
                 """
-            ).format(
-                table_name=sql.Identifier(self._table_name)
-            )
             
             args = {"date_stamp": datetime_str}
+            
             if station_id != -1:  
-                query += " AND stat.id = %(station_id)s" if station_id != -1 else ""
+                query_str += " AND stat.id = :station_id" if station_id != -1 else ""
                 args["station_id"] = station_id
             
             if recent:
-                query += " AND most_recent = TRUE"
+                query_str += " AND most_recent = TRUE"
                 
-            results = run_get_cmd(query, args)
-            if results < 1:
+            query = text(query_str)
+            results = self.session.execute(query, args).all()
+            if len(results) < 1:
                 raise RepositoryNotFoundError(station_id)
             
             return [
