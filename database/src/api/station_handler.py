@@ -79,16 +79,9 @@ def get_pin_info():
     if not station:
         return jsonify({"message": "Station not specified"}), 400
 
-    try:
-        session = db.session
-        results = StationService(session).get_trains_from_station(station, recent=True)
-        return jsonify(results), 200
-    except ServiceTimeoutError:
-        return jsonify({"error": "Request timed out!"}), 408
-    except ServiceResourceNotFound as e:
-        return jsonify({"error": str(e)}), 404
-    except (ServiceInternalError, ServiceParsingError) as e:
-        return jsonify({"error": str(e)}), 500
+    session = db.session
+    results = StationService(session).get_trains_from_station(station, recent=True)
+    return jsonify(results), 200
     
 
     # Fetch the station ID for the specified station

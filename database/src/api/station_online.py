@@ -1,49 +1,31 @@
 from flask import request, jsonify
 from flask_restful import Resource
-from datetime import date
+from werkzeug.exceptions import BadRequest
 
-from database.src.service.service_core import ServiceTimeoutError, ServiceInternalError, ServiceResourceNotFound
-from database.src.service.station_service import StationService
-from db.trackSense_db_commands import run_exec_cmd, run_get_cmd
+from service.service_core import ServiceTimeoutError, ServiceInternalError, ServiceResourceNotFound
+from service.station_service import StationService
 from db.db import db
 
 class StationOnline(Resource):
     def get(self):
-        try:
-            station = request.args.get("station_name", default=None, type=str)
-            if station is None:
-                return jsonify({"message": "Station name not provided"}), 400
+        station = request.args.get("station_name", default=None, type=str)
+        if station is None:
+            raise BadRequest("Station name not provided!")
 
-            session = db.session
+        session = db.session
 
-            formatted_date = StationService(session).get_last_seen(station)
-            return jsonify({"last_seen": formatted_date}), 200
-        
-        except ServiceTimeoutError:
-            return ({"error": "Request timed out!"}), 408
-        except ServiceInternalError as e:
-            return ({"error": str(e)}), 500
-        except ServiceResourceNotFound as e:
-            return ({"error": str(e)}), 404
+        formatted_date = StationService(session).get_last_seen(station)
+        return jsonify({"last_seen": formatted_date}), 200
+    
 
     def put(self):
-        try:
-            data = request.get_json()
-            stat_id = int(data.get("station_id"))
-            
-            if stat_id < 1:
-                raise ValueError()
-
-            session = db.session
-
-            StationService(session).update_last_seen(stat_id)
-            return 200
+        data = request.get_json()
+        stat_id = int(data.get("station_id"))
         
-        except (ValueError, TypeError, MemoryError, OverflowError):
-            return ({"error": "Invalid station ID!"}), 400
-        except ServiceTimeoutError:
-            return ({"error": "Request timed out!"}), 408
-        except ServiceInternalError as e:
-            return ({"error": str(e)}), 500
-        except ServiceResourceNotFound as e:
-            return ({"error": str(e)}), 404
+        if stat_id < 1:
+            raise BadRequest(f"Station ID must be greater than or equal to 1 but ({stat_id}) was provided!")
+
+        session = db.session
+
+        StationService(session).update_last_seen(stat_id)
+        return 200

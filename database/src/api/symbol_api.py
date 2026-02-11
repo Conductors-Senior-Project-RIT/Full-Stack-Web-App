@@ -22,14 +22,9 @@ class SymbolAPI(Resource):
         
         # Instantiate a new symbol service
         service = SymbolService(session)
-        
-        try:
-            results = service.get_symbol(symbol_name)
-            return jsonify({"results": results}), 200
-        except ServiceTimeoutError:
-            return jsonify({"error": "Request timed out!"}), 408
-        except ServiceInternalError as e:
-            return jsonify({"error": str(e)}), 500
+
+        results = service.get_symbol(symbol_name)
+        return jsonify({"results": results}), 200
         
 
     def post(self):
@@ -52,11 +47,6 @@ class SymbolAPI(Resource):
         
         # Create our symbol service
         service = SymbolService(session)
-        
-        try:
-            service.create_symbol(args.name)
-            return 200
-        except ServiceTimeoutError:
-            return jsonify({"error": "Request timed out!"}), 408
-        except ServiceInternalError as e:
-            return jsonify({"error": str(e)}), 500
+
+        service.create_symbol(args.name)
+        return 200

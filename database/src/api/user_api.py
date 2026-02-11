@@ -10,6 +10,7 @@ from flask_jwt_extended import (
     get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies,
 )
 from flask_cors import CORS
+from werkzeug.exceptions import BadRequest
 from db.user_db import *
 from dotenv import load_dotenv
 
@@ -51,7 +52,7 @@ def register():
     password = data.get("password")
 
     if not email or not password:
-        return jsonify({"message": "Email and password required"}), 500
+        return BadRequest("Email and password required")
 
     try:
         result = register_user(email, password) #service
@@ -76,7 +77,7 @@ def login():
     user_id = user[0][0] # need to find a clean way to stop double indexing, index the query results from the repo/db layer so we stop double indexing here.
     user_role = user[0][4]
 
-    response = jsonify({"message": "login successful"})
+    response = jsonify({"message": "login successful"}), 200
 
     additional_claims = {"user_role": user_role} # a user role is set based on what's in the database
 

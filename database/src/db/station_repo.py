@@ -125,7 +125,7 @@ class StationRepository(BaseRepository):
         except Error as e:
             raise RepositoryInternalError(f"Could not get last seen from station: {e}")
         except IndexError as e:
-            raise RepositoryParsingError(f"Could access query results: {e}")
+            raise RepositoryParsingError(f"Could not access query results: {e}")
         except (UnicodeError, ValueError, TypeError) as e:
             raise RepositoryParsingError(f"Could not parse datetime string: {e}")
         

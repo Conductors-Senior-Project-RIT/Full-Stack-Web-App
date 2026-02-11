@@ -4,6 +4,7 @@ User database layer
 This module handles all database CRUD operations for User and UserPreferences records
 """
 
+from psycopg.errors import Error, CancellationTimeout, ConnectionTimeout
 from database_core import *
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 from typing import Any
@@ -20,15 +21,24 @@ class UserRepository(BaseRepository):
         )
         
     def get_user_id(self, email: str) -> int | None:
-        user = run_get_cmd("SELECT id FROM Users WHERE email = %s", (email,))
+        try:
+            user = run_get_cmd("SELECT id FROM Users WHERE email = %s", (email,))
+            
+            if not user:
+                return RepositoryNotFoundError("User not found!")
+            
+            return user[0][0]
         
-        if not user:
-            return None
-        
-        return user[0][0]
+        except IndexError:
+            raise RepositoryInternalError("Failed to index results!")
+        except (ConnectionTimeout, CancellationTimeout) as e:
+            raise RepositoryTimeoutError()
+        except Error as e:
+            raise RepositoryInternalError(str(e))
 
     def get_user_info(self, email: str): #-> list[TupleRow]
         return run_get_cmd("SELECT * FROM Users WHERE email = %s", (email,))
+        
 
     def update_session_token(self, user_id: int, token: str):
         run_exec_cmd(

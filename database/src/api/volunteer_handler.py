@@ -2,7 +2,7 @@ from flask import Blueprint, abort, request, jsonify
 from flask_restful import reqparse
 from flask_jwt_extended import get_jwt, verify_jwt_in_request
 from flask_cors import CORS
-from werkzeug.exceptions import Unauthorized
+from werkzeug.exceptions import Unauthorized, BadRequest
 from service.record_service import RecordService
 from service.service_core import *
 from service.symbol_service import SymbolService
@@ -122,7 +122,7 @@ def post_record():
     
     for arg, val in arg_validators.items():
         if val < 1:
-            abort(400, f"{arg} must be greater than 1, given: {val}")
+            raise BadRequest(f"{arg} must be greater than 1, given: {val}")
         
     record_service = RecordService(args.type)
     record_service.verify_record(args.id, args.symbol, args.engine_number)

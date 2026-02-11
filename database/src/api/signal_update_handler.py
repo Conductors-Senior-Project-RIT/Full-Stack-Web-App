@@ -30,15 +30,9 @@ class SignalUpdater(Resource):
 
         # Ensure that a valid record type, a valid record ID, and at least
         # a valid engine number or symbol ID is provided.
-        try:
-            session = db.session
-            
-            service = RecordService(session, args["type"])
-            service.signal_update(args["id_num"], args["symbol_id"], args["engi_number_id"])
-            return 200
+        session = db.session
         
-        except ServiceTimeoutError:
-            return jsonify({"error": "Request timed out!"}), 408
-        except ServiceInternalError as e:
-            return jsonify({"error": str(e)}), 500
-        
+        service = RecordService(session, args["type"])
+        service.signal_update(args["id_num"], args["symbol_id"], args["engi_number_id"])
+        return 200
+    

@@ -1,7 +1,7 @@
 import hashlib
 import random
 import string
-from db.record_types import RecordTypes, get_record_repository
+from db.record_types import get_all_repositories
 from db.station_repo import StationRepository
 from db.database_core import *
 from service_core import *
@@ -11,44 +11,27 @@ class StationService(BaseService):
     def __init__(self, session):
         self._station_repo = StationRepository(session)
         self._record_repos = {
-            "eot": get_record_repository(session, RecordTypes.EOT),
-            "hot": get_record_repository(session, RecordTypes.HOT)
+            r.get_record_identifier(): r for r in get_all_repositories()
         }
             
         super().__init__(session, "Station")
     
     # -- Station Auth -- #
     def get_stations(self):
-        try:
-            return self._station_repo.get_stations()
-        except RepositoryTimeoutError:
-            raise ServiceTimeoutError(self)
-        except (RepositoryInternalError, RepositoryParsingError) as e:
-            raise ServiceInternalError(self, str(e))
+        return self._station_repo.get_stations()
+
         
         
     def create_station(self, station_name: str) -> str:
-        try:
-            unhashed_pw, hashed_pw = self.generate_password_string()
-            self._station_repo.create_new_station(station_name, hashed_pw)
-            return unhashed_pw
-        except RepositoryTimeoutError:
-            raise ServiceTimeoutError(self)
-        except RepositoryInternalError as e:
-            raise ServiceInternalError(self, str(e))
+        unhashed_pw, hashed_pw = self.generate_password_string()
+        self._station_repo.create_new_station(station_name, hashed_pw)
+        return unhashed_pw
         
         
     def update_station_password(self, station_id: int) -> str:
-        try:
-            unhashed_pw, hashed_pw = self.generate_password_string()
-            self._station_repo.update_station_password(station_id, hashed_pw)
-            return unhashed_pw
-        except RepositoryTimeoutError:
-            raise ServiceTimeoutError(self)
-        except RepositoryNotFoundError as e:
-            raise ServiceResourceNotFound(self, str(e))
-        except RepositoryInternalError as e:
-            raise ServiceInternalError(self, str(e))
+        unhashed_pw, hashed_pw = self.generate_password_string()
+        self._station_repo.update_station_password(station_id, hashed_pw)
+        return unhashed_pw
 
 
     ## Password Generation
@@ -78,14 +61,8 @@ class StationService(BaseService):
             
             return results
         
-        except RepositoryNotFoundError as e:
-            raise ServiceResourceNotFound(self, str(e))
-        except RepositoryTimeoutError:
-            raise ServiceTimeoutError(self)
-        except (RepositoryInternalError, RepositoryParsingError) as e:
-            raise ServiceInternalError(self, str(e))
         except (IndexError, ValueError, TypeError) as e:
-            raise ServiceParsingError(self)
+            raise ServiceParsingError(self.__class__.__name__, str(e))
         
         
     # TODO: Probably not neeeded
@@ -101,35 +78,17 @@ class StationService(BaseService):
             }
             
             return results
-            
-        except RepositoryTimeoutError:
-            raise ServiceTimeoutError(self)
-        except (RepositoryInternalError, RepositoryParsingError) as e:
-            raise ServiceInternalError(self, str(e))
+
         except (IndexError, ValueError, TypeError) as e:
-            raise ServiceParsingError(self)
+            raise ServiceParsingError(self.__class__.__name__, str(e))
 
 
     # -- Station Online -- #
     def get_last_seen(self, station_name: str) -> str:
-        try:
-            return self._station_repo.get_last_seen(station_name)
-        except RepositoryTimeoutError:
-            raise ServiceTimeoutError(self)
-        except (RepositoryInternalError, RepositoryParsingError) as e:
-            raise ServiceInternalError(self, str(e))
-        except RepositoryNotFoundError as e:
-            raise ServiceResourceNotFound(self, str(e))
+        return self._station_repo.get_last_seen(station_name)
         
         
     def update_last_seen(self, station_id: int):
-        try:
-            self._station_repo.update_last_seen(station_id)
-        except RepositoryTimeoutError:
-            raise ServiceTimeoutError()
-        except RepositoryInternalError as e:
-            raise ServiceInternalError(self, str(e))
-        except RepositoryNotFoundError as e:
-            raise ServiceResourceNotFound(self, str(e))
+        self._station_repo.update_last_seen(station_id)
             
             

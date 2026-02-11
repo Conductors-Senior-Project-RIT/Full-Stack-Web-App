@@ -1,5 +1,6 @@
 from flask import jsonify, request
 from flask_restful import Resource, reqparse
+from werkzeug.exceptions import BadRequest
 from db.trackSense_db_commands import *
 from database.src.service.record_service import RecordService
 from db.db import db
@@ -11,11 +12,11 @@ from dotenv import *
 load_dotenv()
 
 
-def validate_int_argument(value: int, name: int, min_value: int):
+def validate_int_argument(value: int, name: str, min_value: int):
     if not isinstance(value, int):
-        raise ValueError(f"{name} ({value}) is not an integer!")
+        raise BadRequest(f"{name} ({value}) is not an integer!")
     if value < min_value:
-        raise ValueError(f"Provided {name} must be greater than {min_value} but was given {value}...")
+        raise BadRequest(f"Provided {name} must be greater than {min_value} but was given {value}...")
 
 class HistoryDB(Resource):
     def get(self):
@@ -33,24 +34,17 @@ class HistoryDB(Resource):
         typ = request.args.get("type", default=-1, type=int)
         id = request.args.get("id", default=-1, type=int)
         page = request.args.get("page", default=1, type=int)
+
+        # Check our type and page arguments (typ checked in strategy creation)
+        validate_int_argument(id, "type", 1)
+        validate_int_argument(page, "page", 1)
         
-        try:
-            # Check our type and page arguments (typ checked in strategy creation)
-            validate_int_argument(id, "type", 1)
-            validate_int_argument(page, "page", 1)
+        session = db.session
+        
+        th_service = RecordService(session, typ)
+        results = th_service.get_train_history(typ, id, page)
+        return jsonify(results), 200
             
-            session = db.session
-            
-            th_service = RecordService(session, typ)
-            results = th_service.get_train_history(typ, id, page)
-            return jsonify(results), 200
-            
-        except (ServiceInvalidArgument, ValueError) as e:
-            return jsonify({"error": str(e)}), 400
-        except ServiceTimeoutError:
-             return jsonify({"error": "Request timed out!"}), 408
-        except ServiceInternalError as e:
-            return jsonify({"error": str(e)}), 500
 
         
 
@@ -87,21 +81,14 @@ class HistoryDB(Resource):
         
         # right now this has 0 authentication. Too bad!
         typ = args["type"]
-        try:
-            session = db.session
-            
-            th_service = RecordService(session, typ)
-            results = th_service.post_train_history(typ, args, dt_str)
-            return jsonify(results), 200
         
-        except ServiceInvalidArgument as e:
-            return jsonify({"error": str(e)}), 400
-        except ServiceResourceNotFound as e:
-            return jsonify({"error": str(e)}), 404
-        except ServiceTimeoutError:
-             return jsonify({"error": "Request timed out!"}), 408
-        except ServiceInternalError as e:
-            return jsonify({"error": str(e)}), 500
+        session = db.session
+            
+        th_service = RecordService(session, typ)
+        results = th_service.post_train_history(typ, args, dt_str)
+        return jsonify(results), 200
+        
+
 
         # if not resp:
         #     print(recovery_request)
