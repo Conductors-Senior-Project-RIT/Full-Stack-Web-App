@@ -1,13 +1,13 @@
 # doc says config .py files should have all uppercase for config keys
 # default settings would refer to dev environment
-# TODO: def missing things but will add along the way
+# TODO: def missing some variables to set, but will add along the way
 import os
 
 class Config(object):
     """
     Base configuration class
     """
-    # default config setting(s) (loaded automatically from .env)
+    # default config setting(s)
     SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-key?")
 
     # build database uri from .env | should prod config database url be stored in .env?
