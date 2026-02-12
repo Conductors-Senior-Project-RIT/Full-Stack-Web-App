@@ -43,6 +43,8 @@ class UserRepository(BaseRepository):
         
             return user[0][0]
 
+        except IndexError as e:
+            raise RepositoryParsingError(str(e))
         except OperationalError:
             raise RepositoryTimeoutError()
         except Error as e:
@@ -138,7 +140,6 @@ class UserRepository(BaseRepository):
         except Error as e:
             raise RepositoryInternalError(f"Could not get user start and end times: {e}") # technically this shouldn't ever happen (?)
 
-        return user_start_and_end_times
 
     def get_user_id_from_jwt_and_email(self, email:str, token: str) -> list[tuple[Any,...]]: # remove maybe as we don't need to store jwt in db (same reasoning as above)
         sql = """

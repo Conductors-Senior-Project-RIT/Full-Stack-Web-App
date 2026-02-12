@@ -10,11 +10,11 @@ from flask_jwt_extended import (
     get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies,
 )
 from flask_cors import CORS
-from db.user_repo import *
+from werkzeug.exceptions import BadRequest, Unauthorized, NotFound, Forbidden
 from dotenv import load_dotenv
 
-from service.user_service import register_user, is_registered, create_user_password_reset_token, \
-    is_user_password_reset_token_valid, reset_user_password
+from service.user_service import UserService
+from db.db import db
 
 """
 TODO: mention below:
@@ -23,7 +23,7 @@ werkzeug is good enough security at the moment, future teams can switch back to 
 why? werkzeug doesn't require us to use another external dependency and don't have time to understand everything about bcrypt and I don't trust how the last group 
 handled security as i had to rewrite most of what they did relating to jwt....
 
-user _r epo.py needs custom error handling so it can be caught here
+user_repo.py needs custom error handling so it can be caught here
 
 storing jwt in database for "get_authentication" defeats the whole purpose of storing it securely with cookies (using the helper function from werkzeug security library)
 """
@@ -51,12 +51,12 @@ def register():
     password = data.get("password")
 
     if not email or not password:
-        return jsonify({"message": "Email and password required"}), 500
+        return BadRequest("Email and password required")
 
-    try:
-        result = register_user(email, password) #service
-    except Exception as e:
-        return jsonify({"message": str(e)}), 500 # use derived error message since an error can come from a few different sources
+    session = db.session
+    service = UserService(session)
+
+    result = service.register_user(email, password) #service
 
     if result.get("email_sent"):
         jsonify({"message": "User registered successfully! A welcome email has been sent."}), 201
@@ -69,14 +69,17 @@ def login():
     email = data.get("email")
     password = data.get("password")
 
-    user = is_registered(email, password)
+    session = db.session
+    service = UserService(session)
+
+    user = service.is_registered(email, password)
     if not user:
-        return jsonify({"message": "Invalid credentials"}), 401
+        raise Unauthorized("Invalid credentials")
 
     user_id = user[0][0] # need to find a clean way to stop double indexing, index the query results from the repo/db layer so we stop double indexing here.
     user_role = user[0][4]
 
-    response = jsonify({"message": "login successful"})
+    response = jsonify({"message": "login successful"}), 200
 
     additional_claims = {"user_role": user_role} # a user role is set based on what's in the database
 
@@ -91,35 +94,46 @@ def reset_password_request():
     email = request.get_json()["email"]
 
     if not email:
-        return jsonify({"message": "Email required"}), 400
+        return BadRequest("Email is required!")
+
+    session = db.session
+    service = UserService(session)
 
     # we don't want to let the user now if an email exists or not (idk y but im following how this was done lol), so we handle email checking silently (return nothing)
-    create_user_password_reset_token(email)
+    service.create_user_password_reset_token(email)
 
     return jsonify({"message": "If an account with that email exists, a reset link was sent."}), 200
 
 @user_bp.route("/api/validate-reset-token", methods=["GET"])
 def token_validation():
     token = request.args.get("token")
-    is_valid = is_user_password_reset_token_valid(token)
+    
+    session = db.session
+    service = UserService(session)
+    
+    is_valid = service.is_user_password_reset_token_valid(token)
 
     if is_valid:
         return jsonify({"message": "Password reset token is valid"}), 200
 
-    return jsonify({"message": "Password reset token is not valid"}), 404
+    raise NotFound("Password reset token is invalid!")
 
 @user_bp.route("/api/reset-password", methods=["PUT"])
 def reset_password():
     token = request.args.get("token")
 
     if token is None:
-        return {"message": "No token provided"}, 400 # by default this jsonify's the result i think? (we can test it out later so we can have a standard to follow for the returns in API layer)
+        raise BadRequest("No token provided!") # by default this jsonify's the result i think? (we can test it out later so we can have a standard to follow for the returns in API layer)
 
     data = request.get_json()
     password = data.get("password")
+    
+    session = db.session
+    service = UserService(session)
 
-    result = reset_user_password(token, password) #again add custom error handling, don't want any of this "is none" or boolean checking
+    result = service.reset_user_password(token, password) #again add custom error handling, don't want any of this "is none" or boolean checking
 
+    # Is this the required payload?
     if not result:
         return {"valid": "false"}, 404
 
@@ -136,9 +150,12 @@ def update_times():
     ending_time = data.get("ending_time")
 
     if not starting_time or not ending_time:
-        return jsonify({"message": "starting_time and ending_time required"}), 400
+        raise BadRequest("starting_time and ending_time required")
 
-    update_user_times(current_user_id, starting_time, ending_time)
+    session = db.session
+    service = UserService(session)
+
+    service.update_user_times(current_user_id, starting_time, ending_time)
     return jsonify({"message": "Success"}), 200
 
 
@@ -156,23 +173,26 @@ def elevate_user():
     user_role = claims.get("user_role")
 
     if user_role != 0: #admin role
-        return jsonify({"message": "Unauthorized role"}), 403
+        raise Forbidden("Unauthorized role")
 
     data = request.get_json()
     email_to_elevate = data.get("email")
     new_role = data.get("role")
 
     if new_role not in [1, 2]: # elevate user seems like a... not so accurate description for this route as it seems you can demote users to different roles as well?
-        return jsonify({"message": "Invalid role"}), 400
+        raise BadRequest("Invalid user role")
 
-    if update_account_status(email_to_elevate, new_role) is None: #if None is returned (again change all the "is None" with custom error handling...)
-        return jsonify({"message": "The email you're trying to change role's for does not exist in our database"}), 404
+    session = db.session
+    service = UserService(session)
+
+    if service.update_account_status(email_to_elevate, new_role) is None: #if None is returned (again change all the "is None" with custom error handling...)
+        return NotFound("The email you're trying to change roles for does not exist")
 
     return jsonify({"message": "User role updated successfully"}), 200
 
 @user_bp.route("/api/logout", methods=["POST"])
 @jwt_required()
 def logout():
-    response = jsonify({"message": "logout successful"})
+    response = jsonify({"message": "Logout successful"})
     unset_jwt_cookies(response)
     return response

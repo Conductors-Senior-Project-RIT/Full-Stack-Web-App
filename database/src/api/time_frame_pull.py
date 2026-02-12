@@ -1,6 +1,7 @@
 
 from flask import jsonify, request
 from flask_restful import Resource
+from werkzeug.exceptions import BadRequest
 from service.service_core import *
 from service.record_service import RecordService
 from db.db import db
@@ -25,19 +26,13 @@ class recent_activities(Resource):
         station = request.args.get("station_name", default=None, type=str)
 
         if time_range == None:
-            return jsonify({"error", "Invalid time range!"}), 400
+            raise BadRequest("Invalid time range!")
+
+        session = db.session
         
-        try:
-            session = db.session
-            
-            record_service = RecordService(session, None)
-            results = record_service.time_frame_pull(
-                typ, time_range, recent, stat_id, station
-            )
-            return jsonify(results), 200
-        except ServiceInvalidArgument as e:
-            return jsonify({"error", str(e)}), 400
-        except ServiceTimeoutError:
-            return jsonify({"error", "Request timed out!"}), 408
-        except (ServiceInternalError, ServiceParsingError) as e:
-            return jsonify({"error": str(e)}), 500
+        record_service = RecordService(session, None)
+        results = record_service.time_frame_pull(
+            time_range, recent, stat_id, station
+        )
+        return jsonify(results), 200
+
