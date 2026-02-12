@@ -10,7 +10,7 @@ from flask_jwt_extended import (
     get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies,
 )
 from flask_cors import CORS
-from db.user_db import *
+from db.user_repo import *
 from dotenv import load_dotenv
 
 from service.user_service import register_user, is_registered, create_user_password_reset_token, \
@@ -23,7 +23,7 @@ werkzeug is good enough security at the moment, future teams can switch back to 
 why? werkzeug doesn't require us to use another external dependency and don't have time to understand everything about bcrypt and I don't trust how the last group 
 handled security as i had to rewrite most of what they did relating to jwt....
 
-user_repo.py needs custom error handling so it can be caught here
+user _r epo.py needs custom error handling so it can be caught here
 
 storing jwt in database for "get_authentication" defeats the whole purpose of storing it securely with cookies (using the helper function from werkzeug security library)
 """
