@@ -8,8 +8,7 @@ import datetime
 import http.client, urllib
 from dotenv import *
 
-load_dotenv()
-
+# load_dotenv()
 
 def validate_int_argument(value: int, name: str, min_value: int):
     if not isinstance(value, int):

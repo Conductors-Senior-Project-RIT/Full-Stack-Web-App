@@ -1,19 +1,20 @@
+from dotenv import load_dotenv
 from flask import Blueprint, request, jsonify
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
     jwt_required,
     get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies,
 )
-from flask_cors import CORS
-from werkzeug.exceptions import BadRequest, Unauthorized, NotFound, Forbidden
-from dotenv import load_dotenv
-
 from service.user_service import UserService
+from werkzeug.exceptions import BadRequest, Unauthorized, NotFound, Forbidden
+
 from backend.db import db
 
 """
+Todo: make the file route.py? 
 TODO: mention below:
 Switching security handling of passwords, easiest thing to do is for everyone to RESET THEIR PASSWORD
 werkzeug is good enough security at the moment, future teams can switch back to bcrypt.
@@ -25,7 +26,7 @@ user_repo.py needs custom error handling so it can be caught here
 storing jwt in database for "get_authentication" defeats the whole purpose of storing it securely with cookies (using the helper function from werkzeug security library)
 """
 
-# bcrypt = Bcrypt()
+bcrypt = Bcrypt()
 jwt = JWTManager()
 
 load_dotenv()
@@ -76,7 +77,7 @@ def login():
     user_id = user[0][0] # need to find a clean way to stop double indexing, index the query results from the repo/db layer so we stop double indexing here.
     user_role = user[0][4]
 
-    response = jsonify({"message": "login successful"}), 200
+    response = jsonify({"message": "login successful"})
 
     additional_claims = {"user_role": user_role} # a user role is set based on what's in the database
 

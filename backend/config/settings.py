@@ -9,8 +9,9 @@ class Config(object):
     """
     # default config setting(s)
     SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-key?")
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "fallback-key?")
 
-    # build database uri from .env | should prod config database url be stored in .env?
+    # build database uri from .env OR should prod config database url be stored in .env?
     @staticmethod
     def get_database_uri():
         host = os.environ.get("DB_HOST")
@@ -30,13 +31,13 @@ class ProdConfig(Config):
     DEBUG = False
 
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
-    SECRET_KEY = os.environ.get("SECRET_KEY")
+    # SECRET_KEY = os.environ.get("SECRET_KEY")
 
-    if not SQLALCHEMY_DATABASE_URI:
-        raise ValueError("Must provide DATABASE_URI environment variable for prod environment. Please set it.")
+    # if not SQLALCHEMY_DATABASE_URI: causes error @ class defintion time, can add these checkers in create_app()
+    #     raise ValueError("Must provide DATABASE_URI environment variable for prod environment. Please set it.")
 
-    if not SECRET_KEY:
-        raise ValueError("Must provide SECRET_KEY environment variable for prod environment. Please set it.")
+    # if not SECRET_KEY:
+    #     raise ValueError("Must provide SECRET_KEY environment variable for prod environment. Please set it.")
 
     # Prod specific settings
     SESSION_COOKIE_SECURE = True  # send cookies over HTTPS only
