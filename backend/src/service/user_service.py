@@ -1,14 +1,12 @@
 import hashlib
 import secrets
-from typing import Any
 
+from ..db.station_repo import StationRepository
+from ..db.user_repo import UserRepository
+from ..service.email_service import send_welcome_email, send_forgot_password_email
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from db.database_core import *
-from service.service_core import *
-from db.station_repo import StationRepository
-from db.user_repo import UserRepository
-from service.email_service import send_welcome_email, send_forgot_password_email
+from ..service.service_core import *
 
 """
 TODO: move everything from user_db.py to user_repo.py for custom error handling!

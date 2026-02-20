@@ -4,12 +4,10 @@ Symbols database layer
 This module handles all database CRUD operations for Symbol records
 """
 
-from typing import NoReturn, Optional, Any
-
 from psycopg import Error, OperationalError
-from record_types import RecordTypes
-from trackSense_db_commands import run_get_cmd, run_exec_cmd
+
 from backend.src.db.database_core import *
+from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
 
 class SymbolRepository(BaseRepository):

@@ -3,9 +3,9 @@ from flask_restful import reqparse
 from flask_jwt_extended import get_jwt, verify_jwt_in_request
 from flask_cors import CORS
 from werkzeug.exceptions import Unauthorized, BadRequest
-from service.record_service import RecordService
-from service.symbol_service import SymbolService
-from db.trackSense_db_commands import *
+from ..service.record_service import RecordService
+from ..service.symbol_service import SymbolService
+from ..db.trackSense_db_commands import *
 from backend.db import db
 
 

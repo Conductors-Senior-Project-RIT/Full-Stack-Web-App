@@ -8,7 +8,7 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies,
 )
-from service.user_service import UserService
+from ..service.user_service import UserService
 from werkzeug.exceptions import BadRequest, Unauthorized, NotFound, Forbidden
 
 from backend.db import db
@@ -26,12 +26,12 @@ user_repo.py needs custom error handling so it can be caught here
 storing jwt in database for "get_authentication" defeats the whole purpose of storing it securely with cookies (using the helper function from werkzeug security library)
 """
 
-bcrypt = Bcrypt()
-jwt = JWTManager()
+# bcrypt = Bcrypt()
+# jwt = JWTManager()
 
-load_dotenv()
+# load_dotenv()
 user_bp = Blueprint("user_bp", __name__)
-CORS(user_bp)  # Enable CORS for the user_bp blueprint
+# CORS(user_bp)  # Enable CORS for the user_bp blueprint
 
 """
 lets ditch the storing session token from database... im not sure why they did that as it beats the purpose of using

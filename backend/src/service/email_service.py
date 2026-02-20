@@ -4,7 +4,7 @@ import requests
 
 from service_core import BaseService
 
-load_dotenv()
+# load_dotenv() fix later
 MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
 MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
 WEBSITE_DOMAIN = os.getenv("WEBSITE_DOMAIN")

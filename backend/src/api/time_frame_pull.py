@@ -2,7 +2,7 @@
 from flask import jsonify, request
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest
-from service.record_service import RecordService
+from ..service.record_service import RecordService
 from backend.db import db
 
 class recent_activities(Resource):

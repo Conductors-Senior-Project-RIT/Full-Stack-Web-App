@@ -1,34 +1,26 @@
 import os
 from flask import Flask
 from flask_cors.extension import CORS
-from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager
 
-from backend.src.api.UserPreferencesAPI import UserPreferences
-from backend.src.api.load_example_data import LoadExampleData
-from backend.src.api.notification_handler import NotificationService
-from backend.src.api.pushover_updater import PushoverUpdater
-from backend.src.api.record_collation import RecordCollation
-from backend.src.api.signal_update_handler import SignalUpdater
-from backend.src.api.station_auth import StationAuth
-from backend.src.api.station_online import StationOnline
-from backend.src.api.symbol_api import SymbolAPI
-from backend.src.api.time_frame_pull import recent_activities
-from backend.src.api.train_history import HistoryDB
-from config.settings import config_selection
-from flask_restful import Api
+from backend.extensions import bcrypt, jwt, api
+
+from .src.api.UserPreferencesAPI import UserPreferences
+from .src.api.load_example_data import LoadExampleData
+from .src.api.notification_handler import NotificationService
+from .src.api.pushover_updater import PushoverUpdater
+from .src.api.record_collation import RecordCollation
+from .src.api.signal_update_handler import SignalUpdater
+from .src.api.station_auth import StationAuth
+from .src.api.station_online import StationOnline
+from .src.api.symbol_api import SymbolAPI
+from .src.api.time_frame_pull import recent_activities
+from .src.api.train_history import HistoryDB
+from .config.settings import config_selection
+
 from dotenv import load_dotenv
 
 load_dotenv()  # .env file --> load_dotenv() --> .env vars go into os.environ --> settings.py reads that stuff -> that's it?
 # okay then just add .env at root of project and see if stuff runs lol
-# flask --app backend:create_app run to run this?
-# create .env file with google doc vars pointing to local db
-
-"""
-1) ditch yaml (handled with settings.py and .env)
-1.1) will setup .env .example and docs for specifying which env you which to use
-WIP
-"""
 
 def create_app():
     """
@@ -57,11 +49,9 @@ def create_app():
     # TODO: reflect existing tables here with the "db" (it's a quick way to get models for existing db tables (?) -- look into more)
 
     # winging the setup here lol
-    api = Api(app)
     CORS(app)
-    bcrypt = Bcrypt() # find old commit to plug back old hashing algorithm
-    bcrypt.init_app(app)
-    jwt = JWTManager()
+    api.init_app(app)
+    bcrypt.init_app(app) # find old commit to plug back old hashing algorithm
     jwt.init_app(app)
 
     # register routes (some are useless)
@@ -90,8 +80,8 @@ def create_app():
 
     error_handler.register_error_handlers(app)  # - commenting out for now
 
-    print(env) # double check env value
-    print(app.config["DEBUG"]) # double check in right env
+    print("env: ",env) # double check env value
+    print(f"debug value: {app.config["DEBUG"]}") # double check in right env
 
     return app
 

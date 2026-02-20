@@ -1,10 +1,11 @@
-from record_types import RecordTypes
 from sqlalchemy.orm.scoping import scoped_session
-from functools import wraps
+
+from .record_types import RecordTypes
+
 
 class BaseRepository:
     def __init__(self, session: scoped_session):
-        if self.session is None:
+        if session is None:
             raise RepositorySessionError()
         self.session = session
         

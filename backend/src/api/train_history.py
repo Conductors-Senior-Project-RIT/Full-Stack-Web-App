@@ -1,12 +1,14 @@
+import datetime
+import http.client
+import urllib
+from ..db.trackSense_db_commands import *
 from flask import jsonify, request
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
-from db.trackSense_db_commands import *
-from backend.src.service.record_service import RecordService
+from urllib.parse import urlencode
+
 from backend.db import db
-import datetime
-import http.client, urllib
-from dotenv import *
+from backend.src.service.record_service import RecordService
 
 # load_dotenv()
 
@@ -40,11 +42,9 @@ class HistoryDB(Resource):
         session = db.session
         
         th_service = RecordService(session, typ)
-        results = th_service.get_train_history(typ, id, page)
+        results = th_service.get_train_history(id, page)
         return jsonify(results), 200
             
-
-        
 
     def post(self):
         """
@@ -81,9 +81,9 @@ class HistoryDB(Resource):
         typ = args["type"]
         
         session = db.session
-            
+
         th_service = RecordService(session, typ)
-        results = th_service.post_train_history(typ, args, dt_str)
+        results = th_service.post_train_history(args, dt_str)
         return jsonify(results), 200
         
 

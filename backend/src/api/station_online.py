@@ -2,7 +2,7 @@ from flask import request, jsonify
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest
 
-from service.station_service import StationService
+from ..service.station_service import StationService
 from backend.db import db
 
 class StationOnline(Resource):

@@ -5,7 +5,7 @@ from backend.src.service.service_core import *
 from backend.db import db
 
 station_bp = Blueprint("station_bp", __name__)
-CORS(station_bp)  # Enable CORS for the station_bp blueprint
+# CORS(station_bp)  # Enable CORS for the station_bp blueprint
 
 @station_bp.route("/api/get-trains", methods=["GET"])
 def get_trains():

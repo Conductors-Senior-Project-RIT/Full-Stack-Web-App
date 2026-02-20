@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_restful import Resource
 from backend.db import db
-from service.record_service import RecordService
+from ..service.record_service import RecordService
 from werkzeug.exceptions import BadRequest
 
 

@@ -1,7 +1,7 @@
 from flask import Flask, Response, jsonify
 from werkzeug.exceptions import HTTPException
 
-from service.service_core import *
+from ..service.service_core import *
 
 # A translation dictionary for Service layer exceptions
 SERVICE_ERROR_CODES = {

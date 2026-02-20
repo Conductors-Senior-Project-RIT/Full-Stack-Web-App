@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from flask_restful import Resource, reqparse
-from service.symbol_service import SymbolService
+from ..service.symbol_service import SymbolService
 from backend.db import db
 
 

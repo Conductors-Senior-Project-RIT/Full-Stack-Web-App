@@ -1,9 +1,9 @@
 import datetime
-from db.base_record_repo import RecordRepository
-import db.record_types as record_types
-from db.station_repo import StationRepository
-from backend.src.db.database_core import *
-from service.service_core import *
+
+import backend.src.db.record_types as record_types
+from ..db.base_record_repo import RecordRepository
+from ..db.station_repo import StationRepository
+from ..service.service_core import *
 
 # Temporary constant for number of results per page
 RESULTS_NUM = 250
@@ -54,7 +54,7 @@ class RecordService(BaseService):
         self.attempt_auto_fill(unit_addr)
         
         resp_id = repository.get_unit_record_ids(unit_addr, True)
-        result = repository.add_new_pin(resp_id, unit_addr)
+        result = repository.add_new_pin(resp_id, int(unit_addr))
         
     def attempt_auto_fill(self, repository: RecordRepository, unit_addr: str):
         symb = repository.check_for_record_field(unit_addr, "symbol_id")

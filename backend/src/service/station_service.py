@@ -1,9 +1,9 @@
 import hashlib
 import random
 import string
-from db.record_types import get_all_repositories
-from db.station_repo import StationRepository
-from db.database_core import *
+from ..db.record_types import get_all_repositories
+from ..db.station_repo import StationRepository
+from ..db.database_core import *
 from service_core import *
 
 
@@ -11,7 +11,7 @@ class StationService(BaseService):
     def __init__(self, session):
         self._station_repo = StationRepository(session)
         self._record_repos = {
-            r.get_record_identifier(): r for r in get_all_repositories()
+            r.get_record_identifier(): r for r in get_all_repositories(session)
         }
             
         super().__init__(session, "Station")
@@ -30,7 +30,7 @@ class StationService(BaseService):
         
     def update_station_password(self, station_id: int) -> str:
         unhashed_pw, hashed_pw = self.generate_password_string()
-        self._station_repo.update_station_password(station_id, hashed_pw)
+        self._station_repo.update_station_password(str(station_id), hashed_pw)
         return unhashed_pw
 
 
