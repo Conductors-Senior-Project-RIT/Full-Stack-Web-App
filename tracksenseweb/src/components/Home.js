@@ -8,7 +8,7 @@ import rotterdam_marker from '../media/images/blackpin.png';
 import silversprings_marker from '../media/images/blackpin.png';
 import fairport_marker from '../media/images/blackpin.png';
 import pittsford_marker from '../media/images/blackpin.png';
-import fairgrounds_marker from '../media/images/blackpin.png';
+import solvay_marker from '../media/images/blackpin.png';
 
 const Home = () => {
   const [hoveredStation, setHoveredStation] = useState(null);
@@ -98,12 +98,12 @@ const Home = () => {
           onMouseLeave={handleMouseLeave}
         />
         <img
-          src={fairgrounds_marker}
+          src={solvay_marker}
           alt="Pin"
           className="location-image"
-          style={{ position: "absolute", top: '38.25%', left: '34.85%', objectfit:"contain", width:25, height:25 }}
-          onClick={() => handlePinClick('fairgrounds')}
-          onMouseEnter={(e) => handleMouseEnter('Fairgrounds', e)}
+          style={{ position: "absolute", top: '39.5%', left: '35.5%', objectfit:"contain", width:25, height:25 }}
+          onClick={() => handlePinClick('solvay')}
+          onMouseEnter={(e) => handleMouseEnter('Solvay', e)}
           onMouseLeave={handleMouseLeave}
         />
       </div>
