@@ -3,6 +3,10 @@ from werkzeug.exceptions import HTTPException
 
 from service.service_core import *
 
+##########################
+##  API ERROR HANDLING  ##
+##########################
+
 # A translation dictionary for Service layer exceptions
 SERVICE_ERROR_CODES = {
     ServiceInvalidArgument: 400,
@@ -74,3 +78,4 @@ def register_error_handlers(app: Flask):
     app.register_error_handler(ServiceError, handle_service_errors)
     app.register_error_handler(HTTPException, handle_api_errors)
     app.register_error_handler(Exception, handle_other_errors)
+    

@@ -27,7 +27,7 @@ class StationRepository(BaseRepository):
         
         # If a database error or another error occurs, print the error and return None
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not retrieve station ID and name pairs: {e}")
         except (ValueError, IndexError) as e:
@@ -55,7 +55,7 @@ class StationRepository(BaseRepository):
                 raise RepositoryInternalError(f"Could not create a new station, 0 rows created.")
 
         except OperationalError:
-                raise RepositoryTimeoutError()
+                raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not create a new station: {e}")  
 
@@ -79,7 +79,7 @@ class StationRepository(BaseRepository):
             
         # If a database error or another error occurs, print the error and return False
         except OperationalError:
-                raise RepositoryTimeoutError()
+                raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not update a station: {e}")  
 
@@ -99,7 +99,7 @@ class StationRepository(BaseRepository):
                 raise RepositoryNotFoundError(station_name)
             return results[0][0]
         except OperationalError:
-                raise RepositoryTimeoutError()
+                raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not retrieve a station id for {station_name}: {e}")
         except IndexError as e:
@@ -121,7 +121,7 @@ class StationRepository(BaseRepository):
             return formatted_date
             
         except OperationalError as e:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not get last seen from station: {e}")
         except IndexError as e:
@@ -139,7 +139,7 @@ class StationRepository(BaseRepository):
                 raise RepositoryNotFoundError(station_id)
         
         except OperationalError as e:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not update last seen on station: {e}")
         

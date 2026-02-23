@@ -23,6 +23,7 @@ class EOTRepository(RecordRepository):
         )
 
     # below is train_history.py related
+    @repository_error_handler
     def get_total_count_of_eot_records(self) -> int:
         """Retrieves total amount of records in EOTRecords table
 
@@ -34,19 +35,13 @@ class EOTRepository(RecordRepository):
 
         TODO: integrate this function to replace sql queries in train_history.py's def get_eot()
         
-        TODO: improve error handling/ documentation 
+        TODO: improve  documentation 
         """
+        response = run_get_cmd("SELECT COUNT(*) FROM EOTRecords")
 
-        try:
-            response = run_get_cmd("SELECT COUNT(*) FROM EOTRecords")
-
-            if response:
-                return response[0][0]
-            
-            return -1
-        except Exception as e:
-            print(f"Error getting EOT record count: {e}")
-            return -1
+        if response:
+            return response[0][0]
+        
         
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
         """ Retrieves EOT records for a specific train id
@@ -64,7 +59,7 @@ class EOTRepository(RecordRepository):
         What it will replace: 
             def get_eot(self, id: int, page: int) -> Response in train_history.py
 
-        TODO: improve error handling/ documentation 
+        TODO: improve documentation 
         TODO: integrate this function to replace sql queries in train_history.py's def get_eot() 
         TODO: Format returned collection
         TODO: what is symbol_id for a train, is it it's unique identifier?
@@ -80,46 +75,39 @@ class EOTRepository(RecordRepository):
         
         sql_args = {"results_num": num_results, "offset": page - 1}
         sql_args["id"] = id
+    
+        resp = run_get_cmd(sql, sql_args)
+        results = [
+                    {
+                        "id": tup[0],
+                        "date_rec": tup[1],
+                        "station_name": tup[2],
+                        "symbol_name": tup[3],
+                        "unit_addr": tup[4],
+                        "brake_pressure": tup[5],
+                        "motion": tup[6],
+                        "marker_light": tup[7],
+                        "turbine": tup[8],
+                        "battery_cond": tup[9],
+                        "battery_charge": tup[10],
+                        "arm_status": tup[11],
+                        "signal_strength": tup[12],
+                        "verified": tup[13],
+                    }
+                    for tup in resp
+                ]
         
-        try:
-            resp = run_get_cmd(sql, sql_args)
-            results = [
-                        {
-                            "id": tup[0],
-                            "date_rec": tup[1],
-                            "station_name": tup[2],
-                            "symbol_name": tup[3],
-                            "unit_addr": tup[4],
-                            "brake_pressure": tup[5],
-                            "motion": tup[6],
-                            "marker_light": tup[7],
-                            "turbine": tup[8],
-                            "battery_cond": tup[9],
-                            "battery_charge": tup[10],
-                            "arm_status": tup[11],
-                            "signal_strength": tup[12],
-                            "verified": tup[13],
-                        }
-                        for tup in resp
-                    ]
-            
-            if id == 1:    
-                return results
-        
-            count_sql = """SELECT COUNT(*) FROM EOTRecords"""
-            count = run_get_cmd(count_sql)
+        if id == 1:    
+            return results
+    
+        count_sql = """SELECT COUNT(*) FROM EOTRecords"""
+        count = run_get_cmd(count_sql)
 
-            return {
-                    "results": results,
-                    "totalPages": ceil(count[0][0] / num_results),
-                }
+        return {
+                "results": results,
+                "totalPages": ceil(count[0][0] / num_results),
+            }
         
-        except OperationalError as e:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not retrieve EOT train history: {e}")
-        except (IndexError, ValueError, TypeError) as e:
-            raise RepositoryParsingError(f"Could not parse results: {e}")
 
     def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:  #post_eot()
         """Inserts a new eot record in EOTRecords table
@@ -138,43 +126,35 @@ class EOTRepository(RecordRepository):
         TODO: improve error handling/ documentation | CHANGE RETURN TYPE 
         """
         recovery_request = True # what is this exactly 
-            
-        try:
-            sql = """
-                INSERT INTO EOTRecords (date_rec, symbol_id, station_recorded, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength) VALUES
-                (%(date)s, %(symbol_id)s, %(station)s,  %(unit_addr)s, %(brake_pressure)s, %(motion)s, %(marker_light)s, %(turbine)s, %(battery_cond)s, %(battery_charge)s, %(arm_status)s, %(signal_strength)s)
-            """
-            sql_args = {
-                "date": args["date_rec"],
-                "station": args["station_id"],
-                "unit_addr": args["unit_addr"],
-                "brake_pressure": args["brake_pressure"],
-                "motion": args["motion"],
-                "marker_light": args["marker_light"],
-                "turbine": args["turbine"],
-                "battery_cond": args["battery_cond"],
-                "battery_charge": args["battery_charge"],
-                "arm_status": args["arm_status"],
-                "signal_strength": args["signal_strength"],
-                "symbol_id": args["symbol_id"]
-            }
 
-            if args["date_rec"] is None:
-                    sql_args["date"] = datetime_string
-                    recovery_request = False
+        sql = """
+            INSERT INTO EOTRecords (date_rec, symbol_id, station_recorded, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength) VALUES
+            (%(date)s, %(symbol_id)s, %(station)s,  %(unit_addr)s, %(brake_pressure)s, %(motion)s, %(marker_light)s, %(turbine)s, %(battery_cond)s, %(battery_charge)s, %(arm_status)s, %(signal_strength)s)
+        """
+        sql_args = {
+            "date": args["date_rec"],
+            "station": args["station_id"],
+            "unit_addr": args["unit_addr"],
+            "brake_pressure": args["brake_pressure"],
+            "motion": args["motion"],
+            "marker_light": args["marker_light"],
+            "turbine": args["turbine"],
+            "battery_cond": args["battery_cond"],
+            "battery_charge": args["battery_charge"],
+            "arm_status": args["arm_status"],
+            "signal_strength": args["signal_strength"],
+            "symbol_id": args["symbol_id"]
+        }
 
-            results = run_exec_cmd(sql, sql_args)
-            if results < 1:
-                raise RepositoryInternalError("Could not create new train record, 0 rows created!")
-            return results, recovery_request
+        if args["date_rec"] is None:
+                sql_args["date"] = datetime_string
+                recovery_request = False
+
+        results = run_exec_cmd(sql, sql_args)
+        if results < 1:
+            raise RepositoryInternalError("Could not create new train record, 0 rows created!")
+        return results, recovery_request
         
-        except OperationalError as e:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not create new EOT record: {e}")
-        except (IndexError, ValueError) as e:
-            raise RepositoryParsingError(f"Could not parse arguments: {e}")
-
 
     # below is for station_handler.py 
     def get_recent_station_records(self, station_id: int) -> list[tuple[Any,...]]:
@@ -189,29 +169,25 @@ class EOTRepository(RecordRepository):
     
     
     def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
-        try:
-            if station_records is None:
-                return []
-            eot_records = [
-                {
-                    "date_rec": record[1],
-                    "unit_addr": record[4],
-                    "brake_pressure": record[5],
-                    "motion": record[6],
-                    "marker_light": record[7],
-                    "turbine": record[8],
-                    "battery_cond": record[9],
-                    "battery_charge": record[10],
-                    "arm_status": record[11],
-                    "signal_stength": record[12],
-                }
-                for record in station_records
-            ]
-            return eot_records
+        if station_records is None:
+            return []
+        eot_records = [
+            {
+                "date_rec": record[1],
+                "unit_addr": record[4],
+                "brake_pressure": record[5],
+                "motion": record[6],
+                "marker_light": record[7],
+                "turbine": record[8],
+                "battery_cond": record[9],
+                "battery_charge": record[10],
+                "arm_status": record[11],
+                "signal_stength": record[12],
+            }
+            for record in station_records
+        ]
+        return eot_records
         
-        except IndexError as e:
-            raise RepositoryParsingError(f"Could not parse EOT station records: {e}")
-
 
     # below is for eot_collation
     def get_record_collation(self, page: int) -> list[dict[str, Any]]:
@@ -332,11 +308,12 @@ class EOTRepository(RecordRepository):
             """
             args = {"results_num": RESULTS_NUM, "offset": page - 1}
             resp = run_get_cmd(sql, args)
-        except OperationalError:
-            raise RepositoryTimeoutError("Could not collate EOT records!")
-        except Error as e:
-            raise RepositoryInternalError(f"Could not collate EOT records: {e}")
-        
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not collate EOT records: {e}"
+            )
+
         try:
             count_sql = """
                 WITH StationChanges AS (
@@ -424,11 +401,12 @@ class EOTRepository(RecordRepository):
                 SELECT COUNT(*) FROM UnitAddrDetails WHERE row_num = 1;
             """
             count = run_get_cmd(count_sql)
-        except OperationalError:
-            raise RepositoryTimeoutError("Could not count EOT records!")
-        except Error as e:
-            raise RepositoryInternalError(f"Could not count EOT records: {e}")
-        
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not count EOT records: {e}"
+            )
+
         try:
             results = {
                     "results": [
@@ -459,8 +437,12 @@ class EOTRepository(RecordRepository):
                     "totalPages": ceil(count[0][0] / RESULTS_NUM)
                 }
             return results
-        except (IndexError, ValueError, TypeError, ZeroDivisionError) as e:
-            raise RepositoryParsingError(f"Could not parse EOT collation results: {e}")
+        
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not parse EOT collation results: {e}"
+            )
     
     # Record/admin verification
     def get_records_by_verification(self, page: int, verified: bool):
@@ -577,11 +559,12 @@ class EOTRepository(RecordRepository):
             """
             args = {"results_num": RESULTS_NUM, "offset": page - 1}
             resp = run_get_cmd(sql, args)
-        except OperationalError:
-            raise RepositoryTimeoutError(f"Could not retrieve {'verified' if verified else 'unverified'} EOT records!")
-        except Error as e:
-            raise RepositoryInternalError(f"Could not retrieve {'verified' if verified else 'unverified'} EOT records: {str(e)}")
-        
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not retrieve {'verified' if verified else 'unverified'} EOT records: {e}"
+            )
+
         try:
             count_sql = f"""
                 WITH StationChanges AS (
@@ -671,10 +654,11 @@ class EOTRepository(RecordRepository):
                 WHERE row_num = 1 AND verified = {verified_str};
             """
             count = run_get_cmd(count_sql)
-        except OperationalError:
-            raise RepositoryTimeoutError(f"Could not count {'verified' if verified else 'unverified'} EOT records!")
-        except Error as e:
-            raise RepositoryInternalError(f"Could not count {'verified' if verified else 'unverified'} EOT records: {str(e)}")
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not count {'verified' if verified else 'unverified'} EOT records: {e}"
+            )
             
         try:
             return {
@@ -703,5 +687,8 @@ class EOTRepository(RecordRepository):
                 ],
                 "totalPages": ceil(count[0][0] / RESULTS_NUM)
             }
-        except (IndexError, ValueError, TypeError, ZeroDivisionError) as e:
-            raise RepositoryParsingError(f"Could not parse EOT verification results: {e}")
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not parse EOT verification results: {e}"
+            )

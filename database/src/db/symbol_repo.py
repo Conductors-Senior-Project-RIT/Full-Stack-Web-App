@@ -30,7 +30,7 @@ class SymbolRepository(BaseRepository):
             return run_get_cmd(sql, named_args)[0]
         
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not retrieve symbol name for ({id}): {e}")
         except IndexError as e:
@@ -60,7 +60,7 @@ class SymbolRepository(BaseRepository):
         
         # If an index error occurs while parsing, print that an index error occurred and return None
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not retrieve symbol names: {e}")
         except IndexError as e:
@@ -89,7 +89,7 @@ class SymbolRepository(BaseRepository):
         
         # Otherwise, we encountered an error while retrieving
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not retrieve symbol ID for {symbol_name}: {e}")
         except IndexError as e:
@@ -116,7 +116,7 @@ class SymbolRepository(BaseRepository):
             run_exec_cmd(sql, args={"name": symbol_name})
         # If an exception occurs, raise a repository layer exception
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not retrieve symbol ID for {symbol_name}: {e}")
         

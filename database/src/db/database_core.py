@@ -1,6 +1,8 @@
-from record_types import RecordTypes
-from sqlalchemy.orm.scoping import scoped_session
 from functools import wraps
+from record_types import RecordTypes
+from core.exceptions import LayerError, layer_error_handler, translate_error
+from sqlalchemy.orm.scoping import scoped_session
+from sqlalchemy.exc import *
 
 class BaseRepository:
     def __init__(self, session: scoped_session):
@@ -8,37 +10,71 @@ class BaseRepository:
             raise RepositorySessionError()
         self.session = session
         
-
-class RepositoryError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
         
+    # def __init_subclass__(cls, **kwargs):
+    #     super().__init_subclass__(**kwargs)
+    #     for attr, value in cls.__dict__.items():
+    #         # If the value is a function, then wrap
+    #         if callable(value):
+    #             # Register class funtion from name (attr), with the error handler decorator wrapping function (value)
+    #             wrapped = layer_error_handler(value, REPOSITORY_ERROR_MAP, RepositoryInternalError)
+    #             setattr(cls, attr, wrapped)
+        
+
+class RepositoryError(LayerError):
+    default_message = "Unknown repository error occurred!"
         
 class RepositorySessionError(RepositoryError):
-    def __init__(self):
-        super().__init__("Session was not initialized to database!")
+    default_message = "Session was not initialized to database!"
         
-class RepositoryTimeoutError(RepositoryError):
-    def __init__(self, point_of_error=None):
-        message = "Database connection timed out" + f":{point_of_error}" if point_of_error else "!"
-        super().__init__(message)
+class RepositoryConnectionError(RepositoryError):
+    default_message = "Error connecting to the database!"
 
 class RepositoryInternalError(RepositoryError):
-    def __init__(self, error_desc: str):
-        super().__init__(f"An internal error occurred: {error_desc}")
-        
+    default_message = "An internal error occurred!"
         
 class RepositoryParsingError(RepositoryError):
-    def __init__(self, error_desc: str):
-        super().__init__(f"An error occurred while parsing results: {error_desc}")
-        
+    default_message = "An error occurred while parsing results!"
         
 class RepositoryNotFoundError(RepositoryError):
-    def __init__(self, value):
-        super().__init__(f"{value} was not found!")
-        
+    default_message = "Could not find value in database!" 
         
 class RepositoryRecordInvalid(RepositoryError):
-    def __init__(self, value):
-        valid_types = list(RecordTypes._value2member_map_)
-        super().__init__(f"Invalid record type provided: {value}! Must be between {valid_types[0]} and {valid_types[-1]}")
+    valid_types = list(RecordTypes._value2member_map_)
+    default_message = f"Invalid record type provided! Value must be between {valid_types[0]} and {valid_types[-1]}." 
+        
+REPOSITORY_ERROR_MAP = {
+    (TimeoutError, UnboundExecutionError, InterfaceError, NoSuchModuleError): 
+        (RepositoryConnectionError, False),
+    (SQLAlchemyError): (RepositoryInternalError, False),
+    (TypeError, KeyError, IndexError, ZeroDivisionError): (RepositoryParsingError, False)
+}        
+
+
+def repository_error_handler(message: str | None = None):
+    def decorator(func):
+        return layer_error_handler(
+            func, 
+            error_map=REPOSITORY_ERROR_MAP, 
+            base_exception=RepositoryInternalError,
+            message=message
+        )
+    
+    return decorator
+
+
+def repository_error_translator(
+    e: Exception,
+    caller_name: str | None = None,
+    point_of_error: str | None = None,
+    message: str | None = None
+):
+    return translate_error(
+        e,
+        REPOSITORY_ERROR_MAP,
+        RepositoryInternalError,
+        caller_name,
+        point_of_error,
+        message
+    )
+    

@@ -31,7 +31,7 @@ class UserRepository(BaseRepository):
                 (email, password),
             )
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Issue creating a new user: {e}")
         
@@ -46,7 +46,7 @@ class UserRepository(BaseRepository):
         except IndexError as e:
             raise RepositoryParsingError(str(e))
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError("Could not retrieve user id.")
 
@@ -59,7 +59,7 @@ class UserRepository(BaseRepository):
                 raise RepositoryNotFoundError(email)# technically this shouldn't ever happen (?)
 
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not retrieve user info: {e}")
 
@@ -80,7 +80,7 @@ class UserRepository(BaseRepository):
                     (new_role, email),
                 )
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Issue updating account status: {e}")
         
@@ -94,7 +94,7 @@ class UserRepository(BaseRepository):
                 update_password_sql, args={"passwd_hash": hashed_password, "user_id": user_id}
             )
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Issue updating user credentials: {e}")
         
@@ -113,7 +113,7 @@ class UserRepository(BaseRepository):
         try:
             run_exec_cmd(sql, args=args)
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Issue updating user times (user preferences related?): {e}")
 
@@ -136,7 +136,7 @@ class UserRepository(BaseRepository):
             return user_start_and_end_times
 
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not get user start and end times: {e}") # technically this shouldn't ever happen (?)
 
@@ -167,7 +167,7 @@ class UserRepository(BaseRepository):
 
             return station_id
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Could not retrieve station id from user's preferences: {e}")
 
@@ -181,7 +181,7 @@ class UserRepository(BaseRepository):
         try:
             run_exec_cmd(sql,args)
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Issue deleting a user's preference: {e}")
 
@@ -196,7 +196,7 @@ class UserRepository(BaseRepository):
         try:
             run_exec_cmd(sql,args)
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Issue adding a station id to a user's preference {e}")
 
@@ -214,7 +214,7 @@ class UserRepository(BaseRepository):
                 reset_token_sql, args={"user_id": user_id, "token_hash": hashed_token}
             )
         except OperationalError:
-            raise RepositoryTimeoutError()
+            raise RepositoryConnectionError()
         except Error as e:
             raise RepositoryInternalError(f"Issue adding a reset request token: {e}")
 

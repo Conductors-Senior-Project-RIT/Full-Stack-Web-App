@@ -34,31 +34,22 @@ class HOTRepository(RecordRepository):
                 LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
                 """
         sql_args = {"id": id, "results_num": num_results, "offset": page - 1}
-
-        try:
-            resp = run_get_cmd(sql, sql_args)
-            return [
-                        {
-                            "id": tup[0],
-                            "date_rec": tup[1],
-                            "station_name": tup[2],
-                            "symbol_name": tup[3],
-                            "unit_addr": tup[4],
-                            "command": tup[5],
-                            "checkbits": tup[6],
-                            "parity": tup[7],
-                            "verified": tup[8],
-                        }
-                        for tup in resp
-            ]
-            
-        except OperationalError as e:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not retrieve HOT train history: {e}")
-        except (IndexError, ValueError) as e:
-            raise RepositoryParsingError(f"Could not parse results: {e}")
-            
+        
+        resp = run_get_cmd(sql, sql_args)
+        return [
+                    {
+                        "id": tup[0],
+                        "date_rec": tup[1],
+                        "station_name": tup[2],
+                        "symbol_name": tup[3],
+                        "unit_addr": tup[4],
+                        "command": tup[5],
+                        "checkbits": tup[6],
+                        "parity": tup[7],
+                        "verified": tup[8],
+                    }
+                    for tup in resp
+        ]
 
 
     def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:
@@ -67,37 +58,29 @@ class HOTRepository(RecordRepository):
         TODO: run_exec_cmd returns none always... think of what to return lol
         """
         recovery_request = True # what is this lol
-
-        try:
-            sql = """
-                INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
-                (%(date)s, %(station)s, %(frame_sync)s, %(unit_addr)s, %(command)s, %(checkbits)s, %(parity)s)
-            """
-            sql_args = {
-                "date": args["date_rec"],
-                "station": args["station_id"],
-                "frame_sync": args["frame_sync"],
-                "command": args["command"],
-                "checkbits": args["checkbits"],
-                "parity": args["parity"],
-                "unit_addr": args["unit_addr"],
-            }
-
-            if args["date_rec"] is None:
-                sql_args["date"] = datetime_string
-                recovery_request = False
-
-            results = run_exec_cmd(sql, sql_args)
-            if results < 1:
-                raise RepositoryInternalError("Could not create new train record, 0 rows created!")
-            return results, recovery_request
         
-        except OperationalError as e:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not create new HOT record: {e}")
-        except (IndexError, ValueError) as e:
-            raise RepositoryParsingError(f"Could not parse arguments: {e}")
+        sql = """
+            INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
+            (%(date)s, %(station)s, %(frame_sync)s, %(unit_addr)s, %(command)s, %(checkbits)s, %(parity)s)
+        """
+        sql_args = {
+            "date": args["date_rec"],
+            "station": args["station_id"],
+            "frame_sync": args["frame_sync"],
+            "command": args["command"],
+            "checkbits": args["checkbits"],
+            "parity": args["parity"],
+            "unit_addr": args["unit_addr"],
+        }
+
+        if args["date_rec"] is None:
+            sql_args["date"] = datetime_string
+            recovery_request = False
+
+        results = run_exec_cmd(sql, sql_args)
+        if results < 1:
+            raise RepositoryInternalError("Could not create new train record, 0 rows created!")
+        return results, recovery_request
 
 
     # below is for station_handler.py
@@ -113,24 +96,22 @@ class HOTRepository(RecordRepository):
     
         
     def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]] | None:
-        try:
-            if station_records is None:
-                return []
-            hot_records = [
-                {
-                    "id": record[0],
-                    "date_rec": record[1],
-                    "frame_sync": record[3],
-                    "unit_addr": record[4],
-                    "command": record[5],
-                    "checkbits": record[6],
-                    "parity": record[7],
-                }
-                for record in station_records
-            ]
-            return hot_records
-        except IndexError as e:
-            raise RepositoryParsingError(f"Could not parse HOT station records: {e}")
+        if station_records is None:
+            return []
+        hot_records = [
+            {
+                "id": record[0],
+                "date_rec": record[1],
+                "frame_sync": record[3],
+                "unit_addr": record[4],
+                "command": record[5],
+                "checkbits": record[6],
+                "parity": record[7],
+            }
+            for record in station_records
+        ]
+        return hot_records
+
 
     # below is for record collation
     def get_record_collation(self, page: int) -> list[dict[str, Any]]:
@@ -223,10 +204,11 @@ class HOTRepository(RecordRepository):
             """
             args = {"results_num": RESULTS_NUM, "offset": page - 1}
             resp = run_get_cmd(sql, args)
-        except OperationalError:
-            raise RepositoryTimeoutError("Could not collate HOT records!")
-        except Error as e:
-            raise RepositoryInternalError(f"Could not collate HOT records: {e}")
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not collate HOT records: {e}"
+            )
 
         try:
             count_sql = """
@@ -315,11 +297,11 @@ class HOTRepository(RecordRepository):
                 SELECT COUNT(*) FROM UnitAddrDetails WHERE row_num = 1;
             """
             count = run_get_cmd(count_sql)
-        except OperationalError:
-            raise RepositoryTimeoutError("Could not count HOT records!")
-        except Error as e:
-            raise RepositoryInternalError(f"Could not count HOT records: {e}")
-        
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not count HOT records: {e}"
+            )
             
         try:
             results = {
@@ -344,9 +326,12 @@ class HOTRepository(RecordRepository):
                     "totalPages": ceil(count[0][0] / RESULTS_NUM),
                 }
             return results
-        except (IndexError, ValueError, TypeError, ZeroDivisionError) as e:
-            raise RepositoryParsingError(f"Could not parse HOT collation results: {e}")
-        
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not parse HOT collation results: {e}"
+            )
+            
         
     def get_records_by_verification(self, page: int, verified: bool):
         verified_str = str(verified).lower()
@@ -434,22 +419,24 @@ class HOTRepository(RecordRepository):
             """
             args = {"results_num": RESULTS_NUM, "offset": page - 1}
             resp = run_get_cmd(sql, args)
-        except OperationalError:
-            raise RepositoryTimeoutError(f"Could not retrieve {'verified' if verified else 'unverified'} HOT records!")
-        except Error as e:
-            raise RepositoryInternalError(f"Could not retrieve {'verified' if verified else 'unverified'} HOT records: {str(e)}")
-        
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not retrieve {'verified' if verified else 'unverified'} HOT records: {e}"
+            )
+
         try:
             count_sql = f"""
                 SELECT COUNT(*) FROM HOTRecords
                 WHERE verified = {verified_str}
             """
             count = run_get_cmd(count_sql)
-        except OperationalError:
-            raise RepositoryTimeoutError(f"Could not count {'verified' if verified else 'unverified'} HOT records!")
-        except Error as e:
-            raise RepositoryInternalError(f"Could not count {'verified' if verified else 'unverified'} HOT records: {str(e)}")
-            
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not count {'verified' if verified else 'unverified'} HOT records: {e}"
+            )
+
         try:
             return {
                 "results": [
@@ -470,5 +457,8 @@ class HOTRepository(RecordRepository):
                 ],
                 "totalPages": ceil(count[0][0] / RESULTS_NUM)
             }
-        except (IndexError, ValueError, TypeError, ZeroDivisionError) as e:
-            raise RepositoryParsingError(f"Could not parse HOT verification results: {e}")
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not parse HOT verification results: {e}"
+            )

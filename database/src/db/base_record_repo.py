@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
-from psycopg import Error, OperationalError, sql
+from abc import abstractmethod
+from psycopg import Error, OperationalError
 from sqlalchemy import text
 from sqlalchemy.orm.scoping import scoped_session
-from trackSense_db_commands import run_get_cmd, run_exec_cmd
+from sqlalchemy.exc import *
 from database_core import *
 from typing import Any
 
@@ -20,89 +20,71 @@ class RecordRepository(BaseRepository):
         return self._record_identifier
     
     @abstractmethod
+    @repository_error_handler
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
         pass
     
     @abstractmethod
+    @repository_error_handler
     def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:
         pass
 
-    
+    @repository_error_handler
     def get_unit_record_ids(self, unit_addr: str, most_recent=False) -> int:
-        try:
-            query = text(
-                f"""
-                SELECT id FROM {self._table_name}
-                WHERE unit_addr = :unit_addr
-                """
-            )
-            
-            args = {"unit_addr": unit_addr}
-            resp_id = self.session.execute(query, args).scalars()
-            
-            if len(resp_id) < 1:
-                raise RepositoryNotFoundError(unit_addr)
-                
-            return resp_id[-1] if most_recent else resp_id
+        query = text(
+            f"""
+            SELECT id FROM {self._table_name}
+            WHERE unit_addr = :unit_addr
+            """
+        )
         
-        except OperationalError:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not get unit record IDs: {e}")
-        except (TypeError, IndexError) as e:
-            raise RepositoryParsingError(f"Could not parse unit record IDs: {e}")
+        args = {"unit_addr": unit_addr}
+        resp_id = self.session.execute(query, args).scalars()
         
-
+        if len(resp_id) < 1:
+            raise RepositoryNotFoundError(unit_addr)
+            
+        return resp_id[-1] if most_recent else resp_id
     
+    
+    @repository_error_handler
     def get_recent_trains(self, unit_addr: str, station_id: int) -> list:
-        try:
-            query = text(
-                f"""
-                SELECT * FROM {self._table_name}
-                WHERE unit_addr = :unit_addr AND station_recorded = :station_id AND date_rec >= NOW() - INTERVAL '10 minutes'
-                """
-            )
-            
-            args = {
-                "unit_addr": unit_addr, 
-                "station_id": station_id
-            }
-            
-            results = self.session.execute(query, args).all()
-            return [row._asdict() for row in results]
+        query = text(
+            f"""
+            SELECT * FROM {self._table_name}
+            WHERE unit_addr = :unit_addr AND station_recorded = :station_id AND date_rec >= NOW() - INTERVAL '10 minutes'
+            """
+        )
         
-        except OperationalError:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not get recent trains: {e}")    
-
+        args = {
+            "unit_addr": unit_addr, 
+            "station_id": station_id
+        }
+        
+        results = self.session.execute(query, args).all()
+        return [row._asdict() for row in results]
 
     
+    @repository_error_handler
     def add_new_pin(self, record_id: int, unit_addr: int) -> int:
-        try:
-            args = {"id": record_id, "unit_addr": unit_addr}
-            
-            query = text(
-                f"""
-                UPDATE {self._table_name}
-                SET most_recent = false
-                WHERE id != :id and unit_addr = :unit_addr and most_recent = true
-                RETURNING id
-                """
-            )
-            
-            results = self.session.execute(query, args).scalar()
-            if len(results) < 1:
-                raise RepositoryInternalError(f"Could not add new pin, 0 rows were updated!")
-            return results
+        args = {"id": record_id, "unit_addr": unit_addr}
         
-        except OperationalError:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not add new pin: {e}")
+        query = text(
+            f"""
+            UPDATE {self._table_name}
+            SET most_recent = false
+            WHERE id != :id and unit_addr = :unit_addr and most_recent = true
+            RETURNING id
+            """
+        )
+        
+        results = self.session.execute(query, args).scalar()
+        if len(results) < 1:
+            raise RepositoryInternalError(f"Could not add new pin, 0 rows were updated!")
+        return results
 
 
-    
+    @repository_error_handler
     def check_for_record_field(self, unit_addr: str, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
             raise RepositoryNotFoundError(field_type)
@@ -111,23 +93,15 @@ class RecordRepository(BaseRepository):
         # SELECT %(field_type)s FROM {record_table} 
         # WHERE unit_addr = %(unit_addr)s and most_recent = True
         # """
-        try:
-            query = text(
-                f"""
-                SELECT {field_type} FROM {self._table_name} 
-                WHERE unit_addr = :unit_addr and most_recent = True
-                """
-            )
-            params = {"unit_addr": unit_addr}
-            
-            return self.session.execute(query, params).scalar()
+        query = text(
+            f"""
+            SELECT {field_type} FROM {self._table_name} 
+            WHERE unit_addr = :unit_addr and most_recent = True
+            """
+        )
+        params = {"unit_addr": unit_addr}
         
-        except OperationalError:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not check a record field: {e}")    
-        except IndexError as e:
-            raise RepositoryParsingError(f"Could not parse record field results: {e}")
+        return self.session.execute(query, params).scalar()
         
 
     
@@ -151,10 +125,11 @@ class RecordRepository(BaseRepository):
                 raise RepositoryInternalError(f"Could not update {field_type}, 0 rows updated!")
             return [row._asdict() for row in results]
         
-        except OperationalError:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not update {field_type}: {e}")
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not update {field_type}: {e}"
+            )
 
 
     # Station Handler
@@ -171,20 +146,21 @@ class RecordRepository(BaseRepository):
             results = self.session.execute(query, args).all()
             return [row._asdict() for row in results]
         
-        except OperationalError:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not fetch records for a specific station {station_id}: {e}")
-        except ValueError as e:
-            raise RepositoryParsingError(f"Could not parse query: {e}")
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not fetch records for a specific station {station_id}: {e}"
+            )
         
     
     @abstractmethod
+    @repository_error_handler
     def get_recent_station_records(self, station_id: int) -> list[tuple[Any, ...]]:
         pass
         
         
     @abstractmethod
+    @repository_error_handler
     def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
         pass
     
@@ -223,10 +199,11 @@ class RecordRepository(BaseRepository):
                 raise RepositoryNotFoundError(record_id)
             return [row._asdict() for row in results]
             
-        except OperationalError:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not verify {self._record_name} {record_id}: {str(e)}")
+        except Exception as e:
+            raise repository_error_handler(
+                e, self.__class__.__name__, None,
+                f"Could not verify {self._record_name} {record_id}: {e}"
+            )
         
         
     # Time frame
@@ -267,9 +244,8 @@ class RecordRepository(BaseRepository):
                 } for tup in results
             ]
             
-        except OperationalError:
-            raise RepositoryTimeoutError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not retrieve {self._record_name}s in timeframe: {e}")
-        except (IndexError, ValueError, TypeError) as e:
-            raise RepositoryParsingError(f"Could not parse record results in timeframe: {e}")
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not retrieve {self._record_name}s in timeframe: {e}"
+            )
