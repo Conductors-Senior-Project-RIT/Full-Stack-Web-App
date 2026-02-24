@@ -1,6 +1,6 @@
 from sqlalchemy.orm.scoping import scoped_session
 
-from .record_types import RecordTypes
+#from .record_types import RecordTypes
 
 
 class BaseRepository:
@@ -39,7 +39,7 @@ class RepositoryNotFoundError(RepositoryError):
         super().__init__(f"{value} was not found!")
         
         
-class RepositoryRecordInvalid(RepositoryError):
-    def __init__(self, value):
-        valid_types = list(RecordTypes._value2member_map_)
-        super().__init__(f"Invalid record type provided: {value}! Must be between {valid_types[0]} and {valid_types[-1]}")
+# class RepositoryRecordInvalid(RepositoryError):
+#     def __init__(self, value):
+#         valid_types = list(RecordTypes._value2member_map_)
+#         super().__init__(f"Invalid record type provided: {value}! Must be between {valid_types[0]} and {valid_types[-1]}")

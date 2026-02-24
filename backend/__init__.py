@@ -44,7 +44,16 @@ def create_app():
     env = os.environ.get("FLASK_APP_ENV", "dev").lower()
     app.config.from_object(config_selection[env]()) # pop config; instantiate config class to access @property from said class as desired
 
-    from db import db
+    print("=" * 50)
+    print(f"Environment: {env}")
+    print(f"Debug Mode: {app.config['DEBUG']}")
+    print(f"Testing: {app.config['TESTING']}")
+    print(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    print(f"Secret Key Set: {bool(app.config.get('SECRET_KEY'))}") #if exists, show boolean
+    print(f"JWT Secret Key Set: {app.config.get('JWT_SECRET_KEY')}") #if exists, show boolean
+    print("=" * 50)
+
+    from .db import db
     db.init_app(app) # load settings for db engine/ bind sqlaclhemy to app (flask-alchemy)
     # TODO: reflect existing tables here with the "db" (it's a quick way to get models for existing db tables (?) -- look into more)
 
@@ -72,7 +81,7 @@ def create_app():
     api.add_resource(StationOnline, "/api/station_online")
 
     # blueprints + error handler registrations here
-    from src.api import user_api, station_handler, volunteer_handler, error_handler
+    from .src.api import user_api, station_handler, volunteer_handler, error_handler
 
     app.register_blueprint(user_api.user_bp)
     app.register_blueprint(station_handler.station_bp)

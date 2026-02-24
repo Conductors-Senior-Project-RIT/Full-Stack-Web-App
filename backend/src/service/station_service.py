@@ -4,7 +4,7 @@ import string
 from ..db.record_types import get_all_repositories
 from ..db.station_repo import StationRepository
 from ..db.database_core import *
-from service_core import *
+from .service_core import BaseService, ServiceParsingError
 
 
 class StationService(BaseService):

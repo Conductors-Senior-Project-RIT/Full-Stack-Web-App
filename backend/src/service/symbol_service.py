@@ -1,8 +1,7 @@
 from typing import Any
-from service_core import BaseService
+from .service_core import BaseService
 from backend.src.db.database_core import *
-from service_core import *
-from db.symbol_repo import SymbolRepository
+from ..db.symbol_repo import SymbolRepository
 
 
 class SymbolService(BaseService):

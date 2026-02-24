@@ -8,8 +8,8 @@ class Config(object):
     Base configuration class
     """
     # default config setting(s)
-    SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-key?")
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "fallback-key?")
+    SECRET_KEY = os.environ.get("SECRET_KEY")
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 
     # build database uri from .env OR should prod config database url be stored in .env?
     @staticmethod
@@ -28,7 +28,8 @@ class ProdConfig(Config):
     """
     Production environment configuration - note sure if raising errors is necessary here but ill leave it for now
     """
-    DEBUG = False
+    # DEBUG = False by default
+    TESTING = False
 
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
     # SECRET_KEY = os.environ.get("SECRET_KEY")
@@ -47,7 +48,7 @@ class DevConfig(Config):
     """
     Dev environment configuration
     """
-    DEBUG = True
+    # DEBUG = True | use --debug flag for the development environment (as per docs).
 
     SQLALCHEMY_DATABASE_URI = Config.get_database_uri()
 
@@ -55,7 +56,8 @@ class TestConfig(Config):
     """
     Test environment configuration
     """
-    DEBUG = True
+    # DEBUG = True | only for dev environment
+    TESTING = True
 
     SQLALCHEMY_DATABASE_URI = Config.get_database_uri()
 

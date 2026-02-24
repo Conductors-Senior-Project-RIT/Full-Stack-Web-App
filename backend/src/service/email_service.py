@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import requests
 
-from service_core import BaseService
+# from service_core import BaseService
 
 # load_dotenv() fix later
 MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
