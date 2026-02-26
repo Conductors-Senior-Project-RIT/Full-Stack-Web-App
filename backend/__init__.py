@@ -19,10 +19,7 @@ from .config.settings import config_selection
 
 from dotenv import load_dotenv
 
-load_dotenv()  # .env file --> load_dotenv() --> .env vars go into os.environ --> settings.py reads that stuff -> that's it?
-# okay then just add .env at root of project and see if stuff runs lol
-
-def create_app():
+def create_app(testing_config=None): #testing_config should accept a dictionary of config values for test environment
     """
     TODO: config setup almost done? just need to add more customizations in settings.py + reflect tables and add more as i continue refactoring?
     idea: make script for dev/testing/prod envs, all it will do is export variables and do
@@ -40,12 +37,20 @@ def create_app():
     # create config file as such: instance/config.py and override any config settings you desire there.
     # app.config.from_pyfile('config.py', silent=True)
 
-    # retrieves specified environment, dev environment is default
-    env = os.environ.get("FLASK_APP_ENV", "dev").lower()
-    app.config.from_object(config_selection[env]()) # pop config; instantiate config class to access @property from said class as desired
+    if testing_config is None:
+        load_dotenv()  # .env file --> load_dotenv() --> .env vars go into os.environ --> settings.py reads that stuff -> that's it?
+        # only for dev environment
+
+        # retrieves specified environment, dev environment is default
+        env = os.environ.get("FLASK_APP_ENV", "dev").lower()
+        app.config.from_object(config_selection[
+                                   env]())  # pop config; instantiate config class to access @property from said class as desired
+
+    else:
+        app.config.update(testing_config)
 
     print("=" * 50)
-    print(f"Environment: {env}")
+    print(f"Environment: {app.config['FLASK_APP_ENV']}")
     print(f"Debug Mode: {app.config['DEBUG']}")
     print(f"Testing: {app.config['TESTING']}")
     print(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
