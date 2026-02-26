@@ -22,7 +22,13 @@ class LayerError(Exception):
         super().__init__(f"{caller}{public}")
         
 
-def layer_error_handler(func, error_map: dict, base_exception: LayerError, message: str | None = None):
+def layer_error_handler(
+    func, 
+    error_map: dict, 
+    base_exception: LayerError, 
+    exclude: tuple[Exception] | Exception | None = None, 
+    message: str | None = None
+):
     """This function acts as a decorator to provide Service layer error translation for
     Repository layer errors that are raised.
 
@@ -44,6 +50,9 @@ def layer_error_handler(func, error_map: dict, base_exception: LayerError, messa
             # Return our wrapped function
             return func(*args, **kwargs)
         except Exception as e:
+            if not exclude or isinstance(e, exclude):
+                raise e
+            
             error = translate_error(
                 e, 
                 error_map, 

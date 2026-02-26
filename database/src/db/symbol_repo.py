@@ -4,10 +4,8 @@ Symbols database layer
 This module handles all database CRUD operations for Symbol records
 """
 
-from typing import NoReturn, Optional, Any
 
 from psycopg import Error, OperationalError
-from record_types import RecordTypes
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 from database.src.db.database_core import *
 
@@ -15,6 +13,7 @@ from database.src.db.database_core import *
 class SymbolRepository(BaseRepository):
     def __init__(self, session):
         super().__init__(session)
+
 
     def get_symbol_name(self, id: int) -> str:
         """
@@ -29,15 +28,14 @@ class SymbolRepository(BaseRepository):
 
             return run_get_cmd(sql, named_args)[0]
         
-        except OperationalError:
-            raise RepositoryConnectionError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not retrieve symbol name for ({id}): {e}")
-        except IndexError as e:
-            raise RepositoryParsingError(f"Could not parse symbol ID result: {e}")
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not retrieve symbol name for ({id}): {e}"
+            )
         
 
-
+    @repository_error_handler
     def get_symbol_names(self) -> list | None:
         """Retrieves all symbol names stored in the Symbols table.
         
@@ -50,21 +48,13 @@ class SymbolRepository(BaseRepository):
         """
 
         # Attempt to retrieve and parse a list of symbol names in the database
-        try:
-            resp = run_get_cmd(sql)
-            ret_val = [
-                tup[0] for tup in resp
-            ]  # run_get_cmd() returns a list of tuples, doing this gives us an array of symbols.
-            
-            return ret_val
+        resp = run_get_cmd(sql)
+        ret_val = [
+            tup[0] for tup in resp
+        ]  # run_get_cmd() returns a list of tuples, doing this gives us an array of symbols.
         
-        # If an index error occurs while parsing, print that an index error occurred and return None
-        except OperationalError:
-            raise RepositoryConnectionError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not retrieve symbol names: {e}")
-        except IndexError as e:
-            raise RepositoryParsingError(f"Could not parse symbol results: {e}")
+        return ret_val
+
         
         
     def get_symbol_id(self, symbol_name: str) -> int | None:
@@ -88,14 +78,13 @@ class SymbolRepository(BaseRepository):
             return symbol_id
         
         # Otherwise, we encountered an error while retrieving
-        except OperationalError:
-            raise RepositoryConnectionError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not retrieve symbol ID for {symbol_name}: {e}")
-        except IndexError as e:
-            raise RepositoryParsingError(f"Could not parse resulting symbol name: {e}")
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not retrieve symbol ID for {symbol_name}: {e}"
+            )
         
-        
+    
     def insert_new_symbol(self, symbol_name: str):
         """Inserts a new symbol row into the Symbols table.
         
@@ -115,9 +104,8 @@ class SymbolRepository(BaseRepository):
         try:
             run_exec_cmd(sql, args={"name": symbol_name})
         # If an exception occurs, raise a repository layer exception
-        except OperationalError:
-            raise RepositoryConnectionError()
-        except Error as e:
-            raise RepositoryInternalError(f"Could not retrieve symbol ID for {symbol_name}: {e}")
-        
-
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__, None,
+                f"Could not retrieve symbol ID for {symbol_name}: {e}"
+            )

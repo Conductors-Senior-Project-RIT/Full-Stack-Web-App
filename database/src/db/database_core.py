@@ -57,6 +57,7 @@ def repository_error_handler(message: str | None = None):
             func, 
             error_map=REPOSITORY_ERROR_MAP, 
             base_exception=RepositoryInternalError,
+            exclude=RepositoryError,
             message=message
         )
     

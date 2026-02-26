@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from psycopg import Error, OperationalError
 from sqlalchemy import text
 from sqlalchemy.orm.scoping import scoped_session
 from sqlalchemy.exc import *
@@ -207,7 +206,6 @@ class RecordRepository(BaseRepository):
         
         
     # Time frame
-    
     def get_records_in_timeframe(self, station_id: int, datetime_str: str, recent: bool) -> list[dict[str, Any]]:
         try:
             query_str = f"""
