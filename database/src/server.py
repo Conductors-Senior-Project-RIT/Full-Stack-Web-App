@@ -13,7 +13,7 @@ from api.load_example_data import (
     LoadExampleData,
 )  # Import the load example data resource
 from api.station_auth import StationAuth
-from api.error_handler import register_error_handlers
+from database.src.api.error_handler import register_error_handlers
 from api.time_frame_pull import recent_activities
 from api.symbol_api import SymbolAPI
 from api.pushover_updater import PushoverUpdater

@@ -16,7 +16,7 @@ def has_value(value: int):
 
 def get_record_repository(session, value: int | RecordTypes) -> RecordRepository:
     if not isinstance(value, (int, RecordTypes)):
-        raise RepositoryRecordInvalid(value)
+        raise RepositoryRecordInvalid(f"Provided: {value}")
     
     match value:
         case RecordTypes.EOT.value:
@@ -25,7 +25,7 @@ def get_record_repository(session, value: int | RecordTypes) -> RecordRepository
             return HOTRepository(session)
         # case RecordTypes.DPU.value:
         #     raise InvalidRecordError(value)
-    raise RepositoryRecordInvalid(value)
+    raise RepositoryRecordInvalid(f"Provided: {value}")
 
 
 def get_all_repositories(session) -> list[RecordRepository]:
