@@ -6,6 +6,7 @@ This module handles all database CRUD operations for Symbol records
 
 
 from psycopg import Error, OperationalError
+from sqlalchemy import text
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 from database.src.db.database_core import *
 
@@ -23,10 +24,19 @@ class SymbolRepository(BaseRepository):
         """
 
         try:
-            sql = "SELECT symb_name FROM Symbols WHERE id = %(symid)s"
-            named_args = {"symid": id}
+            sql = "SELECT symb_name FROM Symbols WHERE id = :sym_id"
+            args = {"sym_id": id}
+            
+            result = self.session.execute(text(sql), args).scalar_one_or_none()
+            
+            if not result:
+                raise RepositoryNotFoundError(
+                    caller_name=self.__class__.__name__,
+                    message=f"Symbol with ID = {id}, could not be found!",
+                    show_error=False
+                )
 
-            return run_get_cmd(sql, named_args)[0]
+            return result
         
         except Exception as e:
             raise repository_error_translator(
@@ -36,24 +46,17 @@ class SymbolRepository(BaseRepository):
         
 
     @repository_error_handler
-    def get_symbol_names(self) -> list | None:
+    def get_symbol_names(self) -> list:
         """Retrieves all symbol names stored in the Symbols table.
         
         Returns:
-            (list | None): All list of symbol names as strings if the database retrieval was successful; otherwise, None if an error occured.
+            (list): All list of symbol names as strings if the database retrieval was successful.
         """
         # Databse query to retrieve all symbol names in the Symbols table
-        sql = """
-            SELECT symb_name FROM Symbols
-        """
-
+        sql = "SELECT symb_name FROM Symbols"
         # Attempt to retrieve and parse a list of symbol names in the database
-        resp = run_get_cmd(sql)
-        ret_val = [
-            tup[0] for tup in resp
-        ]  # run_get_cmd() returns a list of tuples, doing this gives us an array of symbols.
-        
-        return ret_val
+        return self.session.execute(text(sql)).scalars()
+
 
         
         
@@ -67,15 +70,18 @@ class SymbolRepository(BaseRepository):
             (int | None): The ID of the symbol as an int if the database retrieval was successful; otherwise, None if an error occurred.
         """
         # Databse query to retrieve the symbol names in a list that match the given parameter
-        sql = """
-            SELECT id FROM Symbols
-            WHERE symb_name = %(name)s
-        """
+        sql = "SELECT id FROM Symbols WHERE symb_name = :name"
 
         # Try to retrieve the first ID from the resulting tuple list
         try:
-            symbol_id = run_get_cmd(sql, args={"name": symbol_name})[0][0]  # Variable assigned if further debugging is implemented
-            return symbol_id
+            symbol_id = self.session.execute(text(sql), {"name": symbol_name}).scalar_one_or_none()
+            
+            if symbol_id is None:
+                raise RepositoryNotFoundError(
+                    caller_name=self.__class__.__name__,
+                    message=f"Could not find symbol with name = {symbol_name}",
+                    show_error=False
+                )
         
         # Otherwise, we encountered an error while retrieving
         except Exception as e:
@@ -96,13 +102,15 @@ class SymbolRepository(BaseRepository):
         """
         # Database query to insert a new symbol row into the Symbols table
         sql = """
-            INSERT INTO Symbols (symb_name) VALUES
-            (%(name)s)
+            INSERT INTO Symbols (symb_name) 
+            VALUES (:name)
+            RETURNING id
         """
         
         # Attempt to insert the new symbol into the Symbols table
         try:
-            run_exec_cmd(sql, args={"name": symbol_name})
+            return self.session.execute(text(sql), {"name": symbol_name}).scalar_one()
+            
         # If an exception occurs, raise a repository layer exception
         except Exception as e:
             raise repository_error_translator(

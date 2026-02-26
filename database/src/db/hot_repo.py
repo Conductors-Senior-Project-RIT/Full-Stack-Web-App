@@ -5,11 +5,10 @@ This module handles all database CRUD operations for HOT records
 """
 
 from math import ceil
-from typing import Any, NoReturn
+from typing import Any
 
-from psycopg import Error, OperationalError, sql
-from base_record_repo import RecordRepository, RepositoryError
-from trackSense_db_commands import run_get_cmd, run_exec_cmd
+from sqlalchemy import text
+from base_record_repo import RecordRepository
 from database.src.db.database_core import *
 
 RESULTS_NUM = 250
@@ -30,25 +29,25 @@ class HOTRepository(RecordRepository):
                 SELECT HOTRecords.id, date_rec, stat.station_name, sym.symb_name, unit_addr, command, checkbits, parity, verified FROM HOTRecords
                 INNER JOIN Stations as stat on station_recorded = stat.id
                 INNER JOIN Symbols as sym on symbol_id = sym.id
-                WHERE HOTRecords.id = %(id)s
-                LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
+                WHERE HOTRecords.id = :id
+                LIMIT :results_num OFFSET :offset * :results_num
                 """
         sql_args = {"id": id, "results_num": num_results, "offset": page - 1}
         
-        resp = run_get_cmd(sql, sql_args)
+        resp = [row._asdict() for row in self.session.execute(text(sql), sql_args).all()]
         return [
                     {
-                        "id": tup[0],
-                        "date_rec": tup[1],
-                        "station_name": tup[2],
-                        "symbol_name": tup[3],
-                        "unit_addr": tup[4],
-                        "command": tup[5],
-                        "checkbits": tup[6],
-                        "parity": tup[7],
-                        "verified": tup[8],
+                        "id": row[0],
+                        "date_rec": row[1],
+                        "station_name": row[2],
+                        "symbol_name": row[3],
+                        "unit_addr": row[4],
+                        "command": row[5],
+                        "checkbits": row[6],
+                        "parity": row[7],
+                        "verified": row[8],
                     }
-                    for tup in resp
+                    for row in resp
         ]
 
 
@@ -62,6 +61,7 @@ class HOTRepository(RecordRepository):
         sql = """
             INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
             (%(date)s, %(station)s, %(frame_sync)s, %(unit_addr)s, %(command)s, %(checkbits)s, %(parity)s)
+            RETURNING id
         """
         sql_args = {
             "date": args["date_rec"],
@@ -77,10 +77,15 @@ class HOTRepository(RecordRepository):
             sql_args["date"] = datetime_string
             recovery_request = False
 
-        results = run_exec_cmd(sql, sql_args)
-        if results < 1:
-            raise RepositoryInternalError("Could not create new train record, 0 rows created!")
-        return results, recovery_request
+        result = self.session.execute(text(sql), sql_args).scalar_one_or_none()
+        if not result:
+            raise RepositoryInternalError(
+                caller_name=self.__class__.__name__,
+                message="Could not create new train record, 0 rows created!",
+                show_error=True
+            )
+        
+        return result, recovery_request
 
 
     # below is for station_handler.py
@@ -88,11 +93,13 @@ class HOTRepository(RecordRepository):
         """Retrieves the most recent HOT records for a given station id.
 
         """
-        hot_records = run_get_cmd(
-            "SELECT * FROM HOTRecords WHERE station_recorded = %s and most_recent = true",
-            (station_id,),
-        )
-        return hot_records
+        sql = """
+            SELECT * FROM HOTRecords 
+            WHERE station_recorded = :station_id and most_recent = true
+        """
+        args = {"station_id": station_id}
+        
+        return self.session.execute(text(sql), args).all()
     
         
     def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]] | None:
@@ -200,10 +207,10 @@ class HOTRepository(RecordRepository):
                 ON d.symbol_id = f.id
                 WHERE d.row_num = 1
                 ORDER BY d.date_rec DESC
-                LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
+                LIMIT :results_num OFFSET :offset * :results_num
             """
             args = {"results_num": RESULTS_NUM, "offset": page - 1}
-            resp = run_get_cmd(sql, args)
+            resp = [row._asdict() for row in self.session.execute(text(sql), args)]
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
@@ -296,7 +303,7 @@ class HOTRepository(RecordRepository):
                 )
                 SELECT COUNT(*) FROM UnitAddrDetails WHERE row_num = 1;
             """
-            count = run_get_cmd(count_sql)
+            count = self.session.execute(text(count_sql)).scalar_one()
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
@@ -307,23 +314,23 @@ class HOTRepository(RecordRepository):
             results = {
                     "results": [
                         {
-                            "id": tup[0],
-                            "date_rec": tup[1],
-                            "station_name": tup[2],
-                            "symbol_id": tup[3],
-                            "unit_addr": tup[4],
-                            "signal_strength": tup[5],
-                            "verified": tup[6],
-                            "locomotive_num": tup[7],
-                            "first_seen": tup[8],
-                            "last_seen": tup[9],
-                            "occurrence_count": str(tup[10]),
-                            "duration": str(tup[11]),
-                            "symbol_name": tup[12],
+                            "id": row[0],
+                            "date_rec": row[1],
+                            "station_name": row[2],
+                            "symbol_id": row[3],
+                            "unit_addr": row[4],
+                            "signal_strength": row[5],
+                            "verified": row[6],
+                            "locomotive_num": row[7],
+                            "first_seen": row[8],
+                            "last_seen": row[9],
+                            "occurrence_count": str(row[10]),
+                            "duration": str(row[11]),
+                            "symbol_name": row[12],
                         }
-                        for tup in resp
+                        for row in resp
                     ],
-                    "totalPages": ceil(count[0][0] / RESULTS_NUM),
+                    "totalPages": ceil(count / RESULTS_NUM),
                 }
             return results
         except Exception as e:
@@ -415,10 +422,10 @@ class HOTRepository(RecordRepository):
                 WHERE d.row_num = 1
                 AND d.verified = {verified_str}
                 ORDER BY d.unit_addr, d.date_rec DESC
-                LIMIT %(results_num)s OFFSET %(offset)s * %(results_num)s
+                LIMIT :results_num OFFSET :offset * :results_num
             """
             args = {"results_num": RESULTS_NUM, "offset": page - 1}
-            resp = run_get_cmd(sql, args)
+            resp = [row._asdict() for row in self.session.execute(text(sql), args).all()]
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
@@ -430,7 +437,7 @@ class HOTRepository(RecordRepository):
                 SELECT COUNT(*) FROM HOTRecords
                 WHERE verified = {verified_str}
             """
-            count = run_get_cmd(count_sql)
+            count = self.session.execute(text(count_sql)).scalar_one()
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
@@ -441,19 +448,19 @@ class HOTRepository(RecordRepository):
             return {
                 "results": [
                     {
-                        "id": tup[0],
-                        "date_rec": tup[1],
-                        "station_name": tup[2],
-                        "symbol_id": tup[3],
-                        "unit_addr": tup[4],
-                        "signal_strength": tup[5],
-                        "verified": tup[6],
-                        "first_seen": tup[7],
-                        "last_seen": tup[8],
-                        "occurrence_count": tup[9],
-                        "duration": str(tup[10]),
+                        "id": row[0],
+                        "date_rec": row[1],
+                        "station_name": row[2],
+                        "symbol_id": row[3],
+                        "unit_addr": row[4],
+                        "signal_strength": row[5],
+                        "verified": row[6],
+                        "first_seen": row[7],
+                        "last_seen": row[8],
+                        "occurrence_count": row[9],
+                        "duration": str(row[10]),
                     }
-                    for tup in resp
+                    for row in resp
                 ],
                 "totalPages": ceil(count[0][0] / RESULTS_NUM)
             }

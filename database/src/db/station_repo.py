@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Any
 
-from psycopg import Error, OperationalError
+from sqlalchemy import text
 from database.src.db.database_core import *
 from trackSense_db_commands import run_get_cmd, run_exec_cmd
 
@@ -19,7 +19,9 @@ class StationRepository(BaseRepository):
             otherwise, None is returned.
         """
         # Attempt to retrieve and parse a collection of station ID and name pairs.
-        results = run_get_cmd("SELECT id, station_name FROM Stations")
+        sql = text("SELECT id, station_name FROM Stations")
+        results = [row._asdict() for row in self.session.execute(sql).all()]
+        
         return [{
             "id": pair[0],
             "name": pair[1]
@@ -27,7 +29,7 @@ class StationRepository(BaseRepository):
     
             
     @repository_error_handler
-    def create_new_station(self, station_name: str, hashed_password: str):
+    def create_new_station(self, station_name: str, hashed_password: str) -> int:
         """Creates a new station given a station name and a hashed password in the Stations table.
         
         Args:
@@ -35,16 +37,26 @@ class StationRepository(BaseRepository):
             hashed_password (str): A hashed password for the new station.
             
         Returns:
-            bool: Returns True if the station was created without error; otherwise, return False if an error occurred.
+            bool: Returns the id of the new station created
         """
         # Attempt to create a new station and return True if successful.
         sql = """
-            INSERT INTO Stations (station_name, passwd) VALUES
-            (%(station_name)s, %(passwd)s)
+            INSERT INTO Stations (station_name, passwd) 
+            VALUES (:station_name, :passwd)
+            RETURNING id
         """
-        result = run_exec_cmd(sql, args={"station_name": station_name, "passwd": hashed_password})
-        if result == 0:
-            raise RepositoryInternalError(f"Could not create a new station, 0 rows created.")
+        result = self.session.execute(
+            text(sql), {"station_name": station_name, "passwd": hashed_password}
+        ).scalar_one_or_none()
+        
+        if not result:
+            raise RepositoryInternalError(
+                caller_name=self.__class__.__name__,
+                message=f"Could not create a new station, 0 rows created.",
+                show_error=True
+            )
+        
+        return result
 
 
     @repository_error_handler
@@ -60,10 +72,21 @@ class StationRepository(BaseRepository):
             UPDATE Stations
             SET passwd = %(hashed_pw)s
             WHERE id = %(id)s
+            RETURNING id
         """
-        result = run_exec_cmd(sql, args={"hashed_pw": hashed_password, "id": station_id})
-        if result == 0:
-            raise RepositoryNotFoundError(station_id)
+        result = self.session.execute(
+            text(sql), 
+            {"hashed_pw": hashed_password, "id": station_id}
+        ).scalar_one_or_none()
+        
+        if not result:
+            raise RepositoryNotFoundError(
+                caller_name=self.__class__.__name__, 
+                message=f"Could not find station with id: {station_id}!",
+                show_error=True
+            )
+        
+        return result
             
 
     def get_station_id(self, station_name: str) -> int:
@@ -76,11 +99,18 @@ class StationRepository(BaseRepository):
             str: The ID of the station given its name.
         """
         try:
-            sql = "SELECT id FROM Stations WHERE station_name = %(station_name)s"
-            results = run_get_cmd(sql, args={"station_name": station_name})
-            if len(results) < 1:
-                raise RepositoryNotFoundError(station_name)
-            return results[0][0]
+            sql = "SELECT id FROM Stations WHERE station_name = :station_name"
+            result = self.session.execute(text(sql), {"station_name": station_name}).scalar_one_or_none()
+            
+            if not result:
+                raise RepositoryNotFoundError(
+                    caller_name=self.__class__.__name__, 
+                    message=f"Could not find {station_name}!",
+                    show_error=True
+                )
+            
+            return result
+        
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
@@ -90,13 +120,17 @@ class StationRepository(BaseRepository):
 
     @repository_error_handler
     def get_last_seen(self, station_name: str) -> str:
-        sql = "SELECT last_seen FROM stations WHERE station_name = %s;"
-        results = run_get_cmd(sql, (station_name,))
+        sql = "SELECT last_seen FROM stations WHERE station_name = :station_name;"
+        result = self.session.execute(text(sql), {"station_name": station_name}).scalar_one_or_none()
         
-        if len(results) == 0:
-            raise RepositoryNotFoundError(station_name)
+        if not result:
+            raise RepositoryNotFoundError(
+                caller_name=self.__class__.__name__, 
+                message=f"Could not find {station_name}!",
+                show_error=True
+            )
         
-        seen_date = results[0][0]
+        seen_date = result
         formatted_date = seen_date.strftime("%I:%M %p") if seen_date.date() == date.today() \
             else seen_date.strftime("%b %d, %Y at %I:%M %p")
             
@@ -109,5 +143,9 @@ class StationRepository(BaseRepository):
         result = run_exec_cmd(sql, (station_id,))
         
         if result == 0:
-            raise RepositoryNotFoundError(station_id)
+            raise RepositoryNotFoundError(
+                caller_name=self.__class__.__name__, 
+                message=f"Could not find station with id: {station_id}!",
+                show_error=True
+            )
         

@@ -41,7 +41,11 @@ class RecordRepository(BaseRepository):
         resp_id = self.session.execute(query, args).scalars()
         
         if len(resp_id) < 1:
-            raise RepositoryNotFoundError(unit_addr)
+            raise RepositoryNotFoundError(
+                caller_name=self.__class__.__name__,
+                message=f"Could not get record ID where the unit address = {unit_addr}",
+                show_error=False
+            )
             
         return resp_id[-1] if most_recent else resp_id
     
@@ -79,14 +83,22 @@ class RecordRepository(BaseRepository):
         
         results = self.session.execute(query, args).scalar()
         if len(results) < 1:
-            raise RepositoryInternalError(f"Could not add new pin, 0 rows were updated!")
+            raise RepositoryInternalError(
+                caller_name=self.__class__.__name__,
+                message=f"Could not add new pin, 0 rows were updated!",
+                show_error=True
+            )
         return results
 
 
     @repository_error_handler
     def check_for_record_field(self, unit_addr: str, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
-            raise RepositoryNotFoundError(field_type)
+            raise RepositoryNotFoundError(
+                caller_name=self.__class__.__name__,
+                message=f"Could not find {field_type} from a corresponding record with an engine number = {unit_addr}",
+                show_error=False
+            )
         
         # sql = """
         # SELECT %(field_type)s FROM {record_table} 
@@ -106,7 +118,11 @@ class RecordRepository(BaseRepository):
     
     def update_record_field(self, record_id: int, field_value: Any, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
-            raise RepositoryNotFoundError(field_type)
+            raise RepositoryNotFoundError(
+                caller_name=self.__class__.__name__,
+                message=f"Could not find {field_type} with a value = {field_value}",
+                show_error=False
+            )
         
         try:
             args = {"id": record_id, "field_val": field_value}
@@ -121,7 +137,12 @@ class RecordRepository(BaseRepository):
 
             results = self.session.execute(query, args).all()
             if results < 1:
-                raise RepositoryInternalError(f"Could not update {field_type}, 0 rows updated!")
+                raise RepositoryInternalError(
+                    caller_name=self.__class__.__name__,
+                    message=f"Could not update {field_type}, 0 rows updated!",
+                    show_error=False
+                )
+                
             return [row._asdict() for row in results]
         
         except Exception as e:
@@ -195,11 +216,15 @@ class RecordRepository(BaseRepository):
 
             results = self.session.execute(query, args).all()
             if results < 1:
-                raise RepositoryNotFoundError(record_id)
+                raise RepositoryNotFoundError(
+                    caller_name=self.__class__.__name__, 
+                    message=f"Could not find record with id: {record_id}!",
+                    show_error=False
+                )
             return [row._asdict() for row in results]
             
         except Exception as e:
-            raise repository_error_handler(
+            raise repository_error_translator(
                 e, self.__class__.__name__, None,
                 f"Could not verify {self._record_name} {record_id}: {e}"
             )
@@ -227,7 +252,11 @@ class RecordRepository(BaseRepository):
             query = text(query_str)
             results = self.session.execute(query, args).all()
             if len(results) < 1:
-                raise RepositoryNotFoundError(station_id)
+                raise RepositoryNotFoundError(
+                    caller_name=self.__class__.__name__, 
+                    message=f"Could not find record with corresponding station: {station_id}!",
+                    show_error=False
+                )
             
             return [
                 {

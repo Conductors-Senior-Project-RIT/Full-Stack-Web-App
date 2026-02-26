@@ -47,7 +47,7 @@ SERVICE_ERROR_MAP = {
     RepositoryInternalError: (ServiceInternalError, False),
     RepositoryParsingError: (ServiceInternalError, False),
     RepositoryConnectionError: (ServiceTimeoutError, False),
-    RepositoryNotFoundError: (ServiceResourceNotFound, False),
+    RepositoryNotFoundError: (ServiceResourceNotFound, True),
     RepositoryRecordInvalid: (ServiceInvalidArgument, True)
 }
     

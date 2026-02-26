@@ -4,6 +4,8 @@ User database layer
 This module handles all database CRUD operations for User and UserPreferences records
 """
 
+from sqlalchemy import text
+
 from database_core import (
     layer_error_handler, REPOSITORY_ERROR_MAP, BaseRepository,
     RepositoryInternalError, RepositoryError, RepositoryNotFoundError
@@ -22,6 +24,7 @@ again see how caleb inherits his base service class and throws errors
 
 todo: rewrite logic with session?
 """
+
 class UserRepository(BaseRepository):
     def __init__(self, session):
         super().__init__(session)
@@ -36,163 +39,281 @@ class UserRepository(BaseRepository):
                 setattr(self, attr, wrapped)
 
 
-    def create_new_user(self, email: str, password: str):
-        run_exec_cmd(
-            "INSERT INTO Users (email, passwd) VALUES (%s, %s)",
-            (email, password),
-        )
-
-    
-    def get_user_id(self, email: str) -> int | RepositoryInternalError:
-        user = run_get_cmd("SELECT id FROM Users WHERE email = %s", (email,))
-        if not user:
-            raise RepositoryNotFoundError(email) # technically this shouldn't ever happen (?)
-    
-        return user[0][0]
-
-
-    def get_user_info(self, email: str): #-> list[TupleRow]
-        user = run_get_cmd("SELECT * FROM Users WHERE email = %s", (email,))
-
-        if not user:
-            raise RepositoryNotFoundError(email)# technically this shouldn't ever happen (?)
-        
-    
-    def update_session_token(self, user_id: int, token: str): # remove most likely, web tokens handled via JWT
-        run_exec_cmd(
-            "UPDATE Users SET token = %s WHERE id = %s", (token, user_id)
-        )
-        
-        
-    def get_authenticated_user(self, email: str, token: str, return_info="*"): # remove most likely, web tokens handled via JWT
-        return run_get_cmd(
-            "SELECT %s FROM Users WHERE email = %s AND token = %s", (return_info, email, token)
+    def _construct_email_not_found(self, email: str) -> RepositoryNotFoundError:
+        return RepositoryNotFoundError(
+            caller_name=self.__class__.__name__,
+            message=f"Could not find a user with an email = {email}",
+            show_error=False
         )
         
     
-    def update_account_status(self, email: str, new_role: int):
-        run_exec_cmd(
-                "UPDATE Users SET acc_status = %s WHERE email = %s",
-                (new_role, email),
+    def _construct_id_not_found(self, user_id: int) -> RepositoryNotFoundError:
+        return RepositoryNotFoundError(
+            caller_name=self.__class__.__name__,
+            message=f"Could not find a user with an ID = {user_id}",
+            show_error=False
+        )
+
+
+    def create_new_user(self, email: str, password: str) -> int:
+        sql = """
+            INSERT INTO Users (email, passwd) 
+            VALUES (:email, :password)
+            RETURNING id
+        """
+        args = {"email": email, "password": password}
+        
+        result = self.session.execute(text(sql), args).scalar_one_or_none()
+        if not result:
+            raise RepositoryInternalError(
+                caller_name=self.__class__.__name__,
+                message="An error occurred creating a new user!",
+                show_error=True
             )
         
-    
-    def update_user_password(self, user_id: int, hashed_password: str):
-        update_password_sql = (
-            "UPDATE users SET passwd = %(passwd_hash)s WHERE id = %(user_id)s;"
-        )
+        return result
 
-        run_exec_cmd(
-            update_password_sql, args={"passwd_hash": hashed_password, "user_id": user_id}
-        )
+
+    def unique_email_exists(self, email: str):
+        sql = text("SELECT COUNT(1) FROM Users WHERE email = :email")
+        result = self.session.execute(sql, {"email": email}).scalar_one()
+        if result == 0:
+            raise self._construct_email_not_found(email)
+            
+        
+    def unique_id_exists(self, user_id: int):
+        sql = text("SELECT COUNT(1) FROM Users WHERE id = :user_id")
+        result = self.session.execute(sql, {"user_id": user_id}).scalar_one()
+        if result == 0:
+            raise self._construct_id_not_found(user_id)
 
     
-    def update_user_times(self, user_id: int, start_time: str, end_time: str):
+    def get_user_id(self, email: str) -> int:
+        sql = text("SELECT id FROM Users WHERE email = :email")
+        user = self.session.execute(sql, {"email": email}).scalar_one_or_none()
+        
+        if not user:
+            raise self._construct_email_not_found(email) # technically this shouldn't ever happen (?)
+    
+        return user
+
+
+    def get_user_info(self, email: str) -> dict:
+        sql = text("SELECT * FROM Users WHERE email = :email")
+        user = self.session.execute(sql, {"email": email}).one_or_none()
+
+        if not user:
+            raise self._construct_email_not_found(email) # technically this shouldn't ever happen (?)
+        
+        return user._asdict()
+        
+    
+    def update_session_token(self, user_id: int, token: str) -> int: # remove most likely, web tokens handled via JWT
+        # Check if user exists, will raise exception otherwise.
+        self.unique_id_exists(user_id)
+        
+        sql = """
+            UPDATE Users 
+            SET token = %s 
+            WHERE id = %s
+            RETURNING token
+        """
+        
+        result = self.session.execute(text(sql), {"token": token, "id": user_id}).scalar_one_or_none()
+        if not result:
+            raise RepositoryInternalError(
+                caller_name=self.__class__.__name__,
+                message=f"An error occurred updating session token, 0 changes made!",
+                show_error=False
+            )
+
+        return result
+        
+        
+    def get_authenticated_user(self, email: str, token: str, return_info="*") -> dict: # remove most likely, web tokens handled via JWT
+        sql = text("SELECT :ret FROM Users WHERE email = :email AND token = :token")
+        
+        result = self.session.execute(sql, {"ret": return_info, "email": email, "token": token}).one_or_none()
+        if not result:
+            raise self._construct_email_not_found(email)
+        
+        return result._asdict()
+        
+    
+    def update_account_status(self, email: str, new_role: int) -> int:
+        # Check if user exists, will raise exception otherwise
+        self.unique_email_exists(email)
+        
+        sql = """
+            "UPDATE Users 
+            SET acc_status = :role 
+            WHERE email = :email
+            RETURNING acc_status
+        """
+        
+        result = self.session.execute(text(sql), {"role": new_role, "email": email}).scalar_one_or_none()
+        if not result:
+            raise RepositoryInternalError(
+                self.__class__.__name__,
+                message="An error occured updating account status, 0 changes made!",
+                show_error=True
+            )
+        
+        return result
+        
+    
+    def update_user_password(self, user_id: int, hashed_password: str) -> int:
+        # Check if user exists, will raise exception otherwise.
+        self.unique_id_exists(user_id)
+        
+        sql = """
+            UPDATE Users 
+            SET passwd = :passwd_hash 
+            WHERE id = :user_id
+            RETURNING id
+        """
+        
+        result = self.session.execute(
+            text(sql), 
+            {"passwd_hash": hashed_password, "user_id": user_id}
+        ).scalar_one_or_none()
+        
+        if not result:
+            raise RepositoryInternalError(
+                self.__class__.__name__,
+                message="An error occured updating password, 0 changes made!",
+                show_error=True
+            )
+        
+        return result
+
+    
+    def update_user_times(self, user_id: int, start_time: str, end_time: str) -> tuple[str, str]:
+        # Check if user exists, will raise exception otherwise.
+        self.unique_id_exists(user_id)
+        
         sql = """
             UPDATE Users
-            SET starting_time = %(start_time)s,
-            ending_time = %(ending_time)s
+            SET starting_time = %(start_time)s, ending_time = %(ending_time)s
             WHERE id = %(uid)s
+            RETURNING starting_time, ending_time
         """
         args = {
             "start_time": start_time,
             "ending_time": end_time,
             "uid": user_id,
         }
-        run_exec_cmd(sql, args=args)
+        
+        result = self.session.execute(text(sql), args).scalars()
+        if result != 2:
+            raise RepositoryInternalError(
+                self.__class__.__name__,
+                message="An error occured updating user times, 0 changes made!",
+                show_error=True
+            )
+        
+        return result[0], result[1]
 
 
     # below is related to userpreferencesapi.py, they get user_id many different ways lol
-    def get_user_start_and_end_times(self, user_id: int) -> tuple[Any,...]:
-        sql = """
-        SELECT starting_time, ending_time FROM Users WHERE id = %(user_id)s
-        """
-        args = {
-            "user_id": user_id,
-        }
+    def get_user_start_and_end_times(self, user_id: int) -> tuple[int, int]:
+        sql = text("SELECT starting_time, ending_time FROM Users WHERE id = :user_id")
+        args = {"user_id": user_id}
         
-        user_start_and_end_times = run_get_cmd(sql,args)[0] #just return tuple as there's only 1 row within the list of tuples
+        user_times = self.session.execute(sql, args).scalars()
 
-        if not user_start_and_end_times: #empty tuple
-            raise RepositoryNotFoundError(user_id)
+        if user_times != 2: # Incorrectly sized results
+            raise self._construct_id_not_found(user_id)
 
-        return user_start_and_end_times
+        return user_times[0], user_times[1]
 
 
-    def get_user_id_from_jwt_and_email(self, email:str, token: str) -> list[tuple[Any,...]]: # remove maybe as we don't need to store jwt in db (same reasoning as above)
+    def get_user_id_from_jwt_and_email(self, email:str, token: str) -> int: # remove maybe as we don't need to store jwt in db (same reasoning as above)
+        sql = text("SELECT id FROM Users WHERE email = :email AND token = :token")
+        args = {"email": email, "token": token}
+        
+        result = self.session.execute(sql, args).scalar_one_or_none()
+        if not result:
+            raise RepositoryNotFoundError(
+                caller_name=self.__class__.__name__,
+                message=f"A user with an email = {email} could not be found with provided token!",
+                show_error=False
+            )
+        
+        return result
+
+
+    def get_station_id_from_user_preferences(self, user_id: int) -> list[int]:
+        # Check if a single user with provided id exists, otherwise raise exception
+        self.unique_id_exists(user_id)
+        
+        sql = text("SELECT station_id FROM UserPreferences WHERE user_id = :user_id")
+        args = {"user_id": user_id}
+        
+        return self.session.execute(sql, args).scalars()
+
+
+    def delete_user_preferences(self, user_id: int) -> list[int]:
         sql = """
-        SELECT id FROM Users WHERE email = %(email)s AND token = %(token)s
+            DELETE FROM UserPreferences
+            WHERE user_id = :user_id
+            RETURNING station_id
         """
-        args = {
-            "email": email,
-            "token": token,
-        }
-        return run_get_cmd(sql,args)
-
-
-    def get_station_id_from_user_preferences(self, user_id: int) -> list[tuple[Any,...]]:
-        sql = """
-        SELECT station_id FROM UserPreferences WHERE user_id = %(user_id)s
-        """
-        args = {
-            "user_id": user_id,
-        }
-        station_id = run_get_cmd(sql,args)
-
-        if not user_id:
-            raise RepositoryNotFoundError(user_id)
-
-        return station_id
-
-
-    def delete_user_preferences(self, user_id: int):
-        sql = """
-        DELETE FROM UserPreferences WHERE user_id = %(user_id)s
-        """
-        args = {
-            "user_id": user_id,
-        }
-        run_exec_cmd(sql,args)
+        args = {"user_id": user_id}
+        
+        return self.session.execute(text(sql), args).scalars()
 
     def create_user_station_preference(self, user_id: int, station_id: int):
         sql = """
-        INSERT INTO UserPreferences (user_id, station_id) VALUES %(user_id)s, %(station_id)s)
+            INSERT INTO UserPreferences (user_id, station_id) 
+            VALUES (:user_id, :station_id)
+            RETURNING station_id
         """
-        args = {
-            "user_id": user_id,
-            "station_id": station_id,
-        }
+        args = {"user_id": user_id, "station_id": station_id}
         
-        run_exec_cmd(sql,args)
+        result = self.session.execute(text(sql), args).scalar_one_or_none()
+        if not result:
+            raise RepositoryInternalError(
+                self.__class__.__name__,
+                message="An error occured creating new user preference, 0 additions made!",
+                show_error=True
+            )
+
 
 
     def create_user_reset_token(self, user_id, hashed_token):
         """
         TODO: Move helpers like this function and the ones below somewhere else
         """
-        reset_token_sql = """
-                INSERT INTO reset_requests (uid, token, expiration) VALUES 
-                (%(user_id)s, %(token_hash)s, NOW() + INTERVAL '1 hour');
-                """
+        sql = """
+            INSERT INTO reset_requests (uid, token, expiration) 
+            VALUES (:user_id, :token_hash, NOW() + INTERVAL '1 hour');
+            RETURNING id
+        """
+        args = {"user_id": user_id, "token_hash": hashed_token}
                 
-        run_exec_cmd(
-            reset_token_sql, args={"user_id": user_id, "token_hash": hashed_token}
-        )
+        result = self.session.execute(text(sql), args).scalar_one_or_none()
+        if not result:
+            raise RepositoryInternalError(
+                self.__class__.__name__,
+                message="An error occurred creating new reset token, no token created!",
+                show_error=False
+            )
 
 # the two methods below may need to be rewritten as I don't see the purpose of storing token hashes especially as we need to refresh the JWT to avoid fast auto logouts...
 
-    def get_user_id_from_valid_reset_request_token(self, token_hash):
+    def get_user_id_from_valid_reset_request_token(self, token_hash) -> int | None:
         """
         look into later
         """
-        validate_token_sql = """
-                SELECT u.id FROM reset_requests as r
-                INNER JOIN users AS u ON r.uid = u.id
-                WHERE r.token = %(token_hash)s AND r.expiration >= NOW();
-            """
-        # results = run_get_cmd(validate_token_sql, args={"token_hash": token_hash})
-        return run_get_cmd(validate_token_sql, args={"token_hash": token_hash})
+        sql = """
+            SELECT u.id FROM reset_requests as r
+            INNER JOIN Users AS u ON r.uid = u.id
+            WHERE r.token = :token_hash AND r.expiration >= NOW();
+        """
+        return self.session.execute(text(sql), {"token_hash": token_hash}).scalar_one_or_none()
 
-    def delete_user_id_from_reset_requests(self, user_id):
-        delete_request = "DELETE FROM reset_requests WHERE uid = %(user_id)s;"
-        run_exec_cmd(delete_request, args={"user_id": user_id})
+    
+    def delete_user_id_from_reset_requests(self, user_id: int):
+        sql = "DELETE FROM reset_requests WHERE uid = :user_id RETURNING id;"
+        self.session.execute(text(sql), {"user_id": user_id})
