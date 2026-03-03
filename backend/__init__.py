@@ -47,7 +47,7 @@ def create_app(testing_config=None): #testing_config should accept a dictionary 
                                    env]())  # pop config; instantiate config class to access @property from said class as desired
 
     else:
-        app.config.update(testing_config)
+        app.config.from_mapping(testing_config)
 
     print("=" * 50)
     print(f"Environment: {app.config['FLASK_APP_ENV']}")
@@ -92,13 +92,6 @@ def create_app(testing_config=None): #testing_config should accept a dictionary 
     app.register_blueprint(station_handler.station_bp)
     app.register_blueprint(volunteer_handler.volunteer_bp)
 
-    error_handler.register_error_handlers(app)  # - commenting out for now
-
-    print("env: ",env) # double check env value
-    print(f"debug value: {app.config["DEBUG"]}") # double check in right env
+    error_handler.register_error_handlers(app)  
 
     return app
-
-
-
-

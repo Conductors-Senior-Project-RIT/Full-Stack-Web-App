@@ -16,17 +16,17 @@ class BaseTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app({"TESTING": True,
                                "FLASK_APP_ENV": "test",
-                               })  # maybe let .env.test still configure database and remove run_test.sh
+                               })  # maybe let .env.test still configure database and remove run_test.sh --> fix how configuration is handled
         # flask test client simulating http requests
-        self.client = self.app.test_client()
-        self.ctx = self.app.app_context()
-        self.ctx.push() # provides current_app
-        # db.create_all() will this work or reflection needed somehow?
+        # self.client = self.app.test_client() --> for api classsetup only?
+        self.ctx = self.app.app_context() # create app context for flask to know what we're referring to for our testing
+        self.ctx.push() # provides current_app by telling flask "yo we using this test app"
+
 
     def tearDown(self):
         # dont forget db and  session
         self.app = None
-        self.ctx.pop()
+        self.ctx.pop() # pop app context because we're telling flask "we no longer are referring to "this specific" test app instance
         self.client = None
 
     def test_app(self):
