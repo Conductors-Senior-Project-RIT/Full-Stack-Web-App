@@ -99,7 +99,7 @@ class UserService(BaseService):
         """
         token_hash = hashlib.sha256(token.encode()).hexdigest()
 
-        return len(self._user_repo.get_user_id_from_valid_reset_request_token(token_hash)) > 0 # if no password reset token found, then 0 rows are returned, and vice versa
+        return self._user_repo.get_user_id_from_valid_reset_request_token(token_hash) is not None # if no password reset token found, then None rows are returned; otherwise, id is returned
 
     def reset_user_password(self, reset_token, password):
         token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
