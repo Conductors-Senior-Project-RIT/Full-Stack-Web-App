@@ -1,16 +1,13 @@
 import hashlib
 import secrets
+# from werkzeug.security import check_password_hash, generate_password_hash
 
+from ... import bcrypt
+from .service_core import BaseService
 from ..db.station_repo import StationRepository
 from ..db.user_repo import UserRepository
 from ..service.email_service import send_welcome_email, send_forgot_password_email
-from werkzeug.security import check_password_hash, generate_password_hash
 
-from ..service.service_core import *
-
-"""
-TODO: move everything from user_db.py to user_repo.py for custom error handling!
-"""
 class UserService(BaseService):
     def __init__(self, session):
         self._user_repo = UserRepository(session)
@@ -21,11 +18,11 @@ class UserService(BaseService):
         After a user signs up, by default they have all stations set as their default preference
 
         TODO: remove auto incrementing from DB for "id" field and instead generate UUID here (maybe)
-        TODO: somehow check that an email is valid (has @ symbol etc)
-        repo/db layer should do the indexing for us, frick i forgot ... too lazy to change it rn will do later
+        TODO: somehow check if email is valid (has @ symbol, etc)
         """
-        hashed_password = generate_password_hash(password)
 
+        # hashed_password = generate_password_hash(password) | uses werkzeug helper functions, but reverting to old hashing algorithm
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
         self._user_repo.create_new_user(email, hashed_password)
 
         user_id = self._user_repo.get_user_id(email)
@@ -60,8 +57,10 @@ class UserService(BaseService):
 
         user_hashed_password = user[0][2] #list of tuple, 3rd element is passwd
 
-        if check_password_hash(user_hashed_password, password):  # validates user password
+        if bcrypt.check_password_hash(user_hashed_password, password):
             return user
+        # if check_password_hash(user_hashed_password, password):  # validates user password
+        #     return user
 
         return None
 
@@ -86,8 +85,8 @@ class UserService(BaseService):
         if user_id is None: # no such email exists in our db, at some point we should introduce a logger and this is the perfect example of putting it in our code
             return
 
-        reset_token = secrets.token_urlsafe(32) #remove the 32 argument?
-        hashed_token = hashlib.sha256(reset_token.encode()).hexdigest()
+        reset_token = secrets.token_urlsafe(32) # why 32 lol
+        hashed_token = hashlib.sha256(reset_token.encode()).hexdigest() # copy pasted the previous group's old functionality lol
 
         self._user_repo.create_user_reset_token(user_id, hashed_token)
 
@@ -106,15 +105,13 @@ class UserService(BaseService):
 
         user_id = self._user_repo.get_user_id_from_valid_reset_request_token(token_hash)
 
-        if not user_id: # list of tuples returned is empty; so user doesn't exist
+        if user_id is None: # user doesn't exist
             # log that user cannot be found for a password reset
-            # return a custom made service error for passwords so it can be used  for testing --> user_repo.py
-            return False # --> replace this to raise custom error for cleaner tests!
+            return False
 
-        # everything below should work because it's simple sql statements
-        hashed_password = generate_password_hash(password)
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
 
-        user_id = user_id[0][0]
+        # hashed_password = generate_password_hash(password) reverting back to old hashing algorithm
 
         self._user_repo.update_user_password(user_id, hashed_password)
 
