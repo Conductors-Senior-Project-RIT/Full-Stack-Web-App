@@ -8,8 +8,7 @@ if [ -f .env.dev ]; then
 else
     echo "Error: .env.dev not found!"
     echo "Copy .env.example to .env.dev and configure it."
-    exit 1
 fi
 
+# wondering if i should add "$@" here like for the test script
 flask --app backend:create_app run --debug
-#flask run --debug

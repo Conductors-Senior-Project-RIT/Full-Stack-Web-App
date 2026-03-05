@@ -6,7 +6,7 @@ This module handles all database CRUD operations for User and UserPreferences re
 from typing import Any
 
 from sqlalchemy import text, ScalarResult
-from database_core import (
+from .database_core import (
     layer_error_handler, REPOSITORY_ERROR_MAP, BaseRepository,
     RepositoryInternalError, RepositoryError, RepositoryNotFoundError
 )
@@ -16,6 +16,8 @@ class UserRepository(BaseRepository):
         super().__init__(session)
         for attr, value in self.__dict__.items():
             if callable(value):
+                if attr == "session":
+                    continue #don't override session attribute; causes AttributeError when doing self.session.execute(): 'function' object has no attribute 'execute'
                 wrapped = layer_error_handler(
                     func=value, 
                     error_map=REPOSITORY_ERROR_MAP, 
@@ -31,15 +33,13 @@ class UserRepository(BaseRepository):
             message=f"Could not find a user with an email = {email}",
             show_error=False
         )
-        
-    
+
     def _construct_id_not_found(self, user_id: int) -> RepositoryNotFoundError:
         return RepositoryNotFoundError(
             caller_name=self.__class__.__name__,
             message=f"Could not find a user with an ID = {user_id}",
             show_error=False
         )
-
 
     def create_new_user(self, email: str, password: str) -> int:
         sql = """
@@ -78,7 +78,7 @@ class UserRepository(BaseRepository):
         sql = text("SELECT id FROM Users WHERE email = :email")
         user = self.session.execute(sql, {"email": email}).scalar_one_or_none()
         
-        if not user:
+        if user is None: # python treats the integer 0 as falsy, hence the change
             raise self._construct_email_not_found(email) # technically this shouldn't ever happen (?)
     
         return user

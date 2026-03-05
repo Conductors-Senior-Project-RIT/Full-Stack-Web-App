@@ -1,14 +1,9 @@
 #!/bin/bash
 
-# Load test environment
-if [ -f .env.test ]; then
-    set -a              # Auto-export all variables
-    source .env.test     # Load the file
-    set +a              # Turn off auto-export
-else
-    echo "Error: .env.test not found!"
-    echo "Copy .env.example to .env.test and configure it."
-    exit 1
-fi
+# Loads test environment
+set -a              # Auto-export all variables
+source .env.test     # Load .env.test file
+set +a              # Turn off auto-export
 
-# not 100% sure how we would run app to do testing i forgot lol
+# running ./run_test.sh is equivalent to "python3 -m unittest ..." and you can pass in any arguments afterwards thanks to $@
+python3 -m unittest "$@"
