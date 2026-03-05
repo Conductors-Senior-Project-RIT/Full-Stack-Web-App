@@ -17,8 +17,6 @@ from .src.api.time_frame_pull import recent_activities
 from .src.api.train_history import HistoryDB
 from .config.settings import config_selection
 
-from dotenv import load_dotenv
-
 def create_app(config_name=None): # tests call this function to create flask app
     """
     TODO: models for flask-alchemy(sqlalchemy)
@@ -28,7 +26,6 @@ def create_app(config_name=None): # tests call this function to create flask app
     app = Flask(__name__, instance_relative_config=True) # we're not using instance folders so maybe remove
 
     if config_name is None:
-        # load_dotenv() using scripts currently to avoid prod code having load_dotenv() # .env file --> load_dotenv() --> .env vars go into os.environ --> os.environ reads/gets that stuff
         config_name = os.environ.get("FLASK_APP_ENV", "dev").lower() # retrieves specified environment, dev environment is default
 
     app.config.from_object(config_selection[config_name]())  # pop config; instantiate config class to access @property from said class as desired

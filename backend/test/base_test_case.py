@@ -44,5 +44,5 @@ class BaseTestCase(unittest.TestCase):
     def tearDownClass(cls):
         cls.app_context.pop()
 
-    # def tearDown(self): # maybe move this outside base into children hmmm
+    # def tearDown(self): # maybe move this outside base class and into child test classes ONLY relating to the database, not API (?)
     #     db.session.rollback() # whenever a test_method runs, revert changes made in test db
