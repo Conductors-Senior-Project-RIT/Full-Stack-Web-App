@@ -18,9 +18,8 @@ class LayerError(Exception):
 
         public = self.default_message
         if (TESTING_ENABLED or show_error) and message:
-            public = f"{point_of_error}{public[0:-1]}: {message}"
+            public = f"{point_of_error}{public.rstrip('.')}: {message}"
         super().__init__(f"{caller}{public}")
-
 
 def layer_error_handler(
         func,
@@ -60,10 +59,10 @@ def layer_error_handler(
                 base_exception,
                 caller_name,
                 func.__name__,
-                str(e) if not message else message
+                f"{type(e).__name__}: {e}" if not message else message
             )
             raise error from e
-
+        
     return decorator
 
 
@@ -75,18 +74,16 @@ def translate_error(
         point_of_error: str | None = None,
         message: str | None = None
 ) -> LayerError:
-    error_class = next((error_map[cls] for cls in error_map if isinstance(cls, e)), None)
+    error_class = next((error_map[cls] for cls in error_map if isinstance(e, cls)), None)
 
     if error_class:
         layer_exception, show_error = error_class
 
-        if show_error:
-            return layer_exception(
-                caller_name,
-                poe=point_of_error,
-                message=str(e) if not message else message,
-                show_error=show_error
-            )
-        return layer_exception(caller_name)
+        return layer_exception(
+            caller_name,
+            poe=point_of_error,
+            message=message,
+            show_error=show_error
+        )
 
     return base_exception(caller_name)

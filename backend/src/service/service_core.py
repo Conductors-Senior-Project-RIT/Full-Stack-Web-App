@@ -1,5 +1,5 @@
 from ..db.database_core import RepositorySessionError, RepositoryParsingError, RepositoryNotFoundError, \
-    RepositoryInternalError, RepositoryConnectionError
+    RepositoryInternalError, RepositoryConnectionError, RepositoryInvalidArgumentError
 from ..core.exceptions import LayerError, layer_error_handler
 from ..db.record_types import RepositoryRecordInvalid # exists separately because of circular dependency issue; eventually needs to be refactored slightly
 # from ..api.error_handler import BaseLayerError, database_error_handler
@@ -23,22 +23,17 @@ class BaseService:
 class ServiceError(LayerError):
     default_message = "Unknown service error occurred!"
 
-
 class ServiceInternalError(ServiceError):
     default_message = "Internal error occurred!"
-        
         
 class ServiceTimeoutError(ServiceError):
     default_message = "Timed out!"
         
-
 class ServiceParsingError(ServiceError):
     default_message = "Could not parse results!"
-        
-        
+            
 class ServiceResourceNotFound(ServiceError):
     default_message = "Resource not found!"
-
 
 class ServiceInvalidArgument(ServiceError):
     default_message = "Invalid argument provided!"
@@ -51,6 +46,7 @@ SERVICE_ERROR_MAP = {
     RepositoryParsingError: (ServiceInternalError, False),
     RepositoryConnectionError: (ServiceTimeoutError, False),
     RepositoryNotFoundError: (ServiceResourceNotFound, True),
-    RepositoryRecordInvalid: (ServiceInvalidArgument, True)
+    RepositoryRecordInvalid: (ServiceInvalidArgument, True),
+    RepositoryInvalidArgumentError: (ServiceInvalidArgument, True)
 }
     

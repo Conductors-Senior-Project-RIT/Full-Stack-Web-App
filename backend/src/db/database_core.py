@@ -1,6 +1,7 @@
 from sqlalchemy.exc import SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
-from ..core.exceptions import LayerError, layer_error_handler, translate_error
 from sqlalchemy.orm.scoping import scoped_session
+
+from ..core.exceptions import LayerError, layer_error_handler, translate_error
 
 class BaseRepository:
     def __init__(self, session: scoped_session):
@@ -32,16 +33,17 @@ class RepositoryInternalError(RepositoryError):
     default_message = "An internal error occurred!"
         
 class RepositoryParsingError(RepositoryError):
-    default_message = "An error occurred while parsing results!"
+    default_message = "An error occurred while parsing values!"
         
 class RepositoryNotFoundError(RepositoryError):
     default_message = "Could not find value in database!" 
+    
+class RepositoryInvalidArgumentError(RepositoryError):
+    default_message = "Invalid argument provided!" 
 
 # class RepositoryRecordInvalid(RepositoryError):
-#     def __init__(self, value):
-#         valid_types = list(RecordTypes._value2member_map_)
-#         default_message = f"Invalid record type provided! Value must be between {valid_types[0]} and {valid_types[-1]}."
-#         super().__init__(f"Invalid record type provided: {value}! Must be between {valid_types[0]} and {valid_types[-1]}")
+#     valid_types = list(RecordTypes._value2member_map_)
+#     default_message = f"Invalid record type provided! Value must be between {valid_types[0]} and {valid_types[-1]}."
 
 REPOSITORY_ERROR_MAP = {
     (TimeoutError, UnboundExecutionError, InterfaceError, NoSuchModuleError): 
@@ -59,7 +61,6 @@ def repository_error_handler(message: str | None = None):
             exclude=RepositoryError,
             message=message
         )
-    
     return decorator
 
 

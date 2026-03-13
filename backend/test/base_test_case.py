@@ -17,9 +17,9 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """
-        Creates app context for flask to understand what app we're pointing at for a test class
-        Database uses "scoped_session" from flask-alchemy (thin wrapper of sqlalchemy) and it happens to be bound to a flask app
-        Creates variables that will be used in child test classes
+        Creates app context for flask to understand what app we're pointing to for a test class.
+        Database uses "scoped_session" from flask-alchemy (thin wrapper of sqlalchemy) and it happens to be bound to a flask app.
+        Creates variables that will be used in child test classes.
         """
         cls.app = create_app(config_name="test")
         cls.app_context = cls.app.app_context()
@@ -43,6 +43,7 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.app_context.pop()
+        db.session.remove()
 
     # def tearDown(self): # maybe move this outside base class and into child test classes ONLY relating to the database, not API (?)
     #     db.session.rollback() # whenever a test_method runs, revert changes made in test db

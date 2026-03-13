@@ -3,25 +3,13 @@ from flask import Flask
 from flask_cors.extension import CORS
 
 from backend.extensions import bcrypt, jwt, api
-
-from .src.api.user_preferences_api import UserPreferences
-from .src.api.load_example_data import LoadExampleData
-from .src.api.notification_handler import NotificationService
-from .src.api.pushover_updater import PushoverUpdater
-from .src.api.record_collation import RecordCollation
-from .src.api.signal_update_handler import SignalUpdater
-from .src.api.station_auth import StationAuth
-from .src.api.station_online import StationOnline
-from .src.api.symbol_api import SymbolAPI
-from .src.api.time_frame_pull import recent_activities
-from .src.api.train_history import HistoryDB
 from .config.settings import config_selection
 
 def create_app(config_name=None): # tests call this function to create flask app
     """
     TODO: models for flask-alchemy(sqlalchemy)
     """
-
+    
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True) # we're not using instance folders so maybe remove
 
@@ -44,9 +32,24 @@ def create_app(config_name=None): # tests call this function to create flask app
 
     # winging the setup here lol
     CORS(app)
+    if app.config['TESTING']:
+        api.resources = []  # Necessary to reset instances between tests
     api.init_app(app)
     bcrypt.init_app(app) # find old commit to plug back old hashing algorithm for storing passwords
     jwt.init_app(app)
+    
+    # Import unique to specific app instance
+    from .src.api.user_preferences_api import UserPreferences
+    from .src.api.load_example_data import LoadExampleData
+    from .src.api.notification_handler import NotificationService
+    from .src.api.pushover_updater import PushoverUpdater
+    from .src.api.record_collation import RecordCollation
+    from .src.api.signal_update_handler import SignalUpdater
+    from .src.api.station_auth import StationAuth
+    from .src.api.station_online import StationOnline
+    from .src.api.symbol_api import SymbolAPI
+    from .src.api.time_frame_pull import recent_activities
+    from .src.api.train_history import HistoryDB
 
     # register routes (some are useless)
     api.add_resource(HistoryDB, "/api/history")

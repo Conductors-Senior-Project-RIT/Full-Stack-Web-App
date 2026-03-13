@@ -1,13 +1,13 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm.scoping import scoped_session
 
 from .database_core import BaseRepository, RepositoryNotFoundError, RepositoryInternalError, \
-    repository_error_handler, repository_error_translator
+    RepositoryInvalidArgumentError, repository_error_handler, repository_error_translator
 
 
-class RecordRepository(BaseRepository):
+class RecordRepository(ABC, BaseRepository):
     def __init__(self, session: scoped_session, table_name: str, record_name: str, record_identifier: str):
         self._table_name = table_name
         self._record_name = record_name
@@ -20,17 +20,39 @@ class RecordRepository(BaseRepository):
     def get_record_identifier(self) -> str:
         return self._record_identifier
     
+    def get_train_record(self, _id: int) -> dict[str, Any]:
+        if not isinstance(_id, int):
+            raise RepositoryInvalidArgumentError(
+                self.__class__.__name__,
+                None,
+                f"Invalid type provided: {type(_id)}",
+                False
+            )
+        
+        query = text(f"SELECT * FROM {self._table_name} WHERE id = :id")
+        args = {"id": _id}
+        
+        result = self.session.execute(query, args).one_or_none()
+        
+        if result is None:
+            raise RepositoryNotFoundError(
+                self.__class__.__name__,
+                None,
+                f"Could not find record with an ID: {_id}",
+                True
+            ) 
+        
+        return result._asdict()
+        
     @abstractmethod
-    @repository_error_handler
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
         pass
     
     @abstractmethod
-    @repository_error_handler
     def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:
         pass
 
-    @repository_error_handler
+    @repository_error_handler()
     def get_unit_record_ids(self, unit_addr: str, most_recent=False) -> int:
         query = text(
             f"""
@@ -52,7 +74,7 @@ class RecordRepository(BaseRepository):
         return resp_id[-1] if most_recent else resp_id
     
     
-    @repository_error_handler
+    @repository_error_handler()
     def get_recent_trains(self, unit_addr: str, station_id: int) -> list:
         query = text(
             f"""
@@ -70,7 +92,7 @@ class RecordRepository(BaseRepository):
         return [row._asdict() for row in results]
 
     
-    @repository_error_handler
+    @repository_error_handler()
     def add_new_pin(self, record_id: int, unit_addr: int) -> int:
         args = {"id": record_id, "unit_addr": unit_addr}
         
@@ -93,7 +115,7 @@ class RecordRepository(BaseRepository):
         return results
 
 
-    @repository_error_handler
+    @repository_error_handler()
     def check_for_record_field(self, unit_addr: str, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
             raise RepositoryNotFoundError(
@@ -176,13 +198,11 @@ class RecordRepository(BaseRepository):
         
     
     @abstractmethod
-    @repository_error_handler
     def get_recent_station_records(self, station_id: int) -> list[tuple[Any, ...]]:
         pass
         
         
     @abstractmethod
-    @repository_error_handler
     def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
         pass
     

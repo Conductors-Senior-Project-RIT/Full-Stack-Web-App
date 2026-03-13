@@ -7,7 +7,7 @@ from math import ceil
 from typing import Any
 from sqlalchemy import text
 
-from .database_core import RepositoryInternalError, repository_error_translator
+from .database_core import RepositoryInternalError, RepositoryInvalidArgumentError, repository_error_handler, repository_error_translator
 from .base_record_repo import RecordRepository
 
 RESULTS_NUM = 250
@@ -23,34 +23,21 @@ class HOTRepository(RecordRepository):
         )
         
     # below is train_history.py related
+    @repository_error_handler()
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
         sql = """
-                SELECT HOTRecords.id, date_rec, stat.station_name, sym.symb_name, unit_addr, command, checkbits, parity, verified FROM HOTRecords
+                SELECT HOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, command, checkbits, parity, verified FROM HOTRecords
                 INNER JOIN Stations as stat on station_recorded = stat.id
-                INNER JOIN Symbols as sym on symbol_id = sym.id
                 WHERE HOTRecords.id = :id
                 LIMIT :results_num OFFSET :offset * :results_num
                 """
         sql_args = {"id": id, "results_num": num_results, "offset": page - 1}
         
         resp = [row._asdict() for row in self.session.execute(text(sql), sql_args).all()]
-        return [
-                    {
-                        "id": row[0],
-                        "date_rec": row[1],
-                        "station_name": row[2],
-                        "symbol_name": row[3],
-                        "unit_addr": row[4],
-                        "command": row[5],
-                        "checkbits": row[6],
-                        "parity": row[7],
-                        "verified": row[8],
-                    }
-                    for row in resp
-        ]
+        return resp
 
-
-    def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:
+    @repository_error_handler()
+    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None) -> tuple[int, bool]:
         """
         TODO: Namespace is the type for args for post methods in train_history... look more into this
         TODO: run_exec_cmd returns none always... think of what to return lol
@@ -59,7 +46,7 @@ class HOTRepository(RecordRepository):
         
         sql = """
             INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
-            (%(date)s, %(station)s, %(frame_sync)s, %(unit_addr)s, %(command)s, %(checkbits)s, %(parity)s)
+            (:date, :station, :frame_sync, :unit_addr, :command, :checkbits, :parity)
             RETURNING id
         """
         sql_args = {
@@ -73,11 +60,17 @@ class HOTRepository(RecordRepository):
         }
 
         if args["date_rec"] is None:
+            if not datetime_string:
+                raise RepositoryInvalidArgumentError(
+                    self.__class__.__name__, 
+                    None, "Datetime not provided!", True
+                )
+                
             sql_args["date"] = datetime_string
             recovery_request = False
 
         result = self.session.execute(text(sql), sql_args).scalar_one_or_none()
-        if not result:
+        if result is None:
             raise RepositoryInternalError(
                 caller_name=self.__class__.__name__,
                 message="Could not create new train record, 0 rows created!",
@@ -88,7 +81,8 @@ class HOTRepository(RecordRepository):
 
 
     # below is for station_handler.py
-    def get_recent_station_records(self, station_id: int) -> list[tuple[Any,...]]:
+    @repository_error_handler()
+    def get_recent_station_records(self, station_id: int) -> list[dict[str, Any]]:
         """Retrieves the most recent HOT records for a given station id.
 
         """
@@ -98,21 +92,21 @@ class HOTRepository(RecordRepository):
         """
         args = {"station_id": station_id}
         
-        return self.session.execute(text(sql), args).all()
+        return [row._asdict() for row in self.session.execute(text(sql), args).all()]
     
-        
+    @repository_error_handler()
     def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]] | None:
-        if station_records is None:
+        if not station_records:
             return []
         hot_records = [
             {
-                "id": record[0],
-                "date_rec": record[1],
-                "frame_sync": record[3],
-                "unit_addr": record[4],
-                "command": record[5],
-                "checkbits": record[6],
-                "parity": record[7],
+                "id": record["id"],
+                "date_rec": record["date_rec"],
+                "frame_sync": record["frame_sync"],
+                "unit_addr": record["unit_addr"],
+                "command": record["command"],
+                "checkbits": record["checkbits"],
+                "parity": record["parity"],
             }
             for record in station_records
         ]
