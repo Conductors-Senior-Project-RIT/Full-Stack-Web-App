@@ -62,7 +62,7 @@ class RecordRepository(ABC, BaseRepository):
         )
         
         args = {"unit_addr": unit_addr}
-        resp_id = self.session.execute(query, args).scalars()
+        resp_id = self.session.execute(query, args).scalars().all()
         
         if len(resp_id) < 1:
             raise RepositoryNotFoundError(
@@ -75,7 +75,7 @@ class RecordRepository(ABC, BaseRepository):
     
     
     @repository_error_handler()
-    def get_recent_trains(self, unit_addr: str, station_id: int) -> list:
+    def get_recent_trains(self, unit_addr: str, station_id: int) -> list[dict]:
         query = text(
             f"""
             SELECT * FROM {self._table_name}
@@ -93,7 +93,7 @@ class RecordRepository(ABC, BaseRepository):
 
     
     @repository_error_handler()
-    def add_new_pin(self, record_id: int, unit_addr: int) -> int:
+    def add_new_pin(self, record_id: int, unit_addr: int) -> list[int]:
         args = {"id": record_id, "unit_addr": unit_addr}
         
         query = text(
@@ -105,22 +105,16 @@ class RecordRepository(ABC, BaseRepository):
             """
         )
         
-        results = self.session.execute(query, args).scalar()
-        if len(results) < 1:
-            raise RepositoryInternalError(
-                caller_name=self.__class__.__name__,
-                message=f"Could not add new pin, 0 rows were updated!",
-                show_error=True
-            )
-        return results
+        return self.session.execute(query, args).scalars().all()
+
 
 
     @repository_error_handler()
     def check_for_record_field(self, unit_addr: str, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
-            raise RepositoryNotFoundError(
+            raise RepositoryInvalidArgumentError(
                 caller_name=self.__class__.__name__,
-                message=f"Could not find {field_type} from a corresponding record with an engine number = {unit_addr}",
+                message=f"{field_type} is not supported!",
                 show_error=False
             )
         
@@ -142,9 +136,9 @@ class RecordRepository(ABC, BaseRepository):
     
     def update_record_field(self, record_id: int, field_value: Any, field_type: str):
         if field_type != "symbol_id" or field_type != "engine_num":
-            raise RepositoryNotFoundError(
+            raise RepositoryInvalidArgumentError(
                 caller_name=self.__class__.__name__,
-                message=f"Could not find {field_type} with a value = {field_value}",
+                message=f"{field_type} is not supported!",
                 show_error=False
             )
         
