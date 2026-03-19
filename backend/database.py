@@ -63,17 +63,4 @@ def init_models(app: Flask):
         
         global UserPreference
         UserPreference = AutomapBase.classes.userpreferences
-
-        models = [
-            Station,
-            ResetRequest,
-            Symbol,
-            EOTRecord,
-            HOTRecord,
-            NotificationConfig,
-            Pin,
-            User,
-            UserPreference
-        ]
-
             
