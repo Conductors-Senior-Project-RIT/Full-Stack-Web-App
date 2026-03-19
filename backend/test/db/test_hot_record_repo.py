@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 from sqlalchemy import Result
 from sqlalchemy.orm.scoping import scoped_session
 
-from backend.db import db
+from backend.database import db
 from backend.src.db.database_core import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError
 from backend.src.db.hot_repo import HOTRepository
 from backend.test.base_test_case import BaseTestCase
@@ -19,6 +19,14 @@ class TestHOTRecordRepository(BaseTestCase):
         self.session.rollback() # revert changes made from every test_method ran
         self.session.close()
 
+
+    ###############
+    ##  Getters  ##
+    ###############
+    def testGetters(self):
+        self.assertEqual("HOT Record", self.repo.get_record_name())
+        self.assertEqual("hot", self.repo.get_record_identifier())
+        
     
     ##########################
     ##  get_train_record()  ##

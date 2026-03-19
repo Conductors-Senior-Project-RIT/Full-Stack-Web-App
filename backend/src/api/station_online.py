@@ -3,7 +3,7 @@ from flask_restful import Resource
 from werkzeug.exceptions import BadRequest
 
 from ..service.station_service import StationService
-from backend.db import db
+from backend.database import db
 
 class StationOnline(Resource):
     def get(self):

@@ -1,14 +1,24 @@
 from abc import ABC, abstractmethod
-from typing import Any
-from sqlalchemy import text
+from datetime import datetime, timedelta
+from typing import Any, Type
+from sqlalchemy import func, select, text, update
 from sqlalchemy.orm.scoping import scoped_session
 
+from ...database import Base
 from .database_core import BaseRepository, RepositoryNotFoundError, RepositoryInternalError, \
     RepositoryInvalidArgumentError, repository_error_handler, repository_error_translator
 
 
 class RecordRepository(ABC, BaseRepository):
-    def __init__(self, session: scoped_session, table_name: str, record_name: str, record_identifier: str):
+    def __init__(
+        self, 
+        session: scoped_session, 
+        model: Type[Base], 
+        table_name: str, 
+        record_name: str, 
+        record_identifier: str
+    ):
+        self._model = model 
         self._table_name = table_name
         self._record_name = record_name
         self._record_identifier = record_identifier
@@ -28,11 +38,13 @@ class RecordRepository(ABC, BaseRepository):
                 f"Invalid type provided: {type(_id)}",
                 False
             )
+            
+        result = self.session.get(self._model, _id)
         
-        query = text(f"SELECT * FROM {self._table_name} WHERE id = :id")
-        args = {"id": _id}
+        # query = text(f"SELECT * FROM {self._table_name} WHERE id = :id")
+        # args = {"id": _id}
         
-        result = self.session.execute(query, args).one_or_none()
+        # result = self.session.execute(query, args).one_or_none()
         
         if result is None:
             raise RepositoryNotFoundError(
@@ -53,121 +65,165 @@ class RecordRepository(ABC, BaseRepository):
         pass
 
     @repository_error_handler()
-    def get_unit_record_ids(self, unit_addr: str, most_recent=False) -> int:
-        query = text(
-            f"""
-            SELECT id FROM {self._table_name}
-            WHERE unit_addr = :unit_addr
-            """
+    def get_unit_record_ids(self, unit_addr: str, recent=False) -> int | list[int]:
+        # query = text(
+        #     f"""
+        #     SELECT id FROM {self._table_name}
+        #     WHERE unit_addr = :unit_addr
+        #     """
+        # )
+        
+        # args = {"unit_addr": unit_addr}
+        # resp_id = self.session.execute(query, args).scalars().all()
+        
+        stmt = (
+            select(self._model.id)
+            .where(self._model.unit_addr == unit_addr)
+            .order_by(self._model.id.asc())
         )
+        result = self.session.execute(stmt).scalars().all()
         
-        args = {"unit_addr": unit_addr}
-        resp_id = self.session.execute(query, args).scalars().all()
-        
-        if len(resp_id) < 1:
+        if not result:
             raise RepositoryNotFoundError(
                 caller_name=self.__class__.__name__,
                 message=f"Could not get record ID where the unit address = {unit_addr}",
                 show_error=False
             )
             
-        return resp_id[-1] if most_recent else resp_id
+        return result[-1] if recent else result
     
     
     @repository_error_handler()
     def get_recent_trains(self, unit_addr: str, station_id: int) -> list[dict]:
-        query = text(
-            f"""
-            SELECT * FROM {self._table_name}
-            WHERE unit_addr = :unit_addr AND station_recorded = :station_id AND date_rec >= NOW() - INTERVAL '10 minutes'
-            """
+        # query = text(
+        #     f"""
+        #     SELECT * FROM {self._table_name}
+        #     WHERE unit_addr = :unit_addr AND station_recorded = :station_id AND date_rec >= NOW() - INTERVAL '10 minutes'
+        #     """
+        # )
+        
+        # args = {
+        #     "unit_addr": unit_addr, 
+        #     "station_id": station_id
+        # }
+        # results = self.session.execute(query, args).all()
+        
+        stmt = (
+            select(self._model)
+            .where(
+                self._model.unit_addr == unit_addr,
+                self._model.station_recorded == station_id,
+                self._model.date_rec >= func.now() - text("INTERVAL '10 minutes'")
+            )
         )
         
-        args = {
-            "unit_addr": unit_addr, 
-            "station_id": station_id
-        }
-        
-        results = self.session.execute(query, args).all()
-        return [row._asdict() for row in results]
+        results = self.session.execute(stmt).all()
+        return self.rows_to_dicts(results)
 
     
     @repository_error_handler()
-    def add_new_pin(self, record_id: int, unit_addr: int) -> list[int]:
-        args = {"id": record_id, "unit_addr": unit_addr}
+    def add_new_pin(self, record_id: int, unit_addr: str) -> list[int]:
+        # args = {"id": record_id, "unit_addr": unit_addr}
         
-        query = text(
-            f"""
-            UPDATE {self._table_name}
-            SET most_recent = false
-            WHERE id != :id and unit_addr = :unit_addr and most_recent = true
-            RETURNING id
-            """
+        # query = text(
+        #     f"""
+        #     UPDATE {self._table_name}
+        #     SET most_recent = false
+        #     WHERE id != :id and unit_addr = :unit_addr and most_recent = true
+        #     RETURNING id
+        #     """
+        # )
+        
+        # return self.session.execute(query, args).scalars().all()
+        stmt = (
+            update(self._model)
+            .where(
+                self._model.id != record_id,
+                self._model.unit_addr == unit_addr,
+                self._model.most_recent.is_(True)
+            )
+            .values(most_recent=False)
+            .returning(self._model.id)
         )
         
-        return self.session.execute(query, args).scalars().all()
-
-
+        result = self.session.execute(stmt).scalars().all()
+        return result
+        
+    
 
     @repository_error_handler()
-    def check_for_record_field(self, unit_addr: str, field_type: str):
-        if field_type != "symbol_id" or field_type != "engine_num":
+    def get_record_column_by_unit_addr(
+        self, 
+        unit_addr: str, 
+        field_type: str, 
+        result_position: str,
+        most_recent: bool | None = None, 
+    ) -> Any | list[Any]:    
+         
+        if not hasattr(self._model, field_type):
             raise RepositoryInvalidArgumentError(
-                caller_name=self.__class__.__name__,
-                message=f"{field_type} is not supported!",
-                show_error=False
+                self.__class__.__name__,
+                f"Column '{field_type}' not found in {self._model.__name__}!",
+                True
             )
         
-        # sql = """
-        # SELECT %(field_type)s FROM {record_table} 
-        # WHERE unit_addr = %(unit_addr)s and most_recent = True
-        # """
-        query = text(
-            f"""
-            SELECT {field_type} FROM {self._table_name} 
-            WHERE unit_addr = :unit_addr and most_recent = True
-            """
+        stmt = (
+            select(getattr(self._model, field_type))
+            .where(self._model.unit_addr == unit_addr)
+            .order_by(self._model.id.asc())
         )
-        params = {"unit_addr": unit_addr}
         
-        return self.session.execute(query, params).scalar()
+        if most_recent is not None:
+            stmt = stmt.where(self._model.most_recent.is_(most_recent))
         
-
+        result = self.session.execute(stmt).scalars().all()
+        
+        if not result or result_position == "all":
+            return result
+        
+        match result_position:
+            case "first":
+                return result[0]
+            case "last":
+                return result[-1]
+        
+        raise RepositoryInvalidArgumentError(
+            self.__class__.__name__,
+            f"Invalid result position: {result_position}!",
+            True
+        )
+         
     
-    def update_record_field(self, record_id: int, field_value: Any, field_type: str):
-        if field_type != "symbol_id" or field_type != "engine_num":
+    def update_record_column_by_id(self, record_id: int, column_value: int, column_name: str) -> tuple[int, Any]:
+        # args = {"id": record_id, "field_val": field_value}
+        # query = text(
+        #     f"""
+        #     UPDATE {self._table_name} 
+        #     SET {field_type} = :field_val 
+        #     WHERE id = :id
+        #     RETURNING id, {field_type}
+        #     """
+        # )
+        
+        record = self.session.get(self._model, record_id)
+        if not record:
+            raise RepositoryNotFoundError(
+                self.__class__.__name__,
+                f"Could find record to update with an ID = {record_id}, 0 rows updated!",
+                True
+            )
+            
+        if not hasattr(self._model, column_name):
             raise RepositoryInvalidArgumentError(
-                caller_name=self.__class__.__name__,
-                message=f"{field_type} is not supported!",
-                show_error=False
+                self.__class__.__name__,
+                f"Column '{column_name}' not found in {self._model.__name__}!",
+                True
             )
         
-        try:
-            args = {"id": record_id, "field_val": field_value}
-            query = text(
-                f"""
-                UPDATE {self._table_name} 
-                SET {field_type} = :field_val 
-                WHERE id = :id
-                RETURNING id, {field_type}
-                """
-            )
-
-            results = self.session.execute(query, args).all()
-            if results < 1:
-                raise RepositoryInternalError(
-                    caller_name=self.__class__.__name__,
-                    message=f"Could not update {field_type}, 0 rows updated!",
-                    show_error=False
-                )
-                
-            return [row._asdict() for row in results]
+        # Update the value
+        setattr(record, column_name, column_value)
         
-        except Exception as e:
-            raise repository_error_translator(
-                e, self.__class__.__name__, None,
-                f"Could not update {field_type}: {e}"
-            )
+        return record.id, getattr(record, column_name)
 
 
     # Station Handler
@@ -182,7 +238,7 @@ class RecordRepository(ABC, BaseRepository):
             )
             
             results = self.session.execute(query, args).all()
-            return [row._asdict() for row in results]
+            return self.rows_to_dicts(results)
         
         except Exception as e:
             raise repository_error_translator(
@@ -237,7 +293,7 @@ class RecordRepository(ABC, BaseRepository):
                     message=f"Could not find record with id: {record_id}!",
                     show_error=False
                 )
-            return [row._asdict() for row in results]
+            return self.rows_to_dicts(results)
             
         except Exception as e:
             raise repository_error_translator(
@@ -274,18 +330,12 @@ class RecordRepository(ABC, BaseRepository):
                     show_error=False
                 )
             
-            return [
-                {
-                    "id": tup[0],
-                    "unit_addr": tup[1],
-                    "date_rec": str(tup[2].time())[0:5],
-                    "station_name": tup[3],
-                    "symbol_id": tup[4],
-                    "engine_num": tup[5],
-                    "locomotive_num": tup[6],
-                    "Data_type": self._record_identifier.upper()
-                } for tup in results
-            ]
+            results = self.rows_to_dicts(results)
+            # Add data type to result
+            for result in results:
+                result["Data_type"] = self._record_identifier.upper()
+            
+            return results
             
         except Exception as e:
             raise repository_error_translator(

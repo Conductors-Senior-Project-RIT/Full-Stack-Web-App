@@ -27,8 +27,11 @@ def create_app(config_name=None): # tests call this function to create flask app
     print(f"JWT Secret Key Set: {app.config.get('JWT_SECRET_KEY')}") #if exists, show boolean
     print("=" * 50)
 
-    from .db import db
+    from .database import db, init_models
     db.init_app(app) # load settings for db engine/ bind flask-alchemy to app; flask-alchemy currently used as a connection manager with our raw sql lol
+
+    # Initialize our models from our tables
+    init_models(app)
 
     # winging the setup here lol
     CORS(app)

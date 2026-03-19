@@ -6,7 +6,7 @@ from werkzeug.exceptions import Unauthorized, BadRequest
 from ..service.record_service import RecordService
 from ..service.symbol_service import SymbolService
 from ..db.trackSense_db_commands import *
-from backend.db import db
+from backend.database import db
 
 
 volunteer_bp = Blueprint("volunteer_bp", __name__)

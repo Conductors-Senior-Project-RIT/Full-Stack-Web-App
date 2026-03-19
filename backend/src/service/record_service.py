@@ -50,31 +50,39 @@ class RecordService(BaseService):
         results = repository.get_recent_trains(unit_addr, station_id)
         return results is not None and len(results) > 0
         
-    def add_new_pin(self, repository: RecordRepository, unit_addr: str):
-        self.attempt_auto_fill(unit_addr)
         
+    def add_new_pin(self, repository: RecordRepository, unit_addr: str):
+        # Update the symbol id and engine num of the new record
+        self.attempt_auto_fill(unit_addr)
+        # Get most recent record (the one just created)
         resp_id = repository.get_unit_record_ids(unit_addr, True)
-        result = repository.add_new_pin(resp_id, int(unit_addr))
+        # Make the newly created record the only record where most_recent = True
+        repository.add_new_pin(resp_id, int(unit_addr))
+        
         
     def attempt_auto_fill(self, repository: RecordRepository, unit_addr: str):
-        symb = repository.check_for_record_field(unit_addr, "symbol_id")
-        engi = repository.check_for_record_field(unit_addr, "engine_num")
+        """Used to fill a new record with the symbol id and engine num of the previous
+        most recent record with the same unit address."""
+        # All will return a single int
+        symb = repository.get_record_column_by_unit_addr(unit_addr, "symbol_id", "last", True)
+        engi = repository.get_record_column_by_unit_addr(unit_addr, "engine_num", "last", True)
         record_id = repository.get_unit_record_ids(unit_addr, True)
         
-        symb = symb if symb is not None else -1
-        engi = engi if engi is not None else -1
-        
         # Use the signal update function used in signal updater because the perform the same task
-        self.signal_update(record_id, symb, engi)
+        self.signal_update(repository, record_id, symb, engi)
+            
             
     # Signal Updater
-    def signal_update(self, repository: RecordRepository, record_id: int, symbol_id: int, engine_id: int):
-        if symbol_id != -1:
-            repository.update_record_field(record_id, symbol_id, "symbol_id")
+    def signal_update(self, repository: RecordRepository, record_id: int, symbol_id: int | None, engine_id: int | None):
+        if not symbol_id:
+            repository.update_record_column_by_id(record_id, symbol_id, "symbol_id")
+        else:
+            print("No Symbol to Update")
         
-        if engine_id != -1:
-            repository.update_record_field(record_id, engine_id, "engine_num")
-
+        if not symbol_id:
+            repository.update_record_column_by_id(record_id, engine_id, "engine_num")
+        else:
+            print("No Engine Number to Update")
 
     # Data Collation
     def collate_records(self, page: int) -> list[dict[str, str]]:

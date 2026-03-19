@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 from backend.src.service.station_service import StationService
 from backend.src.service.service_core import *
-from backend.db import db
+from backend.database import db
 
 station_bp = Blueprint("station_bp", __name__)
 # CORS(station_bp)  # Enable CORS for the station_bp blueprint

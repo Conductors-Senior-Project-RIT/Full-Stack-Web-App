@@ -5,7 +5,7 @@ from ..db.trackSense_db_commands import run_get_cmd, run_exec_cmd
 from ..service.user_service import UserService
 # (
 #     get_user_preferences, reset_and_update_user_preferences)
-from backend.db import db
+from backend.database import db
 """
 note: the error handling will be changed soon for everything user related
 """

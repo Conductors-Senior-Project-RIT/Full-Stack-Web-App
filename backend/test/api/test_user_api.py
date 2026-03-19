@@ -1,5 +1,5 @@
 import unittest
-from backend.db import db
+from backend.database import db
 from backend.test.base_test_case import BaseTestCase
 
 class TestUserApi(BaseTestCase):

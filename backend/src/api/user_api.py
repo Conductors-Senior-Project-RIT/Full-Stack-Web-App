@@ -11,7 +11,7 @@ from flask_jwt_extended import (
 from ..service.user_service import UserService
 from werkzeug.exceptions import BadRequest, Unauthorized, NotFound, Forbidden
 
-from backend.db import db
+from backend.database import db
 
 """
 Todo: make the file route.py? 

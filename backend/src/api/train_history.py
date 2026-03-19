@@ -7,7 +7,7 @@ from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
 from urllib.parse import urlencode
 
-from backend.db import db
+from backend.database import db
 from backend.src.service.record_service import RecordService
 
 # load_dotenv()
@@ -112,6 +112,9 @@ class HistoryDB(Resource):
         return
 
     def notif_send(self, laptop_id):
+        """
+        CURRENTLY NOT USED, DO NOT TEST. NEED NEW NOTI SYSTEM
+        """
         sql = """
             SELECT user_id, pushover_id from UserPreferences
             INNER JOIN Users on Users.id = user_id
@@ -149,6 +152,9 @@ class HistoryDB(Resource):
 
 
     def check_for_notification(self, unit_addr, station_id, typ):
+        """
+        CURRENTLY NOT USED, DO NOT TEST. NEED NEW NOTI SYSTEM
+        """
         # print("here")
         # check if there are any recent trains logged with this unit address and station id
         # if one was logged within the last 10 minutes, return True

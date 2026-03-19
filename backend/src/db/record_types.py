@@ -53,5 +53,3 @@ def get_record_repository(session, value: int | RecordTypes) -> RecordRepository
 def get_all_repositories(session) -> list[RecordRepository]:
     valid_types = list(RecordTypes)
     return [get_record_repository(session, valid_types[i]) for i in range(0, len(valid_types) - 1)]
-
-

@@ -3,7 +3,7 @@ import unittest
 from sqlalchemy import text
 
 from backend import create_app
-from ..db import db
+from ..database import db
 
 """
 Initial setups for api and database test classes
@@ -42,8 +42,8 @@ class BaseTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.app_context.pop()
         db.session.remove()
+        cls.app_context.pop()
 
     # def tearDown(self): # maybe move this outside base class and into child test classes ONLY relating to the database, not API (?)
     #     db.session.rollback() # whenever a test_method runs, revert changes made in test db

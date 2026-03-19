@@ -1,13 +1,47 @@
+from collections.abc import Iterable
+from typing import Any, Protocol, runtime_checkable
+
+from sqlalchemy import Row, Sequence
 from sqlalchemy.exc import SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
 from sqlalchemy.orm.scoping import scoped_session
 
 from ..core.exceptions import LayerError, layer_error_handler, translate_error
+
+@runtime_checkable
+class AsDictConvertible(Protocol):
+    def _asdict(self) -> dict[str, Any]: ...
+    @property
+    def _mapping(self) -> dict[str, Any]: ...
+    
 
 class BaseRepository:
     def __init__(self, session: scoped_session):
         if session is None:
             raise RepositorySessionError()
         self.session = session
+    
+    @classmethod
+    def rows_to_dicts(cls, rows: Sequence[AsDictConvertible]) -> list[dict[str, Any]]:
+        results = []
+        for r in rows:
+            if isinstance(r, (Row, Iterable)) and len(r) == 1:
+                row = r[0]
+            else:
+                row = r
+            
+            if hasattr(row, "_mapping"):
+                results.append(dict(row._mapping))
+            elif hasattr(row, "_asdict"):
+                results.append(row._asdict())
+            else:
+                raise RepositoryParsingError(
+                    cls.__name__,
+                    "row_to_dicts",
+                    "A provided does not contain functionality to map attributes to values!",
+                    show_error=False
+                )
+                
+        return results
         
         
     # def __init_subclass__(cls, **kwargs):
