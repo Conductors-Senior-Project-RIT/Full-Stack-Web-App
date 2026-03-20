@@ -2,10 +2,14 @@ from datetime import date
 from typing import Any
 from sqlalchemy import text
 
+from ...database import Station
+
 from ..db.database_core import BaseRepository, RepositoryNotFoundError, RepositoryInternalError, \
     repository_error_handler, repository_error_translator
 
 class StationRepository(BaseRepository):
+    model = Station
+    
     def __init__(self, session):
         super().__init__(session)
         

@@ -63,25 +63,13 @@ class RecordService(BaseService):
         """Used to fill a new record with the symbol id and engine num of the previous
         most recent record with the same unit address."""
         # All will return a single int
-        symb = repository.get_record_column_by_unit_addr(unit_addr, "symbol_id", "last", True)
-        engi = repository.get_record_column_by_unit_addr(unit_addr, "engine_num", "last", True)
+        symb = repository.get_record_column_by_unit_addr(unit_addr, "symbol_id", True)[-1]
+        engi = repository.get_record_column_by_unit_addr(unit_addr, "engine_num", True)[-1]
         record_id = repository.get_unit_record_ids(unit_addr, True)
         
         # Use the signal update function used in signal updater because the perform the same task
-        self.signal_update(repository, record_id, symb, engi)
-            
-            
-    # Signal Updater
-    def signal_update(self, repository: RecordRepository, record_id: int, symbol_id: int | None, engine_id: int | None):
-        if not symbol_id:
-            repository.update_record_column_by_id(record_id, symbol_id, "symbol_id")
-        else:
-            print("No Symbol to Update")
-        
-        if not symbol_id:
-            repository.update_record_column_by_id(record_id, engine_id, "engine_num")
-        else:
-            print("No Engine Number to Update")
+        repository.update_signal_values(record_id, symb, engi)
+
 
     # Data Collation
     def collate_records(self, page: int) -> list[dict[str, str]]:
@@ -108,8 +96,7 @@ class RecordService(BaseService):
                 minutes=int(time_increments[1]),
                 seconds=int(time_increments[2]),
             )
-            altered_time = curr_date - delta
-            dt_str = altered_time.strftime("%Y-%m-%d %H:%M:%S")
+            timeframe = curr_date - delta
             
             if station_id == -1:
                 if station_name:
@@ -121,7 +108,7 @@ class RecordService(BaseService):
 
             results = []
             for repo in self._record_repo:
-                repo_resp = repo.get_records_in_timeframe(station_id, dt_str, recent)
+                repo_resp = repo.get_records_in_timeframe(station_id, timeframe, recent)
                 results.append(repo_resp)
             
             results.sort(key=lambda x: x["date_rec"], reverse=True)

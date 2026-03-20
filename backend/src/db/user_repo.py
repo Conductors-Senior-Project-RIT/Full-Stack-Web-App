@@ -6,12 +6,16 @@ This module handles all database CRUD operations for User and UserPreferences re
 from typing import Any
 
 from sqlalchemy import text, ScalarResult
+
+from backend.database import User
 from .database_core import (
     layer_error_handler, REPOSITORY_ERROR_MAP, BaseRepository,
     RepositoryInternalError, RepositoryError, RepositoryNotFoundError
 )
 
 class UserRepository(BaseRepository):
+    model = User
+    
     def __init__(self, session):
         super().__init__(session)
         for attr, value in self.__dict__.items():

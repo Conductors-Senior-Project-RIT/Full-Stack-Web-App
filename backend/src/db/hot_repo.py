@@ -7,6 +7,8 @@ from math import ceil
 from typing import Any
 from sqlalchemy import text
 
+from ...database import HOTRecord
+
 from .database_core import RepositoryInternalError, RepositoryInvalidArgumentError, repository_error_handler, repository_error_translator
 from .base_record_repo import RecordRepository
 
@@ -14,13 +16,10 @@ RESULTS_NUM = 250
 
 
 class HOTRepository(RecordRepository):
+    model = HOTRecord
+    
     def __init__(self, session):
-        super().__init__(
-            session,
-            "HOTRecords", 
-            "HOT Record", 
-            "hot"
-        )
+        super().__init__(session, "HOT Record", "hot")
         
     # below is train_history.py related
     @repository_error_handler()

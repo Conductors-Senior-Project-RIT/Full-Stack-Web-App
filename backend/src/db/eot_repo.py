@@ -7,19 +7,18 @@ This module handles all database CRUD operations for EOT records
 from math import ceil
 from typing import Any
 from sqlalchemy import text
+
+from ...database import EOTRecord
 from .base_record_repo import RecordRepository
 from .database_core import RepositoryInternalError, repository_error_handler, repository_error_translator
 
 RESULTS_NUM = 250
 
 class EOTRepository(RecordRepository):
+    model = EOTRecord
+    
     def __init__(self, session):
-        super().__init__(
-            session,
-            "EOTRecords", 
-            "EOT Record", 
-            "eot",
-        )
+        super().__init__(session, "EOT Record", "eot")
 
     # below is train_history.py related
     @repository_error_handler

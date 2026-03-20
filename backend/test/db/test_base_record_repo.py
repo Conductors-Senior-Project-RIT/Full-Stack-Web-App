@@ -195,35 +195,23 @@ class TestRecordRepository(BaseTestCase):
     def testGetRecordSymbol(self):
         test_cases = [
             # Below are the tests for symbol_id
-            ("2222", "symbol_id", "first", True, 10),
-            ("2222", "symbol_id", "last", True, 10),
-            ("2222", "symbol_id", "all", True, [10]),
-            ("2222", "symbol_id", "first", False, 8),
-            ("2222", "symbol_id", "last", False, 8),
-            ("2222", "symbol_id", "all", False, [8]),
-            ("2222", "symbol_id", "first", None, 8),
-            ("2222", "symbol_id", "last", None, 10),
-            ("2222", "symbol_id", "all", None, [8, 10]), 
+            ("2222", "symbol_id", True, [10]),
+            ("2222", "symbol_id", False, [8]),
+            ("2222", "symbol_id", None, [8, 10]), 
             # Below are the tests for engine_num
-            ("1111", "engine_num", "first", True, 3),
-            ("1111", "engine_num", "last", True, 3),
-            ("1111", "engine_num", "all", True, [3]),
-            ("1111", "engine_num", "first", False, 1),
-            ("1111", "engine_num", "last", False, 1),
-            ("1111", "engine_num", "all", False, [1]),
-            ("1111", "engine_num", "first", None, 1),
-            ("1111", "engine_num", "last", None, 3),
-            ("1111", "engine_num", "all", None, [1, 3]), 
+            ("1111", "engine_num", True, [3]),
+            ("1111", "engine_num", False, [1]),
+            ("1111", "engine_num", None, [1, 3]), 
             # Below are the not found cases
-            ("0000", "engine_num", "first", True, []),
-            ("0000", "engine_num", "last", True, []),
-            ("0000", "engine_num", "all", True, [])
+            ("0000", "engine_num", True, []),
+            ("0000", "engine_num", False, []),
+            ("0000", "engine_num", None, [])
         ]
         
         for unit, col, pos, rec, exp in test_cases:
             # If this fails, the error message will include these params
             with self.subTest(unit=unit, col=col, pos=pos, rec=rec, exp=exp):
-                result = self.repo.get_record_column_by_unit_addr(unit, col, pos, rec)
+                result = self.repo.get_record_column_by_unit_addr(unit, col, rec)
                 self.assertEqual(exp, result)
             
         # Make sure exception raised if not valid column

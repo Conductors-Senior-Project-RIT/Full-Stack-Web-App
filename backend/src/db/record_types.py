@@ -47,6 +47,7 @@ def get_record_repository(session, value: int | RecordTypes) -> RecordRepository
             return HOTRepository(session)
         case RecordTypes.DPU | RecordTypes.DPU.value:
             return DPURepository(session)
+        
     raise RepositoryRecordInvalid(value)
 
 

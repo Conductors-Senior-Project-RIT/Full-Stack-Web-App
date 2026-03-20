@@ -1,29 +1,27 @@
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
-from typing import Any, Type
+from datetime import datetime
+from typing import Any, Generic, Type
 from sqlalchemy import func, select, text, update
 from sqlalchemy.orm.scoping import scoped_session
-from sqlalchemy.orm import aliased
 
-from ...database import Base, Station, Symbol
-from .database_core import BaseRepository, RepositoryNotFoundError, RepositoryInternalError, \
-    RepositoryInvalidArgumentError, repository_error_handler, repository_error_translator
+from .database_core import (
+    BaseRepository, RepositoryNotFoundError, RepositoryInvalidArgumentError, 
+    repository_error_handler, repository_error_translator, ModelType
+)
 
 
 class RecordRepository(ABC, BaseRepository):
+    model: Type[ModelType] = None
+    
     def __init__(
         self, 
-        session: scoped_session, 
-        model: Type[Base], 
-        table_name: str, 
+        session: scoped_session,  
         record_name: str, 
         record_identifier: str
     ):
-        self._model = model 
-        self._table_name = table_name
+        super().__init__(self.model, session)
         self._record_name = record_name
         self._record_identifier = record_identifier
-        super().__init__(session)
         
     def get_record_name(self) -> str:
         return self._record_name
@@ -31,31 +29,6 @@ class RecordRepository(ABC, BaseRepository):
     def get_record_identifier(self) -> str:
         return self._record_identifier
     
-    def get_train_record(self, _id: int) -> dict[str, Any]:
-        if not isinstance(_id, int):
-            raise RepositoryInvalidArgumentError(
-                self.__class__.__name__,
-                None,
-                f"Invalid type provided: {type(_id)}",
-                False
-            )
-            
-        result = self.session.get(self._model, _id)
-        
-        # query = text(f"SELECT * FROM {self._table_name} WHERE id = :id")
-        # args = {"id": _id}
-        
-        # result = self.session.execute(query, args).one_or_none()
-        
-        if result is None:
-            raise RepositoryNotFoundError(
-                self.__class__.__name__,
-                None,
-                f"Could not find record with an ID: {_id}",
-                True
-            ) 
-        
-        return result._asdict()
         
     @abstractmethod
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
@@ -78,9 +51,9 @@ class RecordRepository(ABC, BaseRepository):
         # resp_id = self.session.execute(query, args).scalars().all()
         
         stmt = (
-            select(self._model.id)
-            .where(self._model.unit_addr == unit_addr)
-            .order_by(self._model.id.asc())
+            select(self.model.id)
+            .where(self.model.unit_addr == unit_addr)
+            .order_by(self.model.id.asc())
         )
         result = self.session.execute(stmt).scalars().all()
         
@@ -110,16 +83,16 @@ class RecordRepository(ABC, BaseRepository):
         # results = self.session.execute(query, args).all()
         
         stmt = (
-            select(self._model)
+            select(self.model)
             .where(
-                self._model.unit_addr == unit_addr,
-                self._model.station_recorded == station_id,
-                self._model.date_rec >= func.now() - text("INTERVAL '10 minutes'")
+                self.model.unit_addr == unit_addr,
+                self.model.station_recorded == station_id,
+                self.model.date_rec >= func.now() - text("INTERVAL '10 minutes'")
             )
         )
         
         results = self.session.execute(stmt).all()
-        return self.rows_to_dicts(results)
+        return self.objs_to_dicts(results)
 
     
     @repository_error_handler()
@@ -137,14 +110,14 @@ class RecordRepository(ABC, BaseRepository):
         
         # return self.session.execute(query, args).scalars().all()
         stmt = (
-            update(self._model)
+            update(self.model)
             .where(
-                self._model.id != record_id,
-                self._model.unit_addr == unit_addr,
-                self._model.most_recent.is_(True)
+                self.model.id != record_id,
+                self.model.unit_addr == unit_addr,
+                self.model.most_recent.is_(True)
             )
             .values(most_recent=False)
-            .returning(self._model.id)
+            .returning(self.model.id)
         )
         
         result = self.session.execute(stmt).scalars().all()
@@ -156,74 +129,37 @@ class RecordRepository(ABC, BaseRepository):
         self, 
         unit_addr: str, 
         field_type: str, 
-        result_position: str,
         most_recent: bool | None = None, 
     ) -> Any | list[Any]:    
          
-        if not hasattr(self._model, field_type):
+        if not hasattr(self.model, field_type):
             raise RepositoryInvalidArgumentError(
                 self.__class__.__name__,
-                f"Column '{field_type}' not found in {self._model.__name__}!",
+                f"Column '{field_type}' not found in {self.model.__name__}!",
                 True
             )
         
         stmt = (
-            select(getattr(self._model, field_type))
-            .where(self._model.unit_addr == unit_addr)
-            .order_by(self._model.id.asc())
+            select(getattr(self.model, field_type))
+            .where(self.model.unit_addr == unit_addr)
+            .order_by(self.model.id.asc())
         )
         
         if most_recent is not None:
-            stmt = stmt.where(self._model.most_recent.is_(most_recent))
+            stmt = stmt.where(self.model.most_recent.is_(most_recent))
         
-        result = self.session.execute(stmt).scalars().all()
-        
-        if not result or result_position == "all":
-            return result
-        
-        match result_position:
-            case "first":
-                return result[0]
-            case "last":
-                return result[-1]
-        
-        raise RepositoryInvalidArgumentError(
-            self.__class__.__name__,
-            f"Invalid result position: {result_position}!",
-            True
-        )
-         
+        return self.session.execute(stmt).scalars().all()
+
     
-    def update_record_column_by_id(self, record_id: int, column_value: int, column_name: str) -> tuple[int, Any]:
-        # args = {"id": record_id, "field_val": field_value}
-        # query = text(
-        #     f"""
-        #     UPDATE {self._table_name} 
-        #     SET {field_type} = :field_val 
-        #     WHERE id = :id
-        #     RETURNING id, {field_type}
-        #     """
-        # )
-        
-        record = self.session.get(self._model, record_id)
-        if not record:
-            raise RepositoryNotFoundError(
-                self.__class__.__name__,
-                f"Could find record to update with an ID = {record_id}, 0 rows updated!",
-                True
-            )
+    @repository_error_handler()
+    def update_signal_values(self, record_id: int, symbol_id: int, engine_num: int) -> dict[str, Any]:
+        values = {}
+        if symbol_id:
+            values["symbol_id"] = symbol_id
+        if engine_num:
+            values["engine_num"] = engine_num
             
-        if not hasattr(self._model, column_name):
-            raise RepositoryInvalidArgumentError(
-                self.__class__.__name__,
-                f"Column '{column_name}' not found in {self._model.__name__}!",
-                True
-            )
-        
-        # Update the value
-        setattr(record, column_name, column_value)
-        
-        return record.id, getattr(record, column_name)
+        return self.update_with_pk(record_id, values)
 
 
     # Station Handler
@@ -238,11 +174,11 @@ class RecordRepository(ABC, BaseRepository):
             # )
             
             results = self.session.execute(
-                select(self._model)
-                .where(self._model.station_recorded == station_id)
+                select(self.model)
+                .where(self.model.station_recorded == station_id)
             ).all()
   
-            return self.rows_to_dicts(results)
+            return self.objs_to_dicts(results)
         
         except Exception as e:
             raise repository_error_translator(
@@ -271,7 +207,7 @@ class RecordRepository(ABC, BaseRepository):
         pass
     
     
-    def verify_record(self, record_id: int, symbol_id: int, engine_id: int):
+    def verify_record(self, record_id: int, symbol_id: int, engine_id: int) -> dict[str, Any]:
         try:
             # args = {
             #     "id": record_id,
@@ -289,17 +225,14 @@ class RecordRepository(ABC, BaseRepository):
             #     RETURNING id, symbol_id, locomotive_num
             #     """
             # )
-            record = self.session.get(self._model, record_id)
-            if not record:
-                raise RepositoryNotFoundError(
-                    caller_name=self.__class__.__name__, 
-                    message=f"Could not find record with id: {record_id}!",
-                    show_error=False
-                )
-                
-            setattr(self._model, "symbol_id", symbol_id)
-            setattr(self._model, "locomotive_num", engine_id)
-            setattr(self._model, "verified", True)
+            
+            values = {
+                "symbol_id": symbol_id,
+                "locomotive_num": engine_id,
+                "verified": True
+            }
+            
+            return self.update_with_pk(record_id, values)
             
         except Exception as e:
             raise repository_error_translator(
@@ -309,47 +242,53 @@ class RecordRepository(ABC, BaseRepository):
         
         
     # Time frame
-    def get_records_in_timeframe(self, station_id: int, datetime_str: str, recent: bool) -> list[dict[str, Any]]:
+    def get_records_in_timeframe(self, station_id: int, dt: datetime, recent: bool) -> list[dict[str, Any]]:
+        from ...database import Symbol, Station
+        
         try:
-            query_str = f"""
-                SELECT {self._table_name}.id, unit_addr, date_rec, stat.station_name, sym.symb_name, engine_num, locomotive_num FROM {self._table_name}
-                INNER JOIN Stations as stat on station_recorded = stat.id
-                INNER JOIN Symbols as sym on symbol_id = sym.id
-                WHERE date_rec >= :date_stamp 
-                """
+            # query_str = f"""
+            #     SELECT {self._table_name}.id, unit_addr, date_rec, stat.station_name, sym.symb_name, engine_num, locomotive_num FROM {self._table_name}
+            #     INNER JOIN Stations as stat on station_recorded = stat.id
+            #     INNER JOIN Symbols as sym on symbol_id = sym.id
+            #     WHERE date_rec >= :date_stamp 
+            #     """
             
-            args = {"date_stamp": datetime_str}
+            # args = {"date_stamp": dt}
             
             stmt = (
                 select(
-                    self._model.id, 
-                    self._model.unit_addr,
-                    self._model.date_rec,
+                    self.model.id, 
+                    self.model.unit_addr,
+                    self.model.date_rec,
                     Station.station_name,
                     Symbol.symb_name,
-                    self._model.engine_num,
-                    self._model.locomotive_num
+                    self.model.engine_num,
+                    self.model.locomotive_num
                 )
-                .join(self._model.station_recorded)
+                .join(Station, self.model.station_recorded == Station.id)
+                .join(Symbol, self.model.symbol_id == Symbol.id)
+                .where(self.model.date_rec >= dt)
             )
             
             if station_id != -1:  
-                query_str += " AND stat.id = :station_id" if station_id != -1 else ""
-                args["station_id"] = station_id
+                stmt = stmt.where(Station.id == station_id)
+                # query_str += " AND stat.id = :station_id" if station_id != -1 else ""
+                # args["station_id"] = station_id
             
             if recent:
-                query_str += " AND most_recent = TRUE"
+                stmt = stmt.where(self.model.most_recent.is_(True))
+                # query_str += " AND most_recent = TRUE"
                 
-            query = text(query_str)
-            results = self.session.execute(query, args).all()
-            if len(results) < 1:
-                raise RepositoryNotFoundError(
-                    caller_name=self.__class__.__name__, 
-                    message=f"Could not find record with corresponding station: {station_id}!",
-                    show_error=False
-                )
+            #query = text(query_str)
+            results = self.session.execute(stmt).all()
+            # if len(results) < 1:
+            #     raise RepositoryNotFoundError(
+            #         caller_name=self.__class__.__name__, 
+            #         message=f"Could not find record with corresponding station: {station_id}!",
+            #         show_error=False
+            #     )
             
-            results = self.rows_to_dicts(results)
+            results = self.objs_to_dicts(results)
             # Add data type to result
             for result in results:
                 result["Data_type"] = self._record_identifier.upper()

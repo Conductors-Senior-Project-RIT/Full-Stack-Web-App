@@ -6,10 +6,14 @@ This module handles all database CRUD operations for Symbol records
 from typing import Any
 from sqlalchemy import text, ScalarResult
 
+from ...database import Symbol
+
 from .database_core import BaseRepository, RepositoryNotFoundError, repository_error_translator, \
     repository_error_handler
 
 class SymbolRepository(BaseRepository):
+    model = Symbol
+    
     def __init__(self, session):
         super().__init__(session)
 
