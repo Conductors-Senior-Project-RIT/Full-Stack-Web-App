@@ -17,7 +17,6 @@ class RecordService(BaseService):
         )
         self.station_repo = StationRepository(session)
         self._session = session
-        super().__init__(session, "Train History")
         
     
     def get_first_repository(self) -> RecordRepository:

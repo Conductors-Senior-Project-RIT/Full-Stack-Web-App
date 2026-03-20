@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol, Type, runtime_checkable
 
 from sqlalchemy import Row, Sequence
 from sqlalchemy.exc import SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
@@ -86,13 +86,16 @@ REPOSITORY_ERROR_MAP = {
     (TypeError, KeyError, IndexError, ZeroDivisionError): (RepositoryParsingError, False)
 }
 
-def repository_error_handler(message: str | None = None):
+def repository_error_handler(
+    message: str | None = None, 
+    exclude: tuple[Type[Exception]] | Type[Exception] | None = None
+):
     def decorator(func):
         return layer_error_handler(
             func, 
             error_map=REPOSITORY_ERROR_MAP, 
             base_exception=RepositoryInternalError,
-            exclude=RepositoryError,
+            exclude=RepositoryError if not exclude else exclude,
             message=message
         )
     return decorator

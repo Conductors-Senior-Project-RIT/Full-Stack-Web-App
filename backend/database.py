@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase

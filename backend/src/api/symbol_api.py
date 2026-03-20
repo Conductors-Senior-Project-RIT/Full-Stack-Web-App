@@ -21,8 +21,9 @@ class SymbolAPI(Resource):
         
         # Instantiate a new symbol service
         service = SymbolService(session)
-
         results = service.get_symbol(symbol_name)
+        session.commit()
+        
         return jsonify({"results": results}), 200
         
 
@@ -42,10 +43,9 @@ class SymbolAPI(Resource):
         if not args.name:
             return jsonify({"error": "Must provide a symbol name for a new symbol!"}), 400
         
-        session = db.session
-        
-        # Create our symbol service
+        session = db.session  
         service = SymbolService(session)
-
         service.create_symbol(args.name)
+        session.commit()
+        
         return 200

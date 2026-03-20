@@ -40,8 +40,7 @@ class PushoverUpdater(Resource):
                 }
                 for tup in resp
             ]
-        )
-        return 200
+        ), 200
 
     @jwt_required()
     def post(self):

@@ -1,6 +1,7 @@
 from flask import Flask, Response, jsonify
 from werkzeug.exceptions import HTTPException
 
+from ...database import db
 from ..service.service_core import *
 
 ##########################
@@ -26,6 +27,8 @@ def service_error_to_code(e: ServiceError) -> int:
     Returns:
         int: HTTP error response status code.
     """
+    db.session.rollback()
+    
     for cls in e.__class__.__mro__:
         if cls in SERVICE_ERROR_CODES:
             return SERVICE_ERROR_CODES[cls]
@@ -42,6 +45,7 @@ def handle_service_errors(e: ServiceError) -> Response:
         Response: Constructs a Flask Response with the provided Service layer error message
         and error code.
     """
+    db.session.rollback()
     return jsonify({"error": str(e)}), service_error_to_code(e)  
 
 
@@ -55,6 +59,7 @@ def handle_api_errors(e: HTTPException) -> Response:
         Response: Constructs a Flask Response with the provided HTTP exception description
         and code.
     """
+    db.session.rollback()
     return jsonify({"error": e.description}), e.code    
 
 
@@ -65,6 +70,7 @@ def handle_other_errors() -> Response:
     Returns:
         Response: Constructs a Flask Response with a general error message and code of 500.
     """
+    db.session.rollback()
     return jsonify({"error": "Internal server error!"}), 500
         
         

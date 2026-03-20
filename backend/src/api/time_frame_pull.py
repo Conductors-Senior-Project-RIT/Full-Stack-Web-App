@@ -18,7 +18,7 @@ class recent_activities(Resource):
         args = parser.parse_args()
         """
 
-        typ = request.args.get("type", default=-1, type=int)
+        typ = request.args.get("type", default=None, type=int)
         stat_id = request.args.get("station_id", default=-1, type=int)
         time_range = request.args.get("timerange", default=None, type=str)
         recent = request.args.get("most_recent", default=True, type=bool)
@@ -28,10 +28,12 @@ class recent_activities(Resource):
             raise BadRequest("Invalid time range!")
 
         session = db.session
-        
-        record_service = RecordService(session, None)
+        # We don't need type
+        record_service = RecordService(session, typ)
         results = record_service.time_frame_pull(
             time_range, recent, stat_id, station
         )
+        session.commit()
+        
         return jsonify(results), 200
 

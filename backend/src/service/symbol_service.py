@@ -7,7 +7,6 @@ from ..db.symbol_repo import SymbolRepository
 class SymbolService(BaseService):
     def __init__(self, session):
         self._symbol_repo = SymbolRepository(session)
-        super().__init__()
         
     
     def get_symbol(self, symbol_name: str) -> list[str] | list[int]:

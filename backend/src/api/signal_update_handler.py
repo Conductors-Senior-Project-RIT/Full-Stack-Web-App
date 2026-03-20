@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
+from werkzeug.exceptions import BadRequest
 
 from backend.database import db
 from ..service.record_service import RecordService
@@ -20,18 +21,20 @@ class SignalUpdater(Resource):
         args = parser.parse_args()
 
         if args["id_num"] < 1:
-            return jsonify({"error": f"Ivalid record ID: {args["id_num"]}"}), 400
+            raise BadRequest(f"Ivalid record ID: {args["id_num"]}")
         
         if args["engi_number_id"] == -1 and args["symbol_id"] == -1:
-            return jsonify(
-                {"error": f"Both engine [{args['engi_number_id']}] and symbol ID [{args['id_num']}] cannot be undefined (-1)"}
-            ), 400
+            raise BadRequest(
+                f"Both engine [{args['engi_number_id']}] and symbol ID [{args['id_num']}] cannot be undefined (-1)"
+            )
+
 
         # Ensure that a valid record type, a valid record ID, and at least
         # a valid engine number or symbol ID is provided.
         session = db.session
-        
         service = RecordService(session, args["type"])
         service.signal_update(args["id_num"], args["symbol_id"], args["engi_number_id"])
+        session.commit()
+        
         return 200
     

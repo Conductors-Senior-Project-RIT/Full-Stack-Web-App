@@ -13,8 +13,6 @@ class StationService(BaseService):
         self._record_repos = {
             r.get_record_identifier(): r for r in get_all_repositories(session)
         }
-            
-        super().__init__(session, "Station")
     
     # -- Station Auth -- #
     def get_stations(self):

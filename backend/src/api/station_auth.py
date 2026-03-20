@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
+from werkzeug.exceptions import BadRequest
 from backend.src.service.station_service import StationService
 from backend.database import db
 
@@ -14,6 +15,8 @@ class StationAuth(Resource):
         """
         session = db.session
         results = StationService(session).get_stations()
+        
+        session.commit()
         return jsonify(results), 200
 
     def post(self):
@@ -28,8 +31,9 @@ class StationAuth(Resource):
         args = parser.parse_args()
         
         session = db.session
-        
         pw = StationService(session).create_station(args["station_name"])
+        session.commit()
+        
         return jsonify({"password": pw}), 200
       
       
@@ -45,8 +49,10 @@ class StationAuth(Resource):
         args = parser.parse_args()
         
         if args["id"] < 1:
-            return jsonify({"error": "An invalid station ID was provided!"}), 400
+            raise BadRequest("An invalid station ID was provided!")
         
         session = db.session
         pw = StationService(session).update_station_password(args["id"])
+        session.commit()
+        
         return jsonify({"new_pw": pw}), 200

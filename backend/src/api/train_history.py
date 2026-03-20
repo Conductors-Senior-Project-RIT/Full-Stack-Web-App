@@ -40,9 +40,10 @@ class HistoryDB(Resource):
         validate_int_argument(page, "page", 1)
         
         session = db.session
-        
         th_service = RecordService(session, typ)
         results = th_service.get_train_history(id, page)
+        session.commit()
+        
         return jsonify(results), 200
             
 
@@ -84,6 +85,8 @@ class HistoryDB(Resource):
 
         th_service = RecordService(session, typ)
         results = th_service.post_train_history(args, dt_str)
+        session.commit()
+        
         return jsonify(results), 200
         
 

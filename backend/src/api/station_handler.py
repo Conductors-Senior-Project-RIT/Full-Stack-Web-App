@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
+from werkzeug.exceptions import BadRequest
 from backend.src.service.station_service import StationService
 from backend.src.service.service_core import *
 from backend.database import db
@@ -11,18 +12,14 @@ station_bp = Blueprint("station_bp", __name__)
 def get_trains():
     station = request.args.get("station")
     if not station:
-        return jsonify({"message": "Station not specified"}), 400
+        raise BadRequest("Station not specified")
 
-    try:
-        session = db.session
-        results = StationService(session).get_trains_from_station(station)
-        return jsonify(results), 200
-    except ServiceTimeoutError:
-        return jsonify({"error": "Request timed out!"}), 408
-    except ServiceResourceNotFound as e:
-        return jsonify({"error": str(e)}), 404
-    except (ServiceInternalError, ServiceParsingError) as e:
-        return jsonify({"error": str(e)}), 500
+    session = db.session
+    results = StationService(session).get_trains_from_station(station)
+    session.commit()
+    
+    return jsonify(results), 200
+
 
     # # Fetch the station ID for the specified station
     # station_id = run_get_cmd(
@@ -77,10 +74,12 @@ def get_trains():
 def get_pin_info():
     station = request.args.get("station")
     if not station:
-        return jsonify({"message": "Station not specified"}), 400
+        raise BadRequest("Station not specified")
 
     session = db.session
-    results = StationService(session).get_trains_from_station(station, recent=True)
+    results = StationService(session).get_trains_from_station(station, recent=True) 
+    session.commit()
+    
     return jsonify(results), 200
     
 

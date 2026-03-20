@@ -31,10 +31,10 @@ class RecordCollation(Resource):
             )
             
         session = db.session
-
         # Will raise an exception if the provided record type is not valid
         record_service = RecordService(session, typ)
-        
         # Retrieve and return the records using the respective record service 
         results = record_service.collate_records(page)
+        session.commit()
+        
         return jsonify(results), 200

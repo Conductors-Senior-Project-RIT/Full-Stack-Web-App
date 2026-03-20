@@ -9,7 +9,7 @@ from flask_jwt_extended import (
     get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies,
 )
 from ..service.user_service import UserService
-from werkzeug.exceptions import BadRequest, Unauthorized, NotFound, Forbidden
+from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized, NotFound, Forbidden
 
 from backend.database import db
 
@@ -53,13 +53,13 @@ def register():
 
     session = db.session
     service = UserService(session)
-
     result = service.register_user(email, password) #service
 
     if result.get("email_sent"):
+        session.commit()
         jsonify({"message": "User registered successfully! A welcome email has been sent."}), 201
 
-    return jsonify({"message": "User registered, but failed to send email."}), 500
+    raise InternalServerError("User registered, but failed to send email.")
 
 @user_bp.route("/api/login", methods=["POST"])
 def login():
@@ -69,21 +69,23 @@ def login():
 
     session = db.session
     service = UserService(session)
-
     user = service.is_registered(email, password)
+    
     if not user:
         raise Unauthorized("Invalid credentials")
 
     user_id = user[0][0] # need to find a clean way to stop double indexing, index the query results from the repo/db layer so we stop double indexing here.
     user_role = user[0][4]
 
-    response = jsonify({"message": "login successful"})
+    response = jsonify({"message": "login successful"}), 200
 
     additional_claims = {"user_role": user_role} # a user role is set based on what's in the database
 
     # identity being user_id makes it easier to retrieve user info from db for whatever reason, and can store their user_role here as it's not a security risk and makes it easier to protect certain routes later
     access_token = create_access_token(identity=str(user_id), additional_claims=additional_claims) # user_id as eventually want to replace incrementing id with uuid if possible
     set_access_cookies(response, access_token)
+    
+    session.commit()
     return response
 
 # the bottom 3 routes confuse me, need to look at frontend and see if i should remove one of the routes...
@@ -96,10 +98,10 @@ def reset_password_request():
 
     session = db.session
     service = UserService(session)
-
     # we don't want to let the user now if an email exists or not (idk y but im following how this was done lol), so we handle email checking silently (return nothing)
     service.create_user_password_reset_token(email)
 
+    session.commit()
     return jsonify({"message": "If an account with that email exists, a reset link was sent."}), 200
 
 @user_bp.route("/api/validate-reset-token", methods=["GET"])
@@ -108,12 +110,12 @@ def token_validation():
     
     session = db.session
     service = UserService(session)
-    
     is_valid = service.is_user_password_reset_token_valid(token)
 
     if is_valid:
         return jsonify({"message": "Password reset token is valid"}), 200
 
+    session.commit()
     raise NotFound("Password reset token is invalid!")
 
 @user_bp.route("/api/reset-password", methods=["PUT"])
@@ -128,14 +130,14 @@ def reset_password():
     
     session = db.session
     service = UserService(session)
-
     result = service.reset_user_password(token, password) #again add custom error handling, don't want any of this "is none" or boolean checking
 
     # Is this the required payload?
     if not result:
-        return {"valid": "false"}, 404
+        raise NotFound("false")
 
-    return {"message": "Password changed successfully. Please log in."}, 200
+    session.commit()
+    return jsonify({"message": "Password changed successfully. Please log in."}), 200
 
 # not sure why they're updating times for users... maybe ... what is the point of this lol /api/user_preferences/time
 # delete this route?
@@ -152,8 +154,9 @@ def update_times():
 
     session = db.session
     service = UserService(session)
-
-    service.update_user_times(current_user_id, starting_time, ending_time)
+    service.update_user_times(current_user_id, starting_time, ending_time)  # TODO: Where did the method go???
+    
+    session.commit()
     return jsonify({"message": "Success"}), 200
 
 
@@ -186,6 +189,7 @@ def elevate_user():
     if service.update_account_status(email_to_elevate, new_role) is None: #if None is returned (again change all the "is None" with custom error handling...)
         return NotFound("The email you're trying to change roles for does not exist")
 
+    session.commit()
     return jsonify({"message": "User role updated successfully"}), 200
 
 @user_bp.route("/api/logout", methods=["POST"])

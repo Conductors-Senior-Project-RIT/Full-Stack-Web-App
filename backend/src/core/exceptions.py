@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import Type
 
 TESTING_ENABLED = True
 
@@ -25,7 +26,7 @@ def layer_error_handler(
         func,
         error_map: dict,
         base_exception: LayerError,
-        exclude: tuple[Exception] | Exception | None = None,
+        exclude: tuple[Type[Exception]] | Type[Exception] | None = None,
         message: str | None = None
 ):
     """This function acts as a decorator to provide Service layer error translation for

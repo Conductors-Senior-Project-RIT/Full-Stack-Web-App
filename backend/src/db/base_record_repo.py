@@ -3,8 +3,9 @@ from datetime import datetime, timedelta
 from typing import Any, Type
 from sqlalchemy import func, select, text, update
 from sqlalchemy.orm.scoping import scoped_session
+from sqlalchemy.orm import aliased
 
-from ...database import Base
+from ...database import Base, Station, Symbol
 from .database_core import BaseRepository, RepositoryNotFoundError, RepositoryInternalError, \
     RepositoryInvalidArgumentError, repository_error_handler, repository_error_translator
 
@@ -150,7 +151,6 @@ class RecordRepository(ABC, BaseRepository):
         return result
         
     
-
     @repository_error_handler()
     def get_record_column_by_unit_addr(
         self, 
@@ -232,18 +232,22 @@ class RecordRepository(ABC, BaseRepository):
             if recent:
                 return self.get_recent_station_records(station_id)
             
-            args = {"station_id": station_id}
-            query = text(
-                f"SELECT * FROM {self._table_name} WHERE station_recorded = :station_id"
-            )
+            # args = {"station_id": station_id}
+            # query = text(
+            #     f"SELECT * FROM {self._table_name} WHERE station_recorded = :station_id"
+            # )
             
-            results = self.session.execute(query, args).all()
+            results = self.session.execute(
+                select(self._model)
+                .where(self._model.station_recorded == station_id)
+            ).all()
+  
             return self.rows_to_dicts(results)
         
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
-                f"Could not fetch records for a specific station {station_id}: {e}"
+                f"Error fetching records for a specific station {station_id}: {e}"
             )
         
     
@@ -269,31 +273,33 @@ class RecordRepository(ABC, BaseRepository):
     
     def verify_record(self, record_id: int, symbol_id: int, engine_id: int):
         try:
-            args = {
-                "id": record_id,
-                "symbol": symbol_id,
-                "engine_num": engine_id,
-            }
+            # args = {
+            #     "id": record_id,
+            #     "symbol": symbol_id,
+            #     "engine_num": engine_id,
+            # }
             
-            query = text(
-                f"""
-                UPDATE {self._table_name}
-                SET symbol_id = :symbol, 
-                locomotive_num = :engine_num,
-                verified = true
-                WHERE id = :id
-                RETURNING id, symbol_id, locomotive_num
-                """
-            )
-
-            results = self.session.execute(query, args).all()
-            if results < 1:
+            # query = text(
+            #     f"""
+            #     UPDATE {self._table_name}
+            #     SET symbol_id = :symbol, 
+            #     locomotive_num = :engine_num,
+            #     verified = true
+            #     WHERE id = :id
+            #     RETURNING id, symbol_id, locomotive_num
+            #     """
+            # )
+            record = self.session.get(self._model, record_id)
+            if not record:
                 raise RepositoryNotFoundError(
                     caller_name=self.__class__.__name__, 
                     message=f"Could not find record with id: {record_id}!",
                     show_error=False
                 )
-            return self.rows_to_dicts(results)
+                
+            setattr(self._model, "symbol_id", symbol_id)
+            setattr(self._model, "locomotive_num", engine_id)
+            setattr(self._model, "verified", True)
             
         except Exception as e:
             raise repository_error_translator(
@@ -313,6 +319,19 @@ class RecordRepository(ABC, BaseRepository):
                 """
             
             args = {"date_stamp": datetime_str}
+            
+            stmt = (
+                select(
+                    self._model.id, 
+                    self._model.unit_addr,
+                    self._model.date_rec,
+                    Station.station_name,
+                    Symbol.symb_name,
+                    self._model.engine_num,
+                    self._model.locomotive_num
+                )
+                .join(self._model.station_recorded)
+            )
             
             if station_id != -1:  
                 query_str += " AND stat.id = :station_id" if station_id != -1 else ""
