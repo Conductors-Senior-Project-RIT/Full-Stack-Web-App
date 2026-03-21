@@ -28,6 +28,10 @@ class Base(DeclarativeBase):
 # Initialize automap using that Base class
 AutomapBase = automap_base(declarative_base=Base)
 
+Station = None
+EOTRecord = None
+HOTRecord = None
+
 def init_models(app: Flask):
     with app.app_context():
         # Prepare the Base model
