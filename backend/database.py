@@ -29,8 +29,14 @@ class Base(DeclarativeBase):
 AutomapBase = automap_base(declarative_base=Base)
 
 Station = None
+ResetRequest = None
+Symbol = None
 EOTRecord = None
 HOTRecord = None
+NotificationConfig = None
+Pin = None
+User = None
+UserPreference = None
 
 def init_models(app: Flask):
     with app.app_context():

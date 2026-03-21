@@ -1,9 +1,11 @@
 import os
 from flask import Flask
 from flask_cors.extension import CORS
+from flask_restful import Api
 
-from backend.extensions import bcrypt, jwt, api
+from backend.extensions import bcrypt, jwt
 from .config.settings import config_selection
+from .database import db, init_models
 
 def create_app(config_name=None): # tests call this function to create flask app
     """
@@ -27,19 +29,16 @@ def create_app(config_name=None): # tests call this function to create flask app
     print(f"JWT Secret Key Set: {app.config.get('JWT_SECRET_KEY')}") #if exists, show boolean
     print("=" * 50)
 
-    from .database import db, init_models
     db.init_app(app) # load settings for db engine/ bind flask-alchemy to app; flask-alchemy currently used as a connection manager with our raw sql lol
 
     # Initialize our models from our tables
     init_models(app)
 
+    api = Api(app)
     # winging the setup here lol
     CORS(app)
     if app.config['TESTING']:
         api.resources = []  # Necessary to reset instances between tests
-    api.init_app(app)
-    bcrypt.init_app(app) # find old commit to plug back old hashing algorithm for storing passwords
-    jwt.init_app(app)
     
     # Import unique to specific app instance
     from .src.api.user_preferences_api import UserPreferences
@@ -78,6 +77,10 @@ def create_app(config_name=None): # tests call this function to create flask app
     app.register_blueprint(station_handler.station_bp)
     app.register_blueprint(volunteer_handler.volunteer_bp)
 
-    error_handler.register_error_handlers(app)  
+    error_handler.register_error_handlers(app) 
+
+    api.init_app(app)
+    bcrypt.init_app(app) # find old commit to plug back old hashing algorithm for storing passwords
+    jwt.init_app(app)
 
     return app
