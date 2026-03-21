@@ -1,8 +1,8 @@
-from collections.abc import Collection, Iterable
-from typing import Any, Generic, Protocol, Type, TypeVar, runtime_checkable
+from collections.abc import Iterable
+from typing import Any, Generic, Protocol, Type, TypeVar, Union, runtime_checkable
 
-from sqlalchemy import Row, Sequence, select
-from sqlalchemy.exc import SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
+from sqlalchemy import Row, Sequence
+from sqlalchemy.exc import DataError, SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
 from sqlalchemy.orm.scoping import scoped_session
 
 from ...database import Base
@@ -42,8 +42,9 @@ class RepositoryInvalidArgumentError(RepositoryError):
 REPOSITORY_ERROR_MAP = {
     (TimeoutError, UnboundExecutionError, InterfaceError, NoSuchModuleError): 
         (RepositoryConnectionError, False),
-    SQLAlchemyError: (RepositoryInternalError, False),
-    (TypeError, KeyError, IndexError, ZeroDivisionError): (RepositoryParsingError, False)
+    (TypeError, KeyError, IndexError, ZeroDivisionError, DataError): (RepositoryParsingError, False),
+    SQLAlchemyError: (RepositoryInternalError, False)
+    
 }
 
 def repository_error_translator(
@@ -89,6 +90,11 @@ class AsDictConvertible(Protocol):
 
 ModelType = TypeVar("ModelType", bound=Base)
 
+SingleResult = Union[ModelType, dict[str, Any]]
+CollectionResult = Union[list[ModelType], list[dict[str, Any]]]
+FlexibleResult = Union[SingleResult, CollectionResult]
+
+
 def is_model_type(obj) -> bool:
     if ModelType.__bound__:
         return isinstance(obj, ModelType.__bound__)
@@ -109,14 +115,8 @@ class BaseRepository(Generic[ModelType]):
             raise RepositorySessionError()
         self.session = session
         
-    @repository_error_handler
-    def get(self, pkey: int | str, to_dict=True) -> ModelType | dict[str, Any]:
-        if not hasattr(self.model, pkey.__name__):
-            raise RepositoryInvalidArgumentError(
-                self.__class__.__name__, "get", 
-                f"Invalid primary key provided: {pkey}", True
-            )
-        
+    @repository_error_handler()
+    def get(self, pkey: int | str, to_dict=True) -> SingleResult:
         obj = self.session.get(self.model, pkey)
         
         if not obj:
@@ -128,18 +128,14 @@ class BaseRepository(Generic[ModelType]):
         return self.objs_to_dicts(obj) if to_dict else obj
     
     
-    def get_all(self, to_dict=True) -> list[ModelType] | list[dict[str, Any]]:
-        results = self.session.execute(select(self.model)).all()
-        return self.objs_to_dicts(results) if to_dict else results
-    
-    
     @repository_error_handler()
-    def update(self, new_values: dict[ModelType, dict[str, Any]], to_dict=True) -> list[ModelType] | list[dict[str, Any]]:        
+    def update(self, new_values: dict[ModelType, dict[str, Any]], to_dict=True) -> FlexibleResult:        
         # Return None if empty or undefined
         if not new_values:
             return []
 
         # Update all objects
+        updated = []
         for obj, updates in new_values.items():
             # The object must be a correct type
             if not is_model_type(obj):
@@ -149,28 +145,38 @@ class BaseRepository(Generic[ModelType]):
                 )
             
             # Now update all objs
-            for key, value in updates.items():
+            has_updated = False
+            for key, new_value in updates.items():
                 if not hasattr(obj, key):
                     raise RepositoryInvalidArgumentError(
                         self.__class__.__name__, "update",
                         f"Column name '{key}' not found in {obj}!", True
                     )
-                setattr(obj, key, value)
+                
+                current_value = getattr(obj, key)
+                if current_value != new_value:
+                    has_updated = True
+                    setattr(obj, key, new_value)
+            
+            if has_updated:
+                updated.append(obj)
         
         # Flush to reflect changes in session
         self.session.flush()
-        results = list(new_values.keys())
-        return self.objs_to_dicts(results) if to_dict else results
+        
+        updated = updated[0] if len(updated) == 1 else updated
+        
+        return self.objs_to_dicts(updated) if to_dict else updated
     
     
     @repository_error_handler()
-    def update_with_pk(self, pkey: int | str, new_values: dict[str, Any], to_dict=True) -> ModelType | dict[str, Any]:
-        obj = self.get(pkey)
+    def update_with_pk(self, pkey: int | str, new_values: dict[str, Any], to_dict=True) -> SingleResult:
+        obj = self.get(pkey, to_dict=False)
         return self.update({obj: new_values}, to_dict)
         
         
     @repository_error_handler()
-    def create(self, new_data: list[dict[str, Any]], to_dict=True) -> list[ModelType] | list[dict[str, Any]]:
+    def create(self, new_data: list[dict[str, Any]], to_dict=True) -> CollectionResult:
         instances = [self.model(**data) for data in new_data]
         self.session.add_all(instances)
         self.session.flush()
@@ -179,13 +185,13 @@ class BaseRepository(Generic[ModelType]):
         
     @repository_error_handler()    
     def delete(self, value: int | str | ModelType) -> None:  
-        obj = value if is_model_type(value) else self.get(value)
+        obj = value if is_model_type(value) else self.get(value, to_dict=False)
         self.session.delete(obj)
         self.session.flush()
         
             
     @classmethod
-    def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible]) -> list[dict[str, Any]]:
+    def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible]) -> dict[str, Any] | list[dict[str, Any]]:
         is_collection = isinstance(values, (Iterable))
         rows = values if is_collection else [values]
         

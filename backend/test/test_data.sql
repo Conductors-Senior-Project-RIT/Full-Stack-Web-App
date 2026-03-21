@@ -3,7 +3,8 @@ INSERT INTO Stations (id, station_name, passwd) VALUES
 (1, 'test station2', 'test');
 
 INSERT INTO Symbols (id, symb_name) VALUES
-(0, 'Test Symbol');
+(0, 'Test Symbol'),
+(1, 'Test Symbol2');
 
 INSERT INTO Users (id, email, passwd, acc_status) VALUES
 (0, 'test@test.test', 'hashed_pswd', 0);

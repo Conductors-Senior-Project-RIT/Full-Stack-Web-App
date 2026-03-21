@@ -1,6 +1,7 @@
-from typing import Any
+from typing import Any, Self
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.automap import automap_base
 from flask import Flask
@@ -10,11 +11,18 @@ db = SQLAlchemy()  # the db object gives you access to the db.Model class to def
 
 # Used for type checking
 class Base(DeclarativeBase):  
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+    
     def _asdict(self) -> dict[str, Any]:
-            data = self.__dict__.copy()
-            if "_sa_instance_state" in data:
-                data.pop("_sa_instance_state")
-            return data
+        return {
+            col.key : getattr(self, col.key)
+            for col in inspect(self).mapper.column_attrs
+        }
+        
+    def __hash__(self):
+        return hash((self.__class__, self.id))
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Base):
@@ -22,7 +30,12 @@ class Base(DeclarativeBase):
         elif isinstance(other, dict):
             return self._asdict() == other
         else:
-            raise NotImplementedError("Unsupported object provided for comparison!")
+            False
+            
+    def copy(self) -> Self:
+        return self.__class__(**self._asdict())
+        
+        
 
 
 # Initialize automap using that Base class

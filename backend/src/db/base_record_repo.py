@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Generic, Type
+from typing import Any, Type
 from sqlalchemy import func, select, text, update
 from sqlalchemy.orm.scoping import scoped_session
 
@@ -114,13 +114,14 @@ class RecordRepository(ABC, BaseRepository):
             .where(
                 self.model.id != record_id,
                 self.model.unit_addr == unit_addr,
-                self.model.most_recent.is_(True)
+                self.model.most_recent == True
             )
             .values(most_recent=False)
             .returning(self.model.id)
         )
         
         result = self.session.execute(stmt).scalars().all()
+        self.session.flush()
         return result
         
     
@@ -146,7 +147,7 @@ class RecordRepository(ABC, BaseRepository):
         )
         
         if most_recent is not None:
-            stmt = stmt.where(self.model.most_recent.is_(most_recent))
+            stmt = stmt.where(self.model.most_recent == most_recent)
         
         return self.session.execute(stmt).scalars().all()
 
@@ -159,11 +160,11 @@ class RecordRepository(ABC, BaseRepository):
         if engine_num:
             values["engine_num"] = engine_num
             
-        return self.update_with_pk(record_id, values)
+        return self.update_with_pk(record_id, values)  # Already flushes
 
 
     # Station Handler
-    def get_station_records(self, station_id: int, recent=False) -> list[tuple[Any, ...]]:
+    def get_station_records(self, station_id: int, recent=False) -> list[dict[str, Any]]:
         try:
             if recent:
                 return self.get_recent_station_records(station_id)
@@ -232,7 +233,7 @@ class RecordRepository(ABC, BaseRepository):
                 "verified": True
             }
             
-            return self.update_with_pk(record_id, values)
+            return self.update_with_pk(record_id, values)  # Already flushes
             
         except Exception as e:
             raise repository_error_translator(
@@ -276,7 +277,7 @@ class RecordRepository(ABC, BaseRepository):
                 # args["station_id"] = station_id
             
             if recent:
-                stmt = stmt.where(self.model.most_recent.is_(True))
+                stmt = stmt.where(self.model.most_recent == True)
                 # query_str += " AND most_recent = TRUE"
                 
             #query = text(query_str)
