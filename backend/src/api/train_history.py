@@ -15,6 +15,8 @@ from backend.src.service.record_service import RecordService
 def validate_int_argument(value: int, name: str, min_value: int):
     if not isinstance(value, int):
         raise BadRequest(f"{name} ({value}) is not an integer!")
+    if not isinstance(min_value, int):
+        raise BadRequest(f"{name} minimum value {min_value} is not an integer.")
     if value < min_value:
         raise BadRequest(f"Provided {name} must be greater than {min_value} but was given {value}...")
 
