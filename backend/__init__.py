@@ -5,7 +5,7 @@ from flask_restful import Api
 
 from backend.extensions import bcrypt, jwt
 from .config.settings import config_selection
-from .database import db, init_models
+from .database import db
 
 def create_app(config_name=None): # tests call this function to create flask app
     """

@@ -7,8 +7,7 @@ from backend import create_app
 from backend.src.api.train_history import validate_int_argument, HistoryDB
 
 class TestTrainHistory(unittest.TestCase):
-    @patch('backend.init_models')
-    def setUp(self, mock_models):
+    def setUp(self):
         app = create_app(config_name="test")
         app.testing = True
         self.client = app.test_client()
