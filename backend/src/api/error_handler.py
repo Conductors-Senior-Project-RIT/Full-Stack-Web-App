@@ -46,7 +46,7 @@ def handle_service_errors(e: ServiceError) -> Response:
         and error code.
     """
     db.session.rollback()
-    return jsonify({"error": str(e)}), service_error_to_code(e)  
+    return {"error": str(e)}, service_error_to_code(e)  
 
 
 def handle_api_errors(e: HTTPException) -> Response:
@@ -60,7 +60,7 @@ def handle_api_errors(e: HTTPException) -> Response:
         and code.
     """
     db.session.rollback()
-    return jsonify({"error": e.description}), e.code    
+    return {"error": e.description}, e.code    
 
 
 def handle_other_errors(e: Exception) -> Response:
@@ -71,7 +71,7 @@ def handle_other_errors(e: Exception) -> Response:
         Response: Constructs a Flask Response with a general error message and code of 500.
     """
     db.session.rollback()
-    return jsonify({"error": "Internal server error!"}), 500
+    return {"error": "Internal server error!"}, 500
         
         
 def register_error_handlers(app: Flask):

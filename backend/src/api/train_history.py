@@ -46,7 +46,7 @@ class HistoryDB(Resource):
         results = th_service.get_train_history(id, page)
         session.commit()
         
-        return jsonify(results), 200
+        return results, 200
             
 
     def post(self):
@@ -78,7 +78,7 @@ class HistoryDB(Resource):
         parser.add_argument("command", type=str, default="")
         parser.add_argument("checkbits", type=str, default="")
         parser.add_argument("parity", type=str, default="")
-        args = vars(parser.parse_args())
+        args = parser.parse_args()
         
         # right now this has 0 authentication. Too bad!
         typ = args["type"]
@@ -89,7 +89,7 @@ class HistoryDB(Resource):
         results = th_service.post_train_history(args, dt_str)
         session.commit()
         
-        return jsonify(results), 200
+        return results, 201
         
 
 
@@ -108,13 +108,14 @@ class HistoryDB(Resource):
         return 200
     
 
-    def delete(self):  # not sure if this is needed
-        print("delete goes here!")
-        return
+    # Commenting out the below for code coverage reasons.
+    # def delete(self):  # not sure if this is needed
+    #     print("delete goes here!")
+    #     return
 
-    def put(self):  # Not needed - if this is called then idk what happened
-        print("put goes here!")
-        return
+    # def put(self):  # Not needed - if this is called then idk what happened
+    #     print("put goes here!")
+    #     return
 
     def notif_send(self, laptop_id):
         """
