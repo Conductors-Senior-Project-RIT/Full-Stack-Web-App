@@ -56,14 +56,14 @@ class BaseRepository(Generic[ModelType]):
     
     
     @repository_error_handler()
-    def update(self, new_values: dict[ModelType, dict[str, Any]], to_dict=True) -> FlexibleResult:        
+    def update(self, objs: list[tuple[ModelType, dict[str, Any]]], to_dict=True) -> FlexibleResult:        
         # Return None if empty or undefined
-        if not new_values:
+        if not objs:
             return []
 
         # Update all objects
         updated = []
-        for obj, updates in new_values.items():
+        for obj, updates in objs:
             # The object must be a correct type
             if not issubclass(obj.__class__, Base):
                 raise RepositoryInvalidArgumentError(
@@ -74,6 +74,12 @@ class BaseRepository(Generic[ModelType]):
             # Now update all objs
             has_updated = False
             for key, new_value in updates.items():
+                if key == self.pkey:
+                    raise RepositoryInvalidArgumentError(
+                        self.__class__.__name__, "update",
+                        f"Cannot update {self.pkey}!", True
+                    )
+                
                 if not hasattr(obj, key):
                     raise RepositoryInvalidArgumentError(
                         self.__class__.__name__, "update",
@@ -99,7 +105,7 @@ class BaseRepository(Generic[ModelType]):
     @repository_error_handler()
     def update_with_pk(self, pkey: int | str, new_values: dict[str, Any], to_dict=True) -> SingleResult:
         obj = self.get(pkey, to_dict=False)
-        return self.update({obj: new_values}, to_dict)
+        return self.update([(obj, new_values)], to_dict)
         
         
     @repository_error_handler()

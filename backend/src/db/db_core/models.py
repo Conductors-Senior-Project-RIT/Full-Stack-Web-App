@@ -2,7 +2,8 @@ from sqlalchemy import (
     String, Integer, ForeignKey,
     TIMESTAMP, Time, func, inspect
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+from sqlalchemy.ext.declarative import AbstractConcreteBase
 from sqlalchemy.dialects.postgresql import ARRAY
 from datetime import datetime, time
 from typing import Any, List, Optional, Self
@@ -31,7 +32,7 @@ class Base(db.Model):
         elif isinstance(other, dict):
             return self._asdict() == other
         else:
-            False
+            return False
             
     def copy(self) -> Self:
         return self.__class__(**self._asdict())
@@ -96,15 +97,53 @@ class EngineNumber(Base):
     eng_num: Mapped[str] = mapped_column(String(240), nullable=False)
     
 
-class EOTRecord(Base):
-    __tablename__ = "eotrecords"
-
+class BaseRecord(AbstractConcreteBase, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     date_rec: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
-    station_recorded: Mapped[int] = mapped_column(ForeignKey("stations.id"), nullable=False)
-    symbol_id: Mapped[Optional[int]] = mapped_column(ForeignKey("symbols.id"))
-    engine_num: Mapped[Optional[int]] = mapped_column(ForeignKey("engine_numbers.id"))
     unit_addr: Mapped[str] = mapped_column(String(240), default="unknown")
+    verified: Mapped[bool] = mapped_column(default=False)
+    most_recent: Mapped[bool] = mapped_column(default=True)
+    locomotive_num: Mapped[str] = mapped_column(String(240), default="unknown")
+    signal_strength: Mapped[float] = mapped_column(default=0.0)
+
+    # Declarative columns
+    @declared_attr
+    def station_recorded(cls) -> Mapped[int]:
+        return mapped_column(ForeignKey("stations.id"), nullable=False)
+        
+    @declared_attr
+    def symbol_id(cls) -> Mapped[Optional[int]]:
+        return mapped_column(ForeignKey("symbols.id"))
+    
+    @declared_attr
+    def engine_num(cls) -> Mapped[Optional[int]]:
+        return mapped_column(ForeignKey("engine_numbers.id"))
+    
+    @declared_attr
+    def verifier_id(cls) -> Mapped[Optional[int]]:
+        return mapped_column(ForeignKey("users.id"))
+
+    # Declarative relationships
+    @declared_attr
+    def station(cls) -> Mapped["Station"]:
+        return relationship("Station")
+    
+    @declared_attr
+    def verifier(cls) -> Mapped["User"]:
+        return relationship("User")
+    
+    @declared_attr
+    def symbol(cls) -> Mapped["Symbol"]:
+        return relationship("Symbol")
+    
+    @declared_attr
+    def engine(cls) -> Mapped["EngineNumber"]:
+        return relationship("EngineNumber")
+    
+
+class EOTRecord(BaseRecord):
+    __tablename__ = "eotrecords"
+
     brake_pressure: Mapped[str] = mapped_column(String(240), default="unknown")
     motion: Mapped[str] = mapped_column(String(240), default="unknown")
     marker_light: Mapped[str] = mapped_column(String(240), default="unknown")
@@ -112,42 +151,22 @@ class EOTRecord(Base):
     battery_cond: Mapped[str] = mapped_column(String(240), default="unknown")
     battery_charge: Mapped[str] = mapped_column(String(240), default="unknown")
     arm_status: Mapped[str] = mapped_column(String(240), default="unknown")
-    signal_strength: Mapped[float] = mapped_column(default=0.0)
-    verified: Mapped[bool] = mapped_column(default=False)
-    verifier_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
-    most_recent: Mapped[bool] = mapped_column(default=True)
-    locomotive_num: Mapped[str] = mapped_column(String(240), default="unknown")
 
+    # Override base relationships
     station = relationship("Station", back_populates="eot_records")
-    symbol = relationship("Symbol")
-    engine = relationship("EngineNumber")
     verifier = relationship("User", back_populates="verified_eot")
     
     
-class HOTRecord(Base):
+class HOTRecord(BaseRecord):
     __tablename__ = "hotrecords"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    date_rec: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
-    station_recorded: Mapped[int] = mapped_column(ForeignKey("stations.id"), nullable=False)
-    symbol_id: Mapped[Optional[int]] = mapped_column(ForeignKey("symbols.id"))
-    engine_num: Mapped[Optional[int]] = mapped_column(ForeignKey("engine_numbers.id"))
-    frame_sync: Mapped[str] = mapped_column(String(240), default="UNKNOWN")
-    unit_addr: Mapped[str] = mapped_column(String(240), default="UNKNOWN")
-    command: Mapped[str] = mapped_column(String(240), default="UNKNOWN")
-    checkbits: Mapped[str] = mapped_column(String(240), default="UNKNOWN")
-    parity: Mapped[str] = mapped_column(String(240), default="UNKNOWN")
-    verified: Mapped[bool] = mapped_column(default=False)
-    verifier_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
-    most_recent: Mapped[bool] = mapped_column(default=True)
-    locomotive_num: Mapped[str] = mapped_column(String(240), default="unknown")
-    signal_strength: Mapped[float] = mapped_column(default=0.0)
+    frame_sync: Mapped[str] = mapped_column(String(240), default="unknown")
+    command: Mapped[str] = mapped_column(String(240), default="unknown")
+    checkbits: Mapped[str] = mapped_column(String(240), default="unknown")
+    parity: Mapped[str] = mapped_column(String(240), default="unknown")
 
-    # For Station side (eg. HOTRecord.station_recorded <-> Station.hot_records)
+    # Override base relationships
     station = relationship("Station", back_populates="hot_records")
-    symbol = relationship("Symbol")
-    engine = relationship("EngineNumber")
-    # For User side (eg. User.station_recorded <-> Station.hot_records)
     verifier = relationship("User", back_populates="verified_hot")
     
     

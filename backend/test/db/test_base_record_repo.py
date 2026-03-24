@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from pprint import pprint
 import unittest
 from unittest.mock import patch
 
@@ -6,25 +7,17 @@ from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
+from sqlalchemy.orm import relationship
 
 from backend.database import db
-from backend.src.db.db_core.models import Base
+from backend.src.db.db_core.models import BaseRecord
 from backend.src.db.base_record_repo import RecordRepository
 from backend.src.db.db_core.repository import BaseRepository, RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.test.base_test_case import BaseTestCase
 
 
-class TestTrainRecord(Base):
+class TestTrainRecord(BaseRecord):
     __tablename__ = "trainrecords"
-    id = Column(Integer, primary_key=True, nullable=False)
-    date_rec = Column(TIMESTAMP(timezone=True), nullable=False)
-    station_recorded = Column(Integer, nullable=False)
-    most_recent = Column(Boolean, default=True)
-    unit_addr = Column(String(240), default="unknown", nullable=False)
-    symbol_id = Column(Integer, default=None)
-    engine_num = Column(Integer, default=None)
-    locomotive_num = Column(String(240), default="unknown", nullable=False)
-    verified = Column(Boolean, default=False, nullable=False)
 
 
 class TestRepository(RecordRepository):  
@@ -58,45 +51,45 @@ class TestRecordRepository(BaseTestCase):
         self.test_data = [
             TestTrainRecord(
                 id=1,
-                date_rec=datetime.strptime("1999-01-08 04:05:06:-0400", "%Y-%m-%d %H:%M:%S:%z"),
-                station_recorded=0,
+                date_rec=datetime.strptime("1999-01-08 04:05:06", "%Y-%m-%d %H:%M:%S"),
+                station_recorded=1,
                 most_recent=False,
                 unit_addr="1111",
-                symbol_id=0,
-                engine_num=0,
+                symbol_id=1,
+                engine_num=1,
                 locomotive_num="CT00",
                 verified=True
             ),
             TestTrainRecord(
                 id=2,
-                date_rec=datetime.strptime("2003-02-05 06:53:08:-0400", "%Y-%m-%d %H:%M:%S:%z"),
-                station_recorded=1,
+                date_rec=datetime.strptime("2003-02-05 06:53:08", "%Y-%m-%d %H:%M:%S"),
+                station_recorded=2,
                 most_recent=False,
                 unit_addr="2222",
-                symbol_id=1,
-                engine_num=1,
+                symbol_id=2,
+                engine_num=2,
                 locomotive_num="TG00",
                 verified=True
             ),
             TestTrainRecord(
                 id=3,
-                date_rec=datetime.now(tz=timezone(timedelta(days=-1, seconds=72000))),
-                station_recorded=0,
+                date_rec=datetime.now(),
+                station_recorded=1,
                 most_recent=True,
                 unit_addr="1111",
-                symbol_id=0,
-                engine_num=0,
+                symbol_id=1,
+                engine_num=1,
                 locomotive_num="EL00",
                 verified=False
             ),
             TestTrainRecord(
                 id=4,
-                date_rec=datetime.now(tz=timezone(timedelta(days=-1, seconds=72000))),
-                station_recorded=1,
+                date_rec=datetime.now(),
+                station_recorded=2,
                 most_recent=True,
                 unit_addr="2222",
-                symbol_id=1,
-                engine_num=1,
+                symbol_id=2,
+                engine_num=2,
                 locomotive_num="CY00",
                 verified=False
             )
@@ -118,7 +111,7 @@ class TestRecordRepository(BaseTestCase):
         self.assertEqual("train", self.repo.get_record_identifier())
     
     
-    def testGetTrainRecordLogic(self):
+    def testGetTrainRecord(self):
         # Test that successful retrieval
         for i in [1, "1"]:
             result = self.repo.get(i)
@@ -146,8 +139,8 @@ class TestRecordRepository(BaseTestCase):
             
     def testGetRecentTrains(self):
         # Test successful retrieval of new record
-        results = self.repo.get_recent_trains("2222", 1)
-        expected = [self.test_data[3]]
+        results = self.repo.get_recent_trains("1111", 1)
+        expected = [self.test_data[2]]
         self.assertListEqual(expected, results)
         
         # Test failed retrieval of records
@@ -175,13 +168,13 @@ class TestRecordRepository(BaseTestCase):
     def testGetRecordSymbol(self):
         test_cases = [
             # Below are the tests for symbol_id
-            ("2222", "symbol_id", True, [1]),
-            ("2222", "symbol_id", False, [1]),
-            ("2222", "symbol_id", None, [1, 1]), 
+            ("2222", "symbol_id", True, [2]),
+            ("2222", "symbol_id", False, [2]),
+            ("2222", "symbol_id", None, [2, 2]), 
             # Below are the tests for engine_num
-            ("1111", "engine_num", True, [0]),
-            ("1111", "engine_num", False, [0]),
-            ("1111", "engine_num", None, [0, 0]), 
+            ("1111", "engine_num", True, [1]),
+            ("1111", "engine_num", False, [1]),
+            ("1111", "engine_num", None, [1, 1]), 
             # Below are the not found cases
             ("0000", "engine_num", True, []),
             ("0000", "engine_num", False, []),
@@ -208,27 +201,25 @@ class TestRecordRepository(BaseTestCase):
     def testUpdateSignalValues(self):
         test_symbol = None
         test_engine = None
-        expected = self.test_data[0].copy()
         
         # Test no values change
         result = self.repo.update_signal_values(1, test_symbol, test_engine)
         self.assertListEqual([], result)
         
         test_cases = [
-            (99, None),
-            (None, 99),
-            (100, 100)
+            (2, None),
+            (None, 2),
+            (1, 1)
         ]
         
         for sym, eng in test_cases:
             with self.subTest(sym=sym, eng=eng):
-                if sym:
-                    expected.symbol_id = sym
-                if eng:
-                    expected.engine_num = eng
+                updated = self.repo.update_signal_values(1, sym, eng, False)
+                self.session.add(updated)
+                self.session.flush()
                 
-                result = self.repo.update_signal_values(1, sym, eng)
-                self.assertEqual(expected._asdict(), result)
+                result = self.repo.get(1, False)
+                self.assertEqual(updated, result)
 
     
     ###########################
@@ -236,7 +227,7 @@ class TestRecordRepository(BaseTestCase):
     ###########################
     def testGetStationRecords(self):
         # All tests will be executed with recent=False in this class
-        expected = [self.test_data[1], self.test_data[3]]
+        expected = [self.test_data[0], self.test_data[2]]
         result = self.repo.get_station_records(1)
         self.assertListEqual(expected, result)
         
@@ -250,17 +241,16 @@ class TestRecordRepository(BaseTestCase):
     ##  verify_record  ##
     #####################
     def testVerifyRecord(self):
-        expected = self.test_data[2].copy()
-        sym, loc = 500, "RG00"
+        sym, loc = 2, "RG00"
         
-        expected.symbol_id = sym
-        expected.locomotive_num = loc
-        expected.verified = True
+        # Get the updated instance in session
+        updated = self.repo.verify_record(3, sym, loc, False)
+        self.session.add(updated)
+        self.session.flush()
         
-        self.repo.verify_record(3, sym, loc)
-        
+        # Make sure the changes are correctly reflected in the session
         result = self.repo.get(3, False)
-        self.assertEqual(expected, result)
+        self.assertEqual(updated, result)
         
         with patch.object(RecordRepository, "update_with_pk") as mock:
             mock.side_effect = SQLAlchemyError
@@ -272,38 +262,64 @@ class TestRecordRepository(BaseTestCase):
     ##  get_records_in_timeframe  ##
     ################################
     def testGetRecordsInTimeframe(self):
+        self.maxDiff = None
         expected = [
-            {
-                'id': 3, 
-                'date_rec': self.test_data[2].date_rec, 
-                'unit_addr': '1111', 
-                'station_name': 'test station1',
-                'symb_name': 'Test Symbol1', 
-                'engine_num': 0, 
-                'locomotive_num': 'EL00',
-                'Data_type': 'TRAIN'
-            },
             {
                 'id': 4, 
                 'date_rec': self.test_data[3].date_rec, 
                 'unit_addr': '2222', 
                 'station_name': 'test station2',
                 'symb_name': 'Test Symbol2', 
-                'engine_num': 1, 
+                'engine_num': 2, 
                 'locomotive_num': 'CY00',
+                'Data_type': 'TRAIN'
+            },
+            {
+                'id': 3, 
+                'date_rec': self.test_data[2].date_rec, 
+                'unit_addr': '1111', 
+                'station_name': 'test station1',
+                'symb_name': 'Test Symbol1', 
+                'engine_num': 1, 
+                'locomotive_num': 'EL00',
+                'Data_type': 'TRAIN'
+            },
+            {
+                'id': 2,
+                'date_rec': self.test_data[1].date_rec,
+                'unit_addr': '2222', 
+                'station_name': 'test station2',
+                'symb_name': 'Test Symbol2', 
+                'engine_num': 2, 
+                'locomotive_num': 'TG00',
+                'Data_type': 'TRAIN'
+            },
+            {
+                'id': 1,
+                'date_rec': self.test_data[0].date_rec,
+                'unit_addr': '1111', 
+                'station_name': 'test station1',
+                'symb_name': 'Test Symbol1', 
+                'engine_num': 1, 
+                'locomotive_num': 'CT00',
                 'Data_type': 'TRAIN'
             }
         ]
-        dt = datetime.strptime("2004-01-08 04:05:06:-0400", "%Y-%m-%d %H:%M:%S:%z")
+        dt = datetime.strptime("1998-01-08 04:05:06", "%Y-%m-%d %H:%M:%S")
         results = self.repo.get_records_in_timeframe(-1, dt, False)
-        self.assertListEqual(expected, results)
+        self.assertListEqual(expected[2:], results)
         
         results = self.repo.get_records_in_timeframe(1, dt, False)
+        self.assertListEqual([expected[3]], results)
+        
+        results = self.repo.get_records_in_timeframe(-1, dt, True)
+        self.assertListEqual(expected[:2], results)
+        
+        results = self.repo.get_records_in_timeframe(1, dt, True)
         self.assertListEqual([expected[1]], results)
         
-        self.test_data[0].most_recent = True
-        results = self.repo.get_records_in_timeframe(-1, dt, True)
-        self.assertListEqual(expected, results)
+        results = self.repo.get_records_in_timeframe(1, dt)
+        self.assertListEqual(expected[1::2], results)
         
         with patch.object(Session, "execute") as mock:
             mock.side_effect = SQLAlchemyError

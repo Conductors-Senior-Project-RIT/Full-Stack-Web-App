@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Generic, Type, TypeVar
+from typing import Any, Generic, Type, TypeVar, Union
 from sqlalchemy import func, select, text, update
 from sqlalchemy.orm.session import Session
 
-from .db_core.models import EOTRecord, HOTRecord
+from .db_core.models import BaseRecord
 from .db_core.repository import BaseRepository
 from .db_core.exceptions import (
     RepositoryNotFoundError, RepositoryInvalidArgumentError, 
     repository_error_handler, repository_error_translator)
 
-RecordType = TypeVar("RecordType", HOTRecord, EOTRecord)
+RecordType = TypeVar("RecordType", bound=BaseRecord)
 
 class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]): 
     def __init__(
@@ -154,14 +154,14 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
     
     @repository_error_handler()
-    def update_signal_values(self, record_id: int, symbol_id: int, engine_num: int) -> dict[str, Any]:
+    def update_signal_values(self, record_id: int, symbol_id: int, engine_num: int, to_dict=True) -> dict[str, Any] | RecordType:
         values = {}
         if symbol_id:
             values["symbol_id"] = symbol_id
         if engine_num:
             values["engine_num"] = engine_num
             
-        return self.update_with_pk(record_id, values)  # Already flushes
+        return self.update_with_pk(record_id, values, to_dict)  # Already flushes
 
 
     # Station Handler
@@ -199,7 +199,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         pass
     
     
-    def verify_record(self, record_id: int, symbol_id: int, locomotive_num: str) -> dict[str, Any]:
+    def verify_record(self, record_id: int, symbol_id: int, locomotive_num: str, to_dict=True) -> dict[str, Any] | RecordType:
         try:
             # args = {
             #     "id": record_id,
@@ -224,7 +224,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 "verified": True
             }
             
-            return self.update_with_pk(record_id, values)  # Already flushes
+            return self.update_with_pk(record_id, values, to_dict)  # Already flushes
             
         except Exception as e:
             raise repository_error_translator(
@@ -234,7 +234,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         
         
     # Time frame
-    def get_records_in_timeframe(self, station_id: int, dt: datetime, recent: bool) -> list[dict[str, Any]]:
+    def get_records_in_timeframe(self, station_id: int, dt: datetime, recent: bool | None = None) -> list[dict[str, Any]]:
         from .db_core.models import Symbol, Station
         
         try:
@@ -260,6 +260,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 .join(Station, self.model.station_recorded == Station.id)
                 .join(Symbol, self.model.symbol_id == Symbol.id)
                 .where(self.model.date_rec >= dt)
+                .order_by(self.model.date_rec.desc())
             )
             
             if station_id != -1:  
@@ -267,8 +268,8 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 # query_str += " AND stat.id = :station_id" if station_id != -1 else ""
                 # args["station_id"] = station_id
             
-            if recent:
-                stmt = stmt.where(self.model.most_recent == True)
+            if recent is not None:
+                stmt = stmt.where(self.model.most_recent == recent)
                 # query_str += " AND most_recent = TRUE"
                 
             #query = text(query_str)
