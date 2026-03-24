@@ -1,10 +1,11 @@
-from backend.src.db.base_record_repo import RecordRepository
-from backend.src.db.database_core import repository_error_handler
-
+from .base_record_repo import RecordRepository
+from .db_core.repository import repository_error_handler
+from .db_core.models import Base
 
 class DPURepository(RecordRepository):
     def __init__(self, session):
         super().__init__(
+            Base,
             session, 
             "DPURecords", 
             "DPU Record", 
@@ -23,13 +24,5 @@ class DPURepository(RecordRepository):
     def get_recent_station_records(self, station_id):
         raise NotImplementedError
 
-    @repository_error_handler()
-    def parse_station_records(self, station_records):
+    def get_record_collation(self, page, results_num, verified):
         raise NotImplementedError
-
-    def get_record_collation(self, page):
-        raise NotImplementedError
-
-    def get_records_by_verification(self, page, verified):
-        raise NotImplementedError
-

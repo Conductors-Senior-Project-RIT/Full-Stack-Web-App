@@ -6,7 +6,7 @@ from .base_record_repo import RecordRepository
 # from backend.src.db.database_core import RepositoryRecordInvalid
 from .eot_repo import EOTRepository
 from .hot_repo import HOTRepository
-from .database_core import RepositoryError
+from .db_core.exceptions import RepositoryError
 
 """
 start of error: station_repo.py imports ..db.database_core.py BaseRepository

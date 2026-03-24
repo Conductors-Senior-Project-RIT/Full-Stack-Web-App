@@ -7,20 +7,18 @@ from typing import Any
 
 from sqlalchemy import text, ScalarResult
 
-from backend.database import User
-from .database_core import (
-    layer_error_handler, REPOSITORY_ERROR_MAP, BaseRepository,
+from .db_core.models import User
+from .db_core.repository import BaseRepository
+from .db_core.exceptions import layer_error_handler, REPOSITORY_ERROR_MAP, \
     RepositoryInternalError, RepositoryError, RepositoryNotFoundError
-)
 
 class UserRepository(BaseRepository):
-    model = User
-    
     def __init__(self, session):
-        super().__init__(session)
+        super().__init__(User, session)
+        
         for attr, value in self.__dict__.items():
             if callable(value):
-                if attr == "session":
+                if attr == "session" or attr.startswith('_'):
                     continue #don't override session attribute; causes AttributeError when doing self.session.execute(): 'function' object has no attribute 'execute'
                 wrapped = layer_error_handler(
                     func=value, 

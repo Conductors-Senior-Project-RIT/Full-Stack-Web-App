@@ -1,11 +1,12 @@
 import datetime
+from typing import Any
 
 import backend.src.db.record_types as record_types
 from ..db.base_record_repo import RecordRepository
 from ..db.station_repo import StationRepository
 from ..service.service_core import *
 
-# Temporary constant for number of results per page
+# Constant for number of results per page during collation
 RESULTS_NUM = 250
 
 class RecordService(BaseService):
@@ -26,9 +27,10 @@ class RecordService(BaseService):
             raise ServiceInternalError("Could not access record repository!")
 
 
-    def get_train_history(self, record_id: int, page_num: int):
+    def get_train_history(self, record_id: int, page_num: int) -> dict[str, Any]:
         return self.get_first_repository().get_train_history(record_id, page_num, RESULTS_NUM)
-        
+        # TODO: Likely can just execute the code snippet below
+        # return self.get_first_repository().get(record_id)
         
     def post_train_history(self, args: dict, datetime_str: str):
         # Get a single repository instantiated repository
@@ -72,13 +74,13 @@ class RecordService(BaseService):
 
 
     # Data Collation
-    def collate_records(self, page: int) -> list[dict[str, str]]:
-        return self.get_first_repository().get_record_collation(page)
+    def collate_records(self, page: int) -> dict[str, list | str]:
+        return self.get_first_repository().get_record_collation(page, RESULTS_NUM)
     
     
     # Log Verification
-    def get_unverified_records(self, page: int) -> list[dict[str, str]]:
-        return self.get_first_repository().get_records_by_verification(page, False)
+    def get_unverified_records(self, page: int) -> dict[str, list | str]:
+        return self.get_first_repository().get_record_collation(page, False, RESULTS_NUM)
         
         
     def verify_record(self, record_id: int, symbol_id: int, engine_id: int):

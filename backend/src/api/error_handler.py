@@ -63,7 +63,7 @@ def handle_api_errors(e: HTTPException) -> Response:
     return jsonify({"error": e.description}), e.code    
 
 
-def handle_other_errors() -> Response:
+def handle_other_errors(e: Exception) -> Response:
     """Constructs a Flask *Response* for unhandled/general Exceptions that may occur
     in the API.
 

@@ -1,27 +1,29 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Type
+from typing import Any, Generic, Type, TypeVar
 from sqlalchemy import func, select, text, update
-from sqlalchemy.orm.scoping import scoped_session
+from sqlalchemy.orm.session import Session
 
-from .database_core import (
-    BaseRepository, RepositoryNotFoundError, RepositoryInvalidArgumentError, 
-    repository_error_handler, repository_error_translator, ModelType
-)
+from .db_core.models import EOTRecord, HOTRecord
+from .db_core.repository import BaseRepository
+from .db_core.exceptions import (
+    RepositoryNotFoundError, RepositoryInvalidArgumentError, 
+    repository_error_handler, repository_error_translator)
 
+RecordType = TypeVar("RecordType", HOTRecord, EOTRecord)
 
-class RecordRepository(ABC, BaseRepository):
-    model: Type[ModelType] = None
-    
+class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]): 
     def __init__(
         self, 
-        session: scoped_session,  
-        record_name: str, 
-        record_identifier: str
+        model: Type[RecordType],
+        session: Session,  
+        record_name: str = "Unknown", 
+        record_identifier: str = "Unknown"
     ):
-        super().__init__(self.model, session)
+        super().__init__(model, session)
         self._record_name = record_name
         self._record_identifier = record_identifier
+        
         
     def get_record_name(self) -> str:
         return self._record_name
@@ -49,7 +51,6 @@ class RecordRepository(ABC, BaseRepository):
         
         # args = {"unit_addr": unit_addr}
         # resp_id = self.session.execute(query, args).scalars().all()
-        
         stmt = (
             select(self.model.id)
             .where(self.model.unit_addr == unit_addr)
@@ -191,24 +192,14 @@ class RecordRepository(ABC, BaseRepository):
     @abstractmethod
     def get_recent_station_records(self, station_id: int) -> list[tuple[Any, ...]]:
         pass
-        
-        
-    @abstractmethod
-    def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
-        pass
+    
     
     @abstractmethod
-    def get_record_collation(self, page: int) -> list[dict[str, str]]:
+    def get_record_collation(self, page: int, num_results: int, verified: bool | None = None) -> list[dict[str, list | str]]:
         pass
     
     
-    # Record Verification
-    @abstractmethod
-    def get_records_by_verification(self, page: int, verified: bool) -> list[dict[str, str]]:
-        pass
-    
-    
-    def verify_record(self, record_id: int, symbol_id: int, engine_id: int) -> dict[str, Any]:
+    def verify_record(self, record_id: int, symbol_id: int, locomotive_num: str) -> dict[str, Any]:
         try:
             # args = {
             #     "id": record_id,
@@ -229,7 +220,7 @@ class RecordRepository(ABC, BaseRepository):
             
             values = {
                 "symbol_id": symbol_id,
-                "locomotive_num": engine_id,
+                "locomotive_num": locomotive_num,
                 "verified": True
             }
             
@@ -244,7 +235,7 @@ class RecordRepository(ABC, BaseRepository):
         
     # Time frame
     def get_records_in_timeframe(self, station_id: int, dt: datetime, recent: bool) -> list[dict[str, Any]]:
-        from ...database import Symbol, Station
+        from .db_core.models import Symbol, Station
         
         try:
             # query_str = f"""
