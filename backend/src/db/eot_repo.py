@@ -8,17 +8,16 @@ from math import ceil
 from typing import Any
 from sqlalchemy import text
 
-from ...database import EOTRecord
+from .db_core.models import EOTRecord
 from .base_record_repo import RecordRepository
-from .database_core import RepositoryInternalError, repository_error_handler, repository_error_translator
+from .db_core.exceptions import RepositoryInternalError, repository_error_translator, repository_error_handler
 
 RESULTS_NUM = 250
 
-class EOTRepository(RecordRepository):
-    model = EOTRecord
-    
+class EOTRepository(RecordRepository[EOTRecord]): 
     def __init__(self, session):
-        super().__init__(session, "EOT Record", "eot")
+        super().__init__(EOTRecord, session, "EOT Record", "eot")
+
 
     # below is train_history.py related
     @repository_error_handler
@@ -174,31 +173,10 @@ class EOTRepository(RecordRepository):
         }
         
         return self.session.execute(text(sql), args).all()
-    
-    
-    def parse_station_records(self, station_records: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
-        if station_records is None:
-            return []
-        eot_records = [
-            {
-                "date_rec": record[1],
-                "unit_addr": record[4],
-                "brake_pressure": record[5],
-                "motion": record[6],
-                "marker_light": record[7],
-                "turbine": record[8],
-                "battery_cond": record[9],
-                "battery_charge": record[10],
-                "arm_status": record[11],
-                "signal_stength": record[12],
-            }
-            for record in station_records
-        ]
-        return eot_records
         
 
     # below is for eot_collation
-    def get_record_collation(self, page: int) -> list[dict[str, Any]]:
+    def get_record_collation(self, page: int, num_results: int, verified: bool | None = None) -> dict[str, list | str]:
         try:
             sql = """
                 WITH StationChanges AS (
@@ -312,9 +290,9 @@ class EOTRepository(RecordRepository):
                 ON d.symbol_id = f.id
                 WHERE d.row_num = 1
                 ORDER BY d.date_rec DESC
-                LIMIT :results_num OFFSET :offset * :results_num
+                LIMIT :results_num OFFSET :offset
             """
-            args = {"results_num": RESULTS_NUM, "offset": page - 1}
+            args = {"results_num": num_results, "offset": (((page - 1) * num_results) + num_results)}
             resp = [row._asdict() for row in self.session.execute(text(sql), args).all()]
         except Exception as e:
             raise repository_error_translator(
@@ -442,7 +420,7 @@ class EOTRepository(RecordRepository):
                         }
                         for row in resp
                     ],
-                    "totalPages": ceil(count[0][0] / RESULTS_NUM)
+                    "totalPages": ceil(count[0][0] / num_results)
                 }
             return results
         
@@ -453,250 +431,250 @@ class EOTRepository(RecordRepository):
             )
     
     # Record/admin verification
-    def get_records_by_verification(self, page: int, verified: bool):
-        verified_str = str(verified).lower()
+    # def get_records_by_verification(self, page: int, verified: bool, num_results: int):
+    #     verified_str = str(verified).lower()
         
-        try:
-            sql = f"""
-                WITH StationChanges AS (
-                    SELECT
-                        e.id,
-                        e.date_rec,
-                        e.station_recorded,
-                        e.symbol_id,
-                        e.unit_addr,
-                        e.brake_pressure,
-                        e.motion,
-                        e.marker_light,
-                        e.turbine,
-                        e.battery_cond,
-                        e.battery_charge,
-                        e.arm_status,
-                        e.signal_strength,
-                        e.verified,
-                        LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_station,
-                        LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_date_rec,
-                        CASE
-                            WHEN LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) IS DISTINCT FROM e.station_recorded THEN 1
-                            WHEN e.date_rec - LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) > INTERVAL '2 hours' THEN 1
-                            ELSE 0
-                        END AS is_new_group
-                    FROM EOTRecords e
-                ),
-                GroupedRecords AS (
-                    SELECT
-                        id,
-                        date_rec,
-                        station_recorded,
-                        symbol_id,
-                        unit_addr,
-                        brake_pressure,
-                        motion,
-                        marker_light,
-                        turbine,
-                        battery_cond,
-                        battery_charge,
-                        arm_status,
-                        signal_strength,
-                        verified,
-                        SUM(is_new_group) OVER (PARTITION BY unit_addr ORDER BY date_rec) AS group_id
-                    FROM StationChanges
-                ),
-                UnitAddrOccurrences AS (
-                    SELECT
-                        unit_addr,
-                        station_recorded,
-                        group_id,
-                        MIN(date_rec) AS first_seen,
-                        MAX(date_rec) AS last_seen
-                    FROM GroupedRecords
-                    GROUP BY unit_addr, station_recorded, group_id
-                ),
-                UnitAddrDetails AS (
-                    SELECT
-                        g.id,
-                        g.date_rec,
-                        stat.station_name,
-                        g.symbol_id,
-                        g.unit_addr,
-                        g.brake_pressure,
-                        g.motion,
-                        g.marker_light,
-                        g.turbine,
-                        g.battery_cond,
-                        g.battery_charge,
-                        g.arm_status,
-                        g.signal_strength,
-                        g.verified,
-                        g.station_recorded,
-                        uo.first_seen,
-                        uo.last_seen,
-                        ROW_NUMBER() OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id ORDER BY g.date_rec DESC) AS row_num,
-                        COUNT(*) OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id) AS occurrence_count
-                    FROM GroupedRecords g
-                    INNER JOIN Stations stat ON g.station_recorded = stat.id
-                    INNER JOIN UnitAddrOccurrences uo
-                        ON g.unit_addr = uo.unit_addr
-                        AND g.station_recorded = uo.station_recorded
-                        AND g.group_id = uo.group_id
-                )
-                SELECT
-                    d.id,
-                    d.date_rec,
-                    d.station_name,
-                    d.symbol_id,
-                    d.unit_addr,
-                    d.brake_pressure,
-                    d.motion,
-                    d.marker_light,
-                    d.turbine,
-                    d.battery_cond,
-                    d.battery_charge,
-                    d.arm_status,
-                    d.signal_strength,
-                    d.verified,
-                    d.first_seen,
-                    d.last_seen,
-                    d.occurrence_count,
-                    AGE(d.last_seen, d.first_seen) AS duration
-                FROM UnitAddrDetails d
-                WHERE d.row_num = 1
-                AND d.verified = {verified_str}
-                ORDER BY d.date_rec DESC -- Order by the most recent date
-                LIMIT :results_num OFFSET :offset * :results_num
-            """
-            args = {"results_num": RESULTS_NUM, "offset": page - 1}
-            resp = [row._asdict() for row in self.session.execute(text(sql), args).all()]
-        except Exception as e:
-            raise repository_error_translator(
-                e, self.__class__.__name__, None,
-                f"Could not retrieve {'verified' if verified else 'unverified'} EOT records: {e}"
-            )
+    #     try:
+    #         sql = f"""
+    #             WITH StationChanges AS (
+    #                 SELECT
+    #                     e.id,
+    #                     e.date_rec,
+    #                     e.station_recorded,
+    #                     e.symbol_id,
+    #                     e.unit_addr,
+    #                     e.brake_pressure,
+    #                     e.motion,
+    #                     e.marker_light,
+    #                     e.turbine,
+    #                     e.battery_cond,
+    #                     e.battery_charge,
+    #                     e.arm_status,
+    #                     e.signal_strength,
+    #                     e.verified,
+    #                     LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_station,
+    #                     LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_date_rec,
+    #                     CASE
+    #                         WHEN LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) IS DISTINCT FROM e.station_recorded THEN 1
+    #                         WHEN e.date_rec - LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) > INTERVAL '2 hours' THEN 1
+    #                         ELSE 0
+    #                     END AS is_new_group
+    #                 FROM EOTRecords e
+    #             ),
+    #             GroupedRecords AS (
+    #                 SELECT
+    #                     id,
+    #                     date_rec,
+    #                     station_recorded,
+    #                     symbol_id,
+    #                     unit_addr,
+    #                     brake_pressure,
+    #                     motion,
+    #                     marker_light,
+    #                     turbine,
+    #                     battery_cond,
+    #                     battery_charge,
+    #                     arm_status,
+    #                     signal_strength,
+    #                     verified,
+    #                     SUM(is_new_group) OVER (PARTITION BY unit_addr ORDER BY date_rec) AS group_id
+    #                 FROM StationChanges
+    #             ),
+    #             UnitAddrOccurrences AS (
+    #                 SELECT
+    #                     unit_addr,
+    #                     station_recorded,
+    #                     group_id,
+    #                     MIN(date_rec) AS first_seen,
+    #                     MAX(date_rec) AS last_seen
+    #                 FROM GroupedRecords
+    #                 GROUP BY unit_addr, station_recorded, group_id
+    #             ),
+    #             UnitAddrDetails AS (
+    #                 SELECT
+    #                     g.id,
+    #                     g.date_rec,
+    #                     stat.station_name,
+    #                     g.symbol_id,
+    #                     g.unit_addr,
+    #                     g.brake_pressure,
+    #                     g.motion,
+    #                     g.marker_light,
+    #                     g.turbine,
+    #                     g.battery_cond,
+    #                     g.battery_charge,
+    #                     g.arm_status,
+    #                     g.signal_strength,
+    #                     g.verified,
+    #                     g.station_recorded,
+    #                     uo.first_seen,
+    #                     uo.last_seen,
+    #                     ROW_NUMBER() OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id ORDER BY g.date_rec DESC) AS row_num,
+    #                     COUNT(*) OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id) AS occurrence_count
+    #                 FROM GroupedRecords g
+    #                 INNER JOIN Stations stat ON g.station_recorded = stat.id
+    #                 INNER JOIN UnitAddrOccurrences uo
+    #                     ON g.unit_addr = uo.unit_addr
+    #                     AND g.station_recorded = uo.station_recorded
+    #                     AND g.group_id = uo.group_id
+    #             )
+    #             SELECT
+    #                 d.id,
+    #                 d.date_rec,
+    #                 d.station_name,
+    #                 d.symbol_id,
+    #                 d.unit_addr,
+    #                 d.brake_pressure,
+    #                 d.motion,
+    #                 d.marker_light,
+    #                 d.turbine,
+    #                 d.battery_cond,
+    #                 d.battery_charge,
+    #                 d.arm_status,
+    #                 d.signal_strength,
+    #                 d.verified,
+    #                 d.first_seen,
+    #                 d.last_seen,
+    #                 d.occurrence_count,
+    #                 AGE(d.last_seen, d.first_seen) AS duration
+    #             FROM UnitAddrDetails d
+    #             WHERE d.row_num = 1
+    #             AND d.verified = {verified_str}
+    #             ORDER BY d.date_rec DESC -- Order by the most recent date
+    #             LIMIT :results_num OFFSET :offset
+    #         """
+    #         args = {"results_num": num_results, "offset": (((page - 1) * num_results) + num_results)}
+    #         resp = [row._asdict() for row in self.session.execute(text(sql), args).all()]
+    #     except Exception as e:
+    #         raise repository_error_translator(
+    #             e, self.__class__.__name__, None,
+    #             f"Could not retrieve {'verified' if verified else 'unverified'} EOT records: {e}"
+    #         )
 
-        try:
-            count_sql = f"""
-                WITH StationChanges AS (
-                    SELECT
-                        e.id,
-                        e.date_rec,
-                        e.station_recorded,
-                        e.symbol_id,
-                        e.unit_addr,
-                        e.brake_pressure,
-                        e.motion,
-                        e.marker_light,
-                        e.turbine,
-                        e.battery_cond,
-                        e.battery_charge,
-                        e.arm_status,
-                        e.signal_strength,
-                        e.verified,
-                        LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_station,
-                        LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_date_rec,
-                        CASE
-                            WHEN LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) IS DISTINCT FROM e.station_recorded THEN 1
-                            WHEN e.date_rec - LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) > INTERVAL '2 hours' THEN 1
-                            ELSE 0
-                        END AS is_new_group
-                    FROM EOTRecords e
-                ),
-                GroupedRecords AS (
-                    SELECT
-                        id,
-                        date_rec,
-                        station_recorded,
-                        symbol_id,
-                        unit_addr,
-                        brake_pressure,
-                        motion,
-                        marker_light,
-                        turbine,
-                        battery_cond,
-                        battery_charge,
-                        arm_status,
-                        signal_strength,
-                        verified,
-                        SUM(is_new_group) OVER (PARTITION BY unit_addr ORDER BY date_rec) AS group_id
-                    FROM StationChanges
-                ),
-                UnitAddrOccurrences AS (
-                    SELECT
-                        unit_addr,
-                        station_recorded,
-                        group_id,
-                        MIN(date_rec) AS first_seen,
-                        MAX(date_rec) AS last_seen
-                    FROM GroupedRecords
-                    GROUP BY unit_addr, station_recorded, group_id
-                ),
-                UnitAddrDetails AS (
-                    SELECT
-                        g.id,
-                        g.date_rec,
-                        stat.station_name,
-                        g.symbol_id,
-                        g.unit_addr,
-                        g.brake_pressure,
-                        g.motion,
-                        g.marker_light,
-                        g.turbine,
-                        g.battery_cond,
-                        g.battery_charge,
-                        g.arm_status,
-                        g.signal_strength,
-                        g.verified,
-                        g.station_recorded,
-                        uo.first_seen,
-                        uo.last_seen,
-                        ROW_NUMBER() OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id ORDER BY g.date_rec DESC) AS row_num,
-                        COUNT(*) OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id) AS occurrence_count
-                    FROM GroupedRecords g
-                    INNER JOIN Stations stat ON g.station_recorded = stat.id
-                    INNER JOIN UnitAddrOccurrences uo
-                        ON g.unit_addr = uo.unit_addr
-                        AND g.station_recorded = uo.station_recorded
-                        AND g.group_id = uo.group_id
-                )
-                SELECT COUNT(*) 
-                FROM UnitAddrDetails 
-                WHERE row_num = 1 AND verified = {verified_str};
-            """
-            count = self.session.execute(text(count_sql)).scalar_one()
-        except Exception as e:
-            raise repository_error_translator(
-                e, self.__class__.__name__, None,
-                f"Could not count {'verified' if verified else 'unverified'} EOT records: {e}"
-            )
+    #     try:
+    #         count_sql = f"""
+    #             WITH StationChanges AS (
+    #                 SELECT
+    #                     e.id,
+    #                     e.date_rec,
+    #                     e.station_recorded,
+    #                     e.symbol_id,
+    #                     e.unit_addr,
+    #                     e.brake_pressure,
+    #                     e.motion,
+    #                     e.marker_light,
+    #                     e.turbine,
+    #                     e.battery_cond,
+    #                     e.battery_charge,
+    #                     e.arm_status,
+    #                     e.signal_strength,
+    #                     e.verified,
+    #                     LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_station,
+    #                     LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_date_rec,
+    #                     CASE
+    #                         WHEN LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) IS DISTINCT FROM e.station_recorded THEN 1
+    #                         WHEN e.date_rec - LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) > INTERVAL '2 hours' THEN 1
+    #                         ELSE 0
+    #                     END AS is_new_group
+    #                 FROM EOTRecords e
+    #             ),
+    #             GroupedRecords AS (
+    #                 SELECT
+    #                     id,
+    #                     date_rec,
+    #                     station_recorded,
+    #                     symbol_id,
+    #                     unit_addr,
+    #                     brake_pressure,
+    #                     motion,
+    #                     marker_light,
+    #                     turbine,
+    #                     battery_cond,
+    #                     battery_charge,
+    #                     arm_status,
+    #                     signal_strength,
+    #                     verified,
+    #                     SUM(is_new_group) OVER (PARTITION BY unit_addr ORDER BY date_rec) AS group_id
+    #                 FROM StationChanges
+    #             ),
+    #             UnitAddrOccurrences AS (
+    #                 SELECT
+    #                     unit_addr,
+    #                     station_recorded,
+    #                     group_id,
+    #                     MIN(date_rec) AS first_seen,
+    #                     MAX(date_rec) AS last_seen
+    #                 FROM GroupedRecords
+    #                 GROUP BY unit_addr, station_recorded, group_id
+    #             ),
+    #             UnitAddrDetails AS (
+    #                 SELECT
+    #                     g.id,
+    #                     g.date_rec,
+    #                     stat.station_name,
+    #                     g.symbol_id,
+    #                     g.unit_addr,
+    #                     g.brake_pressure,
+    #                     g.motion,
+    #                     g.marker_light,
+    #                     g.turbine,
+    #                     g.battery_cond,
+    #                     g.battery_charge,
+    #                     g.arm_status,
+    #                     g.signal_strength,
+    #                     g.verified,
+    #                     g.station_recorded,
+    #                     uo.first_seen,
+    #                     uo.last_seen,
+    #                     ROW_NUMBER() OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id ORDER BY g.date_rec DESC) AS row_num,
+    #                     COUNT(*) OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id) AS occurrence_count
+    #                 FROM GroupedRecords g
+    #                 INNER JOIN Stations stat ON g.station_recorded = stat.id
+    #                 INNER JOIN UnitAddrOccurrences uo
+    #                     ON g.unit_addr = uo.unit_addr
+    #                     AND g.station_recorded = uo.station_recorded
+    #                     AND g.group_id = uo.group_id
+    #             )
+    #             SELECT COUNT(*) 
+    #             FROM UnitAddrDetails 
+    #             WHERE row_num = 1 AND verified = {verified_str};
+    #         """
+    #         count = self.session.execute(text(count_sql)).scalar_one()
+    #     except Exception as e:
+    #         raise repository_error_translator(
+    #             e, self.__class__.__name__, None,
+    #             f"Could not count {'verified' if verified else 'unverified'} EOT records: {e}"
+    #         )
             
-        try:
-            return {
-                "results": [
-                    {
-                        "id": row[0],
-                        "date_rec": row[1],
-                        "station_name": row[2],
-                        "symbol_id": row[3],
-                        "unit_addr": row[4],
-                        "brake_pressure": row[5],
-                        "motion": row[6],
-                        "marker_light": row[7],
-                        "turbine": row[8],
-                        "battery_cond": row[9],
-                        "battery_charge": row[10],
-                        "arm_status": row[11],
-                        "signal_strength": row[12],
-                        "verified": row[13],
-                        "first_seen": row[14],
-                        "last_seen": row[15],
-                        "occurrence_count": str(row[16]),
-                        "duration": str(row[17]),
-                    }
-                    for row in resp
-                ],
-                "totalPages": ceil(count[0][0] / RESULTS_NUM)
-            }
-        except Exception as e:
-            raise repository_error_translator(
-                e, self.__class__.__name__, None,
-                f"Could not parse EOT verification results: {e}"
-            )
+    #     try:
+    #         return {
+    #             "results": [
+    #                 {
+    #                     "id": row[0],
+    #                     "date_rec": row[1],
+    #                     "station_name": row[2],
+    #                     "symbol_id": row[3],
+    #                     "unit_addr": row[4],
+    #                     "brake_pressure": row[5],
+    #                     "motion": row[6],
+    #                     "marker_light": row[7],
+    #                     "turbine": row[8],
+    #                     "battery_cond": row[9],
+    #                     "battery_charge": row[10],
+    #                     "arm_status": row[11],
+    #                     "signal_strength": row[12],
+    #                     "verified": row[13],
+    #                     "first_seen": row[14],
+    #                     "last_seen": row[15],
+    #                     "occurrence_count": str(row[16]),
+    #                     "duration": str(row[17]),
+    #                 }
+    #                 for row in resp
+    #             ],
+    #             "totalPages": ceil(count[0][0] / num_results)
+    #         }
+    #     except Exception as e:
+    #         raise repository_error_translator(
+    #             e, self.__class__.__name__, None,
+    #             f"Could not parse EOT verification results: {e}"
+    #         )

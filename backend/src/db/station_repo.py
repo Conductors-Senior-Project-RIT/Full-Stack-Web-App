@@ -2,16 +2,15 @@ from datetime import date
 from typing import Any
 from sqlalchemy import text
 
-from ...database import Station
+from .db_core.models import Station
 
-from ..db.database_core import BaseRepository, RepositoryNotFoundError, RepositoryInternalError, \
+from .db_core.exceptions import RepositoryNotFoundError, RepositoryInternalError, \
     repository_error_handler, repository_error_translator
+from .db_core.repository import BaseRepository
 
-class StationRepository(BaseRepository):
-    model = Station
-    
+class StationRepository(BaseRepository[Station]):
     def __init__(self, session):
-        super().__init__(session)
+        super().__init__(Station, session)
         
 
     @repository_error_handler

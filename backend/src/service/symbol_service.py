@@ -1,6 +1,6 @@
 from typing import Any
 from .service_core import BaseService
-from backend.src.db.database_core import *
+from backend.src.db.db_core.repository import *
 from ..db.symbol_repo import SymbolRepository
 
 

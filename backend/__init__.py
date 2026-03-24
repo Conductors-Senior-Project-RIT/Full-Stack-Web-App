@@ -31,9 +31,6 @@ def create_app(config_name=None): # tests call this function to create flask app
 
     db.init_app(app) # load settings for db engine/ bind flask-alchemy to app; flask-alchemy currently used as a connection manager with our raw sql lol
 
-    # Initialize our models from our tables
-    init_models(app)
-
     api = Api(app)
     # winging the setup here lol
     CORS(app)
@@ -78,9 +75,5 @@ def create_app(config_name=None): # tests call this function to create flask app
     app.register_blueprint(volunteer_handler.volunteer_bp)
 
     error_handler.register_error_handlers(app) 
-
-    api.init_app(app)
-    bcrypt.init_app(app) # find old commit to plug back old hashing algorithm for storing passwords
-    jwt.init_app(app)
 
     return app

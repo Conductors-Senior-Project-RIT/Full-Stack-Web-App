@@ -3,9 +3,10 @@ import random
 import string
 from ..db.record_types import get_all_repositories
 from ..db.station_repo import StationRepository
-from ..db.database_core import *
+from ..db.db_core.repository import *
 from .service_core import BaseService, ServiceParsingError
 
+RESULTS_NUM = 250
 
 class StationService(BaseService):
     def __init__(self, session):
@@ -18,8 +19,7 @@ class StationService(BaseService):
     def get_stations(self):
         return self._station_repo.get_stations()
 
-        
-        
+
     def create_station(self, station_name: str) -> str:
         unhashed_pw, hashed_pw = self.generate_password_string()
         self._station_repo.create_new_station(station_name, hashed_pw)
@@ -69,9 +69,7 @@ class StationService(BaseService):
             station_id = self._station_repo.get_station_id(station_name)
 
             results = {
-                f"{t}_records": r.parse_station_records(
-                    r.get_recent_station_records(station_id)
-                )
+                f"{t}_records": r.get_recent_station_records(station_id)
                 for t, r in self._record_repos.items()
             }
             
