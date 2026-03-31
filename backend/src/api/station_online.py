@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest
 
@@ -15,7 +15,7 @@ class StationOnline(Resource):
         formatted_date = StationService(session).get_last_seen(station)
         session.commit()
         
-        return jsonify({"last_seen": formatted_date}), 200
+        return {"last_seen": formatted_date}, 200
     
 
     def put(self):

@@ -1,4 +1,3 @@
-from flask import jsonify
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
 from backend.src.service.station_service import StationService
@@ -17,7 +16,7 @@ class StationAuth(Resource):
         results = StationService(session).get_stations()
         
         session.commit()
-        return jsonify(results), 200
+        return results, 200
 
     def post(self):
         """Creates a new station with a password in the database provided the name of a new station.
@@ -34,7 +33,7 @@ class StationAuth(Resource):
         pw = StationService(session).create_station(args["station_name"])
         session.commit()
         
-        return jsonify({"password": pw}), 200
+        return {"password": pw}, 201
       
       
     def put(self):
@@ -55,4 +54,4 @@ class StationAuth(Resource):
         pw = StationService(session).update_station_password(args["id"])
         session.commit()
         
-        return jsonify({"new_pw": pw}), 200
+        return {"new_pw": pw}, 200

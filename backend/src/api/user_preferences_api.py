@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..db.trackSense_db_commands import run_get_cmd, run_exec_cmd
@@ -21,7 +21,7 @@ class UserPreferences(Resource):
             response = user_service.get_user_preferences(current_user_id)
             return response, 200
         except Exception as e:
-            return jsonify({"message": str(e)}), 400
+            return {"message": str(e)}, 400
 
     @jwt_required()
     def post(self):
@@ -38,4 +38,4 @@ class UserPreferences(Resource):
             return ({"message": "Preferences updated successfully"}), 200
 
         except Exception as e:
-            return jsonify({"message": str(e)}), 400
+            return {"message": str(e)}, 400

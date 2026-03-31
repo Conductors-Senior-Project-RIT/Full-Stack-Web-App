@@ -1,4 +1,3 @@
-from flask import jsonify
 from flask_restful import Resource, reqparse
 from ..db.trackSense_db_commands import *
 import http.client, urllib

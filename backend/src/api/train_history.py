@@ -2,7 +2,7 @@ import datetime
 import http.client
 import urllib
 from ..db.trackSense_db_commands import *
-from flask import jsonify, request
+from flask import request
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
 from urllib.parse import urlencode

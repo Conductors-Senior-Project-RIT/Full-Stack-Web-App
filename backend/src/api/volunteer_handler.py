@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, request, jsonify
+from flask import Blueprint, abort, request
 from flask_restful import reqparse
 from flask_jwt_extended import get_jwt, verify_jwt_in_request
 from flask_cors import CORS
@@ -46,17 +46,17 @@ def add_pin():
     lng = data.get("lng")
 
     if lat is None or lng is None:
-        return jsonify({"message": "Invalid data"}), 400
+        return {"message": "Invalid data"}, 400
 
     # Insert the pin into the database
     run_exec_cmd("INSERT INTO Pins (lat, lng) VALUES (%s, %s)", (lat, lng))
-    return jsonify({"message": "Pin added successfully"}), 201
+    return {"message": "Pin added successfully"}, 201
 
 
 @volunteer_bp.route("/api/get-pins", methods=["GET"])
 def get_pins():
     pins = run_get_cmd("SELECT lat, lng FROM Pins")
-    return jsonify([{"lat": pin[0], "lng": pin[1]} for pin in pins])
+    return [{"lat": pin[0], "lng": pin[1]} for pin in pins]
 
 
 @volunteer_bp.route("/symbol", methods=["GET", "POST"])
@@ -79,7 +79,7 @@ def get_symbol():
         results = service.get_symbol(symbol_name)
         
         # Return results in the 'results' field for consistency
-        return jsonify({"results": results}), 200
+        return {"results": results}, 200
     
     elif request.method == "POST":
         # To create a new symbol, a name must be provided
@@ -101,7 +101,7 @@ def get_records():
     
     record_service = RecordService(typ)
     results = record_service.get_unverified_records(page)
-    return jsonify(results), 200
+    return results, 200
 
 
 @volunteer_bp.post("/record_verifier")

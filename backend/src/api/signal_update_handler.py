@@ -1,4 +1,3 @@
-from flask import jsonify
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
 
@@ -36,5 +35,5 @@ class SignalUpdater(Resource):
         service.signal_update(args["id_num"], args["symbol_id"], args["engi_number_id"])
         session.commit()
         
-        return 200
+        return 201
     
