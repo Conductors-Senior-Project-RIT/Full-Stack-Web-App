@@ -1,0 +1,119 @@
+{
+ "Overall": {
+  "Total Lines Added": 1894,
+  "Total Lines Deleted": 1224,
+  "Total Lines Changed": 3118,
+  "Commits": 5,
+  "Avg Lines Added Per Commit": 378.8,
+  "Avg Lines Deleted Per Commit": 244.8,
+  "Avg Lines Changed Per Commit": 623.6
+ },
+ "tracksenseweb/src/App.js": {
+  "Total Lines Added": 12,
+  "Total Lines Deleted": 12,
+  "Total Lines Changed": 24,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 4.0,
+  "Avg Lines Deleted Per Commit": 4.0,
+  "Avg Lines Changed Per Commit": 8.0
+ },
+ "tracksenseweb/src/components/Admin.js": {
+  "Total Lines Added": 87,
+  "Total Lines Deleted": 431,
+  "Total Lines Changed": 518,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 29.0,
+  "Avg Lines Deleted Per Commit": 143.66666666666666,
+  "Avg Lines Changed Per Commit": 172.66666666666666
+ },
+ "tracksenseweb/src/components/AdminHOT.js": {
+  "Total Lines Added": 0,
+  "Total Lines Deleted": 404,
+  "Total Lines Changed": 404,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 0.0,
+  "Avg Lines Deleted Per Commit": 202.0,
+  "Avg Lines Changed Per Commit": 202.0
+ },
+ "tracksenseweb/src/components/NavBar.js": {
+  "Total Lines Added": 14,
+  "Total Lines Deleted": 14,
+  "Total Lines Changed": 28,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 4.666666666666667,
+  "Avg Lines Deleted Per Commit": 4.666666666666667,
+  "Avg Lines Changed Per Commit": 9.333333333333334
+ },
+ "tracksenseweb/src/components/ProtectedRoute.js": {
+  "Total Lines Added": 3,
+  "Total Lines Deleted": 3,
+  "Total Lines Changed": 6,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "tracksenseweb/src/components/SuperUser.js": {
+  "Total Lines Added": 2,
+  "Total Lines Deleted": 100,
+  "Total Lines Changed": 102,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 0.6666666666666666,
+  "Avg Lines Deleted Per Commit": 33.333333333333336,
+  "Avg Lines Changed Per Commit": 34.0
+ },
+ "tracksenseweb/src/components/VerifyEOT.js": {
+  "Total Lines Added": 442,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 442,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 221.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 221.0
+ },
+ "tracksenseweb/src/components/VerifyHOT.js": {
+  "Total Lines Added": 404,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 404,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 202.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 202.0
+ },
+ "tracksenseweb/src/components/css/Admin.css": {
+  "Total Lines Added": 172,
+  "Total Lines Deleted": 70,
+  "Total Lines Changed": 242,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 57.333333333333336,
+  "Avg Lines Deleted Per Commit": 23.333333333333332,
+  "Avg Lines Changed Per Commit": 80.66666666666667
+ },
+ "tracksenseweb/src/components/css/Verification.css": {
+  "Total Lines Added": 88,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 88,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 44.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 44.0
+ },
+ "tracksenseweb/src/components/css/SuperUser.css": {
+  "Total Lines Added": 0,
+  "Total Lines Deleted": 190,
+  "Total Lines Changed": 190,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 0.0,
+  "Avg Lines Deleted Per Commit": 95.0,
+  "Avg Lines Changed Per Commit": 95.0
+ },
+ "metrics/churn_calculator.py": {
+  "Total Lines Added": 36,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 36,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 18.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 18.0
+ }
+}

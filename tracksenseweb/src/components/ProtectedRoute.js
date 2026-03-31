@@ -26,7 +26,7 @@ const ProtectedRoute = ({ element: Component, requiredRole, ...rest }) => {
     return <div>Loading...</div>;
   }
 
-  // User roles are 0 for superuser, 1 for admin, 2 for regular user.
+  // User roles are 0 for admin, 1 for volunteer, 2 for regular user.
   if (!isAuthenticated || userRole === null || userRole > requiredRole) {
     return <Navigate to={`/login?redirected=true&from=${location.pathname}`} />;
   }
