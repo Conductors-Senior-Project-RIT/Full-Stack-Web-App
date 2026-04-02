@@ -25,7 +25,7 @@ class LayerError(Exception):
 def layer_error_handler(
         func,
         error_map: dict,
-        base_exception: LayerError,
+        base_exception: Type[LayerError],
         exclude: tuple[Type[Exception]] | Type[Exception] | None = None,
         message: str | None = None
 ):
@@ -70,7 +70,7 @@ def layer_error_handler(
 def translate_error(
         e: Exception,
         error_map: dict,
-        base_exception: LayerError,
+        base_exception: Type[LayerError],
         caller_name: str | None = None,
         point_of_error: str | None = None,
         message: str | None = None
@@ -87,4 +87,4 @@ def translate_error(
             show_error=show_error
         )
 
-    return base_exception(caller_name)
+    return base_exception(caller_name) 
