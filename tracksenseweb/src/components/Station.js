@@ -32,7 +32,11 @@ const Station = ({ station, image, locationImage }) => {
     fetch(`${config.apiUrl}/recent_activities?type=3&station_name=${station}&most_recent=0&timerange=12:00:00`)
       .then(response => response.json())
       .then(data => {
-        setRecords(data || []);
+        const records = [...data.reverse().reduce((map, item) => {
+          const key = `${item.Data_type}${item.unit_addr}`;
+          return map.has(key) ? map : map.set(key, item);
+        }, new Map()).values()].reverse();
+        setRecords(records || []);
         setShowDropdown(true);
       })
       .catch(error => {
@@ -47,7 +51,6 @@ const Station = ({ station, image, locationImage }) => {
         .then(data => {
           setPopUpRecords(data || []);
           setShowEOTPopUp(true);
-          console.log(showEOTPopUp);
         });
     } else if (typ === "HOT") {
       fetch(`${config.apiUrl}/history?type=2&id=${id_num}`)
