@@ -56,7 +56,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
         return self.objs_to_dicts(results)
 
     @repository_error_handler()
-    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None, return_id=True) -> tuple[int, bool]:
+    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None, return_id=True) -> tuple[Any | dict[str, Any], bool]: # type: ignore
         """
         TODO: Namespace is the type for args for post methods in train_history... look more into this
         TODO: run_exec_cmd returns none always... think of what to return lol
