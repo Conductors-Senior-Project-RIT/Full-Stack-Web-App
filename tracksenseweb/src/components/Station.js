@@ -5,11 +5,9 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
 const Station = ({ station, image, locationImage }) => {
-  // State to store EOT records fetched from the backend
+  // State to store EOT/HOT records fetched from the backend
   const [Records, setRecords] = useState([]);
   const [popUpRecord, setPopUpRecords] = useState([]);
-  // State to store HOT records fetched from the backend
-  const [hotRecords, setHotRecords] = useState([]);
   // State to control the visibility of the dropdown
   const [showDropdown, setShowDropdown] = useState(false);
   const [showEOTPopUp, setShowEOTPopUp] = useState(false);
@@ -27,7 +25,7 @@ const Station = ({ station, image, locationImage }) => {
         setLastSeen(data.last_seen);
       })
       .catch(error => console.error("Error fetching timestamp:", error));
-  }, []);
+  });
 
   // Function to handle the pin click event
   const handlePinClick = () => {
@@ -49,6 +47,7 @@ const Station = ({ station, image, locationImage }) => {
         .then(data => {
           setPopUpRecords(data || []);
           setShowEOTPopUp(true);
+          console.log(showEOTPopUp);
         });
     } else if (typ === "HOT") {
       fetch(`${config.apiUrl}/history?type=2&id=${id_num}`)
@@ -124,6 +123,34 @@ const Station = ({ station, image, locationImage }) => {
           </Modal.Footer>
         </Modal>
       </div>
+      <div>
+        <Modal
+          show={showHOTPopUp}
+          onHide={handleClosePopUp}
+          backdrop="static"
+          keyboard={false}
+          dialogClassName='modal-top'
+        >
+          <Modal.Header>
+            <Modal.Title>Additional Information</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {popUpRecord.map((rec, index) => (
+              <p key={index}>
+                Date Recorded: {rec.date_rec}<br />
+                Station Recorded at: {rec.station_name}<br />
+                Train Symbol: {rec.symbol_name}<br />
+                Unit Address: {rec.unit_addr}<br />
+                Command: {rec.command}<br />
+                Signal Strength: {rec.signal_strength}<br />
+              </p>
+            ))}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant='primary' onClick={() => handleClosePopUp()}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
       <div className="map-container">
         <img src={image} alt={alt_text} className="map-image" />
         <img src={locationImage} alt="Pin" className="pin-image" onClick={() => handlePinClick()} role="button" />
@@ -136,7 +163,7 @@ const Station = ({ station, image, locationImage }) => {
                 <tr>
                   <th>Time</th>
                   <th>Symbol</th>
-                  <th>Locomotive Number</th>
+                  <th>Unit Address</th>
                   <th>Signal Type</th>
                 </tr>
               </thead>
@@ -145,7 +172,7 @@ const Station = ({ station, image, locationImage }) => {
                   <tr key={index} onClick={() => handleDetailClick(record.Data_type, record.id)}>
                     <td>{record.date_rec}</td>
                     <td>{record.symbol_id}</td>
-                    <td>{record.engine_num_id}</td>
+                    <td>{record.unit_addr}</td>
                     <td>{record.Data_type}</td>
                   </tr>
                 ))}
