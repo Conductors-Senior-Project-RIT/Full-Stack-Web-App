@@ -32,10 +32,10 @@ const Station = ({ station, image, locationImage }) => {
     fetch(`${config.apiUrl}/recent_activities?type=3&station_name=${station}&most_recent=0&timerange=12:00:00`)
       .then(response => response.json())
       .then(data => {
-        const records = [...data.reverse().reduce((map, item) => {
-          const key = `${item.Data_type}${item.unit_addr}`;
+        const records = [...data.reduce((map, item) => {
+          const key = `${item.unit_addr}${item.locomotive_num}`;
           return map.has(key) ? map : map.set(key, item);
-        }, new Map()).values()].reverse();
+        }, new Map()).values()];
         setRecords(records || []);
         setShowDropdown(true);
       })
@@ -166,8 +166,8 @@ const Station = ({ station, image, locationImage }) => {
                 <tr>
                   <th>Time</th>
                   <th>Symbol</th>
+                  <th>Locomotive Number</th>
                   <th>Unit Address</th>
-                  <th>Signal Type</th>
                 </tr>
               </thead>
               <tbody>
@@ -175,8 +175,8 @@ const Station = ({ station, image, locationImage }) => {
                   <tr key={index} onClick={() => handleDetailClick(record.Data_type, record.id)}>
                     <td>{record.date_rec}</td>
                     <td>{record.symbol_id}</td>
+                    <td>{record.locomotive_num}</td>
                     <td>{record.unit_addr}</td>
-                    <td>{record.Data_type}</td>
                   </tr>
                 ))}
               </tbody>
