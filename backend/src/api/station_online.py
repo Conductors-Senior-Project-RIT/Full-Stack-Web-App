@@ -5,6 +5,8 @@ from werkzeug.exceptions import BadRequest
 from ..service.station_service import StationService
 from backend.database import db
 
+# LOOK INTO THE RETUNR TYPE ERRORS BRO LOL
+
 class StationOnline(Resource):
     def get(self):
         station = request.args.get("station_name", default=None, type=str)
@@ -14,19 +16,19 @@ class StationOnline(Resource):
         session = db.session
         formatted_date = StationService(session).get_last_seen(station)
         session.commit()
-        
+
         return {"last_seen": formatted_date}, 200
     
 
     def put(self):
         data = request.get_json()
         stat_id = int(data.get("station_id"))
-        
+
         if stat_id < 1:
             raise BadRequest(f"Station ID must be greater than or equal to 1 but ({stat_id}) was provided!")
 
         session = db.session
         StationService(session).update_last_seen(stat_id)
         session.commit()
-        
-        return 200
+
+        return '', 204 # flask requires some response object to be returned (here, its done under the hood)

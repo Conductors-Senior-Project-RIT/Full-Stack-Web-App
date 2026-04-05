@@ -7,7 +7,6 @@ class DPURepository(RecordRepository):
         super().__init__(
             Base,
             session, 
-            "DPURecords", 
             "DPU Record", 
             "dpu"
         )
@@ -24,5 +23,5 @@ class DPURepository(RecordRepository):
     def get_recent_station_records(self, station_id):
         raise NotImplementedError
 
-    def get_record_collation(self, page, results_num, verified):
+    def get_record_collation(self, page: int, num_results: int, verified: bool | None = None):
         raise NotImplementedError
