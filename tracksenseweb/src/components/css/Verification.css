@@ -37,8 +37,3 @@
 .modal-content {
   z-index: 1050 !important;
 }
-
-.verify-button {
-  width: 10%;
-  margin-left: 10px;
-}

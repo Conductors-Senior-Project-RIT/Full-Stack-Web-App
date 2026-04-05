@@ -80,7 +80,7 @@
   position: absolute;
   top: 5px; /* Adjusted to move the button upwards */
   right: 10px;
-  background-color: red;
+  background-color: #4B7BA9;
   color: white;
   border: none;
   border-radius: 50%;
@@ -94,7 +94,7 @@
 }
 
 .close-button:hover {
-  background-color: darkred;
+  background-color: #0B5090;
 }
 
 .pin-image {

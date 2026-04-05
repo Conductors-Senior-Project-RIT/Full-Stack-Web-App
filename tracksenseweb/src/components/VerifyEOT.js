@@ -163,9 +163,7 @@ const VerifyEOT = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
+            <Button variant="secondary" onClick={handleClose}>Close</Button>
             <Button className="verify-button" variant="primary" onClick={handleVerify}>Verify</Button>
           </Modal.Footer>
         </Modal>

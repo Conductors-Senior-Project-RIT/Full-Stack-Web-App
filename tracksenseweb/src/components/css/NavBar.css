@@ -1,6 +1,6 @@
 /* Base styles for the nav bar */
 nav {
-    background-color: #8B4513; /* Brown background color */
+    background-color: #0B5090; 
     padding: 10px 0;
 }
 
@@ -39,7 +39,7 @@ nav ul li a:hover {
 }
 
 .logout-button:hover {
-    color: #a0522d; /* Sienna */
+    color: #2D78A1;
 }
 
 /* Responsive styles for smaller screens */
