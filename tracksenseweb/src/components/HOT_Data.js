@@ -95,7 +95,6 @@ const HotData = () => {
                         <th>Signal Strength</th>
                         <th>Locomotive Number</th>
                         <th>Duration</th>
-                        <th>End Time</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,7 +107,6 @@ const HotData = () => {
                             <td>{item.signal_strength}</td>
                             <td>{item.locomotive_num}</td>
                             <td>{item.duration}</td>
-                            <td>{item.last_seen}</td>
                         </tr>
                     ))}
                 </tbody>

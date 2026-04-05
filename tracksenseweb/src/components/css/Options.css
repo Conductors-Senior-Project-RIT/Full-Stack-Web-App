@@ -11,7 +11,7 @@
 
 .options-container h2 {
     text-align: center;
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     margin-bottom: 1.5rem;
     font-size: 2rem;
 }
@@ -23,7 +23,7 @@
 }
 
 .options-container p {
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     margin-bottom: 1rem;
     font-size: 1rem;
 }
@@ -79,7 +79,7 @@ input[type="text"] {
 .station-list li {
     margin-bottom: 1rem; /* Add more spacing between items */
     font-size: 1.2rem; /* Increase font size for better readability */
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     display: flex; /* Use flexbox for horizontal alignment */
     align-items: center; /* Align checkbox and label vertically */
     gap: 0.75rem; /* Add spacing between the checkbox and the label */
@@ -121,12 +121,12 @@ input[type="text"] {
 
 .station-list input[type="checkbox"]:focus {
     outline: none;
-    box-shadow: 0 0 5px rgba(160, 82, 45, 0.5); /* Add focus effect */
+    box-shadow: 0 0 5px #122754; /* Add focus effect */
 }
 
 label {
     font-weight: bold;
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     cursor: pointer; /* Make the label clickable */
     user-select: none; /* Prevent text selection when clicking */
     transition: background-color 0.2s ease, border-color 0.2s ease;
@@ -140,5 +140,5 @@ label {
 .options-container input[type="text"]:focus {
     outline: none;
     border-color: #2D78A1;
-    box-shadow: 0 0 5px rgba(160, 82, 45, 0.5);
+    box-shadow: 0 0 5px #122754;
 }

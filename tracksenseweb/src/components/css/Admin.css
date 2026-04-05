@@ -11,7 +11,7 @@
 
 .admin-container h2 {
     text-align: center;
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     margin-bottom: 1.5rem;
     font-size: 2rem;
 }
@@ -23,7 +23,7 @@
 }
 
 .admin-container p {
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     margin-bottom: 1rem;
     font-size: 1rem;
 }
@@ -34,7 +34,7 @@
 
 .admin-container label {
     font-weight: bold;
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     display: block;
     margin-bottom: 0.5rem;
 }

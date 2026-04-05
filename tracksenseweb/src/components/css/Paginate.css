@@ -17,7 +17,8 @@
     padding: 10px 15px;
     border-radius: 5px;
     background-color: #14608C;
-    color: white; /* White text for readability */
+    color: white !important; /* White text for readability. For some reason, bootstrap tries to override this, so
+        the important tag is used here. */ 
     text-decoration: none;
     font-size: 1rem;
     font-weight: bold;
@@ -27,12 +28,13 @@
 /* Hover effect for buttons */
 .pagination li a:hover {
     background-color: #E6ECF0; 
-    color: #14608C;
+    color: #14608C !important; /* For some reason, bootstrap tries to override our colors. Use important tag to 
+        prevent this behavior. */
 }
 
 /* Active page button */
 .pagination li.react-paginate__active a {
-    background-color: blue; /* Dark brown for active button */
+    background-color: blue;
     color: white; /* White text for the current page */
     font-weight: bold;
     border: 2px solid #E6ECF0; 

@@ -16,7 +16,7 @@
 
 .login-container h2 {
     margin-top: 0;
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     margin-bottom: 1rem;
     text-align: center;
 }
@@ -30,7 +30,7 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: bold;
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
 }
 
 .form-group input {
@@ -66,7 +66,7 @@ button:active {
 
 small {
     font-size: 0.9em;
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     display: block;
     text-align: center;
     margin-top: 1rem;
@@ -89,7 +89,7 @@ small {
 
 .popup p {
     margin-bottom: 1rem;
-    color: #5a3d1a; /* Dark Brown */
+    color: #122754;
     font-size: 1rem;
 }
 
