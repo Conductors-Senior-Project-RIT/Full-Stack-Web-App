@@ -5,7 +5,9 @@ This module handles all database CRUD operations for User and UserPreferences re
 """
 from typing import Any
 
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, ScalarResult
+from sqlalchemy.exc import SQLAlchemyError
 
 from .db_core.models import User
 from .db_core.repository import BaseRepository
@@ -51,16 +53,15 @@ class UserRepository(BaseRepository):
         """
         args = {"email": email, "password": password}
         
-        result = self.session.execute(text(sql), args).scalar_one_or_none()
-        if not result:
+        try: 
+            result = self.session.execute(text(sql), args).scalar_one() # error comes from unqiue constraint on emails
+            return result
+        except SQLAlchemyError as e:
             raise RepositoryInternalError(
                 caller_name=self.__class__.__name__,
                 message="An error occurred creating a new user!",
                 show_error=True
-            )
-        
-        return result
-
+            ) from e
 
     def unique_email_exists(self, email: str):
         sql = text("SELECT COUNT(1) FROM Users WHERE email = :email")
@@ -80,8 +81,8 @@ class UserRepository(BaseRepository):
         sql = text("SELECT id FROM Users WHERE email = :email")
         user = self.session.execute(sql, {"email": email}).scalar_one_or_none()
         
-        if user is None: # python treats the integer 0 as falsy, hence the change
-            raise self._construct_email_not_found(email) # technically this shouldn't ever happen (?)
+        if user is None: # python treats 0 as falsy, hence the change
+            raise self._construct_email_not_found(email) 
     
         return user
 
@@ -91,7 +92,7 @@ class UserRepository(BaseRepository):
         user = self.session.execute(sql, {"email": email}).one_or_none()
 
         if not user:
-            raise self._construct_email_not_found(email) # technically this shouldn't ever happen (?)
+            raise self._construct_email_not_found(email) 
         
         return user._asdict()
         
@@ -133,7 +134,7 @@ class UserRepository(BaseRepository):
         self.unique_email_exists(email)
         
         sql = """
-            "UPDATE Users 
+            UPDATE Users 
             SET acc_status = :role 
             WHERE email = :email
             RETURNING acc_status

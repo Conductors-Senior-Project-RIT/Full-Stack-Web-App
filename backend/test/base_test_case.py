@@ -24,6 +24,7 @@ class BaseTestCase(unittest.TestCase):
         cls.app = create_app(config_name="test")
         cls.app_context = cls.app.app_context()
         cls.app_context.push()
+        # TODO: create schema + mock data via ORM, not raw SQL so schema changes are automatically handled with Flask-Migrate
         cls.database_loader("table.sql")
         cls.database_loader("test_data.sql")
 
