@@ -12,3 +12,4 @@ fi
 
 # wondering if i should add "$@" here like for the test script
 flask --app backend:create_app run --debug
+read -p "Press Enter to exit..."

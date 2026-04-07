@@ -54,11 +54,11 @@ class RecordService(BaseService):
         
     def add_new_pin(self, repository: RecordRepository, unit_addr: str):
         # Update the symbol id and engine num of the new record
-        self.attempt_auto_fill(unit_addr)
+        self.attempt_auto_fill(repository, unit_addr)
         # Get most recent record (the one just created)
         resp_id = repository.get_unit_record_ids(unit_addr, True)
         # Make the newly created record the only record where most_recent = True
-        repository.add_new_pin(resp_id, int(unit_addr))
+        repository.add_new_pin(resp_id, unit_addr)
         
         
     def attempt_auto_fill(self, repository: RecordRepository, unit_addr: str):

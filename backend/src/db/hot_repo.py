@@ -63,36 +63,27 @@ class HOTRepository(RecordRepository[HOTRecord]):
         """
         recovery_request = True # what is this lol
         
-        # sql = """
-        #     INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
-        #     (:date, :station, :frame_sync, :unit_addr, :command, :checkbits, :parity)
-        #     RETURNING id
-        # """
+        sql = """
+            INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
+            (:date, :station, :frame_sync, :unit_addr, :command, :checkbits, :parity)
+            RETURNING id
+        """
         
-        # sql_args = {
-        #     "date": args["date_rec"],
-        #     "station": args["station_id"],
-        #     "frame_sync": args["frame_sync"],
-        #     "command": args["command"],
-        #     "checkbits": args["checkbits"],
-        #     "parity": args["parity"],
-        #     "unit_addr": args["unit_addr"],
-        # }
-        data = args.copy()
-
-        if data["date_rec"] is None:
-            if datetime_string is None:
-                raise RepositoryInvalidArgumentError(
-                    self.__class__.__name__, 
-                    None, "Datetime not provided!", True
-                )
-                
-            data["date_rec"] = datetime_string
+        sql_args = {
+            "date": args["date_rec"],
+            "station": args["station_id"],
+            "frame_sync": args["frame_sync"],
+            "command": args["command"],
+            "checkbits": args["checkbits"],
+            "parity": args["parity"],
+            "unit_addr": args["unit_addr"],
+        }
+        
+        if args["date_rec"] is None:
+            sql_args["date"] = datetime_string
             recovery_request = False
             
-        # result = self.session.execute(text(sql), sql_args).scalar_one_or_none()
-        
-        result = self.create(data)
+        result = self.session.execute(text(sql), sql_args).scalar_one_or_none()
 
         if not result:
             raise RepositoryInternalError(
@@ -100,21 +91,8 @@ class HOTRepository(RecordRepository[HOTRecord]):
                 message="Could not create new train record, 0 rows created!",
                 show_error=True
             )
-        
-        if len(result) != 1:
-            raise RepositoryInternalError(
-                caller_name=self.__class__.__name__,
-                message="Created multiple records! Only one should be created.",
-                show_error=True
-            )
             
-        result_obj = result[0]
-        
-        return (
-            result_obj[self.pkey] 
-            if self.pkey and return_id
-            else result_obj
-        ), recovery_request
+        return result, recovery_request
 
 
     # below is for station_handler.py
@@ -158,8 +136,9 @@ class HOTRepository(RecordRepository[HOTRecord]):
                         h.symbol_id,
                         h.unit_addr,
                         h.signal_strength,
+                        h.command,
                         h.verified,
-                        {"h.locomotive_num," if verified is None else ''}
+                        h.locomotive_num,
                         LAG(h.station_recorded) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) AS prev_station,
                         LAG(h.date_rec) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) AS prev_date_rec,
                         CASE
@@ -177,8 +156,9 @@ class HOTRepository(RecordRepository[HOTRecord]):
                         symbol_id,
                         unit_addr,
                         signal_strength,
+                        command,
                         verified,
-                        {"locomotive_num," if verified is None else ''}
+                        locomotive_num,
                         SUM(is_new_group) OVER (PARTITION BY unit_addr ORDER BY date_rec) AS group_id
                     FROM StationChanges
                 ),
@@ -200,8 +180,9 @@ class HOTRepository(RecordRepository[HOTRecord]):
                         g.symbol_id,
                         g.unit_addr,
                         g.signal_strength,
+                        g.command,
                         g.verified,
-                        {"g.locomotive_num," if verified is None else ''}
+                        g.locomotive_num,
                         g.station_recorded,
                         uo.first_seen,
                         uo.last_seen,
@@ -221,15 +202,19 @@ class HOTRepository(RecordRepository[HOTRecord]):
                     d.symbol_id,
                     d.unit_addr,
                     d.signal_strength,
+                    d.command,
                     d.verified,
                     TO_CHAR(d.first_seen, 'YYYY-MM-DD HH24:MI:SS') AS first_seen,
                     TO_CHAR(d.last_seen, 'YYYY-MM-DD HH24:MI:SS') AS last_seen,
                     d.occurrence_count,
-                    TO_CHAR(AGE(d.last_seen, d.first_seen), 'YYYY-MM-DD HH24:MI:SS') AS duration{',\nd.locomotive_num,\nf.symb_name' if verified is None else ''}
+                    AGE(d.last_seen, d.first_seen) AS duration,
+                    CASE WHEN d.symbol_id IS NULL THEN NULL ELSE f.symb_name END,
+                    d.locomotive_num
                 FROM UnitAddrDetails d
-                {f'LEFT JOIN Symbols f\nON d.symbol_id = f.id' if verified is None else ''}
-                WHERE d.row_num = 1 {f'AND d.verified = {verified}' if verified is not None else ''}
-                ORDER BY{' d.unit_addr, ' if verified is not None else ' '}d.date_rec DESC
+                LEFT JOIN Symbols f
+                ON d.symbol_id = f.id
+                WHERE d.row_num = 1
+                ORDER BY d.date_rec DESC
                 LIMIT :results_num OFFSET :offset
             """
             args = {"results_num": num_results, "offset": (page - 1) * num_results}
@@ -247,28 +232,23 @@ class HOTRepository(RecordRepository[HOTRecord]):
                 count_sql = """
                     WITH StationChanges AS (
                         SELECT
-                            e.id,
-                            e.date_rec,
-                            e.station_recorded,
-                            e.symbol_id,
-                            e.unit_addr,
-                            e.brake_pressure,
-                            e.motion,
-                            e.marker_light,
-                            e.turbine,
-                            e.battery_cond,
-                            e.battery_charge,
-                            e.arm_status,
-                            e.signal_strength,
-                            e.verified,
-                            LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_station,
-                            LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_date_rec,
+                            h.id,
+                            h.date_rec,
+                            h.station_recorded,
+                            h.symbol_id,
+                            h.unit_addr,
+                            h.signal_strength,
+                            h.command,
+                            h.verified,
+                            h.locomotive_num,
+                            LAG(h.station_recorded) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) AS prev_station,
+                            LAG(h.date_rec) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) AS prev_date_rec,
                             CASE
-                                WHEN LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) IS DISTINCT FROM e.station_recorded THEN 1
-                                WHEN e.date_rec - LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) > INTERVAL '2 hours' THEN 1
+                                WHEN LAG(h.station_recorded) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) IS DISTINCT FROM h.station_recorded THEN 1
+                                WHEN h.date_rec - LAG(h.date_rec) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) > INTERVAL '2 hours' THEN 1
                                 ELSE 0
                             END AS is_new_group
-                        FROM EOTRecords e
+                        FROM HOTRecords h
                     ),
                     GroupedRecords AS (
                         SELECT
@@ -277,14 +257,8 @@ class HOTRepository(RecordRepository[HOTRecord]):
                             station_recorded,
                             symbol_id,
                             unit_addr,
-                            brake_pressure,
-                            motion,
-                            marker_light,
-                            turbine,
-                            battery_cond,
-                            battery_charge,
-                            arm_status,
                             signal_strength,
+                            command,
                             verified,
                             SUM(is_new_group) OVER (PARTITION BY unit_addr ORDER BY date_rec) AS group_id
                         FROM StationChanges
@@ -306,15 +280,9 @@ class HOTRepository(RecordRepository[HOTRecord]):
                             stat.station_name,
                             g.symbol_id,
                             g.unit_addr,
-                            g.brake_pressure,
-                            g.motion,
-                            g.marker_light,
-                            g.turbine,
-                            g.battery_cond,
-                            g.battery_charge,
-                            g.arm_status,
                             g.signal_strength,
                             g.verified,
+                            g.command,
                             g.station_recorded,
                             uo.first_seen,
                             uo.last_seen,
@@ -345,7 +313,25 @@ class HOTRepository(RecordRepository[HOTRecord]):
             
         try:
             results = {
-                    "results": resp,
+                    "results": [
+                        {
+                            "id": row["id"],
+                            "date_rec": str(row["date_rec"]),
+                            "station_name": row["station_name"],
+                            "symbol_id": row["symbol_id"],
+                            "unit_addr": row["unit_addr"],
+                            "signal_strength": row["signal_strength"],
+                            "verified": row["verified"],
+                            "locomotive_num": row["locomotive_num"],
+                            "first_seen": str(row["first_seen"]),
+                            "last_seen": str(row["last_seen"]),
+                            "occurrence_count": str(row["occurrence_count"]),
+                            "duration": str(row["duration"]),
+                            "symbol_name": row["symb_name"],
+                            "command": row["command"]
+                        }
+                        for row in resp
+                    ],
                     "totalPages": ceil(count / num_results),
                 }
             return results
