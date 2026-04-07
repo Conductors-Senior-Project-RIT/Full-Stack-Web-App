@@ -36,7 +36,7 @@ const Station = ({ station, image, locationImage }) => {
       .catch(error => {
         console.error('Error fetching train data:', error);
       });
-  })
+  }, [])
 
   const handleDetailClick = (typ, id_num) => {
     if (typ === "EOT") {
