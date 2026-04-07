@@ -100,7 +100,6 @@ const Data = () => {
                         <th>locomotive_num</th>
                         <th>NPKT</th>
                         <th>Duration</th>
-                        <th>End Time</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,7 +117,6 @@ const Data = () => {
                                 <td>{item.locomotive_num}</td>
                                 <td>{item.ocurrence_count}</td>
                                 <td>{item.duration}</td>
-                                <td>{item.last_seen}</td>
                             </tr>
                         );
                     })}
