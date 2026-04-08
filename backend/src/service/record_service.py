@@ -111,9 +111,11 @@ class RecordService(BaseService):
             results = []
             for repo in self._record_repo:
                 repo_resp = repo.get_records_in_timeframe(station_id, timeframe, recent)
-                results.append(repo_resp)
+                results.extend(repo_resp)
             
             results.sort(key=lambda x: x["date_rec"], reverse=True)
+            for row in results:
+                row["date_rec"] = str(row["date_rec"])
             return results
         
         except (IndexError, KeyError) as e:

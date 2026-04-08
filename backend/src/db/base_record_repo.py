@@ -258,7 +258,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                     self.model.locomotive_num
                 )
                 .join(Station, self.model.station_recorded == Station.id)
-                .join(Symbol, self.model.symbol_id == Symbol.id)
+                .outerjoin(Symbol, self.model.symbol_id == Symbol.id)
                 .where(self.model.date_rec >= dt)
                 .order_by(self.model.date_rec.desc())
             )
