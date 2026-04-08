@@ -34,7 +34,7 @@ class DevConfig(Config):
     # DEBUG = True | use --debug flag for the development environment (as per docs; script does this).
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "dev-jwt")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI", "postgresql+psycopg2://postgres:ReginaLatinae$24@localhost:5432/seniorprojecttest") # falls back to default testing db
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI", "postgresql+psycopg2://test_user:pass@localhost:5432/test_db") # falls back to default testing db
 
 class TestConfig(Config):
     """
