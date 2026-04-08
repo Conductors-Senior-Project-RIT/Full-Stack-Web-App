@@ -61,11 +61,11 @@ class EOTRepository(RecordRepository[EOTRecord]):
         """
         
         # TODO: Move  to db
-        sql = """SELECT EOTRecords.id, date_rec, stat.station_name, sym.symb_name, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
+        sql = """SELECT EOTRecords.id, date_rec, stat.station_name, Symbols.symb_name, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
                 INNER JOIN Stations as stat on station_recorded = stat.id
-                INNER JOIN Symbols as sym on symbol_id = sym.id\n"""
+                LEFT JOIN Symbols ON EOTRecords.symbol_id = Symbols.id \n"""
         
-        if id == -1:
+        if id != -1:
             sql += "WHERE EOTRecords.id = :id ORDER BY EOTRecords.id Desc\n"
         else:
             sql += "ORDER BY date_rec DESC\n"
@@ -80,22 +80,22 @@ class EOTRepository(RecordRepository[EOTRecord]):
                         "id": row["id"],
                         "date_rec": str(row["date_rec"]),
                         "station_name": row["station_name"],
-                        "symbol_name": row["symbol_name"],
-                        "unit_addr": row[4],
-                        "brake_pressure": row[5],
-                        "motion": row[6],
-                        "marker_light": row[7],
-                        "turbine": row[8],
-                        "battery_cond": row[9],
-                        "battery_charge": row[10],
-                        "arm_status": row[11],
-                        "signal_strength": row[12],
-                        "verified": row[13],
+                        "symbol_name": row["symb_name"],
+                        "unit_addr": row["unit_addr"],
+                        "brake_pressure": row["brake_pressure"],
+                        "motion": row["motion"],
+                        "marker_light": row["marker_light"],
+                        "turbine": row["turbine"],
+                        "battery_cond": row["battery_cond"],
+                        "battery_charge": row["battery_charge"],
+                        "arm_status": row["arm_status"],
+                        "signal_strength": row["signal_strength"],
+                        "verified": row["verified"],
                     }
                     for row in resp
                 ]
         
-        if id == 1:    
+        if id != 1:    
             return results
     
         count = self.get_total_count_of_eot_records()
@@ -168,8 +168,8 @@ class EOTRepository(RecordRepository[EOTRecord]):
         sql = """
             SELECT * FROM EOTRecords 
             WHERE station_recorded = :station_id and most_recent = true 
-            INNER JOIN Symbols ON EOTRecords.symbol_id = Symbols.id 
-            INNER JOIN Engine_Numbers ON EOTRecords.engine_num = Engine_Numbers.id
+            LEFT JOIN Symbols ON EOTRecords.symbol_id = Symbols.id 
+            LEFT JOIN Engine_Numbers ON EOTRecords.engine_num = Engine_Numbers.id
         """
         args = {
             "station_id": station_id

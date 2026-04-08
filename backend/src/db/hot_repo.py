@@ -52,8 +52,10 @@ class HOTRepository(RecordRepository[HOTRecord]):
             .limit(num_results).offset((page - 1) * num_results)
         )
         results = self.session.execute(stmt).all()
-    
-        return self.objs_to_dicts(results)
+        result_dict = self.objs_to_dicts(results)
+        for row in result_dict:
+            row["date_rec"] = str(row["date_rec"])
+        return result_dict
 
     @repository_error_handler()
     def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None, return_id=True) -> tuple[Any | dict[str, Any], bool]: # type: ignore
