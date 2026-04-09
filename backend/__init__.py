@@ -7,9 +7,9 @@ from backend.extensions import bcrypt, jwt
 from .config.settings import config_selection
 from .database import db
 
-def create_app(config_name=None): # tests call this function to create flask app
+def create_app(config_name=None): 
     """
-    TODO: models for flask-alchemy(sqlalchemy)
+    App factory
     """
     
     # create and configure the app
@@ -32,7 +32,7 @@ def create_app(config_name=None): # tests call this function to create flask app
     db.init_app(app) # load settings for db engine/ bind flask-alchemy to app; flask-alchemy currently used as a connection manager with our raw sql lol
 
     api = Api(app)
-    # winging the setup here lol
+
     CORS(app)
     if app.config['TESTING']:
         api.resources = []  # Necessary to reset instances between tests
