@@ -30,6 +30,7 @@ def create_app(config_name=None): # tests call this function to create flask app
     print("=" * 50)
 
     db.init_app(app) # load settings for db engine/ bind flask-alchemy to app; flask-alchemy currently used as a connection manager with our raw sql lol
+    jwt.init_app(app)
 
     api = Api(app)
     # winging the setup here lol

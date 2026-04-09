@@ -45,8 +45,8 @@ class SymbolRepository(BaseRepository):
             )
         
 
-    @repository_error_handler
-    def get_symbol_names(self) -> ScalarResult[Any]:
+    @repository_error_handler()
+    def get_symbol_names(self) -> list[Any]:
         """Retrieves all symbol names stored in the Symbols table.
         
         Returns:
@@ -55,7 +55,8 @@ class SymbolRepository(BaseRepository):
         # Database query to retrieve all symbol names in the Symbols table
         sql = "SELECT symb_name FROM Symbols"
         # Attempt to retrieve and parse a list of symbol names in the database
-        return self.session.execute(text(sql)).scalars()
+        symbols = list(self.session.execute(text(sql)).scalars().all())
+        return symbols
 
 
         

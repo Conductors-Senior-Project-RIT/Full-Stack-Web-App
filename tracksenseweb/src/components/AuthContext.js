@@ -32,15 +32,15 @@ export const AuthProvider = ({ children }) => {
 
   const verifyToken = async (token) => {
     try {
-      const response = await fetch(`${config.apiUrl}/verify-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (data.valid) {
+      // const response = await fetch(`${config.apiUrl}/verify-token`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Authorization': `Bearer ${token}`,
+      //   },
+      // });
+      // const data = await response.json();
+      // if (data.valid) {
         setIsAuthenticated(true);
 
         // Fetch user role
@@ -52,11 +52,11 @@ export const AuthProvider = ({ children }) => {
         });
         const roleData = await roleResponse.json();
         setUserRole(roleData.role); // Store user role in state
-      } else {
-        setIsAuthenticated(false);
-        setUserRole(null);
-        document.cookie = 'token=; path=/; max-age=0'; // Remove the token cookie
-      }
+      // } else {
+      //   setIsAuthenticated(false);
+      //   setUserRole(null);
+      //   document.cookie = 'token=; path=/; max-age=0'; // Remove the token cookie
+      // }
     } catch (error) {
       console.error('Error verifying token:', error);
       setIsAuthenticated(false);

@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Blueprint, request
+from flask import Blueprint, request, make_response
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import (
@@ -59,7 +59,10 @@ def register():
         session.commit()
         return {"message": "User registered successfully! A welcome email has been sent."}, 201
 
-    raise InternalServerError("User registered, but failed to send email.")
+    # Temporarily allow email sending to fail until we recreate the email sending functionality.
+    # raise InternalServerError("User registered, but failed to send email.")
+    session.commit()
+    return {"message": "User registered, but failed to send email."}, 201
 
 @user_bp.route("/api/login", methods=["POST"])
 def login():
@@ -74,15 +77,16 @@ def login():
     if not user:
         raise Unauthorized("Invalid credentials")
 
-    user_id = user[0][0] # need to find a clean way to stop double indexing, index the query results from the repo/db layer so we stop double indexing here.
-    user_role = user[0][4]
-
-    response = {"message": "login successful"}, 200
-
+    user_id = user["id"]
+    user_role = user["acc_status"]
+    
     additional_claims = {"user_role": user_role} # a user role is set based on what's in the database
-
     # identity being user_id makes it easier to retrieve user info from db for whatever reason, and can store their user_role here as it's not a security risk and makes it easier to protect certain routes later
     access_token = create_access_token(identity=str(user_id), additional_claims=additional_claims) # user_id as eventually want to replace incrementing id with uuid if possible
+    
+    response = make_response({"message": "login successful", "access_token": access_token}, 200)
+
+
     set_access_cookies(response, access_token)
     
     session.commit()

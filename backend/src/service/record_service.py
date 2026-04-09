@@ -80,7 +80,7 @@ class RecordService(BaseService):
     
     # Log Verification
     def get_unverified_records(self, page: int) -> dict[str, list | str]:
-        return self.get_first_repository().get_record_collation(page, False, RESULTS_NUM)
+        return self.get_first_repository().get_record_collation(page, RESULTS_NUM, False)
         
         
     def verify_record(self, record_id: int, symbol_id: int, engine_id: int):
