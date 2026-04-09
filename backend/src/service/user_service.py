@@ -29,7 +29,9 @@ class UserService(BaseService):
 
         self.initialize_user_preferences(user_id) #default user settings
 
-        email_sent = send_welcome_email(email)
+        # Temporarily avoid this until we create email sender again
+        # email_sent = send_welcome_email(email)
+        email_sent = False
 
         return {"user_id": user_id, "email_sent": email_sent}
 
@@ -55,7 +57,7 @@ class UserService(BaseService):
         if not user: # invalid email as there's no rows returned
             return None
 
-        user_hashed_password = user[0][2] #list of tuple, 3rd element is passwd
+        user_hashed_password = user["passwd"]
 
         if bcrypt.check_password_hash(user_hashed_password, password):
             return user
