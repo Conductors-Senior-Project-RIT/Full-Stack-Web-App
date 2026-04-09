@@ -19,6 +19,26 @@
   margin-bottom: 20px;
 }
 
+.itemgrid {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.Station-container .map-container {
+  flex: 50%;
+  position: relative;
+  max-width: 55%;
+}
+
+@media (max-width: 600px) {
+  .Station-container .map-container {
+    flex: 100%;
+    max-width: 80%;
+    margin-bottom: 20px;
+  }
+}
 
 .map-image {
   width: 100%;
@@ -26,17 +46,14 @@
 }
 
 .dropdown {
-  position: absolute;
-  top: 10%;
-  left: 10%;
-  right: 10%;
   background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 20px;
   max-height: 80vh;
   overflow-y: auto;
-  z-index: 1000; /* Ensure it appears on top of the map */
+  margin: 0 20px;
+  min-width: 40%;
 }
 
 .pop_up {
@@ -76,32 +93,12 @@
   margin-bottom: 0%;
 }
 
-.close-button {
-  position: absolute;
-  top: 5px; /* Adjusted to move the button upwards */
-  right: 10px;
-  background-color: red;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.close-button:hover {
-  background-color: darkred;
-}
-
 .pin-image {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  max-width: 80%;
 }
 
 .pin-image:active {

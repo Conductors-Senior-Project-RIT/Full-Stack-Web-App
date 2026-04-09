@@ -14,7 +14,7 @@
   margin-bottom: 25px; /* Add more spacing below the title */
 }
 
-.map-container {
+.home-container .map-container {
   position: relative;
   width: 100%; /* Make the map take full width */
   max-width: 900px; /* Increase the maximum width */
