@@ -94,7 +94,7 @@ class UserRepository(BaseRepository):
         if not user:
             raise self._construct_email_not_found(email) 
         
-        return user._asdict()
+        return user._asdict() # leftoff here; finish user_service that uses this lol; im at login() part now
         
     
     def update_session_token(self, user_id: int, token: str) -> int: # remove most likely, web tokens handled via JWT
