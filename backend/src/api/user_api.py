@@ -1,5 +1,4 @@
-from dotenv import load_dotenv
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, abort, request, jsonify
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import (
@@ -10,7 +9,7 @@ from flask_jwt_extended import (
 )
 from ..service.user_service import UserService
 from werkzeug.exceptions import BadRequest, InternalServerError, Unauthorized, NotFound, Forbidden
-
+from ..service.email_service import email_service
 from backend.database import db
 
 """
@@ -52,17 +51,18 @@ def register():
     password = data.get("password")
 
     if not email or not password:
-        return BadRequest("Email and password required")
+        abort(400, descrption="Password and valid email required") # returning instantied object, need to throw error with abort with desc so it gets handled by registered blueprint error handlers
+        # return BadRequest("Email and password required")
 
     session = db.session
     service = UserService(session)
     result = service.register_user(email, password) #service
 
-    if not result.get("email_sent"):
+    if result.get("email_sent"):
         session.commit()
-        jsonify({"message": "User registered successfully! A welcome email has been sent."}), 201
-
-    raise InternalServerError("User registered, but failed to send email.")
+        return {"message": "User registered successfully! A welcome email has been sent."}, 201
+    
+    return {"message": "Failed to send welcome email"}, 201 # TODO: error_handler.py or email_service should handle brevo's ApiError gracefully
 
 @user_bp.route("/api/login", methods=["POST"])
 def login():

@@ -1,12 +1,14 @@
 import hashlib
 import secrets
+
+from backend.src.db.db_core.models import User
 # from werkzeug.security import check_password_hash, generate_password_hash
 
 from ... import bcrypt
 from .service_core import BaseService
 from ..db.station_repo import StationRepository
 from ..db.user_repo import UserRepository
-from ..service.email_service import send_welcome_email, send_forgot_password_email
+from ..service.email_service import email_service #instantiated 
 
 class UserService(BaseService):
     def __init__(self, session):
@@ -29,9 +31,11 @@ class UserService(BaseService):
 
         self.initialize_user_preferences(user_id) #default user settings
 
-        email_sent = send_welcome_email(email)
+        created_user = self._user_repo.session.get(User, user_id) # retrieve specific user Model via db.session's .get()
 
-        return {"user_id": user_id, "email_sent": email_sent}
+        email_service.send_registered_email(created_user.email, "New User") 
+
+        return {"user_id": user_id, "email_sent": "email sent with no ApiError yay"}
 
     def initialize_user_preferences(self, user_id: int):
         """
