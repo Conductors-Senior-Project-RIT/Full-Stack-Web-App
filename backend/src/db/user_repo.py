@@ -17,7 +17,7 @@ from .db_core.exceptions import layer_error_handler, REPOSITORY_ERROR_MAP, \
 class UserRepository(BaseRepository):
     def __init__(self, session):
         super().__init__(User, session)
-        
+        # UserRepository methods are wrapped with the layer_error_handler decorator when the class is instantiatied 
         for attr, value in self.__dict__.items():
             if callable(value):
                 if attr == "session" or attr.startswith('_'):

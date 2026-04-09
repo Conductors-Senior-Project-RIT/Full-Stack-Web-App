@@ -2,7 +2,7 @@ from flask import Flask, Response, jsonify
 from werkzeug.exceptions import HTTPException
 
 from ...database import db
-from ..service.service_core import *
+from ..service.service_core import ServiceError, ServiceInternalError, ServiceInvalidArgument, ServiceParsingError, ServiceResourceNotFound, ServiceTimeoutError
 
 ##########################
 ##  API ERROR HANDLING  ##
@@ -27,7 +27,6 @@ def service_error_to_code(e: ServiceError) -> int:
     Returns:
         int: HTTP error response status code.
     """
-    db.session.rollback()
     
     for cls in e.__class__.__mro__:
         if cls in SERVICE_ERROR_CODES:

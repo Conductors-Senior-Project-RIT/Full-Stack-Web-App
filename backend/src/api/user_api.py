@@ -30,14 +30,17 @@ storing jwt in database for "get_authentication" defeats the whole purpose of st
 # jwt = JWTManager()
 
 # load_dotenv()
+
 user_bp = Blueprint("user_bp", __name__)
+
 # CORS(user_bp)  # Enable CORS for the user_bp blueprint
 
 """
 lets ditch the storing session token from database... im not sure why they did that as it beats the purpose of using
 jwt lol.
 
-TODO: need to create a decorator to place on routes that only admins should be able to touch 
+TODO: need to create a decorator to place on routes that only admins should be able to touch  --> unsure if conflicts would occur with frontend..
+TODO: EMAIL VALIDATOR + FLASK-MAIL WITH THREADING FOR EMAILS LELE
 TODO: refresh token 30 mins before it expires (check docs where it uses an `after_request` callback)
 @app.after_request
 def refresh_expiring_jwts(response)
@@ -55,7 +58,7 @@ def register():
     service = UserService(session)
     result = service.register_user(email, password) #service
 
-    if result.get("email_sent"):
+    if not result.get("email_sent"):
         session.commit()
         jsonify({"message": "User registered successfully! A welcome email has been sent."}), 201
 

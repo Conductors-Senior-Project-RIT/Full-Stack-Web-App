@@ -15,7 +15,7 @@ class BaseService:
         for attr, value in cls.__dict__.items():
             # If the value is a function, then wrap
             if callable(value):
-                # Register class funtion from name (attr), with the error handler decorator wrapping function (value)
+                # Register class funtion from name (attr), with the error handler decorator wrapping function (value); no need to explcility place error handling decorator above child service classes (?)
                 wrapped = layer_error_handler(value, SERVICE_ERROR_MAP, ServiceInternalError)
                 setattr(cls, attr, wrapped)
 
