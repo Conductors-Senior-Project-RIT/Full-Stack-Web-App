@@ -12,7 +12,7 @@ html, body {
 }
 
 body {
-  background-color: #d2b48c; /* Default background color */
+  background-color: #E6ECF0; 
 }
 
 code {
@@ -68,17 +68,17 @@ code {
 
 /* Background color classes */
 .bg-home {
-  background-color: #d2b48c; /* Light Green */
+  background-color: #DCE7EE; 
 }
 
 .bg-data {
-  background-color: #d2b48c; /* Light Blue */
+  background-color: #DCE7EE; 
 }
 
 .bg-aboutus {
-  background-color: #d2b48c; /* Beige */
+  background-color: #DCE7EE; 
 }
 
 .bg-login {
-  background-color: #d2b48c; /* Khaki */
+  background-color: #DCE7EE; 
 }

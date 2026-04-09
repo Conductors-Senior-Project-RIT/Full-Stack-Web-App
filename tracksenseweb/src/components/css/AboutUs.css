@@ -13,7 +13,7 @@
 section {
     margin-bottom: 40px;
     padding: 20px;
-    background-color: #f5deb3;
+    background-color: #D3E6FA;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -23,12 +23,12 @@ h2 {
     color: #2c3e50;
     font-size: 2em;
     margin-bottom: 15px;
-    border-bottom: 2px solid #8B4513;
+    border-bottom: 2px solid #14608C;
     padding-bottom: 5px;
 }
 
 h3 {
-    color: #8B4513;
+    color: #14608C;
     font-size: 1.5em;
     margin-top: 20px;
     margin-bottom: 10px;

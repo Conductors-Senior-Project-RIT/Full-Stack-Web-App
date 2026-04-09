@@ -3,7 +3,7 @@
     margin: 0 auto;
     padding: 20px;
     border-radius: 5px;
-    background-color: #d2b48c; /* Soft brown background color */
+    background-color: #E6ECF0;
 }
 
 .data-table {
@@ -19,7 +19,7 @@
 }
 
 .data-table th {
-    background-color: #8B4513; /* Darker brown for headers */
+    background-color: #14608C;
     color: white;
 }
 
@@ -28,10 +28,10 @@
 }
 
 .data-table tr:hover {
-    background-color: #ddd; /* Highlight row on hover */
+    background-color: #dddddd; /* Highlight row on hover */
 }
 
 .data-table thead th {
-    background-color: #8B4513; /* Darker brown for headers */
+    background-color: #14608C;
     color: white;
 }
