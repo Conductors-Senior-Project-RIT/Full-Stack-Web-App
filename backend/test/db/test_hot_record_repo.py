@@ -52,26 +52,26 @@ class TestHOTRecordRepository(BaseTestCase):
         }
         
         # Test recovery request creation
-        result_id, result_recov = self.repo.create_train_record(data, None, False)
+        result_id, result_recov = self.repo.create_train_record(data, None)
         self.assertEqual(8, result_id)
         self.assertEqual(True, result_recov)
         
         # Test non-recovery request creation
         data["date_rec"] = None
-        result_id, result_recov = self.repo.create_train_record(data, date_rec, False)
+        result_id, result_recov = self.repo.create_train_record(data, date_rec)
         self.assertEqual(9, result_id)
         self.assertEqual(False, result_recov)
         
         # Test datetime never provided exceptions
         with self.assertRaises(RepositoryInvalidArgumentError):
-            self.repo.create_train_record(data, None, False)
+            self.repo.create_train_record(data, None)
             
         # Test "execute" return exceptions
         with patch.object(Session, "execute") as mock:
-            mock.return_value = None
+            mock.return_value.scalar_one_or_none.return_value = None
             
             with self.assertRaises(RepositoryInternalError):
-                self.repo.create_train_record(data, date_rec, True)
+                self.repo.create_train_record(data, date_rec)
         
         
     def testGetRecentStationRecords(self):

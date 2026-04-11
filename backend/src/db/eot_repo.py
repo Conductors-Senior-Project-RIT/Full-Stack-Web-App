@@ -6,13 +6,14 @@ This module handles all database CRUD operations for EOT records
 
 from math import ceil
 from typing import Any
-from sqlalchemy import text
+from sqlalchemy import desc, func, select, text
 
 from .db_core.models import EOTRecord
 from .base_record_repo import RecordRepository
-from .db_core.exceptions import RepositoryInternalError, repository_error_translator, repository_error_handler
+from .db_core.exceptions import (
+    RepositoryInternalError, RepositoryInvalidArgumentError, repository_error_translator, repository_error_handler
+)
 
-RESULTS_NUM = 250
 
 class EOTRepository(RecordRepository[EOTRecord]): 
     def __init__(self, session):
@@ -20,25 +21,8 @@ class EOTRepository(RecordRepository[EOTRecord]):
 
 
     # below is train_history.py related
-    @repository_error_handler
-    def get_total_count_of_eot_records(self) -> int:
-        """Retrieves total amount of records in EOTRecords table
-
-        Returns:
-            If db operation is successful, number of records in EOTRecords table, otherwise, None
-        
-        Raises:
-            No raised exceptions - prints out error and returns None  
-
-        TODO: integrate this function to replace sql queries in train_history.py's def get_eot()
-        
-        TODO: improve  documentation 
-        """
-        return self.session.execute(text("SELECT COUNT(*) FROM EOTRecords")).scalar_one()
-        
-        
-    def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str | Any, Any]] | dict[
-        str, list[dict[str | Any, Any]] | int]:
+    def get_train_history(self, id: int, page: int, num_results: int) -> (
+        list[dict[str, Any]] | dict[str, list[dict[str, Any]] | int]):
         """ Retrieves EOT records for a specific train id
         
         Args:
@@ -59,46 +43,55 @@ class EOTRepository(RecordRepository[EOTRecord]):
         TODO: Format returned collection
         TODO: what is symbol_id for a train, is it it's unique identifier?
         """
+        from .db_core.models import Station, Symbol
         
-        # TODO: Move  to db
-        sql = """SELECT EOTRecords.id, date_rec, stat.station_name, Symbols.symb_name, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
-                INNER JOIN Stations as stat on station_recorded = stat.id
-                LEFT JOIN Symbols ON EOTRecords.symbol_id = Symbols.id \n"""
+        stmt = (
+            select(
+                self.model.id,
+                func.to_char(self.model.date_rec, "YYYY-MM-DD HH24:MI:SS").label("date_rec"),
+                Station.station_name,
+                Symbol.symb_name,
+                self.model.unit_addr,
+                self.model.brake_pressure,
+                self.model.motion,
+                self.model.marker_light,
+                self.model.turbine,
+                self.model.battery_cond,
+                self.model.battery_charge,
+                self.model.arm_status,
+                self.model.signal_strength,
+                self.model.verified
+            )
+            .join(Station, Station.id == self.model.station_recorded)
+            .join(Symbol, Symbol.id == self.model.symbol_id, isouter=True)  # Outer join on symbols
+        )
         
         if id != -1:
-            sql += "WHERE EOTRecords.id = :id ORDER BY EOTRecords.id Desc\n"
+            stmt = stmt.where(self.model.id == id).order_by(desc(self.model.id))
         else:
-            sql += "ORDER BY date_rec DESC\n"
-        sql += "LIMIT :results_num OFFSET :offset * :results_num"
+            stmt = stmt.order_by(desc(self.model.date_rec)).limit(num_results).offset((page - 1) * num_results)
         
-        sql_args = {"results_num": num_results, "offset": page - 1}
-        sql_args["id"] = id
+        # sql = """SELECT EOTRecords.id, date_rec, stat.station_name, Symbols.symb_name, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
+        #         INNER JOIN Stations as stat on station_recorded = stat.id
+        #         LEFT JOIN Symbols ON EOTRecords.symbol_id = Symbols.id \n"""
+        
+        # if id != -1:
+        #     sql += "WHERE EOTRecords.id = :id ORDER BY EOTRecords.id Desc\n"
+        # else:
+        #     sql += "ORDER BY date_rec DESC\n"
+        # sql += "LIMIT :results_num OFFSET :offset * :results_num"
+        
+        # sql_args = {"results_num": num_results, "offset": page - 1}
+        # sql_args["id"] = id
     
-        resp = [row._asdict() for row in self.session.execute(text(sql), sql_args)]
-        results = [
-                    {
-                        "id": row["id"],
-                        "date_rec": str(row["date_rec"]),
-                        "station_name": row["station_name"],
-                        "symbol_name": row["symb_name"],
-                        "unit_addr": row["unit_addr"],
-                        "brake_pressure": row["brake_pressure"],
-                        "motion": row["motion"],
-                        "marker_light": row["marker_light"],
-                        "turbine": row["turbine"],
-                        "battery_cond": row["battery_cond"],
-                        "battery_charge": row["battery_charge"],
-                        "arm_status": row["arm_status"],
-                        "signal_strength": row["signal_strength"],
-                        "verified": row["verified"],
-                    }
-                    for row in resp
-                ]
+        # resp = [row._asdict() for row in self.session.execute(text(sql), sql_args)]
         
-        if id != 1:    
+        results = self.objs_to_dicts(self.session.execute(stmt).all())
+        
+        if id != -1:    
             return results
     
-        count = self.get_total_count_of_eot_records()
+        count = self.get_total_record_count()
 
         return {
             "results": results,
@@ -145,6 +138,13 @@ class EOTRepository(RecordRepository[EOTRecord]):
         }
 
         if args["date_rec"] is None:
+            if datetime_string is None:
+                raise RepositoryInvalidArgumentError(
+                    self.__class__.__name__,
+                    message="Record timestamp must be provided!",
+                    show_error=True
+                )
+            
             sql_args["date"] = datetime_string
             recovery_request = False
 
@@ -160,21 +160,32 @@ class EOTRepository(RecordRepository[EOTRecord]):
         
 
     # below is for station_handler.py 
-    def get_recent_station_records(self, station_id: int) -> list[tuple[Any,...]]:
+    def get_recent_station_records(self, station_id: int) -> list[dict[str, Any]]:
         """Retrieves most recent eot records for a given station id.
 
         """
-        sql = """
-            SELECT * FROM EOTRecords 
-            WHERE station_recorded = :station_id and most_recent = true 
-            LEFT JOIN Symbols ON EOTRecords.symbol_id = Symbols.id 
-            LEFT JOIN Engine_Numbers ON EOTRecords.engine_num = Engine_Numbers.id
-        """
-        args = {
-            "station_id": station_id
-        }
+        from .db_core.models import Symbol, EngineNumber
         
-        return self.session.execute(text(sql), args).all()
+        # sql = """
+        #     SELECT * FROM EOTRecords 
+        #     WHERE station_recorded = :station_id and most_recent = true 
+        #     LEFT JOIN Symbols ON EOTRecords.symbol_id = Symbols.id 
+        #     LEFT JOIN Engine_Numbers ON EOTRecords.engine_num = Engine_Numbers.id
+        # """
+        # args = {
+        #     "station_id": station_id
+        # }
+        
+        stmt = (
+            select(self.model)
+            .where(self.model.station_recorded == station_id)
+            .where(self.model.most_recent == True)
+            .join(Symbol, Symbol.id == self.model.symbol_id, isouter=True)
+            .join(EngineNumber, EngineNumber.id == self.model.engine_num, isouter=True)
+        )
+        
+        results = self.session.execute(stmt).all()
+        return self.objs_to_dicts(results)
         
 
     # below is for eot_collation

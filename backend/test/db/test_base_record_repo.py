@@ -115,6 +115,10 @@ class TestRecordRepository(BaseTestCase):
         self.assertEqual("train", self.repo.get_record_identifier())
     
     
+    def testGetTotalRecordCount(self):
+        self.assertEqual(len(self.test_data), self.repo.get_total_record_count())
+    
+    
     def testGetTrainRecord(self):
         # Test that successful retrieval
         for i in [1, "1"]:

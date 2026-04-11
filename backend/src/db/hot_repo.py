@@ -5,7 +5,7 @@ This module handles all database CRUD operations for HOT records
 """
 from math import ceil
 from typing import Any, Optional, Type
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.orm.session import Session
 
 from .db_core.models import HOTRecord
@@ -38,7 +38,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
         stmt = (
             select(
                 self.model.id, 
-                self.model.date_rec,
+                func.to_char(self.model.date_rec, "YYYY-MM-DD HH24:MI:SS").label("date_rec"),
                 Station.station_name,
                 Symbol.symb_name,
                 self.model.symbol_id,
@@ -55,12 +55,10 @@ class HOTRepository(RecordRepository[HOTRecord]):
         )
         results = self.session.execute(stmt).all()
         result_dict = self.objs_to_dicts(results)
-        for row in result_dict:
-            row["date_rec"] = str(row["date_rec"])
         return result_dict
 
     @repository_error_handler()
-    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None, return_id=True) -> int: # type: ignore
+    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None) -> int: # type: ignore
         """
         TODO: Namespace is the type for args for post methods in train_history... look more into this
         TODO: run_exec_cmd returns none always... think of what to return lol
@@ -97,7 +95,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
             
         result_id = self.session.execute(text(sql), sql_args).scalar_one_or_none()
 
-        if not result_id:
+        if result_id is None:
             raise RepositoryInternalError(
                 caller_name=self.__class__.__name__,
                 message="Could not create new train record, 0 rows created!",

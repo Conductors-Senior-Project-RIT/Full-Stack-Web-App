@@ -31,6 +31,20 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
     def get_record_identifier(self) -> str:
         return self._record_identifier
     
+    
+    @repository_error_handler()
+    def get_total_record_count(self) -> int:
+        """Retrieves total amount of records in a table
+
+        Returns:
+            If db operation is successful, number of records in a table, otherwise, None  
+
+        TODO: integrate this function to replace sql queries in train_history.py's def get_eot()
+        
+        TODO: improve  documentation 
+        """
+        return self.session.query(func.count(self.model.id)).scalar()
+    
         
     @abstractmethod
     def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
