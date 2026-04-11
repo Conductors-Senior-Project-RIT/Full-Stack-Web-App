@@ -34,6 +34,8 @@ class RepositoryRecordInvalid(RepositoryError):
     # super().__init__(f"Invalid record type provided: {value}! Must be between {valid_types[0]} and {valid_types[-1]}")
     
 def has_value(value: int):
+    if not isinstance(value, int):
+        raise RepositoryRecordInvalid(f"Expected int, got {type(value).__name__}")
     return any(value == item.value for item in RecordTypes)
 
 def get_record_repository(session, value: int | RecordTypes) -> RecordRepository:
@@ -48,7 +50,7 @@ def get_record_repository(session, value: int | RecordTypes) -> RecordRepository
         # case RecordTypes.DPU | RecordTypes.DPU.value:
         #     return DPURepository(session)
         
-    raise RepositoryRecordInvalid(value)
+    raise RepositoryRecordInvalid(str(value))
 
 
 def get_all_repositories(session) -> list[RecordRepository]:

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './css/Admin.css';
+import './css/Verification.css';
 import config from '../config';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
@@ -10,7 +10,7 @@ import ReactPaginate from 'react-paginate';
 import './css/Paginate.css';
 import { useSearchParams } from 'react-router-dom';
 
-const AdminHOT = () => {
+const VerifyHOT = () => {
   // Data state
   const [data, setData] = useState([]);
   const [symbols, setSymbols] = useState([]);
@@ -26,9 +26,20 @@ const AdminHOT = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "1");
 
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  };
+
   // Fetch data from the API
   useEffect(() => {
-    fetch(`${config.apiUrl}/record_verifier?page=${page}&type=2`)
+    let token = getCookie('token');
+    fetch(`${config.apiUrl}/record_verifier?page=${page}&type=2`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then(response => response.json())
       .then(data => {
         setData(data.results);
@@ -60,10 +71,12 @@ const AdminHOT = () => {
 
         symbolId = data.results[0];
         if (symbolId !== -1) {
+          let token = getCookie('token');
           fetch(`${config.apiUrl}/record_verifier`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
               id: modalId,
@@ -165,7 +178,7 @@ const AdminHOT = () => {
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button className="button-admin" variant="primary" onClick={handleVerify}>
+          <Button className="verify-button" variant="primary" onClick={handleVerify}>
             Verify
           </Button>
         </Modal.Footer>
@@ -211,4 +224,4 @@ const AdminHOT = () => {
   );
 };
 
-export default AdminHOT;
+export default VerifyHOT;

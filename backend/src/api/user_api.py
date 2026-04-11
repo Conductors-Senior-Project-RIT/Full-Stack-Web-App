@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, make_response
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import (
@@ -57,9 +57,12 @@ def register():
 
     if result.get("email_sent"):
         session.commit()
-        jsonify({"message": "User registered successfully! A welcome email has been sent."}), 201
+        return {"message": "User registered successfully! A welcome email has been sent."}, 201
 
-    raise InternalServerError("User registered, but failed to send email.")
+    # Temporarily allow email sending to fail until we recreate the email sending functionality.
+    # raise InternalServerError("User registered, but failed to send email.")
+    session.commit()
+    return {"message": "User registered, but failed to send email."}, 201
 
 @user_bp.route("/api/login", methods=["POST"])
 def login():
@@ -74,15 +77,16 @@ def login():
     if not user:
         raise Unauthorized("Invalid credentials")
 
-    user_id = user[0][0] # need to find a clean way to stop double indexing, index the query results from the repo/db layer so we stop double indexing here.
-    user_role = user[0][4]
-
-    response = jsonify({"message": "login successful"}), 200
-
+    user_id = user["id"]
+    user_role = user["acc_status"]
+    
     additional_claims = {"user_role": user_role} # a user role is set based on what's in the database
-
     # identity being user_id makes it easier to retrieve user info from db for whatever reason, and can store their user_role here as it's not a security risk and makes it easier to protect certain routes later
     access_token = create_access_token(identity=str(user_id), additional_claims=additional_claims) # user_id as eventually want to replace incrementing id with uuid if possible
+    
+    response = make_response({"message": "login successful", "access_token": access_token}, 200)
+
+
     set_access_cookies(response, access_token)
     
     session.commit()
@@ -102,7 +106,7 @@ def reset_password_request():
     service.create_user_password_reset_token(email)
 
     session.commit()
-    return jsonify({"message": "If an account with that email exists, a reset link was sent."}), 200
+    return {"message": "If an account with that email exists, a reset link was sent."}, 200
 
 @user_bp.route("/api/validate-reset-token", methods=["GET"])
 def token_validation():
@@ -113,7 +117,7 @@ def token_validation():
     is_valid = service.is_user_password_reset_token_valid(token)
 
     if is_valid:
-        return jsonify({"message": "Password reset token is valid"}), 200
+        return {"message": "Password reset token is valid"}, 200
 
     session.commit()
     raise NotFound("Password reset token is invalid!")
@@ -123,7 +127,7 @@ def reset_password():
     token = request.args.get("token")
 
     if token is None:
-        raise BadRequest("No token provided!") # by default this jsonify's the result i think? (we can test it out later so we can have a standard to follow for the returns in API layer)
+        raise BadRequest("No token provided!")
 
     data = request.get_json()
     password = data.get("password")
@@ -137,7 +141,7 @@ def reset_password():
         raise NotFound("false")
 
     session.commit()
-    return jsonify({"message": "Password changed successfully. Please log in."}), 200
+    return {"message": "Password changed successfully. Please log in."}, 200
 
 # not sure why they're updating times for users... maybe ... what is the point of this lol /api/user_preferences/time
 # delete this route?
@@ -157,7 +161,7 @@ def update_times():
     service.update_user_times(current_user_id, starting_time, ending_time)  # TODO: Where did the method go???
     
     session.commit()
-    return jsonify({"message": "Success"}), 200
+    return {"message": "Success"}, 200
 
 
 @user_bp.route("/api/role", methods=["GET"])
@@ -165,7 +169,7 @@ def update_times():
 def get_user_role():
     claims = get_jwt() # maybe current_user_* prefix is good when calling get_jwt() and get_jwt_identity()
     user_role = claims.get("user_role")
-    return jsonify({"role": user_role}), 200
+    return {"role": user_role}, 200
 
 @user_bp.route("/api/elevate-user", methods=["PUT"])
 @jwt_required()
@@ -190,11 +194,11 @@ def elevate_user():
         return NotFound("The email you're trying to change roles for does not exist")
 
     session.commit()
-    return jsonify({"message": "User role updated successfully"}), 200
+    return {"message": "User role updated successfully"}, 200
 
 @user_bp.route("/api/logout", methods=["POST"])
 @jwt_required()
 def logout():
-    response = jsonify({"message": "Logout successful"})
+    response = {"message": "Logout successful"}
     unset_jwt_cookies(response)
     return response

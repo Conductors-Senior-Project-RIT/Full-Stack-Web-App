@@ -1,4 +1,4 @@
-from flask import Flask, Response, jsonify
+from flask import Flask, Response
 from werkzeug.exceptions import HTTPException
 
 from ...database import db
@@ -71,6 +71,7 @@ def handle_other_errors(e: Exception) -> Response:
         Response: Constructs a Flask Response with a general error message and code of 500.
     """
     db.session.rollback()
+    if(TESTING_ENABLED): return {"error": e.args[0]}, 500
     return {"error": "Internal server error!"}, 500
         
         

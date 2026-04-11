@@ -83,8 +83,5 @@ class StationService(BaseService):
     def get_last_seen(self, station_name: str) -> str:
         return self._station_repo.get_last_seen(station_name)
         
-        
     def update_last_seen(self, station_id: int):
         self._station_repo.update_last_seen(station_id)
-            
-            

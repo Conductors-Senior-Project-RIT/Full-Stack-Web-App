@@ -42,8 +42,5 @@ class BaseTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        db.session.remove()
+        db.session.remove() # releases connection and transaction resources so a new scoped_session can use it then closes session and discards the session itself.
         cls.app_context.pop()
-
-    # def tearDown(self): # maybe move this outside base class and into child test classes ONLY relating to the database, not API (?)
-    #     db.session.rollback() # whenever a test_method runs, revert changes made in test db

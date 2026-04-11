@@ -61,11 +61,14 @@ class EOTRepository(RecordRepository[EOTRecord]):
         """
         
         # TODO: Move  to db
-        sql = """SELECT EOTRecords.id, date_rec, stat.station_name, sym.symb_name, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
+        sql = """SELECT EOTRecords.id, date_rec, stat.station_name, Symbols.symb_name, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength, verified FROM EOTRecords
                 INNER JOIN Stations as stat on station_recorded = stat.id
-                INNER JOIN Symbols as sym on symbol_id = sym.id"""
+                LEFT JOIN Symbols ON EOTRecords.symbol_id = Symbols.id \n"""
         
-        sql += "WHERE EOTRecords.id = :id ORDER BY EOTRecords.id Desc" if id == 1 else "ORDER BY date_rec DESC"
+        if id != -1:
+            sql += "WHERE EOTRecords.id = :id ORDER BY EOTRecords.id Desc\n"
+        else:
+            sql += "ORDER BY date_rec DESC\n"
         sql += "LIMIT :results_num OFFSET :offset * :results_num"
         
         sql_args = {"results_num": num_results, "offset": page - 1}
@@ -74,25 +77,25 @@ class EOTRepository(RecordRepository[EOTRecord]):
         resp = [row._asdict() for row in self.session.execute(text(sql), sql_args)]
         results = [
                     {
-                        "id": row[0],
-                        "date_rec": row[1],
-                        "station_name": row[2],
-                        "symbol_name": row[3],
-                        "unit_addr": row[4],
-                        "brake_pressure": row[5],
-                        "motion": row[6],
-                        "marker_light": row[7],
-                        "turbine": row[8],
-                        "battery_cond": row[9],
-                        "battery_charge": row[10],
-                        "arm_status": row[11],
-                        "signal_strength": row[12],
-                        "verified": row[13],
+                        "id": row["id"],
+                        "date_rec": str(row["date_rec"]),
+                        "station_name": row["station_name"],
+                        "symbol_name": row["symb_name"],
+                        "unit_addr": row["unit_addr"],
+                        "brake_pressure": row["brake_pressure"],
+                        "motion": row["motion"],
+                        "marker_light": row["marker_light"],
+                        "turbine": row["turbine"],
+                        "battery_cond": row["battery_cond"],
+                        "battery_charge": row["battery_charge"],
+                        "arm_status": row["arm_status"],
+                        "signal_strength": row["signal_strength"],
+                        "verified": row["verified"],
                     }
                     for row in resp
                 ]
         
-        if id == 1:    
+        if id != 1:    
             return results
     
         count = self.get_total_count_of_eot_records()
@@ -165,8 +168,8 @@ class EOTRepository(RecordRepository[EOTRecord]):
         sql = """
             SELECT * FROM EOTRecords 
             WHERE station_recorded = :station_id and most_recent = true 
-            INNER JOIN Symbols ON EOTRecords.symbol_id = Symbols.id 
-            INNER JOIN Engine_Numbers ON EOTRecords.engine_num = Engine_Numbers.id
+            LEFT JOIN Symbols ON EOTRecords.symbol_id = Symbols.id 
+            LEFT JOIN Engine_Numbers ON EOTRecords.engine_num = Engine_Numbers.id
         """
         args = {
             "station_id": station_id
@@ -292,7 +295,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
                 ORDER BY d.date_rec DESC
                 LIMIT :results_num OFFSET :offset
             """
-            args = {"results_num": num_results, "offset": (((page - 1) * num_results) + num_results)}
+            args = {"results_num": num_results, "offset": ((page - 1) * num_results)}
             resp = [row._asdict() for row in self.session.execute(text(sql), args).all()]
         except Exception as e:
             raise repository_error_translator(
@@ -397,30 +400,30 @@ class EOTRepository(RecordRepository[EOTRecord]):
             results = {
                     "results": [
                         {
-                            "id": row[0],
-                            "date_rec": row[1],
-                            "station_name": row[2],
-                            "symbol_id": row[3],
-                            "unit_addr": row[4],
-                            "brake_pressure": row[5],
-                            "motion": row[6],
-                            "marker_light": row[7],
-                            "turbine": row[8],
-                            "battery_cond": row[9],
-                            "battery_charge": row[10],
-                            "arm_status": row[11],
-                            "signal_strength": row[12],
-                            "verified": row[13],
-                            "first_seen": row[14],
-                            "last_seen": row[15],
-                            "ocurrence_count": str(row[16]),
-                            "duration": str(row[17]),
-                            "symbol_name": row[18],
-                            "locomotive_num": row[19],
+                            "id": row["id"],
+                            "date_rec": str(row["date_rec"]),
+                            "station_name": row["station_name"],
+                            "symbol_id": row["symbol_id"],
+                            "unit_addr": row["unit_addr"],
+                            "brake_pressure": row["brake_pressure"],
+                            "motion": row["motion"],
+                            "marker_light": row["marker_light"],
+                            "turbine": row["turbine"],
+                            "battery_cond": row["battery_cond"],
+                            "battery_charge": row["battery_charge"],
+                            "arm_status": row["arm_status"],
+                            "signal_strength": row["signal_strength"],
+                            "verified": row["verified"],
+                            "first_seen": str(row["first_seen"]),
+                            "last_seen": str(row["last_seen"]),
+                            "ocurrence_count": str(row["occurrence_count"]),
+                            "duration": str(row["duration"]),
+                            "symbol_name": row["symb_name"],
+                            "locomotive_num": row["locomotive_num"],
                         }
                         for row in resp
                     ],
-                    "totalPages": ceil(count[0][0] / num_results)
+                    "totalPages": ceil(count / num_results)
                 }
             return results
         

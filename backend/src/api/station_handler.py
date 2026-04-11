@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest
 from backend.src.service.station_service import StationService
@@ -18,7 +18,7 @@ def get_trains():
     results = StationService(session).get_trains_from_station(station)
     session.commit()
     
-    return jsonify(results), 200
+    return results, 200
 
 
     # # Fetch the station ID for the specified station
@@ -26,7 +26,7 @@ def get_trains():
     #     "SELECT id FROM Stations WHERE station_name = %s", (station,)
     # )
     # if not station_id:
-    #     return jsonify({"message": "Station not found"}), 404
+    #     return {"message": "Station not found"}, 404
     #
     # station_id = station_id[0][0]
     #
@@ -67,7 +67,7 @@ def get_trains():
     #     for record in hot_records
     # ]
     #
-    # return jsonify({"eot_records": eot_records, "hot_records": hot_records})
+    # return {"eot_records": eot_records, "hot_records": hot_records}
 
 @station_bp.route("/api/get-pin-info", methods=["GET"])
 # todo: refactor like above, just will get most recent station for type
@@ -80,7 +80,7 @@ def get_pin_info():
     results = StationService(session).get_trains_from_station(station, recent=True) 
     session.commit()
     
-    return jsonify(results), 200
+    return results, 200
     
 
     # Fetch the station ID for the specified station
@@ -88,7 +88,7 @@ def get_pin_info():
     #     "SELECT id FROM Stations WHERE station_name = %s", (station,)
     # )
     # if not station_id:
-    #     return jsonify({"message": "Station not found"}), 404
+    #     return {"message": "Station not found"}, 404
 
     # station_id = station_id[0][0]
 
@@ -136,4 +136,4 @@ def get_pin_info():
     #     for record in hot_records
     # ]
 
-    # return jsonify({"eot_records": eot_records, "hot_records": hot_records})
+    # return {"eot_records": eot_records, "hot_records": hot_records}

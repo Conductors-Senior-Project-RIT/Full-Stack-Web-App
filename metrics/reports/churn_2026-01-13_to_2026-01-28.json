@@ -1,0 +1,317 @@
+{
+ "Overall": {
+  "Total Lines Added": 395,
+  "Total Lines Deleted": 130,
+  "Total Lines Changed": 525,
+  "Commits": 12,
+  "Avg Lines Added Per Commit": 32.916666666666664,
+  "Avg Lines Deleted Per Commit": 10.833333333333334,
+  "Avg Lines Changed Per Commit": 43.75
+ },
+ "tracksenseweb/src/components/ForgotPassword.js": {
+  "Total Lines Added": 3,
+  "Total Lines Deleted": 3,
+  "Total Lines Changed": 6,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "tracksenseweb/src/components/Login.js": {
+  "Total Lines Added": 3,
+  "Total Lines Deleted": 3,
+  "Total Lines Changed": 6,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "tracksenseweb/src/components/Register.js": {
+  "Total Lines Added": 3,
+  "Total Lines Deleted": 3,
+  "Total Lines Changed": 6,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "tracksenseweb/src/components/ResetPassword.js": {
+  "Total Lines Added": 3,
+  "Total Lines Deleted": 3,
+  "Total Lines Changed": 6,
+  "Commits on File": 3,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/user.py": {
+  "Total Lines Added": 25,
+  "Total Lines Deleted": 26,
+  "Total Lines Changed": 51,
+  "Commits on File": 5,
+  "Avg Lines Added Per Commit": 5.0,
+  "Avg Lines Deleted Per Commit": 5.2,
+  "Avg Lines Changed Per Commit": 10.2
+ },
+ "tracksenseweb/src/App.js": {
+  "Total Lines Added": 16,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 16,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 4.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 4.0
+ },
+ "tracksenseweb/src/components/Fairgrounds.js": {
+  "Total Lines Added": 52,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 52,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 13.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 13.0
+ },
+ "tracksenseweb/src/components/Home.js": {
+  "Total Lines Added": 80,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 80,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 20.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 20.0
+ },
+ "tracksenseweb/src/components/Pittsford.js": {
+  "Total Lines Added": 52,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 52,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 13.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 13.0
+ },
+ "database/src/__init__.py": {
+  "Total Lines Added": 0,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 0,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 0.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 0.0
+ },
+ "database/src/api/UserPreferencesAPI.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/__init__.py": {
+  "Total Lines Added": 0,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 0,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 0.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 0.0
+ },
+ "database/src/api/admin_handler.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/data_collation.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/hot_collation.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/load_example_data.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/log_verifier.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/notification_handler.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/pushover_updater.py": {
+  "Total Lines Added": 2,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 6,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 0.5,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 1.5
+ },
+ "database/src/api/reset_db.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/signal_update_handler.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 8,
+  "Total Lines Changed": 12,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 2.0,
+  "Avg Lines Changed Per Commit": 3.0
+ },
+ "database/src/api/station_auth.py": {
+  "Total Lines Added": 10,
+  "Total Lines Deleted": 10,
+  "Total Lines Changed": 20,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 2.5,
+  "Avg Lines Deleted Per Commit": 2.5,
+  "Avg Lines Changed Per Commit": 5.0
+ },
+ "database/src/api/station_handler.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/station_online.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/symbol_api.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/symbol_id_api.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/time_frame_pull.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 6,
+  "Total Lines Changed": 10,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.5,
+  "Avg Lines Changed Per Commit": 2.5
+ },
+ "database/src/api/train_history.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/train_test.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/api/verifier_hot.py": {
+  "Total Lines Added": 4,
+  "Total Lines Deleted": 4,
+  "Total Lines Changed": 8,
+  "Commits on File": 4,
+  "Avg Lines Added Per Commit": 1.0,
+  "Avg Lines Deleted Per Commit": 1.0,
+  "Avg Lines Changed Per Commit": 2.0
+ },
+ "database/src/db/__init__.py": {
+  "Total Lines Added": 0,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 0,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 0.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 0.0
+ },
+ "database/test/__init__.py": {
+  "Total Lines Added": 0,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 0,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 0.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 0.0
+ },
+ "database/test/api/__init__.py": {
+  "Total Lines Added": 0,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 0,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 0.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 0.0
+ },
+ "database/test/api/test_station_auth.py": {
+  "Total Lines Added": 30,
+  "Total Lines Deleted": 0,
+  "Total Lines Changed": 30,
+  "Commits on File": 2,
+  "Avg Lines Added Per Commit": 15.0,
+  "Avg Lines Deleted Per Commit": 0.0,
+  "Avg Lines Changed Per Commit": 15.0
+ }
+}

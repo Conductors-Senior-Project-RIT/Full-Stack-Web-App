@@ -1,5 +1,4 @@
-
-from flask import jsonify, request
+from flask import request
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest
 from ..service.record_service import RecordService
@@ -35,5 +34,5 @@ class recent_activities(Resource):
         )
         session.commit()
         
-        return jsonify(results), 200
+        return results, 200
 

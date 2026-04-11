@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import request
 from flask_restful import Resource
 from backend.database import db
 from ..service.record_service import RecordService
@@ -37,4 +37,4 @@ class RecordCollation(Resource):
         results = record_service.collate_records(page)
         session.commit()
         
-        return jsonify(results), 200
+        return results, 200

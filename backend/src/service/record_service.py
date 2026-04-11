@@ -54,11 +54,11 @@ class RecordService(BaseService):
         
     def add_new_pin(self, repository: RecordRepository, unit_addr: str):
         # Update the symbol id and engine num of the new record
-        self.attempt_auto_fill(unit_addr)
+        self.attempt_auto_fill(repository, unit_addr)
         # Get most recent record (the one just created)
         resp_id = repository.get_unit_record_ids(unit_addr, True)
         # Make the newly created record the only record where most_recent = True
-        repository.add_new_pin(resp_id, int(unit_addr))
+        repository.add_new_pin(resp_id, unit_addr)
         
         
     def attempt_auto_fill(self, repository: RecordRepository, unit_addr: str):
@@ -80,7 +80,7 @@ class RecordService(BaseService):
     
     # Log Verification
     def get_unverified_records(self, page: int) -> dict[str, list | str]:
-        return self.get_first_repository().get_record_collation(page, False, RESULTS_NUM)
+        return self.get_first_repository().get_record_collation(page, RESULTS_NUM, False)
         
         
     def verify_record(self, record_id: int, symbol_id: int, engine_id: int):
@@ -111,9 +111,11 @@ class RecordService(BaseService):
             results = []
             for repo in self._record_repo:
                 repo_resp = repo.get_records_in_timeframe(station_id, timeframe, recent)
-                results.append(repo_resp)
+                results.extend(repo_resp)
             
             results.sort(key=lambda x: x["date_rec"], reverse=True)
+            for row in results:
+                row["date_rec"] = str(row["date_rec"])
             return results
         
         except (IndexError, KeyError) as e:

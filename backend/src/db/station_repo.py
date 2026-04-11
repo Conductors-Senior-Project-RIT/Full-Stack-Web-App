@@ -13,7 +13,7 @@ class StationRepository(BaseRepository[Station]):
         super().__init__(Station, session)
         
 
-    @repository_error_handler
+    @repository_error_handler()
     def get_stations(self) -> list[dict[str, Any]]:
         """Returns a collection of ID and station name pairs from the Stations table.
 
@@ -26,12 +26,12 @@ class StationRepository(BaseRepository[Station]):
         results = [row._asdict() for row in self.session.execute(sql).all()]
         
         return [{
-            "id": pair[0],
-            "name": pair[1]
+            "id": pair["id"],
+            "name": pair["station_name"]
         } for pair in results]
     
             
-    @repository_error_handler
+    @repository_error_handler()
     def create_new_station(self, station_name: str, hashed_password: str) -> int:
         """Creates a new station given a station name and a hashed password in the Stations table.
         
@@ -62,7 +62,7 @@ class StationRepository(BaseRepository[Station]):
         return result
 
 
-    @repository_error_handler
+    @repository_error_handler()
     def update_station_password(self, station_id: str, hashed_password: str) -> str:
         """Updates a station's password given its respective ID.
         
@@ -121,7 +121,7 @@ class StationRepository(BaseRepository[Station]):
             )
         
 
-    @repository_error_handler
+    @repository_error_handler()
     def get_last_seen(self, station_name: str) -> str:
         sql = "SELECT last_seen FROM stations WHERE station_name = :station_name;"
         result = self.session.execute(text(sql), {"station_name": station_name}).scalar_one_or_none()
@@ -140,7 +140,7 @@ class StationRepository(BaseRepository[Station]):
         return formatted_date
 
         
-    @repository_error_handler
+    @repository_error_handler()
     def update_last_seen(self, station_id: int):
         sql = "UPDATE stations SET last_seen = NOW() WHERE id = %(id)s;"
 
