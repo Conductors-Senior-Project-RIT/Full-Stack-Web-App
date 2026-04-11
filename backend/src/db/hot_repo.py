@@ -25,7 +25,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
     # below is train_history.py related
     @repository_error_handler()
     def get_train_history(self, record_id: int, page: int, num_results: int) -> list[dict[str,Any]]:
-        from .db_core.models import Station
+        from .db_core.models import Station, Symbol
         
         # sql = """
         #         SELECT HOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, command, checkbits, parity, verified FROM HOTRecords
@@ -40,6 +40,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
                 self.model.id, 
                 self.model.date_rec,
                 Station.station_name,
+                Symbol.symb_name,
                 self.model.symbol_id,
                 self.model.unit_addr,
                 self.model.command, 
@@ -48,6 +49,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
                 self.model.verified
             )
             .join(Station, Station.id == self.model.station_recorded)
+            .join(Symbol, Symbol.id == self.model.symbol_id)
             .where(self.model.id == record_id)
             .limit(num_results).offset((page - 1) * num_results)
         )

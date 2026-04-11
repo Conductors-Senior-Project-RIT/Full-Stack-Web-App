@@ -41,7 +41,6 @@ class TestRepository(RecordRepository):
 
 
 class TestRecordRepository(BaseTestCase):
-    """We don't need to use BaseTestCase since this class does not use DB connection."""
     def setUp(self):
         self.session = db.session
         TestTrainRecord.__table__.drop(bind=db.engine, checkfirst=True)
@@ -58,7 +57,8 @@ class TestRecordRepository(BaseTestCase):
                 symbol_id=1,
                 engine_num=1,
                 locomotive_num="CT00",
-                verified=True
+                verified=True,
+                signal_strength=0.0
             ),
             TestTrainRecord(
                 id=2,
@@ -69,7 +69,8 @@ class TestRecordRepository(BaseTestCase):
                 symbol_id=2,
                 engine_num=2,
                 locomotive_num="TG00",
-                verified=True
+                verified=True,
+                signal_strength=0.0
             ),
             TestTrainRecord(
                 id=3,
@@ -80,7 +81,8 @@ class TestRecordRepository(BaseTestCase):
                 symbol_id=1,
                 engine_num=1,
                 locomotive_num="EL00",
-                verified=False
+                verified=False,
+                signal_strength=0.0
             ),
             TestTrainRecord(
                 id=4,
@@ -91,7 +93,8 @@ class TestRecordRepository(BaseTestCase):
                 symbol_id=2,
                 engine_num=2,
                 locomotive_num="CY00",
-                verified=False
+                verified=False,
+                signal_strength=0.0
             )
         ]
         
@@ -226,6 +229,7 @@ class TestRecordRepository(BaseTestCase):
     ##  get_station_records  ##
     ###########################
     def testGetStationRecords(self):
+        self.maxDiff = None
         # All tests will be executed with recent=False in this class
         expected = [self.test_data[0], self.test_data[2]]
         result = self.repo.get_station_records(1)

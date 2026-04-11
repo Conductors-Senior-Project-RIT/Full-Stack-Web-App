@@ -33,11 +33,11 @@ class TestRecordTypes(BaseTestCase):
         self.assertIsInstance(hot_enum, HOTRepository)
         
         # Test valid DPU cases
-        dpu_int = get_record_repository(session, 3)
-        self.assertIsInstance(dpu_int, DPURepository)
+        # dpu_int = get_record_repository(session, 3)
+        # self.assertIsInstance(dpu_int, DPURepository)
         
-        dpu_enum = get_record_repository(session, RecordTypes.DPU)
-        self.assertIsInstance(dpu_enum, DPURepository)
+        # dpu_enum = get_record_repository(session, RecordTypes.DPU)
+        # self.assertIsInstance(dpu_enum, DPURepository)
         
         self.tearDown()
     

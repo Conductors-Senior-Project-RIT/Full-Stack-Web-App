@@ -4,13 +4,7 @@ from .db_core.models import Base
 
 class DPURepository(RecordRepository):
     def __init__(self, session):
-        super().__init__(
-            Base,
-            session, 
-            "DPURecords", 
-            "DPU Record", 
-            "dpu"
-        )
+        raise NotImplementedError
     
     @repository_error_handler()
     def get_train_history(self, id, page, num_results):

@@ -17,22 +17,27 @@ class Base(db.Model):
         for key, value in kwargs.items():
             setattr(self, key, value)
     
-    def _asdict(self) -> dict[str, Any]:
+    def _asdict(self):
+        mapper = inspect(self.__class__)
         return {
-            col.key : getattr(self, col.key)
-            for col in inspect(self).mapper.column_attrs
+            col.key: getattr(self, col.key)
+            for col in mapper.columns
         }
         
     def __hash__(self):
-        return hash((self.__class__, self.id))
+        return hash(tuple(sorted(self._asdict().items())))
 
-    def __eq__(self, other) -> bool:
-        if isinstance(other, Base):
+    def __eq__(self, other):
+        if self is other:
+            return True
+        
+        if isinstance(other, self.__class__):
             return self._asdict() == other._asdict()
-        elif isinstance(other, dict):
+        
+        if isinstance(other, dict):
             return self._asdict() == other
-        else:
-            return False
+        
+        return False
             
     def copy(self) -> Self:
         return self.__class__(**self._asdict())
