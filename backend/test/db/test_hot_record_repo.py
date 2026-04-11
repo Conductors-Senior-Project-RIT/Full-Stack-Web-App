@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
 
-from backend.src.db.db_core.repository import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
+from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.database import db
 from backend.src.db.hot_repo import HOTRepository
 from backend.test.base_test_case import BaseTestCase
@@ -43,7 +43,7 @@ class TestHOTRecordRepository(BaseTestCase):
         date_rec = datetime.strptime("2026-01-08 04:05:06:-0400", "%Y-%m-%d %H:%M:%S:%z")
         data = {
             "date_rec": date_rec,
-            "station_recorded": 2,
+            "station_id": 2,
             "frame_sync": "beep",
             "command": "boop",
             "checkbits": "C1",
@@ -52,30 +52,24 @@ class TestHOTRecordRepository(BaseTestCase):
         }
         
         # Test recovery request creation
-        result_obj, result_recov = self.repo.create_train_record(data, None, False)
-        self.assertEqual(8, result_obj["id"])
-        self.assertEqual(date_rec, result_obj["date_rec"])
+        result_id, result_recov = self.repo.create_train_record(data, None, False)
+        self.assertEqual(8, result_id)
         self.assertEqual(True, result_recov)
         
         # Test non-recovery request creation
         data["date_rec"] = None
-        result_obj, result_recov = self.repo.create_train_record(data, date_rec, False)
-        self.assertEqual(9, result_obj["id"])
-        self.assertEqual(date_rec, result_obj["date_rec"])
+        result_id, result_recov = self.repo.create_train_record(data, date_rec, False)
+        self.assertEqual(9, result_id)
         self.assertEqual(False, result_recov)
         
         # Test datetime never provided exceptions
         with self.assertRaises(RepositoryInvalidArgumentError):
             self.repo.create_train_record(data, None, False)
             
-        # Test "create" return exceptions
-        with patch.object(HOTRepository, "create") as mock:
-            mock.return_value = []
+        # Test "execute" return exceptions
+        with patch.object(Session, "execute") as mock:
+            mock.return_value = None
             
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.create_train_record(data, date_rec, True)
-                
-            mock.return_value = [{"id": 6}, {"id": 7}]
             with self.assertRaises(RepositoryInternalError):
                 self.repo.create_train_record(data, date_rec, True)
         
@@ -91,77 +85,82 @@ class TestHOTRecordRepository(BaseTestCase):
         all_expected = {
             'results': [
                 {
+                    'command': 'unknown',
                     'date_rec': '2026-08-16 20:17:11',
-                    'duration': '0000-00-00 00:00:00',
+                    'duration': '0:00:00',
                     'first_seen': '2026-08-16 20:17:11',
                     'id': 7,
                     'last_seen': '2026-08-16 20:17:11',
                     'locomotive_num': 'unknown',
-                    'occurrence_count': 1,
+                    'occurrence_count': '1',
                     'signal_strength': 0.0,
                     'station_name': 'test station1',
-                    'symb_name': None,
                     'symbol_id': None,
+                    'symbol_name': None,
                     'unit_addr': '1234',
                     'verified': False
                 },
                 {
+                    'command': 'unknown',
                     'date_rec': '2021-08-16 20:17:11',
-                    'duration': '0000-00-00 00:00:00',
+                    'duration': '0:00:00',
                     'first_seen': '2021-08-16 20:17:11',
                     'id': 6,
                     'last_seen': '2021-08-16 20:17:11',
                     'locomotive_num': 'unknown',
-                    'occurrence_count': 1,
+                    'occurrence_count': '1',
                     'signal_strength': 0.0,
                     'station_name': 'test station2',
-                    'symb_name': None,
                     'symbol_id': None,
+                    'symbol_name': None,
                     'unit_addr': '9910',
                     'verified': False
                 },
                 {
+                    'command': 'unknown',
                     'date_rec': '2021-08-16 20:16:11',
-                    'duration': '0000-00-00 00:02:00',
+                    'duration': '0:02:00',
                     'first_seen': '2021-08-16 20:14:11',
                     'id': 5,
                     'last_seen': '2021-08-16 20:16:11',
                     'locomotive_num': 'unknown',
-                    'occurrence_count': 3,
+                    'occurrence_count': '3',
                     'signal_strength': 0.0,
                     'station_name': 'test station1',
-                    'symb_name': None,
                     'symbol_id': None,
+                    'symbol_name': None,
                     'unit_addr': '9910',
                     'verified': False
                 },
-                {  
+                {
+                    'command': 'unknown',
                     'date_rec': '2001-02-04 01:23:45',
-                    'duration': '0000-00-00 00:00:00',
+                    'duration': '0:00:00',
                     'first_seen': '2001-02-04 01:23:45',
                     'id': 2,
                     'last_seen': '2001-02-04 01:23:45',
                     'locomotive_num': 'unknown',
-                    'occurrence_count': 1,
+                    'occurrence_count': '1',
                     'signal_strength': 0.0,
                     'station_name': 'test station1',
-                    'symb_name': None,
                     'symbol_id': None,
+                    'symbol_name': None,
                     'unit_addr': '5678',
                     'verified': False
                 },
-                {  
+                {
+                    'command': 'unknown',
                     'date_rec': '1999-01-08 04:10:21',
-                    'duration': '0000-00-00 00:00:00',
+                    'duration': '0:00:00',
                     'first_seen': '1999-01-08 04:10:21',
                     'id': 1,
                     'last_seen': '1999-01-08 04:10:21',
                     'locomotive_num': 'unknown',
-                    'occurrence_count': 1,
+                    'occurrence_count': '1',
                     'signal_strength': 0.0,
                     'station_name': 'test station1',
-                    'symb_name': None,
                     'symbol_id': None,
+                    'symbol_name': None,
                     'unit_addr': '1234',
                     'verified': False
                 }
@@ -201,68 +200,83 @@ class TestHOTRecordRepository(BaseTestCase):
     def testGetRecordsByVerification(self):
         test_results = [
             {
+                'command': 'unknown',
                 'date_rec': '2026-08-16 20:17:11',
-                'duration': '0000-00-00 00:00:00',
+                'duration': '0:00:00',
                 'first_seen': '2026-08-16 20:17:11',
                 'id': 7,
                 'last_seen': '2026-08-16 20:17:11',
-                'occurrence_count': 1,
+                'locomotive_num': 'unknown',
+                'occurrence_count': '1',
                 'signal_strength': 0.0,
                 'station_name': 'test station1',
                 'symbol_id': None,
+                'symbol_name': None,
                 'unit_addr': '1234',
                 'verified': False
             },
             {
-                'date_rec': '1999-01-08 04:10:21',
-                'duration': '0000-00-00 00:00:00',
-                'first_seen': '1999-01-08 04:10:21',
-                'id': 1,
-                'last_seen': '1999-01-08 04:10:21',
-                'occurrence_count': 1,
+                'command': 'unknown',
+                'date_rec': '2021-08-16 20:17:11',
+                'duration': '0:00:00',
+                'first_seen': '2021-08-16 20:17:11',
+                'id': 6,
+                'last_seen': '2021-08-16 20:17:11',
+                'locomotive_num': 'unknown',
+                'occurrence_count': '1',
                 'signal_strength': 0.0,
-                'station_name': 'test station1',
+                'station_name': 'test station2',
                 'symbol_id': None,
-                'unit_addr': '1234',
+                'symbol_name': None,
+                'unit_addr': '9910',
                 'verified': False
             },
             {
+                'command': 'unknown',
+                'date_rec': '2021-08-16 20:16:11',
+                'duration': '0:02:00',
+                'first_seen': '2021-08-16 20:14:11',
+                'id': 5,
+                'last_seen': '2021-08-16 20:16:11',
+                'locomotive_num': 'unknown',
+                'occurrence_count': '3',
+                'signal_strength': 0.0,
+                'station_name': 'test station1',
+                'symbol_id': None,
+                'symbol_name': None,
+                'unit_addr': '9910',
+                'verified': False
+            },
+            {
+                'command': 'unknown',
                 'date_rec': '2001-02-04 01:23:45',
-                'duration': '0000-00-00 00:00:00',
+                'duration': '0:00:00',
                 'first_seen': '2001-02-04 01:23:45',
                 'id': 2,
                 'last_seen': '2001-02-04 01:23:45',
-                'occurrence_count': 1,
+                'locomotive_num': 'unknown',
+                'occurrence_count': '1',
                 'signal_strength': 0.0,
                 'station_name': 'test station1',
                 'symbol_id': None,
+                'symbol_name': None,
                 'unit_addr': '5678',
                 'verified': False
             },
             {
-                'date_rec': '2021-08-16 20:17:11',
-                'duration': '0000-00-00 00:00:00',
-                'first_seen': '2021-08-16 20:17:11',
-                'id': 6,
-                'last_seen': '2021-08-16 20:17:11',
-                'occurrence_count': 1,
-                'signal_strength': 0.0,
-                'station_name': 'test station2',
-                'symbol_id': None,
-                'unit_addr': '9910',
-                'verified': False
-            },
-            {
-                'date_rec': '2021-08-16 20:16:11',
-                'duration': '0000-00-00 00:02:00',
-                'first_seen': '2021-08-16 20:14:11',
-                'id': 5,
-                'last_seen': '2021-08-16 20:16:11',
-                'occurrence_count': 3,
+                'command': 'unknown',
+                'date_rec': '1999-01-08 04:10:21',
+                'duration': '0:00:00',
+                'first_seen': '1999-01-08 04:10:21',
+                'id': 1,
+                'last_seen': '1999-01-08 04:10:21',
+                'locomotive_num': 'unknown',
+                'occurrence_count': '1',
                 'signal_strength': 0.0,
                 'station_name': 'test station1',
                 'symbol_id': None,
-                'unit_addr': '9910',
+                'symbol_name': None,
+                'unit_addr': '1234',
                 'verified': False
             }
         ]
@@ -278,12 +292,14 @@ class TestHOTRecordRepository(BaseTestCase):
         
         for i in range(4, 7):
             self.repo.verify_record(i, 1, "cheese balls")
-        for i in range(3, 5):
+        for i in range(1, 3):
             test_results[i]["symbol_id"] = 1
-            test_results[i]["verified"] = True    
+            test_results[i]["verified"] = True 
+            test_results[i]["locomotive_num"] = "cheese balls"  
+            test_results[i]["symbol_name"] = "Test Symbol1" 
         
         results = self.repo.get_record_collation(1, 250, True)
-        self.assertEqual({"results": test_results[3:5], "totalPages": 1}, results)
+        self.assertEqual({"results": test_results[1:3], "totalPages": 1}, results)
         
     def testGetRecordsByVerificationException(self):
         with self.assertRaises(RepositoryInvalidArgumentError):

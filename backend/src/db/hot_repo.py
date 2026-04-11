@@ -60,7 +60,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
         return result_dict
 
     @repository_error_handler()
-    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None, return_id=True) -> tuple[Any | dict[str, Any], bool]: # type: ignore
+    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None, return_id=True) -> int: # type: ignore
         """
         TODO: Namespace is the type for args for post methods in train_history... look more into this
         TODO: run_exec_cmd returns none always... think of what to return lol
@@ -84,19 +84,27 @@ class HOTRepository(RecordRepository[HOTRecord]):
         }
         
         if args["date_rec"] is None:
+            if datetime_string is None:
+                raise RepositoryInvalidArgumentError(
+                    caller_name=self.__class__.__name__,
+                    message="Record timestamp must be provided!",
+                    show_error=True
+                )
+                
             sql_args["date"] = datetime_string
             recovery_request = False
             
-        result = self.session.execute(text(sql), sql_args).scalar_one_or_none()
+            
+        result_id = self.session.execute(text(sql), sql_args).scalar_one_or_none()
 
-        if not result:
+        if not result_id:
             raise RepositoryInternalError(
                 caller_name=self.__class__.__name__,
                 message="Could not create new train record, 0 rows created!",
                 show_error=True
             )
             
-        return result, recovery_request
+        return result_id, recovery_request
 
 
     # below is for station_handler.py
@@ -218,9 +226,15 @@ class HOTRepository(RecordRepository[HOTRecord]):
                 LEFT JOIN Symbols f
                 ON d.symbol_id = f.id
                 WHERE d.row_num = 1
+            """
+            
+            if verified is not None:
+                sql += f"AND verified = {verified}"
+            sql += """
                 ORDER BY d.date_rec DESC
                 LIMIT :results_num OFFSET :offset
             """
+            
             args = {"results_num": num_results, "offset": (page - 1) * num_results}
             results = self.session.execute(text(sql), args).all()
             resp = self.objs_to_dicts(results)

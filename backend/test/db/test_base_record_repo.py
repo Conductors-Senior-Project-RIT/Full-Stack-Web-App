@@ -12,7 +12,8 @@ from sqlalchemy.orm import relationship
 from backend.database import db
 from backend.src.db.db_core.models import BaseRecord
 from backend.src.db.base_record_repo import RecordRepository
-from backend.src.db.db_core.repository import BaseRepository, RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
+from backend.src.db.db_core.repository import BaseRepository
+from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.test.base_test_case import BaseTestCase
 
 

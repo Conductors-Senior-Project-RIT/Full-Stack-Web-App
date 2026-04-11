@@ -122,9 +122,8 @@ class EOTRepository(RecordRepository[EOTRecord]):
         TODO: integrate this function to replace sql queries in train_history.py's post_eot() | train_history post() looks gross with parser.add_argument... how to make cleaner?
         TODO: improve documentation
         """
-        recovery_request = True # what is this exactly 
+        recovery_request = True
 
-        # We need an ORM...
         sql = """
             INSERT INTO EOTRecords (date_rec, symbol_id, station_recorded, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength) VALUES
             (:date, :symbol_id, :station,  :unit_addr, :brake_pressure, :motion, :marker_light, :turbine, :battery_cond, :battery_charge, :arm_status, :signal_strength)
