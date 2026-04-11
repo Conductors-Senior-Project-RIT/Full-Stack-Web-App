@@ -24,7 +24,7 @@ const Station = ({ station, image, locationImage }) => {
   });
 
   useEffect(() => {
-    fetch(`${config.apiUrl}/recent_activities?type=3&station_name=${station}&most_recent=0&timerange=12:00:00`)
+    fetch(`${config.apiUrl}/recent_activities?station_name=${station}&most_recent=0&timerange=12:00:00`)
       .then(response => response.json())
       .then(data => {
         const records = [...data.reduce((map, item) => {

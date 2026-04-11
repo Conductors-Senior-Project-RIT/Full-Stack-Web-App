@@ -26,9 +26,20 @@ const VerifyHOT = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "1");
 
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  };
+
   // Fetch data from the API
   useEffect(() => {
-    fetch(`${config.apiUrl}/verifier_hot?page=${page}`)
+    let token = getCookie('token');
+    fetch(`${config.apiUrl}/record_verifier?page=${page}&type=2`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then(response => response.json())
       .then(data => {
         setData(data.results);
@@ -38,38 +49,52 @@ const VerifyHOT = () => {
 
     fetch(`${config.apiUrl}/symbols`)
       .then(response => response.json())
-      .then(symbols => setSymbols(symbols))
-      .catch(error => console.error('Error fetching symbols:', error));
+      .then((data) => {
+        if (data && data.results) {
+          setSymbols(data.results);
+        } else {
+          console.error('Response payload empty!');
+        }
+      })
+      .catch(error => console.error('Error fetching symbols:', error.message));
   }, [page]);
 
   // Perform verification
   const performVerification = () => {
     let symbolId = -1;
-    fetch(`${config.apiUrl}/symbol_ids?symbol_name=${modalSymbol}`)
+    fetch(`${config.apiUrl}/symbols?symbol_name=${modalSymbol}`)
       .then(response => response.json())
       .then(data => {
-        symbolId = data.id;
+
+        if (!data || !data.results)
+          throw new Error("No results we returned!");
+
+        symbolId = data.results[0];
         if (symbolId !== -1) {
-          fetch(`${config.apiUrl}/verifier_hot`, {
+          let token = getCookie('token');
+          fetch(`${config.apiUrl}/record_verifier`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
               id: modalId,
+              type: 2,
               symbol: symbolId,
               engine_number: modalEngineNum,
             }),
           })
-            .then(response => response.ok)
-            .then(response => {
-              if (response) {
-                console.log('HOT record verified successfully.');
-                window.location.reload(); // Reload the page
-              }
-            });
+          .then(response => response.ok)
+          .then(response => {
+            if (response) {
+              console.log('HOT record verified successfully.');
+              window.location.reload(); // Reload the page
+            }
+          });
         }
-      });
+      })
+      .catch(error => console.error(error));
   };
 
   // Handle modal show

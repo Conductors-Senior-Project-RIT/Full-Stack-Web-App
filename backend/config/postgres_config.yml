@@ -1,0 +1,5 @@
+host:localhost
+database:tmg2102
+user:tmg2102
+password:pass
+port:5432
