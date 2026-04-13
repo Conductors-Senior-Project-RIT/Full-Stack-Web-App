@@ -191,7 +191,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
     # below is for eot_collation
     def get_record_collation(self, page: int, num_results: int, verified: bool | None = None) -> dict[str, list | str]:
         try:
-            sql = """
+            sql = f"""
                 WITH StationChanges AS (
                     SELECT
                         e.id,
@@ -302,11 +302,19 @@ class EOTRepository(RecordRepository[EOTRecord]):
                 LEFT JOIN Symbols f
                 ON d.symbol_id = f.id
                 WHERE d.row_num = 1
+            """
+            
+            if verified is not None:
+                sql += f"AND verified = {verified}"
+            sql += """
                 ORDER BY d.date_rec DESC
                 LIMIT :results_num OFFSET :offset
             """
-            args = {"results_num": num_results, "offset": ((page - 1) * num_results)}
-            resp = [row._asdict() for row in self.session.execute(text(sql), args).all()]
+            
+            args = {"results_num": num_results, "offset": (page - 1) * num_results}
+            results = self.session.execute(text(sql), args).all()
+            resp = self.objs_to_dicts(results)
+            
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
@@ -397,9 +405,12 @@ class EOTRepository(RecordRepository[EOTRecord]):
                         AND g.station_recorded = uo.station_recorded
                         AND g.group_id = uo.group_id
                 )
-                SELECT COUNT(*) FROM UnitAddrDetails WHERE row_num = 1;
+                SELECT COUNT(*) FROM UnitAddrDetails WHERE row_num = 1
             """
+            
+            count_sql += f"AND verified = {verified};" if verified is not None else ";"
             count = self.session.execute(text(count_sql)).scalar_one()
+            
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
@@ -426,7 +437,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
                             "verified": row["verified"],
                             "first_seen": str(row["first_seen"]),
                             "last_seen": str(row["last_seen"]),
-                            "ocurrence_count": str(row["occurrence_count"]),
+                            "occurrence_count": str(row["occurrence_count"]),
                             "duration": str(row["duration"]),
                             "symbol_name": row["symb_name"],
                             "locomotive_num": row["locomotive_num"],

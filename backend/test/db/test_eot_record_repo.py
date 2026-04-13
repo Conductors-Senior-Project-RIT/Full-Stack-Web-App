@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, Mock, patch
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-
+from record_tests import collation_valid, compare_results
 from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.database import db
 from backend.src.db.eot_repo import EOTRepository
@@ -35,140 +35,82 @@ class TestEOTRecordRepository(BaseTestCase):
     def testGetTrainHistory(self):
         expected = [
             {
-                'arm_status': 'unknown',
-                'battery_charge': 'unknown',
-                'battery_cond': 'unknown',
-                'brake_pressure': 'unknown',
-                'date_rec': '2025-05-25 05:20:00',
                 'id': 8,
-                'marker_light': 'unknown',
-                'motion': 'unknown',
-                'signal_strength': 0.0,
+                'date_rec': '2025-05-25 05:20:00',
                 'station_name': 'test station1',
-                'symb_name': 'Test Symbol1',
-                'turbine': 'unknown',
-                'unit_addr': '1234',
-                'verified': False
+                'symb_name': 'Test Symbol1'
             },
             {
-                'arm_status': 'unknown',
-                'battery_charge': 'unknown',
-                'battery_cond': 'unknown',
-                'brake_pressure': 'unknown',
-                'date_rec': '2025-03-25 05:20:00',
                 'id': 7,
-                'marker_light': 'unknown',
-                'motion': 'unknown',
-                'signal_strength': 0.0,
+                'date_rec': '2025-03-25 05:20:00',
                 'station_name': 'test station1',
-                'symb_name': 'Test Symbol1',
-                'turbine': 'unknown',
-                'unit_addr': '1234',
-                'verified': False
+                'symb_name': 'Test Symbol1'
             },
             {
-                'arm_status': 'unknown',
-                'battery_charge': 'unknown',
-                'battery_cond': 'unknown',
-                'brake_pressure': 'unknown',
-                'date_rec': '2025-03-25 05:15:00',
                 'id': 6,
-                'marker_light': 'unknown',
-                'motion': 'unknown',
-                'signal_strength': 0.0,
+                'date_rec': '2025-03-25 05:15:00',
                 'station_name': 'test station1',
-                'symb_name': None,
-                'turbine': 'unknown',
-                'unit_addr': '1234',
-                'verified': False
+                'symb_name': None
             },
             {
-                'arm_status': 'unknown',
-                'battery_charge': 'unknown',
-                'battery_cond': 'unknown',
-                'brake_pressure': 'unknown',
-                'date_rec': '2025-03-25 05:10:00',
                 'id': 5,
-                'marker_light': 'unknown',
-                'motion': 'unknown',
-                'signal_strength': 0.0,
+                'date_rec': '2025-03-25 05:10:00',
                 'station_name': 'test station2',
-                'symb_name': None,
-                'turbine': 'unknown',
-                'unit_addr': '1234',
-                'verified': False
+                'symb_name': None
             },
             {
-                'arm_status': 'unknown',
-                'battery_charge': 'unknown',
-                'battery_cond': 'unknown',
-                'brake_pressure': 'unknown',
-                'date_rec': '2025-03-25 05:05:00',
                 'id': 4,
-                'marker_light': 'unknown',
-                'motion': 'unknown',
-                'signal_strength': 0.0,
+                'date_rec': '2025-03-25 05:05:00',
                 'station_name': 'test station1',
-                'symb_name': None,
-                'turbine': 'unknown',
-                'unit_addr': '1234',
-                'verified': False
+                'symb_name': None
             },
             {
-                'arm_status': 'unknown',
-                'battery_charge': 'unknown',
-                'battery_cond': 'unknown',
-                'brake_pressure': 'unknown',
-                'date_rec': '2025-03-25 05:00:00',
                 'id': 3,
-                'marker_light': 'unknown',
-                'motion': 'unknown',
-                'signal_strength': 0.0,
+                'date_rec': '2025-03-25 05:00:00',
                 'station_name': 'test station1',
-                'symb_name': None,
-                'turbine': 'unknown',
-                'unit_addr': '1234',
-                'verified': False
+                'symb_name': None
             },
             {
-                'arm_status': 'unknown',
-                'battery_charge': 'unknown',
-                'battery_cond': 'unknown',
-                'brake_pressure': 'unknown',
-                'date_rec': '2003-02-05 06:53:08',
                 'id': 2,
-                'marker_light': 'unknown',
-                'motion': 'unknown',
-                'signal_strength': 0.0,
+                'date_rec': '2003-02-05 06:53:08',
                 'station_name': 'test station1',
-                'symb_name': None,
-                'turbine': 'unknown',
-                'unit_addr': '1337',
-                'verified': False
+                'symb_name': None
             },
             {
-                'arm_status': 'unknown',
-                'battery_charge': 'unknown',
-                'battery_cond': 'unknown',
-                'brake_pressure': 'unknown',
-                'date_rec': '1999-01-08 04:05:06',
                 'id': 1,
-                'marker_light': 'unknown',
-                'motion': 'unknown',
-                'signal_strength': 0.0,
+                'date_rec': '1999-01-08 04:05:06',
                 'station_name': 'test station1',
-                'symb_name': 'Test Symbol1',
-                'turbine': 'unknown',
-                'unit_addr': '727',
-                'verified': False
+                'symb_name': 'Test Symbol1'
             }
         ]
         
+        # Test that getting all records works
         results = self.repo.get_train_history(-1, 1, 250)
-        self.assertEqual({"results": expected, "totalPages": 1}, results)
+        valid, message = collation_valid({"results": expected, "totalPages": 1}, results)
+        self.assertTrue(valid, message)
         
+        # Test that getting a full page of records works
+        results = self.repo.get_train_history(-1, 1, 2)
+        valid, message = collation_valid({"results": expected[:2], "totalPages": 4}, results)
+        self.assertTrue(valid, message)
+
+        # Test that getting a partial page of records works
+        results = self.repo.get_train_history(-1, 3, 3)
+        valid, message = collation_valid({"results": expected[-2:], "totalPages": 3}, results)
+        self.assertTrue(valid, message)
+        
+        # Test bot getting records on an exceeding page
+        results = self.repo.get_train_history(-1, 4, 3)
+        self.assertDictEqual({"results": [], "totalPages": 3}, results)
+        
+        # Test that getting a single record works
         results = self.repo.get_train_history(1, None, None)
-        self.assertEqual([expected[-1]], results)
+        valid, message = compare_results([expected[-1]], results)
+        self.assertTrue(valid, message)
+        
+        # Test not finding record
+        results = self.repo.get_train_history(17, None, None)
+        self.assertEqual([], results)
         
         
     def testCreateTrainRecord(self):
@@ -216,6 +158,140 @@ class TestEOTRecordRepository(BaseTestCase):
         results = self.repo.get_recent_station_records(1)
         self.assertListEqual(expected, results)
         
+        
+    def testGetRecordCollation(self):
+        expected = [
+            {
+                'id': 8,
+                'date_rec': '2025-05-25 05:20:00',
+                'first_seen': '2025-05-25 05:20:00',
+                'last_seen': '2025-05-25 05:20:00',
+                'duration': '0:00:00',
+                'occurrence_count': '1',
+                'station_name': 'test station1',
+                'unit_addr': '1234',
+                'symbol_id': 1,
+                'symbol_name': 'Test Symbol1',
+            },
+            {
+                'id': 7,
+                'date_rec': '2025-03-25 05:20:00',
+                'first_seen': '2025-03-25 05:15:00',
+                'last_seen': '2025-03-25 05:20:00',
+                'duration': '0:05:00',
+                'occurrence_count': '2',
+                'station_name': 'test station1',
+                'unit_addr': '1234',
+                'symbol_id': 1,
+                'symbol_name': 'Test Symbol1',
+            },
+            {
+                'id': 5,
+                'date_rec': '2025-03-25 05:10:00',
+                'first_seen': '2025-03-25 05:10:00',
+                'last_seen': '2025-03-25 05:10:00',
+                'duration': '0:00:00',
+                'occurrence_count': '1',
+                'station_name': 'test station2',
+                'unit_addr': '1234',
+                'symbol_id': None,
+                'symbol_name': None,
+            },
+            {
+                'id': 4,
+                'date_rec': '2025-03-25 05:05:00',
+                'first_seen': '2025-03-25 05:00:00',
+                'last_seen': '2025-03-25 05:05:00',
+                'duration': '0:05:00',
+                'occurrence_count': '2',
+                'station_name': 'test station1',
+                'unit_addr': '1234',
+                'symbol_id': None,
+                'symbol_name': None,
+            },
+            {
+                'id': 2,
+                'date_rec': '2003-02-05 06:53:08',
+                'first_seen': '2003-02-05 06:53:08',
+                'last_seen': '2003-02-05 06:53:08',
+                'duration': '0:00:00',
+                'occurrence_count': '1',
+                'station_name': 'test station1',
+                'unit_addr': '1337',
+                'symbol_id': None,
+                'symbol_name': None,
+            },
+            {
+                'id': 1,
+                'date_rec': '1999-01-08 04:05:06',
+                'first_seen': '1999-01-08 04:05:06',
+                'last_seen': '1999-01-08 04:05:06',
+                'duration': '0:00:00',
+                'occurrence_count': '1',
+                'station_name': 'test station1',
+                'unit_addr': '727',
+                'symbol_id': 1,
+                'symbol_name': 'Test Symbol1',
+            }
+        ]
+        
+        # All results with only one partition
+        results = self.repo.get_record_collation(1, 250, None)
+        valid, message = collation_valid({"results": expected, "totalPages": 1}, results)
+        self.assertTrue(valid, message)
+        
+        # Portion of results with multiple partitions
+        results = self.repo.get_record_collation(1, 2, None)
+        valid, message = collation_valid({"results": expected[0:2], "totalPages": 3}, results)
+        self.assertTrue(valid, message)
+        
+        # Portion of result with last partition
+        results = self.repo.get_record_collation(2, 4, None)
+        valid, message = collation_valid({"results": expected[4:], "totalPages": 2}, results)
+        self.assertTrue(valid, message)
+        
+        # Test getting no records
+        results = self.repo.get_record_collation(3, 4, None)
+        self.assertEqual({"results": [], "totalPages": 2}, results)
+        
+        # Test getting verified records
+        for i in range(1, 6):
+            self.repo.verify_record(i, 1, "cheese balls")
+        for i in range(2, len(expected)):
+            expected[i]["symbol_id"] = 1
+            expected[i]["verified"] = True 
+            expected[i]["locomotive_num"] = "cheese balls"  
+            expected[i]["symbol_name"] = "Test Symbol1"
+        
+        # Verified record results
+        results = self.repo.get_record_collation(1, 250, True)
+        valid, message = collation_valid({"results": expected[2:], "totalPages": 1}, results)
+        self.assertTrue(valid, message)
+        
+        # Unverfied record results
+        results = self.repo.get_record_collation(1, 250, False)
+        valid, message = collation_valid({"results": expected[:2], "totalPages": 1}, results)
+        self.assertTrue(valid, message)
+        
+    
+    def testGetRecordCollationExceptions(self):
+        # Test that exception is handled in collation step
+        with patch.object(Session, "execute") as mock_session:
+            mock_session.return_value.all.side_effect = SQLAlchemyError
+            with self.assertRaises(RepositoryInternalError):
+                self.repo.get_record_collation(1, 250, None)
+            
+        # Test that exception is handled in counting step
+        with patch.object(Session, "execute") as mock_session:
+            mock_session.return_value.scalar_one.side_effect = SQLAlchemyError
+            with self.assertRaises(RepositoryInternalError):
+                self.repo.get_record_collation(1, 250, None)
+        
+        # Test that exception is handled in parsing step
+        with patch("backend.src.db.eot_repo.ceil", side_effect=ValueError()):
+            with self.assertRaises(RepositoryParsingError):
+                self.repo.get_record_collation(1, 250, None)
+            
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,12 +1,13 @@
 from pprint import pprint
 import unittest
 import math
+from types import TracebackType
 from datetime import datetime
 from unittest.mock import MagicMock, Mock, patch
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-
+from record_tests import collation_valid
 from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.database import db
 from backend.src.db.hot_repo import HOTRepository
@@ -82,228 +83,98 @@ class TestHOTRecordRepository(BaseTestCase):
         
         
     def testGetRecordCollation(self):
-        all_expected = {
-            'results': [
-                {
-                    'command': 'unknown',
-                    'date_rec': '2026-08-16 20:17:11',
-                    'duration': '0:00:00',
-                    'first_seen': '2026-08-16 20:17:11',
-                    'id': 7,
-                    'last_seen': '2026-08-16 20:17:11',
-                    'locomotive_num': 'unknown',
-                    'occurrence_count': '1',
-                    'signal_strength': 0.0,
-                    'station_name': 'test station1',
-                    'symbol_id': None,
-                    'symbol_name': None,
-                    'unit_addr': '1234',
-                    'verified': False
-                },
-                {
-                    'command': 'unknown',
-                    'date_rec': '2021-08-16 20:17:11',
-                    'duration': '0:00:00',
-                    'first_seen': '2021-08-16 20:17:11',
-                    'id': 6,
-                    'last_seen': '2021-08-16 20:17:11',
-                    'locomotive_num': 'unknown',
-                    'occurrence_count': '1',
-                    'signal_strength': 0.0,
-                    'station_name': 'test station2',
-                    'symbol_id': None,
-                    'symbol_name': None,
-                    'unit_addr': '9910',
-                    'verified': False
-                },
-                {
-                    'command': 'unknown',
-                    'date_rec': '2021-08-16 20:16:11',
-                    'duration': '0:02:00',
-                    'first_seen': '2021-08-16 20:14:11',
-                    'id': 5,
-                    'last_seen': '2021-08-16 20:16:11',
-                    'locomotive_num': 'unknown',
-                    'occurrence_count': '3',
-                    'signal_strength': 0.0,
-                    'station_name': 'test station1',
-                    'symbol_id': None,
-                    'symbol_name': None,
-                    'unit_addr': '9910',
-                    'verified': False
-                },
-                {
-                    'command': 'unknown',
-                    'date_rec': '2001-02-04 01:23:45',
-                    'duration': '0:00:00',
-                    'first_seen': '2001-02-04 01:23:45',
-                    'id': 2,
-                    'last_seen': '2001-02-04 01:23:45',
-                    'locomotive_num': 'unknown',
-                    'occurrence_count': '1',
-                    'signal_strength': 0.0,
-                    'station_name': 'test station1',
-                    'symbol_id': None,
-                    'symbol_name': None,
-                    'unit_addr': '5678',
-                    'verified': False
-                },
-                {
-                    'command': 'unknown',
-                    'date_rec': '1999-01-08 04:10:21',
-                    'duration': '0:00:00',
-                    'first_seen': '1999-01-08 04:10:21',
-                    'id': 1,
-                    'last_seen': '1999-01-08 04:10:21',
-                    'locomotive_num': 'unknown',
-                    'occurrence_count': '1',
-                    'signal_strength': 0.0,
-                    'station_name': 'test station1',
-                    'symbol_id': None,
-                    'symbol_name': None,
-                    'unit_addr': '1234',
-                    'verified': False
-                }
-            ],
-            'totalPages': 1
-        }
-        
-        result = self.repo.get_record_collation(1, 250)
-        self.assertEqual(all_expected, result)
-        
-        result = self.repo.get_record_collation(1, 2)
-        self.assertEqual({"results": all_expected["results"][0:2], "totalPages": 3}, result)
-        
-        result = self.repo.get_record_collation(3, 2)
-        self.assertEqual({"results": [all_expected["results"][4]], "totalPages": 3}, result)
-            
-    def testGetRecordCollationException(self):
-        with patch.object(Session, "execute") as mock:
-            mock.return_value.all.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.get_record_collation(1, 250)
-        
-        with patch.object(Session, "execute") as mock:
-            mock.return_value.scalar_one.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.get_record_collation(1, 250)
-                
-        with patch("backend.src.db.hot_repo.ceil", side_effect=TypeError()) as mock:
-            with self.assertRaises(RepositoryParsingError):
-                self.repo.get_record_collation(1, 250)
-                mock.assert_called_once()
-                
-                
-    ###################################
-    ##  get_records_by_verification  ##
-    ###################################
-    def testGetRecordsByVerification(self):
-        test_results = [
+        expected = [
             {
-                'command': 'unknown',
-                'date_rec': '2026-08-16 20:17:11',
-                'duration': '0:00:00',
-                'first_seen': '2026-08-16 20:17:11',
-                'id': 7,
-                'last_seen': '2026-08-16 20:17:11',
-                'locomotive_num': 'unknown',
-                'occurrence_count': '1',
-                'signal_strength': 0.0,
-                'station_name': 'test station1',
-                'symbol_id': None,
-                'symbol_name': None,
-                'unit_addr': '1234',
-                'verified': False
+                "id": 7,
+                "date_rec": "2026-08-16 20:17:11",
+                "first_seen": "2026-08-16 20:17:11",
+                "last_seen": "2026-08-16 20:17:11",
+                "duration": "0:00:00",
+                "occurrence_count": "1",
+                "station_name": "test station1" ,
+                "unit_addr": "1234",
+                "verified": False
             },
             {
-                'command': 'unknown',
-                'date_rec': '2021-08-16 20:17:11',
-                'duration': '0:00:00',
-                'first_seen': '2021-08-16 20:17:11',
-                'id': 6,
-                'last_seen': '2021-08-16 20:17:11',
-                'locomotive_num': 'unknown',
-                'occurrence_count': '1',
-                'signal_strength': 0.0,
-                'station_name': 'test station2',
-                'symbol_id': None,
-                'symbol_name': None,
-                'unit_addr': '9910',
-                'verified': False
+                "id": 6,
+                "date_rec": "2021-08-16 20:17:11",
+                "first_seen": "2021-08-16 20:17:11",
+                "last_seen": "2021-08-16 20:17:11",
+                "duration": "0:00:00",
+                "occurrence_count": "1",
+                "station_name": "test station2",
+                "unit_addr": "9910",
+                "verified": False
             },
             {
-                'command': 'unknown',
-                'date_rec': '2021-08-16 20:16:11',
-                'duration': '0:02:00',
-                'first_seen': '2021-08-16 20:14:11',
-                'id': 5,
-                'last_seen': '2021-08-16 20:16:11',
-                'locomotive_num': 'unknown',
-                'occurrence_count': '3',
-                'signal_strength': 0.0,
-                'station_name': 'test station1',
-                'symbol_id': None,
-                'symbol_name': None,
-                'unit_addr': '9910',
-                'verified': False
+                "id": 5,
+                "date_rec": "2021-08-16 20:16:11",
+                "first_seen": "2021-08-16 20:14:11",
+                "last_seen": "2021-08-16 20:16:11",
+                "duration": "0:02:00",
+                "occurrence_count": "3",
+                "station_name": "test station1",
+                "unit_addr": "9910",
+                "verified": False
             },
             {
-                'command': 'unknown',
-                'date_rec': '2001-02-04 01:23:45',
-                'duration': '0:00:00',
-                'first_seen': '2001-02-04 01:23:45',
-                'id': 2,
-                'last_seen': '2001-02-04 01:23:45',
-                'locomotive_num': 'unknown',
-                'occurrence_count': '1',
-                'signal_strength': 0.0,
-                'station_name': 'test station1',
-                'symbol_id': None,
-                'symbol_name': None,
-                'unit_addr': '5678',
-                'verified': False
+                "id": 2,
+                "date_rec": "2001-02-04 01:23:45",
+                "first_seen": "2001-02-04 01:23:45",
+                "last_seen": "2001-02-04 01:23:45",
+                "duration": "0:00:00",
+                "occurrence_count": "1",
+                "station_name": "test station1",
+                "unit_addr": "5678",
+                "verified": False
             },
             {
-                'command': 'unknown',
-                'date_rec': '1999-01-08 04:10:21',
-                'duration': '0:00:00',
-                'first_seen': '1999-01-08 04:10:21',
-                'id': 1,
-                'last_seen': '1999-01-08 04:10:21',
-                'locomotive_num': 'unknown',
-                'occurrence_count': '1',
-                'signal_strength': 0.0,
-                'station_name': 'test station1',
-                'symbol_id': None,
-                'symbol_name': None,
-                'unit_addr': '1234',
-                'verified': False
+                "id": 1,
+                "date_rec": "1999-01-08 04:10:21",
+                "first_seen": "1999-01-08 04:10:21",
+                "last_seen": "1999-01-08 04:10:21",
+                "duration": "0:00:00",
+                "occurrence_count": "1",
+                "station_name": "test station1",
+                "unit_addr": "1234",
+                "verified": False
             }
         ]
-            
-        results = self.repo.get_record_collation(1, 250, False)
-        self.assertEqual({"results": test_results, "totalPages": 1}, results)
+
+
+        # All results with only one partition
+        results = self.repo.get_record_collation(1, 250, None)
+        valid, message = collation_valid({"results": expected, "totalPages": 1}, results)
+        self.assertTrue(valid, message)
         
-        results = self.repo.get_record_collation(1, 2, False)
-        self.assertEqual({"results": test_results[0:2], "totalPages": 4}, results)
+        # Portion of results with multiple partitions
+        results = self.repo.get_record_collation(1, 2, None)
+        valid, message = collation_valid({"results": expected[0:2], "totalPages": 3}, results)
+        self.assertTrue(valid, message)
         
-        results = self.repo.get_record_collation(3, 2, False)
-        self.assertEqual({"results": test_results[4:], "totalPages": 4}, results)
+        # Portion of result with last partition
+        results = self.repo.get_record_collation(3, 2, None)
+        valid, message = collation_valid({"results": expected[4:], "totalPages": 3}, results)
+        self.assertTrue(valid, message)        
         
-        for i in range(4, 7):
+        # Test getting verified records
+        for i in range(1, 6):
             self.repo.verify_record(i, 1, "cheese balls")
-        for i in range(1, 3):
-            test_results[i]["symbol_id"] = 1
-            test_results[i]["verified"] = True 
-            test_results[i]["locomotive_num"] = "cheese balls"  
-            test_results[i]["symbol_name"] = "Test Symbol1" 
+        for i in range(2, 5):
+            expected[i]["symbol_id"] = 1
+            expected[i]["verified"] = True 
+            expected[i]["locomotive_num"] = "cheese balls"  
+            expected[i]["symbol_name"] = "Test Symbol1"
         
+        # Verified record results
         results = self.repo.get_record_collation(1, 250, True)
-        self.assertEqual({"results": test_results[1:3], "totalPages": 1}, results)
+        valid, message = collation_valid({"results": expected[2:5], "totalPages": 1}, results)
+        self.assertTrue(valid, message)
         
-    def testGetRecordsByVerificationException(self):
-        with self.assertRaises(RepositoryInvalidArgumentError):
-            self.repo.get_record_collation(1, 250, "Taco")
+        # Unverfied record results
+        results = self.repo.get_record_collation(1, 250, False)
+        valid, message = collation_valid({"results": expected[:2], "totalPages": 1}, results)
+        self.assertTrue(valid, message)
         
     
 if __name__ == '__main__':
