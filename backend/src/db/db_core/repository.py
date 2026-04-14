@@ -127,7 +127,7 @@ class BaseRepository(Generic[ModelType]):
         
             
     @classmethod
-    def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible]) -> dict[str, Any] | list[dict[str, Any]]:
+    def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible], convert_to_string: set[str] = {}) -> dict[str, Any] | list[dict[str, Any]]:
         is_collection = isinstance(values, (Iterable))
         rows = values if is_collection else [values]
         
@@ -143,12 +143,20 @@ class BaseRepository(Generic[ModelType]):
             elif hasattr(row, "_asdict"):
                 results.append(row._asdict())
             else:
-                raise RepositoryParsingError(
-                    cls.__name__,
-                    "objs_to_dicts",
-                    "A provided does not contain functionality to map attributes to values!",
-                    show_error=False
-                )
+                try:
+                    results.append(dict(row))
+                except:
+                    raise RepositoryParsingError(
+                        cls.__name__,
+                        "objs_to_dicts",
+                        "A provided instance does not contain functionality for dictionary conversion!",
+                        show_error=False
+                    )
+        
+        # Convert any values if corresponding keys should be converted to a string
+        if len(convert_to_string) > 0:
+            for d in results:
+                d.update({k: str(d[k]) for k in convert_to_string if k in d})
                 
         return results if is_collection else results[0]
         

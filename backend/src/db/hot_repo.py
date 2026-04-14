@@ -34,13 +34,11 @@ class HOTRepository(RecordRepository[HOTRecord]):
         #         LIMIT :results_num OFFSET :offset * :results_num
         #         """
         # sql_args = {"id": id, "results_num": num_results, "offset": page - 1}
-        # TODO: What's even the point of having a limit and offset if only one record is selected???
         stmt = (
             select(
                 self.model.id, 
                 func.to_char(self.model.date_rec, "YYYY-MM-DD HH24:MI:SS").label("date_rec"),
                 Station.station_name,
-                Symbol.symb_name,
                 self.model.symbol_id,
                 self.model.unit_addr,
                 self.model.command, 
@@ -48,10 +46,8 @@ class HOTRepository(RecordRepository[HOTRecord]):
                 self.model.parity, 
                 self.model.verified
             )
-            .join(Station, Station.id == self.model.station_recorded)
-            .join(Symbol, Symbol.id == self.model.symbol_id)
+            .join(Station, Station.id == self.model.station_recorded, isouter=True)
             .where(self.model.id == record_id)
-            .limit(num_results).offset((page - 1) * num_results)
         )
         results = self.session.execute(stmt).all()
         result_dict = self.objs_to_dicts(results)
@@ -129,13 +125,6 @@ class HOTRepository(RecordRepository[HOTRecord]):
 
     # below is for record collation
     def get_record_collation(self, page: int, num_results: int, verified: bool | None = None) -> dict[str, list | str]:
-        if verified is not None and not isinstance(verified, bool):
-            raise RepositoryInvalidArgumentError(
-                self.__class__.__name__, "get_record_collation",
-                "Variable 'verified' is neither None or a boolean instance!",
-                True
-            )
-        
         try:
             sql = f"""
                 WITH StationChanges AS (
@@ -235,7 +224,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
             
             args = {"results_num": num_results, "offset": (page - 1) * num_results}
             results = self.session.execute(text(sql), args).all()
-            resp = self.objs_to_dicts(results)
+            resp = self.objs_to_dicts(results, {"duration"})
             
         except Exception as e:
             raise repository_error_translator(
@@ -326,28 +315,11 @@ class HOTRepository(RecordRepository[HOTRecord]):
                 e, self.__class__.__name__, None,
                 f"Could not count HOT records: {e}"
             )
-            
+        
+
         try:
             results = {
-                    "results": [
-                        {
-                            "id": row["id"],
-                            "date_rec": str(row["date_rec"]),
-                            "station_name": row["station_name"],
-                            "symbol_id": row["symbol_id"],
-                            "unit_addr": row["unit_addr"],
-                            "signal_strength": row["signal_strength"],
-                            "verified": row["verified"],
-                            "locomotive_num": row["locomotive_num"],
-                            "first_seen": str(row["first_seen"]),
-                            "last_seen": str(row["last_seen"]),
-                            "occurrence_count": str(row["occurrence_count"]),
-                            "duration": str(row["duration"]),
-                            "symbol_name": row["symb_name"],
-                            "command": row["command"]
-                        }
-                        for row in resp
-                    ],
+                    "results": resp,
                     "totalPages": ceil(count / num_results),
                 }
             return results

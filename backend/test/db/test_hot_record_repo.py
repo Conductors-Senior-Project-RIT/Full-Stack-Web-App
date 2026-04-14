@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, Mock, patch
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from record_tests import collation_valid
+from record_tests import collation_valid, compare_results
 from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.database import db
 from backend.src.db.hot_repo import HOTRepository
@@ -35,10 +35,17 @@ class TestHOTRecordRepository(BaseTestCase):
     ##  get_train_history  ##
     #########################
     def testGetTrainHistory(self):
-        # Do we even keep this method??
-        # expected = [self.repo.get(i) for i in range(4)]
-        # results = self.repo.get_train_history()
-        pass
+        expected_record = self.repo.get(1)
+        expected_record["station_name"] = "test station1"
+        expected_record["date_rec"] = str(expected_record["date_rec"])
+        
+        results = self.repo.get_train_history(1, 1, 250)
+        valid, msg = compare_results(results, [expected_record])
+        self.assertTrue(valid, msg)
+        
+        results = self.repo.get_train_history(17, 1, 250)
+        self.assertEqual([], results)
+        
         
     def testCreateTrainRecord(self):
         date_rec = datetime.strptime("2026-01-08 04:05:06:-0400", "%Y-%m-%d %H:%M:%S:%z")
@@ -90,7 +97,7 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "2026-08-16 20:17:11",
                 "last_seen": "2026-08-16 20:17:11",
                 "duration": "0:00:00",
-                "occurrence_count": "1",
+                "occurrence_count": 1,
                 "station_name": "test station1" ,
                 "unit_addr": "1234",
                 "verified": False
@@ -101,7 +108,7 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "2021-08-16 20:17:11",
                 "last_seen": "2021-08-16 20:17:11",
                 "duration": "0:00:00",
-                "occurrence_count": "1",
+                "occurrence_count": 1,
                 "station_name": "test station2",
                 "unit_addr": "9910",
                 "verified": False
@@ -112,7 +119,7 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "2021-08-16 20:14:11",
                 "last_seen": "2021-08-16 20:16:11",
                 "duration": "0:02:00",
-                "occurrence_count": "3",
+                "occurrence_count": 3,
                 "station_name": "test station1",
                 "unit_addr": "9910",
                 "verified": False
@@ -123,7 +130,7 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "2001-02-04 01:23:45",
                 "last_seen": "2001-02-04 01:23:45",
                 "duration": "0:00:00",
-                "occurrence_count": "1",
+                "occurrence_count": 1,
                 "station_name": "test station1",
                 "unit_addr": "5678",
                 "verified": False
@@ -134,13 +141,12 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "1999-01-08 04:10:21",
                 "last_seen": "1999-01-08 04:10:21",
                 "duration": "0:00:00",
-                "occurrence_count": "1",
+                "occurrence_count": 1,
                 "station_name": "test station1",
                 "unit_addr": "1234",
                 "verified": False
             }
         ]
-
 
         # All results with only one partition
         results = self.repo.get_record_collation(1, 250, None)
@@ -155,7 +161,11 @@ class TestHOTRecordRepository(BaseTestCase):
         # Portion of result with last partition
         results = self.repo.get_record_collation(3, 2, None)
         valid, message = collation_valid({"results": expected[4:], "totalPages": 3}, results)
-        self.assertTrue(valid, message)        
+        self.assertTrue(valid, message)  
+        
+        # Test getting no records
+        results = self.repo.get_record_collation(3, 3, None)
+        self.assertEqual({"results": [], "totalPages": 2}, results)      
         
         # Test getting verified records
         for i in range(1, 6):
@@ -164,7 +174,7 @@ class TestHOTRecordRepository(BaseTestCase):
             expected[i]["symbol_id"] = 1
             expected[i]["verified"] = True 
             expected[i]["locomotive_num"] = "cheese balls"  
-            expected[i]["symbol_name"] = "Test Symbol1"
+            expected[i]["symb_name"] = "Test Symbol1"
         
         # Verified record results
         results = self.repo.get_record_collation(1, 250, True)
@@ -175,6 +185,25 @@ class TestHOTRecordRepository(BaseTestCase):
         results = self.repo.get_record_collation(1, 250, False)
         valid, message = collation_valid({"results": expected[:2], "totalPages": 1}, results)
         self.assertTrue(valid, message)
+        
+    
+    def testGetRecordCollationExceptions(self):
+        # Test that exception is handled in collation step
+        with patch.object(Session, "execute") as mock_session:
+            mock_session.return_value.all.side_effect = SQLAlchemyError
+            with self.assertRaises(RepositoryInternalError):
+                self.repo.get_record_collation(1, 250, None)
+            
+        # Test that exception is handled in counting step
+        with patch.object(Session, "execute") as mock_session:
+            mock_session.return_value.scalar_one.side_effect = SQLAlchemyError
+            with self.assertRaises(RepositoryInternalError):
+                self.repo.get_record_collation(1, 250, None)
+        
+        # Test that exception is handled in parsing step
+        with patch("backend.src.db.hot_repo.ceil", side_effect=ValueError()):
+            with self.assertRaises(RepositoryParsingError):
+                self.repo.get_record_collation(1, 250, None)
         
     
 if __name__ == '__main__':

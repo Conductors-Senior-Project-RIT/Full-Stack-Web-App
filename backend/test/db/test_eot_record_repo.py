@@ -37,50 +37,42 @@ class TestEOTRecordRepository(BaseTestCase):
             {
                 'id': 8,
                 'date_rec': '2025-05-25 05:20:00',
-                'station_name': 'test station1',
-                'symb_name': 'Test Symbol1'
+                'station_name': 'test station1'
             },
             {
                 'id': 7,
                 'date_rec': '2025-03-25 05:20:00',
-                'station_name': 'test station1',
-                'symb_name': 'Test Symbol1'
+                'station_name': 'test station1'
             },
             {
                 'id': 6,
                 'date_rec': '2025-03-25 05:15:00',
-                'station_name': 'test station1',
-                'symb_name': None
+                'station_name': 'test station1'
             },
             {
                 'id': 5,
                 'date_rec': '2025-03-25 05:10:00',
-                'station_name': 'test station2',
-                'symb_name': None
+                'station_name': 'test station2'
             },
             {
                 'id': 4,
                 'date_rec': '2025-03-25 05:05:00',
-                'station_name': 'test station1',
-                'symb_name': None
+                'station_name': 'test station1'
             },
             {
                 'id': 3,
                 'date_rec': '2025-03-25 05:00:00',
-                'station_name': 'test station1',
-                'symb_name': None
+                'station_name': 'test station1'
             },
             {
                 'id': 2,
                 'date_rec': '2003-02-05 06:53:08',
-                'station_name': 'test station1',
-                'symb_name': None
+                'station_name': 'test station1'
             },
             {
                 'id': 1,
                 'date_rec': '1999-01-08 04:05:06',
-                'station_name': 'test station1',
-                'symb_name': 'Test Symbol1'
+                'station_name': 'test station1'
             }
         ]
         
@@ -154,7 +146,7 @@ class TestEOTRecordRepository(BaseTestCase):
                 
     
     def testGetRecentStationRecords(self):
-        expected = [self.repo.get(i) for i in range(7, 9)]
+        expected = self.repo.objs_to_dicts([self.repo.get(i) for i in range(7, 9)], {"date_rec"})
         results = self.repo.get_recent_station_records(1)
         self.assertListEqual(expected, results)
         
@@ -167,11 +159,11 @@ class TestEOTRecordRepository(BaseTestCase):
                 'first_seen': '2025-05-25 05:20:00',
                 'last_seen': '2025-05-25 05:20:00',
                 'duration': '0:00:00',
-                'occurrence_count': '1',
+                'occurrence_count': 1,
                 'station_name': 'test station1',
                 'unit_addr': '1234',
                 'symbol_id': 1,
-                'symbol_name': 'Test Symbol1',
+                'symb_name': 'Test Symbol1',
             },
             {
                 'id': 7,
@@ -179,11 +171,11 @@ class TestEOTRecordRepository(BaseTestCase):
                 'first_seen': '2025-03-25 05:15:00',
                 'last_seen': '2025-03-25 05:20:00',
                 'duration': '0:05:00',
-                'occurrence_count': '2',
+                'occurrence_count': 2,
                 'station_name': 'test station1',
                 'unit_addr': '1234',
                 'symbol_id': 1,
-                'symbol_name': 'Test Symbol1',
+                'symb_name': 'Test Symbol1',
             },
             {
                 'id': 5,
@@ -191,11 +183,11 @@ class TestEOTRecordRepository(BaseTestCase):
                 'first_seen': '2025-03-25 05:10:00',
                 'last_seen': '2025-03-25 05:10:00',
                 'duration': '0:00:00',
-                'occurrence_count': '1',
+                'occurrence_count': 1,
                 'station_name': 'test station2',
                 'unit_addr': '1234',
                 'symbol_id': None,
-                'symbol_name': None,
+                'symb_name': None,
             },
             {
                 'id': 4,
@@ -203,11 +195,11 @@ class TestEOTRecordRepository(BaseTestCase):
                 'first_seen': '2025-03-25 05:00:00',
                 'last_seen': '2025-03-25 05:05:00',
                 'duration': '0:05:00',
-                'occurrence_count': '2',
+                'occurrence_count': 2,
                 'station_name': 'test station1',
                 'unit_addr': '1234',
                 'symbol_id': None,
-                'symbol_name': None,
+                'symb_name': None,
             },
             {
                 'id': 2,
@@ -215,11 +207,11 @@ class TestEOTRecordRepository(BaseTestCase):
                 'first_seen': '2003-02-05 06:53:08',
                 'last_seen': '2003-02-05 06:53:08',
                 'duration': '0:00:00',
-                'occurrence_count': '1',
+                'occurrence_count': 1,
                 'station_name': 'test station1',
                 'unit_addr': '1337',
                 'symbol_id': None,
-                'symbol_name': None,
+                'symb_name': None,
             },
             {
                 'id': 1,
@@ -227,11 +219,11 @@ class TestEOTRecordRepository(BaseTestCase):
                 'first_seen': '1999-01-08 04:05:06',
                 'last_seen': '1999-01-08 04:05:06',
                 'duration': '0:00:00',
-                'occurrence_count': '1',
+                'occurrence_count': 1,
                 'station_name': 'test station1',
                 'unit_addr': '727',
                 'symbol_id': 1,
-                'symbol_name': 'Test Symbol1',
+                'symb_name': 'Test Symbol1',
             }
         ]
         
@@ -261,7 +253,7 @@ class TestEOTRecordRepository(BaseTestCase):
             expected[i]["symbol_id"] = 1
             expected[i]["verified"] = True 
             expected[i]["locomotive_num"] = "cheese balls"  
-            expected[i]["symbol_name"] = "Test Symbol1"
+            expected[i]["symb_name"] = "Test Symbol1"
         
         # Verified record results
         results = self.repo.get_record_collation(1, 250, True)

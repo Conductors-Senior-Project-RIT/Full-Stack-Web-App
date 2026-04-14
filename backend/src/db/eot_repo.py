@@ -50,7 +50,6 @@ class EOTRepository(RecordRepository[EOTRecord]):
                 self.model.id,
                 func.to_char(self.model.date_rec, "YYYY-MM-DD HH24:MI:SS").label("date_rec"),
                 Station.station_name,
-                Symbol.symb_name,
                 self.model.unit_addr,
                 self.model.brake_pressure,
                 self.model.motion,
@@ -63,7 +62,6 @@ class EOTRepository(RecordRepository[EOTRecord]):
                 self.model.verified
             )
             .join(Station, Station.id == self.model.station_recorded)
-            .join(Symbol, Symbol.id == self.model.symbol_id, isouter=True)  # Outer join on symbols
         )
         
         if id != -1:
@@ -185,7 +183,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
         )
         
         results = self.session.execute(stmt).all()
-        return self.objs_to_dicts(results)
+        return self.objs_to_dicts(results, {"date_rec"})
         
 
     # below is for eot_collation
@@ -279,7 +277,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
                 )
                 SELECT
                     d.id,
-                    d.date_rec,
+                    TO_CHAR(d.date_rec, 'YYYY-MM-DD HH24:MI:SS') AS date_rec,
                     d.station_name,
                     d.symbol_id,
                     d.unit_addr,
@@ -292,8 +290,8 @@ class EOTRepository(RecordRepository[EOTRecord]):
                     d.arm_status,
                     d.signal_strength,
                     d.verified,
-                    d.first_seen,
-                    d.last_seen,
+                    TO_CHAR(d.first_seen, 'YYYY-MM-DD HH24:MI:SS') AS first_seen,
+                    TO_CHAR(d.last_seen, 'YYYY-MM-DD HH24:MI:SS') AS last_seen,
                     d.occurrence_count,
                     AGE(d.last_seen, d.first_seen) AS duration,
                     CASE WHEN d.symbol_id IS NULL THEN NULL ELSE f.symb_name END,
@@ -313,7 +311,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
             
             args = {"results_num": num_results, "offset": (page - 1) * num_results}
             results = self.session.execute(text(sql), args).all()
-            resp = self.objs_to_dicts(results)
+            resp = self.objs_to_dicts(results, {"duration"})
             
         except Exception as e:
             raise repository_error_translator(
@@ -419,31 +417,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
 
         try:
             results = {
-                    "results": [
-                        {
-                            "id": row["id"],
-                            "date_rec": str(row["date_rec"]),
-                            "station_name": row["station_name"],
-                            "symbol_id": row["symbol_id"],
-                            "unit_addr": row["unit_addr"],
-                            "brake_pressure": row["brake_pressure"],
-                            "motion": row["motion"],
-                            "marker_light": row["marker_light"],
-                            "turbine": row["turbine"],
-                            "battery_cond": row["battery_cond"],
-                            "battery_charge": row["battery_charge"],
-                            "arm_status": row["arm_status"],
-                            "signal_strength": row["signal_strength"],
-                            "verified": row["verified"],
-                            "first_seen": str(row["first_seen"]),
-                            "last_seen": str(row["last_seen"]),
-                            "occurrence_count": str(row["occurrence_count"]),
-                            "duration": str(row["duration"]),
-                            "symbol_name": row["symb_name"],
-                            "locomotive_num": row["locomotive_num"],
-                        }
-                        for row in resp
-                    ],
+                    "results": resp,
                     "totalPages": ceil(count / num_results)
                 }
             return results
