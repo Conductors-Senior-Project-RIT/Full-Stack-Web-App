@@ -224,7 +224,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
             
             args = {"results_num": num_results, "offset": (page - 1) * num_results}
             results = self.session.execute(text(sql), args).all()
-            resp = self.objs_to_dicts(results, {"duration"})
+            resp = self.objs_to_dicts(results, {"duration", "occurrence_count"})
             
         except Exception as e:
             raise repository_error_translator(

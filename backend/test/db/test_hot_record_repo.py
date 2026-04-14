@@ -97,7 +97,7 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "2026-08-16 20:17:11",
                 "last_seen": "2026-08-16 20:17:11",
                 "duration": "0:00:00",
-                "occurrence_count": 1,
+                "occurrence_count": "1",
                 "station_name": "test station1" ,
                 "unit_addr": "1234",
                 "verified": False
@@ -108,7 +108,7 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "2021-08-16 20:17:11",
                 "last_seen": "2021-08-16 20:17:11",
                 "duration": "0:00:00",
-                "occurrence_count": 1,
+                "occurrence_count": "1",
                 "station_name": "test station2",
                 "unit_addr": "9910",
                 "verified": False
@@ -119,7 +119,7 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "2021-08-16 20:14:11",
                 "last_seen": "2021-08-16 20:16:11",
                 "duration": "0:02:00",
-                "occurrence_count": 3,
+                "occurrence_count": "3",
                 "station_name": "test station1",
                 "unit_addr": "9910",
                 "verified": False
@@ -130,7 +130,7 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "2001-02-04 01:23:45",
                 "last_seen": "2001-02-04 01:23:45",
                 "duration": "0:00:00",
-                "occurrence_count": 1,
+                "occurrence_count": "1",
                 "station_name": "test station1",
                 "unit_addr": "5678",
                 "verified": False
@@ -141,7 +141,7 @@ class TestHOTRecordRepository(BaseTestCase):
                 "first_seen": "1999-01-08 04:10:21",
                 "last_seen": "1999-01-08 04:10:21",
                 "duration": "0:00:00",
-                "occurrence_count": 1,
+                "occurrence_count": "1",
                 "station_name": "test station1",
                 "unit_addr": "1234",
                 "verified": False
