@@ -30,11 +30,16 @@ class RecordCollation(Resource):
                 f"Invalid page argument provided: {page}. Must be greater than 0."
             )
             
+        # Flask creates a request-specific database session
         session = db.session
+        
         # Will raise an exception if the provided record type is not valid
         record_service = RecordService(session, typ)
+        
         # Retrieve and return the records using the respective record service 
         results = record_service.collate_records(page)
+        
+        # Commit the changes the the database if successful
         session.commit()
         
         return results, 200

@@ -12,10 +12,12 @@ class StationAuth(Resource):
             Response: Returns a collection of ID and name pairs if the retrieval was successful; otherwise,
             an error message is returned.
         """
+        # Flask creates a request-specific database session
         session = db.session
+        
+        # Get all station ids and names from the database as a collection of dictionaries
         results = StationService(session).get_stations()
         
-        session.commit()
         return results, 200
 
     def post(self):
@@ -29,10 +31,16 @@ class StationAuth(Resource):
         parser.add_argument("station_name", type=str, default="unnamed")
         args = parser.parse_args()
         
+        # Flask creates a request-specific database session
         session = db.session
+        
+        # Creates a new station with the given name, and returns the generated password associated with it
         pw = StationService(session).create_station(args["station_name"])
+        
+        # Commit the changes if everything is successful
         session.commit()
         
+        # Return the new password to the user
         return {"password": pw}, 201
       
       
@@ -47,11 +55,18 @@ class StationAuth(Resource):
         parser.add_argument("id", type=int, default=-1)
         args = parser.parse_args()
         
+        # Ensure that the primary key of the station is valid
         if args["id"] < 1:
             raise BadRequest("An invalid station ID was provided!")
         
+        # Flask creates a request-specific database session
         session = db.session
+        
+        # Returns the updated station password
         pw = StationService(session).update_station_password(args["id"])
+        
+        # Commit the changes if everything is successful
         session.commit()
         
+        # Return the updated password to the user
         return {"new_pw": pw}, 200
