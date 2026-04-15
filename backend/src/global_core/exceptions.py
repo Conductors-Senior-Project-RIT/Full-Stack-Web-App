@@ -51,7 +51,7 @@ def layer_error_handler(
             # Return our wrapped function
             return func(*args, **kwargs)
         except Exception as e:
-            if not exclude or isinstance(e, exclude):
+            if exclude and isinstance(e, exclude):
                 raise e
 
             error = translate_error(
@@ -60,7 +60,8 @@ def layer_error_handler(
                 base_exception,
                 caller_name,
                 func.__name__,
-                f"{type(e).__name__}: {e}" if not message else message
+                f"{type(e).__name__}: {e}" if not message else message,
+                exclude=exclude
             )
             raise error from e
         
@@ -73,8 +74,12 @@ def translate_error(
         base_exception: Type[LayerError],
         caller_name: str | None = None,
         point_of_error: str | None = None,
-        message: str | None = None
+        message: str | None = None,
+        exclude: tuple[Type[Exception]] | Type[Exception] | None = None
 ) -> LayerError:
+    if exclude and isinstance(e, exclude):
+        return e
+    
     error_class = next((error_map[cls] for cls in error_map if isinstance(e, cls)), None)
 
     if error_class:

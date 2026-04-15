@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, Mock, patch
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from record_tests import collation_valid, compare_results
+from backend.test.db.test_utils import collation_valid, compare_results_ordered
 from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.database import db
 from backend.src.db.hot_repo import HOTRepository
@@ -40,7 +40,7 @@ class TestHOTRecordRepository(BaseTestCase):
         expected_record["date_rec"] = str(expected_record["date_rec"])
         
         results = self.repo.get_train_history(1, 1, 250)
-        valid, msg = compare_results(results, [expected_record])
+        valid, msg = compare_results_ordered(results, [expected_record])
         self.assertTrue(valid, msg)
         
         results = self.repo.get_train_history(17, 1, 250)

@@ -54,7 +54,7 @@ class BaseRepository(Generic[ModelType]):
     
     
     @repository_error_handler()
-    def update(self, objs: list[tuple[ModelType, dict[str, Any]]], to_dict=True) -> FlexibleResult:        
+    def update(self, objs: list[tuple[ModelType, dict[str, Any]]], to_dict=True) -> CollectionResult:        
         # Return None if empty or undefined
         if not objs:
             return []
@@ -95,15 +95,14 @@ class BaseRepository(Generic[ModelType]):
         # Flush to reflect changes in session
         self.session.flush()
         
-        updated = updated[0] if len(updated) == 1 else updated
-        
         return self.objs_to_dicts(updated) if to_dict else updated
     
     
     @repository_error_handler()
-    def update_with_pk(self, pkey: int | str, new_values: dict[str, Any], to_dict=True) -> SingleResult:
+    def update_with_pk(self, pkey: int | str, new_values: dict[str, Any], to_dict=True) -> SingleResult | None:
         obj = self.get(pkey, to_dict=False)
-        return self.update([(obj, new_values)], to_dict)
+        result = self.update([(obj, new_values)], to_dict)
+        return result[0] if len(result) == 1 else None
         
         
     @repository_error_handler()
@@ -128,16 +127,20 @@ class BaseRepository(Generic[ModelType]):
             
     @classmethod
     def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible], convert_to_string: set[str] = {}) -> dict[str, Any] | list[dict[str, Any]]:
+        # Determine if the values given is iterable
         is_collection = isinstance(values, (Iterable))
         rows = values if is_collection else [values]
-        
+
         results = []
         for r in rows:
+            # If the row is an SQLAlchemy Row or Iterable and contains one instance, then retrieve the first index
             if isinstance(r, (Row, Iterable)) and len(r) == 1:
                 row = r[0]
+            # Otherwise, convert the entire row
             else:
                 row = r
             
+            # Check to see if the row can be converted into a dictionary
             if hasattr(row, "_mapping"):
                 results.append(dict(row._mapping))
             elif hasattr(row, "_asdict"):
@@ -145,6 +148,7 @@ class BaseRepository(Generic[ModelType]):
             else:
                 try:
                     results.append(dict(row))
+                # Raise an exception if the row cannot be converted
                 except:
                     raise RepositoryParsingError(
                         cls.__name__,

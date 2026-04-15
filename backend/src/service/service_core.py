@@ -1,4 +1,4 @@
-from ..db.db_core.exceptions import RepositorySessionError, RepositoryParsingError, RepositoryNotFoundError, \
+from ..db.db_core.exceptions import RepositoryExistingRowError, RepositorySessionError, RepositoryParsingError, RepositoryNotFoundError, \
     RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryConnectionError
 from ..global_core.exceptions import LayerError, layer_error_handler
 from ..db.record_types import RepositoryRecordInvalid # exists separately because of circular dependency issue; eventually needs to be refactored slightly
@@ -32,6 +32,9 @@ class ServiceParsingError(ServiceError):
             
 class ServiceResourceNotFound(ServiceError):
     default_message = "Resource not found!"
+    
+class ServiceExistingResource(ServiceError):
+    default_message = "Resource already exists!"
 
 class ServiceInvalidArgument(ServiceError):
     default_message = "Invalid argument provided!"
@@ -40,11 +43,12 @@ class ServiceInvalidArgument(ServiceError):
 # Maps a Repository layer error to a corresponding Service layer error, and whether the lower layer message should be shown
 SERVICE_ERROR_MAP = {
     RepositorySessionError: (ServiceInternalError, True),
-    RepositoryInternalError: (ServiceInternalError, False),
+    RepositoryExistingRowError: (ServiceExistingResource, True),
     RepositoryParsingError: (ServiceInternalError, False),
     RepositoryConnectionError: (ServiceTimeoutError, False),
     RepositoryNotFoundError: (ServiceResourceNotFound, True),
     RepositoryRecordInvalid: (ServiceInvalidArgument, True),
-    RepositoryInvalidArgumentError: (ServiceInvalidArgument, True)
+    RepositoryInvalidArgumentError: (ServiceInvalidArgument, True),
+    RepositoryInternalError: (ServiceInternalError, False)
 }
     

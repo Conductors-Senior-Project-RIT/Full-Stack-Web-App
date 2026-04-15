@@ -164,16 +164,6 @@ class EOTRepository(RecordRepository[EOTRecord]):
         """
         from .db_core.models import Symbol, EngineNumber
         
-        # sql = """
-        #     SELECT * FROM EOTRecords 
-        #     WHERE station_recorded = :station_id and most_recent = true 
-        #     LEFT JOIN Symbols ON EOTRecords.symbol_id = Symbols.id 
-        #     LEFT JOIN Engine_Numbers ON EOTRecords.engine_num = Engine_Numbers.id
-        # """
-        # args = {
-        #     "station_id": station_id
-        # }
-        
         stmt = (
             select(self.model)
             .where(self.model.station_recorded == station_id)

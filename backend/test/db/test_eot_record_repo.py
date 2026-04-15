@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, Mock, patch
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from record_tests import collation_valid, compare_results
+from backend.test.db.test_utils import collation_valid, compare_results_ordered
 from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.database import db
 from backend.src.db.eot_repo import EOTRepository
@@ -97,7 +97,7 @@ class TestEOTRecordRepository(BaseTestCase):
         
         # Test that getting a single record works
         results = self.repo.get_train_history(1, None, None)
-        valid, message = compare_results([expected[-1]], results)
+        valid, message = compare_results_ordered([expected[-1]], results)
         self.assertTrue(valid, message)
         
         # Test not finding record

@@ -28,7 +28,7 @@ class StationService(BaseService):
         
     def update_station_password(self, station_id: int) -> str:
         unhashed_pw, hashed_pw = self.generate_password_string()
-        self._station_repo.update_station_password(str(station_id), hashed_pw)
+        self._station_repo.update_station_password(station_id, hashed_pw)
         return unhashed_pw
 
 

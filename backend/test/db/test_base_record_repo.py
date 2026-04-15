@@ -212,7 +212,7 @@ class TestRecordRepository(BaseTestCase):
         
         # Test no values change
         result = self.repo.update_signal_values(1, test_symbol, test_engine)
-        self.assertListEqual([], result)
+        self.assertEqual(None, result)
         
         test_cases = [
             (2, None),

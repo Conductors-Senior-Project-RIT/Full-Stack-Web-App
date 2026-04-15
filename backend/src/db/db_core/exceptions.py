@@ -28,6 +28,9 @@ class RepositoryNotFoundError(RepositoryError):
     
 class RepositoryInvalidArgumentError(RepositoryError):
     default_message = "Invalid argument provided!" 
+    
+class RepositoryExistingRowError(RepositoryError):
+    default_message = "The provided row already exists!"
 
 # class RepositoryRecordInvalid(RepositoryError):
 #     valid_types = list(RecordTypes._value2member_map_)
@@ -46,7 +49,8 @@ def repository_error_translator(
     e: Exception,
     caller_name: str | None = None,
     point_of_error: str | None = None,
-    message: str | None = None
+    message: str | None = None,
+    exclude: tuple[Type[Exception]] | Type[Exception] | None = None
 ):
     return translate_error(
         e,
@@ -54,7 +58,8 @@ def repository_error_translator(
         RepositoryInternalError,
         caller_name,
         point_of_error,
-        message
+        message,
+        RepositoryError if not exclude else exclude
     )
     
 def repository_error_handler(

@@ -7,7 +7,7 @@ from sqlalchemy.orm.session import Session
 from .db_core.models import BaseRecord
 from .db_core.repository import BaseRepository
 from .db_core.exceptions import (
-    RepositoryNotFoundError, RepositoryInvalidArgumentError, 
+    RepositoryInternalError, RepositoryNotFoundError, RepositoryInvalidArgumentError, 
     repository_error_handler, repository_error_translator)
 
 RecordType = TypeVar("RecordType", bound=BaseRecord)
@@ -168,7 +168,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
     
     @repository_error_handler()
-    def update_signal_values(self, record_id: int, symbol_id: int, engine_num: int, to_dict=True) -> dict[str, Any] | RecordType:
+    def update_signal_values(self, record_id: int, symbol_id: int, engine_num: int, to_dict=True) -> dict[str, Any] | RecordType | None:
         values = {}
         if symbol_id:
             values["symbol_id"] = symbol_id
