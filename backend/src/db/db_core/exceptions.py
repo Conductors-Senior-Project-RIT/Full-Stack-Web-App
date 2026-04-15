@@ -66,12 +66,9 @@ def repository_error_handler(
     message: str | None = None, 
     exclude: tuple[Type[Exception]] | Type[Exception] | None = None
 ):
-    def decorator(func):
-        return layer_error_handler(
-            func, 
-            error_map=REPOSITORY_ERROR_MAP, 
-            base_exception=RepositoryInternalError,
-            exclude=RepositoryError if not exclude else exclude,
-            message=message
-        )
-    return decorator
+    return layer_error_handler(
+        error_map=REPOSITORY_ERROR_MAP, 
+        base_exception=RepositoryInternalError,
+        exclude=RepositoryError if not exclude else exclude,
+        message=message
+    )

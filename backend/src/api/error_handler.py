@@ -3,6 +3,7 @@ from werkzeug.exceptions import HTTPException
 
 from ...database import db
 from ..service.service_core import *
+from backend import error_debugging
 
 ##########################
 ##  API ERROR HANDLING  ##
@@ -75,7 +76,7 @@ def handle_other_errors(e: Exception) -> Response:
         Response: Constructs a Flask Response with a general error message and code of 500.
     """
     db.session.rollback()
-    if(TESTING_ENABLED): return {"error": e.args[0]}, 500
+    if(error_debugging): return {"error": e.args[0]}, 500
     return {"error": "Internal server error!"}, 500
         
         

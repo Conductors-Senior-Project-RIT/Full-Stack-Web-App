@@ -7,6 +7,8 @@ from backend.extensions import bcrypt, jwt
 from .config.settings import config_selection
 from .database import db
 
+error_debugging: bool = False
+
 def create_app(config_name=None): # tests call this function to create flask app
     """
     TODO: models for flask-alchemy(sqlalchemy)
@@ -28,6 +30,9 @@ def create_app(config_name=None): # tests call this function to create flask app
     print(f"Secret Key Set: {bool(app.config.get('SECRET_KEY'))}") #if exists, show boolean
     print(f"JWT Secret Key Set: {app.config.get('JWT_SECRET_KEY')}") #if exists, show boolean
     print("=" * 50)
+    
+    global error_debugging
+    error_debugging = app.config['DEBUG'] or app.config['TESTING']
 
     db.init_app(app) # load settings for db engine/ bind flask-alchemy to app; flask-alchemy currently used as a connection manager with our raw sql lol
     jwt.init_app(app)

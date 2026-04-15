@@ -2,9 +2,6 @@ from ..db.db_core.exceptions import RepositoryExistingRowError, RepositorySessio
     RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryConnectionError
 from ..global_core.exceptions import LayerError, layer_error_handler
 from ..db.record_types import RepositoryRecordInvalid # exists separately because of circular dependency issue; eventually needs to be refactored slightly
-# from ..api.error_handler import BaseLayerError, database_error_handler
-
-TESTING_ENABLED = True
 
 
 class BaseService:
