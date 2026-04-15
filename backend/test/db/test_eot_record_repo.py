@@ -1,13 +1,11 @@
-from pprint import pprint
 import unittest
-import math
 from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
 from backend.test.db.test_utils import collation_valid, compare_results_ordered
-from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
+from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryParsingError
 from backend.database import db
 from backend.src.db.eot_repo import EOTRepository
 from backend.test.base_test_case import BaseTestCase

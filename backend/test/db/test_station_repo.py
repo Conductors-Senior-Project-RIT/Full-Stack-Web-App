@@ -1,14 +1,10 @@
-from pprint import pprint
-import unittest
-import math
-from types import TracebackType
 from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from backend.test.db.test_utils import collation_valid, compare_results_pkey
-from backend.src.db.db_core.exceptions import RepositoryExistingRowError, RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
+from backend.test.db.test_utils import compare_results_pkey
+from backend.src.db.db_core.exceptions import RepositoryExistingRowError, RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError
 from backend.database import db
 from backend.src.db.station_repo import StationRepository
 from backend.test.base_test_case import BaseTestCase

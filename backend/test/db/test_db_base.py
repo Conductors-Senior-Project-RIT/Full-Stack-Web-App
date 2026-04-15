@@ -1,7 +1,7 @@
 import unittest
 
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.database import db
 from backend.src.db.db_core.models import Base

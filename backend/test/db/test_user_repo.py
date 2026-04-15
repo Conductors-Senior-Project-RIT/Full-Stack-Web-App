@@ -51,11 +51,11 @@ class TestUserRepository(BaseTestCase):
         pass
 
 
-    # def test_get_user_id(self):
-    #     email = "newtestemail@gmail.com"
-    #     actual = self.repo.get_user_id(email)
-    #     expected = 1
-    #     self.assertEqual(actual, expected)
+    def test_get_user_id(self):
+        email = "newtestemail@gmail.com"
+        actual = self.repo.get_user_id(email)
+        expected = 1
+        self.assertEqual(actual, expected)
 
-# if __name__ == '__main__':
-#     unittest.main()
+if __name__ == '__main__':
+    unittest.main()
