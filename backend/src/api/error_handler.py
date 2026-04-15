@@ -12,10 +12,11 @@ from ..service.service_core import *
 SERVICE_ERROR_CODES = {
     ServiceInvalidArgument: 400,
     ServiceResourceNotFound: 404,
+    ServiceExistingResource: 409,
     ServiceTimeoutError: 408,
-    ServiceError: 500,
     ServiceInternalError: 500,
-    ServiceParsingError: 500
+    ServiceParsingError: 500,
+    ServiceError: 500
 }
 
 def service_error_to_code(e: ServiceError) -> int:
@@ -27,16 +28,13 @@ def service_error_to_code(e: ServiceError) -> int:
     Returns:
         int: HTTP error response status code.
     """
-    db.session.rollback()
-    
-    for cls in e.__class__.__mro__:
-        if cls in SERVICE_ERROR_CODES:
-            return SERVICE_ERROR_CODES[cls]
-    return 500
+    # e.__class__.__mro__ returns the class hierarchy of the exception.
+    # The following line locates the first class present in the error code map and returns its associated error code. The default value is 500.
+    return next((SERVICE_ERROR_CODES[c] for c in e.__class__.__mro__ if c in SERVICE_ERROR_CODES), 500)
       
 
 def handle_service_errors(e: ServiceError) -> Response:
-    """Constructs a Flask *Response* for a provided Service layer exception.
+    """Constructs a Flask `Response` for a provided Service layer exception.
 
     Args:
         e (ServiceError): A Service layer exception.
@@ -45,12 +43,15 @@ def handle_service_errors(e: ServiceError) -> Response:
         Response: Constructs a Flask Response with the provided Service layer error message
         and error code.
     """
+    # Rollback changes in the request's current session.
     db.session.rollback()
+    
+    # Return the corres.ponding error code if present
     return {"error": str(e)}, service_error_to_code(e)  
 
 
 def handle_api_errors(e: HTTPException) -> Response:
-    """Constructs a Flask *Response* for a provided HTTP exception.
+    """Constructs a Flask `Response` for a provided HTTP exception.
 
     Args:
         e (HTTPException): An HTTPException.
@@ -64,8 +65,11 @@ def handle_api_errors(e: HTTPException) -> Response:
 
 
 def handle_other_errors(e: Exception) -> Response:
-    """Constructs a Flask *Response* for unhandled/general Exceptions that may occur
+    """Constructs a Flask `Response` for unhandled/general Exceptions that may occur
     in the API.
+    
+    Args:
+        e (Exception): A general Python exception.
 
     Returns:
         Response: Constructs a Flask Response with a general error message and code of 500.
@@ -76,7 +80,7 @@ def handle_other_errors(e: Exception) -> Response:
         
         
 def register_error_handlers(app: Flask):
-    """Registers error handlers to a *Flask* instance which handle exceptions that occur
+    """Registers error handlers to a `Flask` instance which handle exceptions that occur
     in the API.
 
     Args:

@@ -1,4 +1,4 @@
 [report]
 exclude_lines =
-    raise NotImplementedError
-    pass
+    ^\s*raise NotImplementedError\s*$
+    ^\s*pass\s*$
