@@ -29,4 +29,4 @@ class StationOnline(Resource):
         StationService(session).update_last_seen(stat_id)
         session.commit()
 
-        return '', 204 # flask requires some response object to be returned (here, its done under the hood)
+        return {}, 204 # flask requires some response object to be returned (here, its done under the hood)

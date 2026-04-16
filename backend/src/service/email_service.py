@@ -77,7 +77,7 @@ class EmailService:
         """
         
         subject = "Password Reset Request"
-        email_body = f"<h1>A password reset request was made from your account. If you wish to reset your password, please click the following link: {self.website_domain}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email!<h1>"
+        email_body = f"<h1>A password reset request was made from your account. If you wish to reset your password, please click the following link: {self.website_domain}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email!</h1>"
         send_to_email = send_to_email
 
         self.send_email(subject, email_body, send_to_email, send_to_name)

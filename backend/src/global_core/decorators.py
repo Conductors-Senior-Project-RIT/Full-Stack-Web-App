@@ -2,7 +2,7 @@ from functools import wraps
 
 from flask_jwt_extended import get_jwt, verify_jwt_in_request, create_access_token, get_jwt_identity, set_access_cookies
 
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Unauthorized, Forbidden
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -14,14 +14,21 @@ At the moment: Helpful decorators for API
 def role_required(*allowed_roles): 
     """
     Flask route decorator: can be used to verify user has a jwt in the request + their jwt has a claim indicating the user's role status
+    regular user (2), volunteer (1), admin (0)
+
+    Args: 
+        allowed_roles (tuple of integers 0, 1, 2): if nothing is passed, this decorator is just jwt_required()
     """
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
             verify_jwt_in_request() 
-            user_role = get_jwt().get("user_role")
-            if user_role not in allowed_roles:
-                raise Forbidden("Insufficient permissions to access route")
+            if allowed_roles: # if something is passed, check permissions
+                user_role = get_jwt().get("user_role")
+                if user_role is None:
+                    raise Unauthorized("User role undefined!") # something wrong for additional_claims in creating access token 
+                if user_role not in allowed_roles:
+                    raise Forbidden("Insufficient permissions to access route") # has valid token, not right roles
             return fn(*args, **kwargs)
         return decorator
     return wrapper

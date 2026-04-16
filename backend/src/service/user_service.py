@@ -45,19 +45,6 @@ class UserService(BaseService):
         email_service.send_registered_email(email) 
         # return {"user_id": user_id}
 
-    def initialize_user_preferences(self, user_id: int):
-        """
-        Default trains a user is subscribed to. Inserts all stations into the UserPreferences table for the new user
-        """
-        stations = self._station_repo.get_stations() # returns list of dictionaries
-
-        if not stations: # if empty, etc
-            raise RuntimeError("No train stations available")
-
-        for station in stations:
-            station_id = station.get("id")
-            self._user_repo.create_user_station_preference(user_id, station_id)
-
     def is_registered(self, email: str, password: str):
         """
         Validates user password, if nothing is returned something went wrong
@@ -79,13 +66,12 @@ class UserService(BaseService):
     def update_user_role(self, email: str, new_role: str):
         """
         If none is returned, that means user email doesn't exist in our database. Hence, user must sign up
+
+        let repo errors bubble to api's generic error handler
         """
-        if self._user_repo.get_user_id(email) is None: #  trying to elevate role for this specific email does not exist
-            return None
-
+        self._user_repo.get_user_id(email) # 
+            
         self._user_repo.update_account_status(email, int(new_role)) #must cast role to int as "additional_claims" from JWT only accepts that or something else that was funky and i don't remember
-
-        return True
 
     def create_user_password_reset_token(self, email):
         """
@@ -94,15 +80,12 @@ class UserService(BaseService):
 
         user_id = self._user_repo.get_user_id(email)
 
-        if user_id is None: # no such email exists in our db, at some point we should introduce a logger and this is the perfect example of putting it in our code
-            return
-
         reset_token = secrets.token_urlsafe(32) # why 32 lol
-        hashed_token = hashlib.sha256(reset_token.encode()).hexdigest() # copy pasted the previous group's old functionality lol
+        hashed_token = hashlib.sha256(reset_token.encode()).hexdigest() # copy pasted the previous group's old functionality
 
         self._user_repo.create_user_reset_token(user_id, hashed_token)
 
-        send_forgot_password_email(email, reset_token)
+        email_service.send_forgot_password_email(email, reset_token)
 
     def is_user_password_reset_token_valid(self, token):
         """
@@ -130,6 +113,21 @@ class UserService(BaseService):
         self._user_repo.delete_user_id_from_reset_requests(user_id) #after resetting password, delete the user id from the reset requests table
 
         return True
+
+    " bottom 3 functions not tested yet"
+
+    def initialize_user_preferences(self, user_id: int):
+        """
+        Default trains a user is subscribed to. Inserts all stations into the UserPreferences table for the new user
+        """
+        stations = self._station_repo.get_stations() # returns list of dictionaries
+
+        if not stations: # if empty, etc
+            raise RuntimeError("No train stations available")
+
+        for station in stations:
+            station_id = station.get("id")
+            self._user_repo.create_user_station_preference(user_id, station_id)
 
     def get_user_preferences(self, user_id: int):
         """

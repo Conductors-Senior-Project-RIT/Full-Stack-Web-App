@@ -67,13 +67,12 @@ class UserRepository(BaseRepository):
         "exception handler for email"
         sql = text("SELECT COUNT(1) FROM Users WHERE email = :email")
         result = self.session.execute(sql, {"email": email}).scalar_one()
-        if result == 0:
-            raise self._construct_email_not_found(email)
+        return result > 0 # >0 because returning count
         
     def email_exists(self, email: str) -> bool:
         "simple existence checker for email"
         sql = text("SELECT COUNT(1) FROM Users WHERE email = :email")
-        result = self.session.execute(sql, {"email": email}).scalar_one_or_none()
+        result = self.session.execute(sql, {"email": email}).scalar_one()
         return result is not None
             
     def unique_id_exists(self, user_id: int):
@@ -105,39 +104,6 @@ class UserRepository(BaseRepository):
         
         return user._asdict() # leftoff here; finish user_service that uses this lol; im at login() part now
         
-    
-    def update_session_token(self, user_id: int, token: str) -> int: # remove most likely, web tokens handled via JWT
-        # Check if user exists, will raise exception otherwise.
-        self.unique_id_exists(user_id)
-        
-        sql = """
-            UPDATE Users 
-            SET token = %s 
-            WHERE id = %s
-            RETURNING token
-        """
-        
-        result = self.session.execute(text(sql), {"token": token, "id": user_id}).scalar_one_or_none()
-        if not result:
-            raise RepositoryInternalError(
-                caller_name=self.__class__.__name__,
-                message=f"An error occurred updating session token, 0 changes made!",
-                show_error=False
-            )
-
-        return result
-        
-        
-    def get_authenticated_user(self, email: str, token: str, return_info="*") -> dict: # remove most likely, web tokens handled via JWT
-        sql = text("SELECT :ret FROM Users WHERE email = :email AND token = :token")
-        
-        result = self.session.execute(sql, {"ret": return_info, "email": email, "token": token}).one_or_none()
-        if not result:
-            raise self._construct_email_not_found(email)
-        
-        return result._asdict()
-        
-    
     def update_account_status(self, email: str, new_role: int) -> int:
         # Check if user exists, will raise exception otherwise
         self.unique_email_exists(email)
@@ -225,22 +191,6 @@ class UserRepository(BaseRepository):
 
         return user_times[0], user_times[1]
 
-
-    def get_user_id_from_jwt_and_email(self, email:str, token: str) -> int: # remove maybe as we don't need to store jwt in db (same reasoning as above)
-        sql = text("SELECT id FROM Users WHERE email = :email AND token = :token")
-        args = {"email": email, "token": token}
-        
-        result = self.session.execute(sql, args).scalar_one_or_none()
-        if not result:
-            raise RepositoryNotFoundError(
-                caller_name=self.__class__.__name__,
-                message=f"A user with an email = {email} could not be found with provided token!",
-                show_error=False
-            )
-        
-        return result
-
-
     def get_station_id_from_user_preferences(self, user_id: int) -> ScalarResult[Any]:
         # Check if a single user with provided id exists, otherwise raise exception
         self.unique_id_exists(user_id)
@@ -281,11 +231,11 @@ class UserRepository(BaseRepository):
 
     def create_user_reset_token(self, user_id, hashed_token):
         """
-        TODO: Move helpers like this function and the ones below somewhere else
+        Stores password reset token 
         """
         sql = """
             INSERT INTO reset_requests (uid, token, expiration) 
-            VALUES (:user_id, :token_hash, NOW() + INTERVAL '1 hour');
+            VALUES (:user_id, :token_hash, NOW() + INTERVAL '1 hour')
             RETURNING id
         """
         args = {"user_id": user_id, "token_hash": hashed_token}
@@ -298,11 +248,9 @@ class UserRepository(BaseRepository):
                 show_error=False
             )
 
-# the two methods below may need to be rewritten as I don't see the purpose of storing token hashes especially as we need to refresh the JWT to avoid fast auto logouts...
-
     def get_user_id_from_valid_reset_request_token(self, token_hash) -> int | None:
         """
-        look into later
+        retrieves PASSWORD reset token
         """
         sql = """
             SELECT u.id FROM reset_requests as r
