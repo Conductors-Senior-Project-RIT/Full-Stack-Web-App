@@ -15,10 +15,11 @@ class StationRepository(BaseRepository[Station]):
 
     @repository_error_handler()
     def get_stations(self) -> list[dict[str, Any]]:
-        """Returns a collection of ID and station name pairs from the Stations table.
+        """Returns a collection of ID and station name pairs from the `Stations` table.
 
         Returns:
-            (list[dict[str, Any]]): Will return a list of tuples that contain station IDs and names if operation was successful.
+            (list[dict[str, Any]]):  A list of tuples containing station IDs and names if the 
+                operation was successful.
         """
         # Attempt to retrieve and parse all station ID and name pairs.
         stmt = select(self.model.id, self.model.station_name)
@@ -30,14 +31,14 @@ class StationRepository(BaseRepository[Station]):
             
     @repository_error_handler()
     def create_new_station(self, stat_name: str, hashed_password: str) -> int:
-        """Creates a new station given a station name and a hashed password in the Stations table.
+        """Creates a new station from `stat_name` and a `hashed_password` in the `Stations` table.
         
         Args:
             station_name (str): The name of a new station.
             hashed_password (str): A hashed password for the new station.
             
         Returns:
-            bool: Returns the id of the new station created
+            int: Returns the id of the new station created
         """
         # Check to see if station name exists
         stmt = select(self.model.id).where(self.model.station_name == stat_name)
@@ -76,11 +77,14 @@ class StationRepository(BaseRepository[Station]):
 
     @repository_error_handler()
     def update_station_password(self, station_id: int, hashed_password: str) -> str:
-        """Updates a station's password given its respective ID.
+        """Updates a station's password with `hashed_password` with a matching `station_id`.
         
         Args:
             station_name (int): The ID of the station to update.
             hashed_password (str): The new hashed password for the station.
+            
+        Returns:
+            str: The newly updated password from the database session.
         """
         if not isinstance(station_id, int) or not isinstance(hashed_password, str):
             raise RepositoryInvalidArgumentError(
@@ -91,17 +95,17 @@ class StationRepository(BaseRepository[Station]):
         
         # Will raise a RepositoryNotFoundError if station does not exist
         result = self.update_with_pk(station_id, {"passwd": hashed_password}, to_dict=False)  
-        return result.id
+        return result.passwd
             
 
     def get_station_id(self, stat_name: str) -> int:
-        """Returns the ID of a station given its name.
+        """Returns the ID of a station with a given `stat_name`.
 
         Args:
             stat_name (str): The name of the station.
 
         Returns:
-            str: The ID of the station given its name.
+            str: The ID of the station.
         """
         try:
             # Select the station ID where the station name matches the provided name.
@@ -129,8 +133,8 @@ class StationRepository(BaseRepository[Station]):
     @repository_error_handler()
     def get_last_seen(self, stat_name: str) -> str:
         """Returns a formatted string of the station's last seen timestamp. 
-        If the timestamp occurred today, the string is formatted as: 'HH:MM AM/PM'; 
-        otherwise, it is formatted as: 'MON DD, YYYY at HH:MM AM/PM'.
+        If the timestamp occurred today, the string is formatted as: `HH:MM AM/PM`; 
+        otherwise, it is formatted as: `MON DD, YYYY at HH:MM AM/PM`.
 
         Args:
             stat_name (str): The name of the station to retrieve from.
@@ -164,7 +168,7 @@ class StationRepository(BaseRepository[Station]):
     @repository_error_handler()
     def update_last_seen(self, station_id: int) -> datetime:
         """Updates a station's last seen timestamp to the current time during execution.  
-        Returns a datetime object representing the result.
+        Returns a `datetime` instance representing the result.
 
         Args:
             station_id (int): The ID of the station to update.

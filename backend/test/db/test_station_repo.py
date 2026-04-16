@@ -54,12 +54,8 @@ class TestStationRepository(BaseTestCase):
     def testUpdateStationPassword(self):
         # Test that the id of the updated station is correct
         new_pass = "bbbb"
-        resulting_id = self.repo.update_station_password(1, new_pass)
-        self.assertEqual(1, resulting_id)
-        
-        # Test that the updated password is reflected in session
-        updated_row = self.repo.get(resulting_id)
-        self.assertEqual(new_pass, updated_row["passwd"])
+        resulting_password = self.repo.update_station_password(1, new_pass)
+        self.assertEqual(new_pass, resulting_password)
         
         # Test argument checking
         with self.assertRaises(RepositoryInvalidArgumentError):
