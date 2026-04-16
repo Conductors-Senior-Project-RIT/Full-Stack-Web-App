@@ -37,8 +37,15 @@ user_bp = Blueprint("user_bp", __name__)
 lets ditch the storing session token from database... im not sure why they did that as it beats the purpose of using
 jwt lol.
 
-TODO: need to create a decorator to place on routes that only admins should be able to touch  --> unsure if conflicts would occur with frontend..
-TODO: EMAIL VALIDATOR + FLASK-MAIL WITH THREADING FOR EMAILS LELE
+using cookies to handle jwt 
+
+app.config["JWT_TOKEN_LOCATION"] = ["cookies"] --> is easer than [headers] but if can't complete will rollback to headers to be compatabile with app
+app.config["JWT_SECRET_KEY"] = "super-secret"
+app.config["JWT_COOKIE_SECURE"] = False
+app.config["JWT_COOKIE_CSRF_PROTECT"] --> since using cookies 
+
+check_jwt_auth() in volunteer hanlder is basically what im doing in the global_core/decorators.py class lol --> will just make it cleaner 
+
 TODO: refresh token 30 mins before it expires (check docs where it uses an `after_request` callback)
 @app.after_request
 def refresh_expiring_jwts(response)
@@ -80,15 +87,14 @@ def login():
     user_role = user.get("acc_status")
     
     additional_claims = {"user_role": user_role} # a user role is set based on what's in the database
-    # identity being user_id makes it easier to retrieve user info from db for whatever reason, and can store their user_role here as it's not a security risk and makes it easier to protect certain routes later
+    # lookup partial loading with identity -> can be cleaner and less db operations as specific user model can be stored
     access_token = create_access_token(identity=str(user_id), additional_claims=additional_claims) # user_id as eventually want to replace incrementing id with uuid if possible
     
-    response = make_response({"message": "login successful", "access_token": access_token}, 200)
+    response = make_response({"message": "login successful"}, 200)
 
-    set_access_cookies(response, access_token)
+    set_access_cookies(response, access_token) 
 
-    session.commit()
-
+    # session.commit()
     return response
 
 # the bottom 3 routes confuse me, need to look at frontend and see if i should remove one of the routes...
