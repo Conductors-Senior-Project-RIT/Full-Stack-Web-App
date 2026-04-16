@@ -12,14 +12,13 @@ from .exceptions import (
 from .models import Base
 
 
-
 @runtime_checkable
 class AsDictConvertible(Protocol):
     """This protocol can be passed into a class to specify dictionary
     conversion capabilities."""
-    def _asdict(self) -> dict[str, Any]: ...
+    def _asdict(self) -> dict[str, Any]: ...  # pragma: no cover
     @property
-    def _mapping(self) -> dict[str, Any]: ...
+    def _mapping(self) -> dict[str, Any]: ...  # pragma: no cover
     
     
 # A generic type variable in is constrained to only accept types that are subclasses of Base.
@@ -37,15 +36,15 @@ FlexibleResult = Union[SingleResult, CollectionResult]
 class BaseRepository(Generic[ModelType]): 
     """Base class for a repository, supporting CRUD functionality for 
     SQLAlchemy ORMs. This class uses a generic, `ModelType`, which is bounded to 
-    the `Base` class from `models`, defineing the model to operate on. Methods
+    the :class:`Base` class from `models`, defineing the model to operate on. Methods
     in this class return `ModelType`, but conversion to a `dict` as a return type 
     is supported if the provided model extends `Base`. 
     
     
     Args:
         Generic (ModelType): A type variable representing an SQLAlchemy ORM model 
-            which extends `Base`. The model provdided defines which table to manipulate
-            in a provided `Session`.
+            which extends :class:`Base`. The model provdided defines which table to manipulate
+            in a provided :class:`Session`.
             
     Notes:
         - All methods in this class `flush` model changes in the session; however,
@@ -83,7 +82,7 @@ class BaseRepository(Generic[ModelType]):
     def get(self, pkey: Any, to_dict=True) -> SingleResult:
         """Retrieves an ORM from the session's current state. By default,
         this method returns a dictionary representation of the result, which 
-        can be turned off by setting `to_dict` to `False`. A `RepositoryNotFoundError`
+        can be turned off by setting `to_dict` to `False`. A :class:`RepositoryNotFoundError`
         will is thrown if the primary key cannot be found in the current session.
 
         Args:
@@ -237,13 +236,48 @@ class BaseRepository(Generic[ModelType]):
         
     @repository_error_handler()
     def create(self, new_data: list[dict[str, Any]] | dict[str, Any], to_dict=True) -> CollectionResult:
+        """
+        Creates one or more new records in the database from the provided data.
+
+        Instantiates model instance from the given data, adds them to the session, and flushes them to the database. 
+        The flush persists the records and generates neecessary values (e.g. primary keys). This method does not commit
+        these changes, thus, they are not reflected in the database until a higher layer commits them. 
+
+        Args:
+            new_data: A single dict or list of dicts mapping column names to values
+                    used to instantiate the model(s).
+            to_dict:  If True, returns the created records as a list of dicts.
+                    If False, returns the raw model instances. Defaults to True.
+
+        Returns:
+            CollectionResult: By default, this method returns a list of dictionary representations of the created records, which can 
+            be turned off by setting `to_dict` to `False` to instead return a list of `ModelType` instances. If the provided `new_data` 
+            is empty, an empty list is returned.
+
+        Raises:
+            RepositoryParsingError:  This exception is thrown if any of of these conditions occur:
+                - If the provided data cannot be mapped to the model, such as invalid types (ProgrammingError)
+                - Malformed `new_data` (eg. not a valid `dict`) (TypeError).
+                - If a database error occurs during the flush, such as a primary key collision (IntegrityError).
+        """
+        
+        if not new_data:
+            return []
+        
+        # Create transient instances of the model with the provided data
         instances = (
             [self.model(**data) for data in new_data] 
             if isinstance(new_data, list) else
             [self.model(**new_data)]
         )
+
+        # Add the instances to the session, their state is now pending
         self.session.add_all(instances)
-        self.session.flush()     
+        
+        # Flushing the instances in the session will persist them as new rows in the db, 
+        # auto-generating any values as necessary, such as primary keys.
+        # However, these changes are not committed until a higher layer commits them. 
+        self.session.flush()  
            
         return self.objs_to_dicts(instances) if to_dict else instances
         
@@ -259,7 +293,7 @@ class BaseRepository(Generic[ModelType]):
     @repository_error_handler()
     def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible], convert_to_string: set[str] = {}) -> dict[str, Any] | list[dict[str, Any]]:
         # Determine if the values given is iterable
-        is_collection = isinstance(values, (Iterable))
+        is_collection = isinstance(values, Iterable)
         rows = values if is_collection else [values]
 
         results = []

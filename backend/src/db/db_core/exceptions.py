@@ -1,6 +1,6 @@
 from typing import Type
 
-from sqlalchemy.exc import DataError, SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
+from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError, SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
 
 from ...global_core.exceptions import LayerError, layer_error_handler, translate_error
 
@@ -39,7 +39,8 @@ class RepositoryExistingRowError(RepositoryError):
 REPOSITORY_ERROR_MAP = {
     (TimeoutError, UnboundExecutionError, InterfaceError, NoSuchModuleError): 
         (RepositoryConnectionError, False),
-    (TypeError, KeyError, ValueError, IndexError, ZeroDivisionError, DataError): 
+    (TypeError, KeyError, ValueError, IndexError, ZeroDivisionError, 
+     DataError, ProgrammingError, IntegrityError): 
         (RepositoryParsingError, False),
     SQLAlchemyError: (RepositoryInternalError, False)
     

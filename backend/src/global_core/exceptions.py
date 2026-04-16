@@ -14,7 +14,8 @@ class LayerError(Exception):
             caller_name: str | None = None,
             poe: str | None = None,
             message: str | None = None,
-            show_error=False
+            show_error=False,
+            cause: Exception | None = None
     ):
         """Constructor for a `LayerError` instance.
     
@@ -38,6 +39,9 @@ class LayerError(Exception):
             show_error (bool, optional): If `True`, forces the detailed error
                 message and point of error to be shown regardless of the global
                 `error_debugging` flag. Defaults to False.
+            cause (Exception | None, optional): The exception that is the cause of this error. If provided, this exception is attached 
+                to the `LayerError` instance via `__cause__` chaining, allowing for preservation 
+                of the original exceptions and their tracebacks. Defaults to None.
         """
         # Contruct the caller prefix and point of error message if provided
         caller = f"[{caller_name}] " if caller_name else ""
@@ -53,8 +57,15 @@ class LayerError(Exception):
             # Display the specific error message if provided, followed by the default message and additional error details.
             public = f"{point_of_error}{public.rstrip(".!")}: {message}"
         
+        # Attach the cause for exception for later reference
+        self.cause = cause
+        
         # Pass the final error message to the Exception constructor
         super().__init__(f"{caller}{public}")
+        
+    def __cause__(self) -> Exception | None:
+        """Override the default cause behavior to return exception if provided."""
+        return getattr(self, 'cause', None)
 
 def layer_error_handler(
         error_map: dict[Exception | tuple[Exception], tuple[Exception, bool]],
@@ -204,8 +215,15 @@ def translate_error(
             caller_name,
             poe=point_of_error,
             message=message,
-            show_error=show_error
+            show_error=show_error,
+            cause=e
         )
 
     # Match not found, instantiate and return the fallback exception
-    return base_exception(caller_name) 
+    return base_exception(
+            caller_name,
+            poe=point_of_error,
+            message=message,
+            show_error=show_error,
+            cause=e
+        )
