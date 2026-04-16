@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request
 from flask_restful import Resource, reqparse
 from ..service.symbol_service import SymbolService
 from backend.database import db
@@ -24,7 +24,7 @@ class SymbolAPI(Resource):
         results = service.get_symbol(symbol_name)
         session.commit()
         
-        return jsonify({"results": results}), 200
+        return {"results": results}, 200
         
 
     def post(self):
@@ -41,11 +41,11 @@ class SymbolAPI(Resource):
 
         # If there is no name provided, then return a 400 error
         if not args.name:
-            return jsonify({"error": "Must provide a symbol name for a new symbol!"}), 400
+            return {"error": "Must provide a symbol name for a new symbol!"}, 400
         
         session = db.session  
         service = SymbolService(session)
         service.create_symbol(args.name)
         session.commit()
         
-        return 200
+        return 201

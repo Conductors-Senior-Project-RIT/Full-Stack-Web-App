@@ -2,7 +2,7 @@ import datetime
 import http.client
 import urllib
 from ..db.trackSense_db_commands import *
-from flask import jsonify, request
+from flask import request
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
 from urllib.parse import urlencode
@@ -90,22 +90,6 @@ class HistoryDB(Resource):
         session.commit()
         
         return results, 201
-        
-
-
-        # if not resp:
-        #     print(recovery_request)
-        #     print(typ)
-        #     self.add_new_pin(args["station_id"], typ, args["unit_addr"])
-        #     noti = self.check_for_notification(
-        #         args["unit_addr"], args["station_id"], args["type"]
-        #     )
-        #     # print(noti)
-        #     if not noti and not recovery_request:
-        #         # print("owo") # lmfao wha
-        #         self.notif_send(args["station_id"])
-                
-        return 200
     
 
     # Commenting out the below for code coverage reasons.

@@ -26,9 +26,20 @@ const VerifyHOT = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "1");
 
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  };
+
   // Fetch data from the API
   useEffect(() => {
-    fetch(`${config.apiUrl}/record_verifier?page=${page}&type=2`)
+    let token = getCookie('token');
+    fetch(`${config.apiUrl}/record_verifier?page=${page}&type=2`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then(response => response.json())
       .then(data => {
         setData(data.results);
@@ -60,10 +71,12 @@ const VerifyHOT = () => {
 
         symbolId = data.results[0];
         if (symbolId !== -1) {
+          let token = getCookie('token');
           fetch(`${config.apiUrl}/record_verifier`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
               id: modalId,

@@ -1,7 +1,10 @@
 import hashlib
 import secrets
 
+from email_validator import validate_email, EmailNotValidError
+
 from backend.src.db.db_core.models import User
+from werkzeug.exceptions import BadRequest
 # from werkzeug.security import check_password_hash, generate_password_hash
 
 from ... import bcrypt
@@ -22,20 +25,25 @@ class UserService(BaseService):
         TODO: remove auto incrementing from DB for "id" field and instead generate UUID here (maybe)
         TODO: somehow check if email is valid (has @ symbol, etc)
         """
-
-        # hashed_password = generate_password_hash(password) | uses werkzeug helper functions, but reverting to old hashing algorithm
         hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
-        self._user_repo.create_new_user(email, hashed_password)
 
-        user_id = self._user_repo.get_user_id(email)
+        try:
+            email_info = validate_email(email, check_deliverability=False)
+            email = email_info.normalized # store normalized email only
+        except EmailNotValidError as e:
+            raise BadRequest("Invalid email format")
+        
+        if self._user_repo.email_exists(email): 
+            raise BadRequest("Email already registered")
+
+        user_id = self._user_repo.create_new_user(email, hashed_password)
 
         self.initialize_user_preferences(user_id) #default user settings
+        
+        # Temporarily avoid this until we create email sender again
 
-        created_user = self._user_repo.session.get(User, user_id) # retrieve specific user Model via db.session's .get()
-
-        email_service.send_registered_email(created_user.email, "New User") 
-
-        return {"user_id": user_id, "email_sent": "email sent with no ApiError yay"}
+        email_service.send_registered_email(email) 
+        # return {"user_id": user_id}
 
     def initialize_user_preferences(self, user_id: int):
         """
@@ -54,12 +62,12 @@ class UserService(BaseService):
         """
         Validates user password, if nothing is returned something went wrong
         """
-        user = self._user_repo.get_user_info(email)
+        user = self._user_repo.get_user_info(email) 
 
         if not user: # invalid email as there's no rows returned
             return None
 
-        user_hashed_password = user[0][2] #list of tuple, 3rd element is passwd
+        user_hashed_password = user.get("passwd")
 
         if bcrypt.check_password_hash(user_hashed_password, password):
             return user
@@ -154,5 +162,3 @@ class UserService(BaseService):
 
         for station_id in new_station_preferences:
             self._user_repo.create_user_station_preference(user_id, station_id)
-
-

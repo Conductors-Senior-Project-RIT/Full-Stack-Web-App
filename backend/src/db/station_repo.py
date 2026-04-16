@@ -26,8 +26,8 @@ class StationRepository(BaseRepository[Station]):
         results = [row._asdict() for row in self.session.execute(sql).all()]
         
         return [{
-            "id": pair[0],
-            "name": pair[1]
+            "id": pair["id"],
+            "name": pair["station_name"]
         } for pair in results]
     
             

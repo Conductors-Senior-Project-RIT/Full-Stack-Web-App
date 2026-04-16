@@ -1,6 +1,6 @@
-from flask import Blueprint, abort, request, jsonify
+from flask import Blueprint, abort, request
 from flask_restful import reqparse
-from flask_jwt_extended import get_jwt, verify_jwt_in_request
+from flask_jwt_extended import get_jwt, verify_jwt_in_request, jwt_required
 from flask_cors import CORS
 from werkzeug.exceptions import Unauthorized, BadRequest
 from ..service.record_service import RecordService
@@ -12,8 +12,8 @@ from backend.database import db
 volunteer_bp = Blueprint("volunteer_bp", __name__)
 CORS(volunteer_bp)  # Enable CORS for the volunteer_bp blueprint
 
-
-@volunteer_bp.before_request
+# jwt known to break with before request when using preflight like react fetch does.
+# @volunteer_bp.before_request
 def check_jwt_auth():
     """Before a request is made to any route in this blueprint, this function checks 
     whether the request includes a JWT with sufficient user privileges.
@@ -23,7 +23,7 @@ def check_jwt_auth():
         the necessary user privileges.
     """
     # Verify that a JWT was provided
-    verify_jwt_in_request()
+    verify_jwt_in_request(locations=["cookies", "headers"])
     
     # Access the set of additional claims created with JWT
     claims = get_jwt()
@@ -40,32 +40,38 @@ def check_jwt_auth():
 
 
 @volunteer_bp.route("/api/add-pin", methods=["POST"])
+@jwt_required()
 def add_pin():
+    check_jwt_auth()
     data = request.get_json()
     lat = data.get("lat")
     lng = data.get("lng")
 
     if lat is None or lng is None:
-        return jsonify({"message": "Invalid data"}), 400
+        return {"message": "Invalid data"}, 400
 
     # Insert the pin into the database
     run_exec_cmd("INSERT INTO Pins (lat, lng) VALUES (%s, %s)", (lat, lng))
-    return jsonify({"message": "Pin added successfully"}), 201
+    return {"message": "Pin added successfully"}, 201
 
 
 @volunteer_bp.route("/api/get-pins", methods=["GET"])
+@jwt_required()
 def get_pins():
+    check_jwt_auth()
     pins = run_get_cmd("SELECT lat, lng FROM Pins")
-    return jsonify([{"lat": pin[0], "lng": pin[1]} for pin in pins])
+    return [{"lat": pin[0], "lng": pin[1]} for pin in pins]
 
 
-@volunteer_bp.route("/symbol", methods=["GET", "POST"])
+@volunteer_bp.route("/api/symbol", methods=["GET", "POST"])
+@jwt_required()
 def get_symbol():
     """_summary_
 
     Returns:
         _type_: _description_
     """
+    check_jwt_auth()
     # Retrieve the provided query parameters (if it exists)
     symbol_name = request.args.get("symbol_name", default=None, type=str)
     
@@ -79,7 +85,7 @@ def get_symbol():
         results = service.get_symbol(symbol_name)
         
         # Return results in the 'results' field for consistency
-        return jsonify({"results": results}), 200
+        return {"results": results}, 200
     
     elif request.method == "POST":
         # To create a new symbol, a name must be provided
@@ -91,21 +97,27 @@ def get_symbol():
         return 200
 
 
-@volunteer_bp.get("/record_verifier")
+@volunteer_bp.get("/api/record_verifier")
+@jwt_required()
 def get_records():
+    check_jwt_auth()
     page = request.args.get("page", default=1, type=int)
     typ = request.args.get("type", default=-1, type=int)
     
     if page < 1:
         abort(400, f"Invalid page number: {page}")
     
-    record_service = RecordService(typ)
+    session = db.session
+
+    record_service = RecordService(session, typ)
     results = record_service.get_unverified_records(page)
-    return jsonify(results), 200
+    return results, 200
 
 
-@volunteer_bp.post("/record_verifier")
+@volunteer_bp.post("/api/record_verifier")
+@jwt_required()
 def post_record():
+    check_jwt_auth()
     parser = reqparse.RequestParser()
     parser.add_argument("id", type=int, default=-1)
     parser.add_argument("type", type=int, default=-1)
