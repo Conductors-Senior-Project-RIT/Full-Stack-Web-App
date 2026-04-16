@@ -11,39 +11,96 @@ from .exceptions import (
 from .models import Base
 
 
-################################################
-##  REPOSITORY CLASSES AND TYPES DEFINITIONS  ##
-################################################
 
 @runtime_checkable
 class AsDictConvertible(Protocol):
+    """This protocol can be passed into a class to specify dictionary
+    conversion capabilities."""
     def _asdict(self) -> dict[str, Any]: ...
     @property
     def _mapping(self) -> dict[str, Any]: ...
     
-
+    
+# A generic type variable in is constrained to only accept types that are subclasses of Base.
+# Provides type safety by rejecting incompatible types at runtime.
 ModelType = TypeVar("ModelType", bound=Base)
 
+# Return type can be an ORM or dict instance
 SingleResult = Union[ModelType, dict[str, Any]]
+# Return type can be a list of ORMs or dicts
 CollectionResult = Union[list[ModelType], list[dict[str, Any]]]
+# Return type can be a single or a collection of result(s)
 FlexibleResult = Union[SingleResult, CollectionResult]
 
 
 class BaseRepository(Generic[ModelType]): 
-    def __init__(self, model: Type[ModelType], session: Session = None):
+    """Base class for a repository, supporting CRUD functionality for 
+    SQLAlchemy ORMs. This class uses a generic, `ModelType`, which is bounded to 
+    the `Base` class from `models`, defineing the model to operate on. Methods
+    in this class return `ModelType`, but conversion to a `dict` as a return type 
+    is supported if the provided model extends `Base`. 
+    
+    
+    Args:
+        Generic (ModelType): A type variable representing an SQLAlchemy ORM model 
+            which extends `Base`. The model provdided defines which table to manipulate
+            in a provided `Session`.
+            
+    Notes:
+        - All methods in this class `flush` model changes in the session; however,
+        these changes are not reflected in the database until a higher layer
+        commits them.
+    """
+    
+    def __init__(self, model: Type[ModelType], session: Session):
+        """Constructor for a repository.
+        
+        Defines the model and `Session` that the repository operates on.
+        If the model and session are valid, this instance maintains a reference
+        to the model's primary key through `pkey`.
+        
+
+        Args:
+            model (Type[ModelType]): _description_
+            session (Session, optional): _description_. Defaults to None.
+        """
+        
         self.model = model
         self.session = session
         
+        # Extract the primary key by inspecting the model's attributes
         self.pkey = None
-        if self.session is not None:
+        if self.model:
             pkeys = inspect(self.model).primary_key
-            self.pkey = pkeys[0].name
+            if pkeys:
+                self.pkey = pkeys[0].name if pkeys else None
         
         
     @repository_error_handler()
-    def get(self, pkey: int | str, to_dict=True) -> SingleResult:
+    def get(self, pkey: Any, to_dict=True) -> SingleResult:
+        """Retrieves an ORM from the session's current state. By default,
+        this method returns a dictionary representation of the result, which 
+        can be turned off by setting `to_dict` to `False`. A `RepositoryNotFoundError`
+        will is thrown if the primary key cannot be found in the current session.
+
+        Args:
+            pkey (Any): Primary key to search for in the current session, typically
+                an `int` or `str`.
+                
+            to_dict (bool, optional): Specifies whether retrieved instance should be
+                returned as a `ModelType` or `dict`. Setting this field to `True` returns
+                the results as a `dict`; otherwise, a `ModelType`. Default value is True.
+
+        Raises:
+            RepositoryNotFoundError: Thrown if the instance cannot be found in the current
+                session with the provided `pkey`.
+
+        Returns:
+            SingleResult: A `ModelType` or `dict` instance of the result.
+        """
         obj = self.session.get(self.model, pkey)
         
+        # Throw error if row is not found
         if not obj:
             raise RepositoryNotFoundError(
                 self.__class__.__name__, "get",
@@ -73,10 +130,7 @@ class BaseRepository(Generic[ModelType]):
             has_updated = False
             for key, new_value in updates.items():
                 if key == self.pkey:
-                    raise RepositoryInvalidArgumentError(
-                        self.__class__.__name__, "update",
-                        f"Cannot update {self.pkey}!", True
-                    )
+                    continue
                 
                 if not hasattr(obj, key):
                     raise RepositoryInvalidArgumentError(
@@ -125,6 +179,7 @@ class BaseRepository(Generic[ModelType]):
         self.session.flush()
         
             
+    @repository_error_handler()
     @classmethod
     def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible], convert_to_string: set[str] = {}) -> dict[str, Any] | list[dict[str, Any]]:
         # Determine if the values given is iterable
