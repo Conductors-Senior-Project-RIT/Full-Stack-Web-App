@@ -122,7 +122,7 @@ def layer_error_handler(
         @wraps(func)
         def decorator(*args, **kwargs):
             # Reference the instance calling the function
-            caller_name = args[0].__class__.__name__
+            caller_name = args[0].__class__.__name__ if args else None
             
             try:
                 # Return the wrapped function in the try/except
