@@ -1,3 +1,90 @@
+from datetime import datetime
+
+from sqlalchemy.orm import configure_mappers
+
+from backend.src.db.base_record_repo import RecordRepository
+from backend.src.db.db_core.models import BaseRecord
+
+class TestTrainRecord(BaseRecord):
+    __tablename__ = "trainrecords"
+    __table_args__ = {'extend_existing': True}
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'trainrecords',
+        'concrete': True
+    }
+    
+configure_mappers()
+
+
+class TestRepository(RecordRepository):  
+    def __init__(self, session):
+        super().__init__(TestTrainRecord, session, "Train Record", "train")
+      
+    def get_train_history(self, id, page, num_results):
+        pass
+
+    def create_train_record(self, args, datetime_string):
+        pass
+
+    def get_recent_station_records(self, station_id):
+        pass
+
+    def get_record_collation(self, page):
+        pass
+
+    def get_records_by_verification(self, page, verified):
+        pass
+    
+def return_test_data() -> list[dict]:
+    return [ 
+        TestTrainRecord(
+            date_rec=datetime.strptime("1999-01-08 04:05:06", "%Y-%m-%d %H:%M:%S"),
+            station_recorded=1,
+            most_recent=False,
+            unit_addr="1111",
+            symbol_id=1,
+            engine_num=1,
+            locomotive_num="CT00",
+            verified=True,
+            signal_strength=0.0
+        ),
+        TestTrainRecord(
+            date_rec=datetime.strptime("2003-02-05 06:53:08", "%Y-%m-%d %H:%M:%S"),
+            station_recorded=2,
+            most_recent=False,
+            unit_addr="2222",
+            symbol_id=2,
+            engine_num=2,
+            locomotive_num="TG00",
+            verified=True,
+            signal_strength=0.0
+        ),
+        TestTrainRecord(
+            date_rec=datetime.now(),
+            station_recorded=1,
+            most_recent=True,
+            unit_addr="1111",
+            symbol_id=1,
+            engine_num=1,
+            locomotive_num="EL00",
+            verified=False,
+            signal_strength=0.0
+        ),
+        TestTrainRecord(
+            date_rec=datetime.now(),
+            station_recorded=2,
+            most_recent=True,
+            unit_addr="2222",
+            symbol_id=2,
+            engine_num=2,
+            locomotive_num="CY00",
+            verified=False,
+            signal_strength=0.0
+        )
+    ]
+
+
 def collation_valid(e: dict, r: dict) -> tuple[bool, str | None]:
     """
     The return value of a record collation is a dictionary containing two keys: 'results' and 'totalPages'.

@@ -1,348 +1,40 @@
 from datetime import datetime
-import pprint
-import unittest
 from unittest.mock import MagicMock, patch
+from sqlalchemy.exc import IntegrityError, ProgrammingError
+import unittest
 
 from sqlalchemy import text
-from sqlalchemy.exc import IntegrityError, ProgrammingError, SQLAlchemyError
-from sqlalchemy.orm.session import Session
-from yaml import warnings
 
 from backend.database import db
-from backend.src.db.db_core.models import Base, BaseRecord
-from backend.src.db.base_record_repo import RecordRepository
-from backend.src.db.db_core.exceptions import RepositoryExistingRowError, RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
+from backend.src.db.db_core.exceptions import RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.src.db.db_core.repository import BaseRepository
-from backend.src.global_core.exceptions import LayerError
 from backend.test.base_test_case import BaseTestCase
+from backend.test.db.test_utils import TestRepository, TestRepository, TestTrainRecord, return_test_data
 
 
-class TestTrainRecord(BaseRecord):
-    __tablename__ = "trainrecords"
-
-
-class TestRepository(RecordRepository):  
-    def __init__(self, session):
-        super().__init__(TestTrainRecord, session, "Train Record", "train")
+class TestBaseRepository(BaseTestCase):  
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        with db.engine.connect() as conn:
+            conn.execute(text("TRUNCATE trainrecords RESTART IDENTITY CASCADE"))
+            conn.commit()
       
-    def get_train_history(self, id, page, num_results):
-        pass
-
-    def create_train_record(self, args, datetime_string):
-        pass
-
-    def get_recent_station_records(self, station_id):
-        pass
-
-    def get_record_collation(self, page):
-        pass
-
-    def get_records_by_verification(self, page, verified):
-        pass
-
-
-class TestBaseRepositories(BaseTestCase):
     def setUp(self):
-        self.session = db.session
-        TestTrainRecord.__table__.drop(bind=db.engine, checkfirst=True)
-        TestTrainRecord.__table__.create(bind=db.engine, checkfirst=True)
+        super().setUp()
         self.repo = TestRepository(self.session)
         
-        self.test_data = [
-            TestTrainRecord(
-                id=1,
-                date_rec=datetime.strptime("1999-01-08 04:05:06", "%Y-%m-%d %H:%M:%S"),
-                station_recorded=1,
-                most_recent=False,
-                unit_addr="1111",
-                symbol_id=1,
-                engine_num=1,
-                locomotive_num="CT00",
-                verified=True,
-                signal_strength=0.0
-            ),
-            TestTrainRecord(
-                id=2,
-                date_rec=datetime.strptime("2003-02-05 06:53:08", "%Y-%m-%d %H:%M:%S"),
-                station_recorded=2,
-                most_recent=False,
-                unit_addr="2222",
-                symbol_id=2,
-                engine_num=2,
-                locomotive_num="TG00",
-                verified=True,
-                signal_strength=0.0
-            ),
-            TestTrainRecord(
-                id=3,
-                date_rec=datetime.now(),
-                station_recorded=1,
-                most_recent=True,
-                unit_addr="1111",
-                symbol_id=1,
-                engine_num=1,
-                locomotive_num="EL00",
-                verified=False,
-                signal_strength=0.0
-            ),
-            TestTrainRecord(
-                id=4,
-                date_rec=datetime.now(),
-                station_recorded=2,
-                most_recent=True,
-                unit_addr="2222",
-                symbol_id=2,
-                engine_num=2,
-                locomotive_num="CY00",
-                verified=False,
-                signal_strength=0.0
-            )
-        ]
-        
+        # Reset sequence before inserting so ids start at 1
+        self.session.execute(text(
+            "SELECT setval(pg_get_serial_sequence('trainrecords', 'id'), coalesce(MAX(id), 1), false) FROM trainrecords"
+        ))
+        self.test_data = return_test_data()
         self.session.add_all(self.test_data)
         self.session.flush()
-        
-        # Reset sequence to avoid primary key collision on next auto-generated insert
-        self.session.execute(text(
-            "SELECT setval(pg_get_serial_sequence('trainrecords', 'id'), MAX(id)) FROM trainrecords"
-        ))
-                
-        
-    def tearDown(self):
-        self.session.rollback() # revert changes made from every test_method ran
-        self.session.close()
-        
-        
-    ###################################
-    ##  TESTS FOR RECORD REPOSITORY  ##
-    ###################################
-    
-    def testGetters(self):
-        self.assertEqual("Train Record", self.repo.get_record_name())
-        self.assertEqual("train", self.repo.get_record_identifier())
-    
-    
-    def testGetTotalRecordCount(self):
-        self.assertEqual(len(self.test_data), self.repo.get_total_record_count())
-    
-    
-    def testGetTrainRecord(self):
-        # Test that successful retrieval
-        for i in [1, "1"]:
-            result = self.repo.get(i)
-            self.assertDictEqual(self.test_data[0]._asdict(), result)
-        
-        # Test invalid id
-        with self.assertRaises(RepositoryNotFoundError):
-            self.repo.get(-1)
-            
-            
-    def testGetUnitRecordIds(self):
-        # Check that valid list of ids are returned
-        test_ret = [1, 3]
-        result = self.repo.get_unit_record_ids("1111", False)
-        self.assertListEqual(test_ret, result)
-        
-        # Check that valid most recent id returned
-        result = self.repo.get_unit_record_ids("1111", True)
-        self.assertEqual(3, result)
-        
-        # Test that an exception is raised when nothing is found
-        with self.assertRaises(RepositoryNotFoundError):
-            result = self.repo.get_unit_record_ids("unit", True)
-            
-            
-    def testGetRecentTrains(self):
-        # Test successful retrieval of new record
-        results = self.repo.get_recent_trains("1111", 1)
-        expected = [self.test_data[2]]
-        self.assertListEqual(expected, results)
-        
-        # Test failed retrieval of records
-        results = self.repo.get_recent_trains("bruh", 1)
-        self.assertListEqual([], results)
-
-            
-    def testAddNewPin(self):
-        # Test successful pin update
-        result_id = self.repo.add_new_pin(4, "1111")
-        self.assertListEqual([3], result_id)
-        
-        result_id = self.repo.add_new_pin(3, "1111")
-        self.assertListEqual([], result_id)
-            
-            
-    ######################################
-    ##  get_record_column_by_unit_addr  ##
-    ###################################### 
-    def _run_get_record_case(self, unit_addr, column, position, recent, expected):
-        result = self.repo.get_record_column_by_unit_addr(unit_addr, column, position, recent)
-        self.assertIsInstance(result, type(expected))
-        self.assertEqual(expected, result)
-          
-    def testGetRecordSymbol(self):
-        test_cases = [
-            # Below are the tests for symbol_id
-            ("2222", "symbol_id", True, [2]),
-            ("2222", "symbol_id", False, [2]),
-            ("2222", "symbol_id", None, [2, 2]), 
-            # Below are the tests for engine_num
-            ("1111", "engine_num", True, [1]),
-            ("1111", "engine_num", False, [1]),
-            ("1111", "engine_num", None, [1, 1]), 
-            # Below are the not found cases
-            ("0000", "engine_num", True, []),
-            ("0000", "engine_num", False, []),
-            ("0000", "engine_num", None, [])
-        ]
-        
-        for unit, col, rec, exp in test_cases:
-            # If this fails, the error message will include these params
-            with self.subTest(unit=unit, col=col, rec=rec, exp=exp):
-                result = self.repo.get_record_column_by_unit_addr(unit, col, rec)
-                self.assertEqual(exp, result)
-            
-        # Make sure exception raised if not valid column
-        with self.assertRaises(RepositoryInvalidArgumentError):
-            self.repo.get_record_column_by_unit_addr("5545", "Bob")
-            
-        with self.assertRaises(RepositoryParsingError):
-            self.repo.get_record_column_by_unit_addr("1111", "engine_num", "Bob")
+        print("Jigglebutt")
+        print([r.id for r in self.test_data])
         
     
-    # ############################
-    # ##  update_signal_values  ##
-    # ############################
-    def testUpdateSignalValues(self):
-        test_symbol = None
-        test_engine = None
-        
-        # Test no values change
-        result = self.repo.update_signal_values(1, test_symbol, test_engine)
-        self.assertEqual(None, result)
-        
-        test_cases = [
-            (2, None),
-            (None, 2),
-            (1, 1)
-        ]
-        
-        for sym, eng in test_cases:
-            with self.subTest(sym=sym, eng=eng):
-                updated = self.repo.update_signal_values(1, sym, eng, False)
-                self.session.add(updated)
-                self.session.flush()
-                
-                result = self.repo.get(1, False)
-                self.assertEqual(updated, result)
-
-    
-    ###########################
-    ##  get_station_records  ##
-    ###########################
-    def testGetStationRecords(self):
-        self.maxDiff = None
-        # All tests will be executed with recent=False in this class
-        expected = [self.test_data[0], self.test_data[2]]
-        result = self.repo.get_station_records(1)
-        self.assertListEqual(expected, result)
-        
-        with patch.object(Session, "execute") as mock:
-            mock.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.get_station_records(1)
-        
-        
-    #####################
-    ##  verify_record  ##
-    #####################
-    def testVerifyRecord(self):
-        sym, loc = 2, "RG00"
-        
-        # Get the updated instance in session
-        updated = self.repo.verify_record(3, sym, loc, False)
-        self.session.add(updated)
-        self.session.flush()
-        
-        # Make sure the changes are correctly reflected in the session
-        result = self.repo.get(3, False)
-        self.assertEqual(updated, result)
-        
-        with patch.object(RecordRepository, "update_with_pk") as mock:
-            mock.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.verify_record(3, sym, loc)
-        
-        
-    ################################
-    ##  get_records_in_timeframe  ##
-    ################################
-    def testGetRecordsInTimeframe(self):
-        self.maxDiff = None
-        expected = [
-            {
-                'id': 4, 
-                'date_rec': self.test_data[3].date_rec, 
-                'unit_addr': '2222', 
-                'station_name': 'test station2',
-                'symb_name': 'Test Symbol2', 
-                'engine_num': 2, 
-                'locomotive_num': 'CY00',
-                'Data_type': 'TRAIN'
-            },
-            {
-                'id': 3, 
-                'date_rec': self.test_data[2].date_rec, 
-                'unit_addr': '1111', 
-                'station_name': 'test station1',
-                'symb_name': 'Test Symbol1', 
-                'engine_num': 1, 
-                'locomotive_num': 'EL00',
-                'Data_type': 'TRAIN'
-            },
-            {
-                'id': 2,
-                'date_rec': self.test_data[1].date_rec,
-                'unit_addr': '2222', 
-                'station_name': 'test station2',
-                'symb_name': 'Test Symbol2', 
-                'engine_num': 2, 
-                'locomotive_num': 'TG00',
-                'Data_type': 'TRAIN'
-            },
-            {
-                'id': 1,
-                'date_rec': self.test_data[0].date_rec,
-                'unit_addr': '1111', 
-                'station_name': 'test station1',
-                'symb_name': 'Test Symbol1', 
-                'engine_num': 1, 
-                'locomotive_num': 'CT00',
-                'Data_type': 'TRAIN'
-            }
-        ]
-        dt = datetime.strptime("1998-01-08 04:05:06", "%Y-%m-%d %H:%M:%S")
-        results = self.repo.get_records_in_timeframe(-1, dt, False)
-        self.assertListEqual(expected[2:], results)
-        
-        results = self.repo.get_records_in_timeframe(1, dt, False)
-        self.assertListEqual([expected[3]], results)
-        
-        results = self.repo.get_records_in_timeframe(-1, dt, True)
-        self.assertListEqual(expected[:2], results)
-        
-        results = self.repo.get_records_in_timeframe(1, dt, True)
-        self.assertListEqual([expected[1]], results)
-        
-        results = self.repo.get_records_in_timeframe(1, dt)
-        self.assertListEqual(expected[1::2], results)
-        
-        with patch.object(Session, "execute") as mock:
-            mock.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.get_records_in_timeframe(-1, dt, True)
-                
-                
     #################################
     ##  TESTS FOR BASE REPOSITORY  ##
     #################################
@@ -358,12 +50,12 @@ class TestBaseRepositories(BaseTestCase):
         # Test inspection error on invalid instance
         self.repo = BaseRepository(int, self.session)
         self.assertEqual(None, self.repo.pkey)
-        
+            
         # Test if inspection doesn't find primary key
         with patch('backend.src.db.db_core.repository.inspect') as mock_inspect:
             mock_inspect.return_value.primary_key = []
             self.repo = BaseRepository(TestTrainRecord, self.session)
-            self.assertEqual(None, self.repo.pkey)
+            self.assertEqual(None, self.repo.pkey) 
         
     def testRepositoryGet(self):
         # Test that the dictionary returned is equal
@@ -493,25 +185,22 @@ class TestBaseRepositories(BaseTestCase):
         new_record_data = {"id": 999, "date_rec": date_rec, "station_recorded": station_rec}
         
         self.repo.create(new_record_data, False)[0]
-        self.repo.session.commit()
+        self.repo.session.flush()
         
         # Test that if a primary key collision occurs, then error is raised
         with self.assertRaises(RepositoryParsingError) as exc:
+            sp = self.repo.session.begin_nested()
             self.repo.create({"id": 999, "date_rec": datetime.now(), "station_recorded": 2}, False) 
         # The exception should contain the root cause (IntegrityError) if primary key collision occurs
         # Rollback the changes in order to test that original record is intact
+        sp.rollback()
         e = exc.exception            
         self.assertIsInstance(e.__cause__(), IntegrityError)
-        self.repo.session.rollback()
         
         # Test that the original record still has the same column values after failed creation
         instance = self.repo.get(999, False)
         self.assertEqual(date_rec, instance.date_rec)
         self.assertEqual(station_rec, instance.station_recorded)
-        
-        # Delete the instance to avoid collision with later tests, and commit the deletion
-        self.repo.session.delete(instance)
-        self.repo.session.commit()
             
         # Test that a parsing error is raised when the input data is not a dict or list of dicts
         with self.assertRaises(RepositoryParsingError) as exc:
@@ -522,19 +211,21 @@ class TestBaseRepositories(BaseTestCase):
             
         # Test that a parsing error is raised when the input data dict is has incompatible types for the model
         with self.assertRaises(RepositoryParsingError) as exc:
+            sp = self.session.begin_nested()
             self.repo.create([{"date_rec": Exception, "station_recorded": station_rec}])
         # The exception should contain the root cause (ProgrammingError)
+        sp.rollback()
         e = exc.exception            
         self.assertIsInstance(e.__cause__(), ProgrammingError)
-        self.repo.session.rollback()
         
         # Test that a parsing error is raised when null constraint is violated
         with self.assertRaises(RepositoryParsingError) as exc:
+            sp = self.session.begin_nested()
             self.repo.create([{"station_recorded": station_rec}])
         # The exception should contain the root cause (IntegrityError)
+        sp.rollback()
         e = exc.exception            
         self.assertIsInstance(e.__cause__(), IntegrityError)
-        self.repo.session.rollback()
         
     
     def testRepositoryDelete(self):
@@ -599,9 +290,6 @@ class TestBaseRepositories(BaseTestCase):
         self.assertEqual([], result)
         
     
-
-
 if __name__ == "__main__":
     unittest.main()
             
-        
