@@ -37,6 +37,7 @@ class TestRepository(RecordRepository):
         pass
     
 def return_test_data() -> list[dict]:
+    """Returns a list of test data to be used in testing the record and base repositories."""
     return [ 
         TestTrainRecord(
             date_rec=datetime.strptime("1999-01-08 04:05:06", "%Y-%m-%d %H:%M:%S"),

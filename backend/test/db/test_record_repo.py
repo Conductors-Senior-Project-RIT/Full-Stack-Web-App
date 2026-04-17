@@ -53,7 +53,7 @@ class TestRecordRepository(BaseTestCase):
     
     def testGetTotalRecordCount(self):
         self.assertEqual(len(self.test_data), self.repo.get_total_record_count())
-    
+        
     
     def testGetTrainRecord(self):
         # Test that successful retrieval

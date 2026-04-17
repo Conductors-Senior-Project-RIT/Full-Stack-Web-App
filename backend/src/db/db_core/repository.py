@@ -284,6 +284,20 @@ class BaseRepository(Generic[ModelType]):
         
     @repository_error_handler()    
     def delete(self, value: int | str | ModelType) -> None:  
+        """Deletes an instance from the database that matches the provided value, which can be a primary key or an 
+        instance of `ModelType`. 
+        
+        If a primary key is provided, the instance with the matching primary key will be retrieved 
+        and deleted. If an instance of `ModelType` is provided, that instance will be deleted. In either case, the session is
+        flushed to reflect the changes in the current session, but these changes are not committed until a higher layer commits them.
+
+        Args:
+            value (int | str | ModelType): A primary key value or an instance of `ModelType` to delete from the database. 
+        
+        Raises:
+            RepositoryNotFoundError: If the instance to delete cannot be found in the current session.
+        """
+        
         obj = value if issubclass(value.__class__, Base) else self.get(value, to_dict=False)
         self.session.delete(obj)
         self.session.flush()
@@ -291,7 +305,27 @@ class BaseRepository(Generic[ModelType]):
             
     @classmethod
     @repository_error_handler()
-    def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible], convert_to_string: set[str] = {}) -> dict[str, Any] | list[dict[str, Any]]:
+    def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible], convert_to_string: set[str] = {}) -> (
+        dict[str, Any] | list[dict[str, Any]]):
+        """Converts one or more instances to their dictionary representations. The provided values 
+        should be instances of a type that supports dictionary conversion.
+
+        Args:
+            values (AsDictConvertible | Sequence[AsDictConvertible]): A single instance or sequence of instances 
+                that support dictionary conversion, such as :class:`Base` or SQLAlchemy :class:`Row` objects.
+            
+            convert_to_string (set[str], optional): A set of keys specifying which fields in the resulting dictionaries 
+                should have their values converted to strings. Default value is an empty set, meaning no fields will be 
+                converted to strings.
+
+        Raises:
+            RepositoryParsingError: Raised if a provided object is not compatible with dictionary conversion.
+
+        Returns:
+            dict[str, Any] | list[dict[str, Any]]: A dictionary representation of the provided values.
+            IF any keys are specified in `convert_to_string`, then the corresponding values for those keys 
+            will be converted to strings in the returned dictionaries.
+        """
         # Determine if the values given is iterable
         is_collection = isinstance(values, Iterable)
         rows = values if is_collection else [values]
@@ -326,6 +360,7 @@ class BaseRepository(Generic[ModelType]):
         if len(convert_to_string) > 0:
             for d in results:
                 d.update({k: str(d[k]) for k in convert_to_string if k in d})
-                
+        
+        # Return a single dictionary if the input was not a collection, otherwise return a list of dictionaries
         return results if is_collection else results[0]
         
