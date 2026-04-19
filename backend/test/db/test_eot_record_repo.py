@@ -22,13 +22,6 @@ class TestEOTRecordRepository(BaseTestCase):
         self.session.close()
 
 
-    ###############
-    ##  Getters  ##
-    ###############
-    def testGetters(self):
-        self.assertEqual("EOT Record", self.repo.get_record_name())
-        self.assertEqual("eot", self.repo.get_record_identifier())
-
 
     def testGetTrainHistory(self):
         expected = [

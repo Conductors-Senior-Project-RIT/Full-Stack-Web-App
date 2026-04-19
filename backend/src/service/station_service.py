@@ -12,7 +12,7 @@ class StationService(BaseService):
     def __init__(self, session):
         self._station_repo = StationRepository(session)
         self._record_repos = {
-            r.get_record_identifier(): r for r in get_all_repositories(session)
+            r.record_identifier: r for r in get_all_repositories(session)
         }
     
     # -- Station Auth -- #

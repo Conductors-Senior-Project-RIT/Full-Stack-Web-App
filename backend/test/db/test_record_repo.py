@@ -39,16 +39,6 @@ class TestRecordRepository(BaseTestCase):
         self.test_data = return_test_data()
         self.session.add_all(self.test_data)
         self.session.flush()
-        
-        
-        
-    ###################################
-    ##  TESTS FOR RECORD REPOSITORY  ##
-    ###################################
-    
-    def testGetters(self):
-        self.assertEqual("Train Record", self.repo.get_record_name())
-        self.assertEqual("train", self.repo.get_record_identifier())
     
     
     def testGetTotalRecordCount(self):

@@ -21,15 +21,8 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         record_identifier: str = "Unknown"
     ):
         super().__init__(model, session)
-        self._record_name = record_name
-        self._record_identifier = record_identifier
-        
-        
-    def get_record_name(self) -> str:
-        return self._record_name
-        
-    def get_record_identifier(self) -> str:
-        return self._record_identifier
+        self.record_name = record_name
+        self.record_identifier = record_identifier
     
     
     @repository_error_handler()
@@ -298,7 +291,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             results = self.objs_to_dicts(results)
             # Add data type to result
             for result in results:
-                result["Data_type"] = self._record_identifier.upper()
+                result["Data_type"] = self.record_identifier.upper()
             
             return results
             

@@ -7,7 +7,7 @@ from backend.extensions import bcrypt, jwt
 from .config.settings import config_selection
 from .database import db
 
-error_debugging: bool = False
+error_debugging: bool = True
 
 def create_app(config_name=None): # tests call this function to create flask app
     """

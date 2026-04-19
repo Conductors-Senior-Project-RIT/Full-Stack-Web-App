@@ -18,14 +18,6 @@ class TestHOTRecordRepository(BaseTestCase):
     def tearDown(self):
         self.session.rollback() # revert changes made from every test_method ran
         self.session.close()
-
-
-    ###############
-    ##  Getters  ##
-    ###############
-    def testGetters(self):
-        self.assertEqual("HOT Record", self.repo.get_record_name())
-        self.assertEqual("hot", self.repo.get_record_identifier())
         
     
     #########################
