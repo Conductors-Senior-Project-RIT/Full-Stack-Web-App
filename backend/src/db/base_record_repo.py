@@ -236,7 +236,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
-                f"Could not verify {self._record_name} {record_id}: {e}"
+                f"Could not verify {self.record_name} {record_id}: {e}"
             )
         
         
@@ -298,5 +298,5 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         except Exception as e:
             raise repository_error_translator(
                 e, self.__class__.__name__, None,
-                f"Could not retrieve {self._record_name}s in timeframe: {e}"
+                f"Could not retrieve {self.record_name}s in timeframe: {e}"
             )
