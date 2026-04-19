@@ -16,7 +16,7 @@ class RecordService(BaseService):
             if record_type is not None else 
             record_types.get_all_repositories(session)
         )
-        self.station_repo = StationRepository(session)
+        self._station_repo = StationRepository(session)
         self._session = session
         
     
@@ -74,12 +74,12 @@ class RecordService(BaseService):
 
 
     # Data Collation
-    def collate_records(self, page: int) -> dict[str, list | str]:
+    def collate_records(self, page: int) -> dict[str, list | int]:
         return self.get_first_repository().get_record_collation(page, RESULTS_NUM)
     
     
     # Log Verification
-    def get_unverified_records(self, page: int) -> dict[str, list | str]:
+    def get_unverified_records(self, page: int) -> dict[str, list | int]:
         return self.get_first_repository().get_record_collation(page, RESULTS_NUM, False)
         
         
@@ -102,7 +102,7 @@ class RecordService(BaseService):
             
             if station_id == -1:
                 if station_name:
-                    station_id = self.station_repo.get_station_id(station_name)
+                    station_id = self._station_repo.get_station_id(station_name)
                 
             # Should never occur, but to be safe..
             if len(self._record_repo) < 1:

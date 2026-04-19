@@ -30,7 +30,7 @@ class ServiceParsingError(ServiceError):
 class ServiceResourceNotFound(ServiceError):
     default_message = "Resource not found!"
     
-class ServiceExistingResource(ServiceError):
+class ServiceExistingResourceError(ServiceError):
     default_message = "Resource already exists!"
 
 class ServiceInvalidArgument(ServiceError):
@@ -40,7 +40,7 @@ class ServiceInvalidArgument(ServiceError):
 # Maps a Repository layer error to a corresponding Service layer error, and whether the lower layer message should be shown
 SERVICE_ERROR_MAP = {
     RepositorySessionError: (ServiceInternalError, True),
-    RepositoryExistingRowError: (ServiceExistingResource, True),
+    RepositoryExistingRowError: (ServiceExistingResourceError, True),
     RepositoryParsingError: (ServiceInternalError, False),
     RepositoryConnectionError: (ServiceTimeoutError, False),
     RepositoryNotFoundError: (ServiceResourceNotFound, True),

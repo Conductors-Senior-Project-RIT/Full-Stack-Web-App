@@ -78,7 +78,7 @@ def get_symbol():
     session = db.session
     
     # Instantiate a symbol service
-    service = SymbolService()
+    service = SymbolService(session)
 
     if request.method == "GET":
         # The service supports an undefined symbol name and always returns a list

@@ -52,7 +52,7 @@ def repository_error_translator(
     point_of_error: str | None = None,
     message: str | None = None,
     exclude: tuple[Type[Exception]] | Type[Exception] | None = None
-):
+) -> RepositoryError:
     return translate_error(
         e,
         REPOSITORY_ERROR_MAP,

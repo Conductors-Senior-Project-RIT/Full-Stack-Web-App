@@ -177,7 +177,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
         
 
     # below is for eot_collation
-    def get_record_collation(self, page: int, num_results: int, verified: bool | None = None) -> dict[str, list | str]:
+    def get_record_collation(self, page: int, num_results: int, verified: bool | None = None) -> dict[str, list | int]:
         try:
             sql = f"""
                 WITH StationChanges AS (

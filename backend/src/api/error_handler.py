@@ -13,7 +13,7 @@ from backend import error_debugging
 SERVICE_ERROR_CODES = {
     ServiceInvalidArgument: 400,
     ServiceResourceNotFound: 404,
-    ServiceExistingResource: 409,
+    ServiceExistingResourceError: 409,
     ServiceTimeoutError: 408,
     ServiceInternalError: 500,
     ServiceParsingError: 500,

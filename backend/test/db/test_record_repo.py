@@ -171,12 +171,10 @@ class TestRecordRepository(BaseTestCase):
         sym, loc = 2, "RG00"
         
         # Get the updated instance in session
-        updated = self.repo.verify_record(3, sym, loc, False)
-        self.session.add(updated)
-        self.session.flush()
+        updated = self.repo.verify_record(3, sym, loc)
         
         # Make sure the changes are correctly reflected in the session
-        result = self.repo.get(3, False)
+        result = self.repo.get(3)
         self.assertEqual(updated, result)
         
         with patch.object(RecordRepository, "update_with_pk") as mock:

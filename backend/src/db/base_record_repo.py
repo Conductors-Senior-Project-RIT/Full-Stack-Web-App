@@ -197,16 +197,16 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         
     
     @abstractmethod
-    def get_recent_station_records(self, station_id: int) -> list[tuple[Any, ...]]:
+    def get_recent_station_records(self, station_id: int) -> list[dict[str, Any]]:
         pass
     
     
     @abstractmethod
-    def get_record_collation(self, page: int, num_results: int, verified: bool | None = None) -> list[dict[str, list | str]]:
+    def get_record_collation(self, page: int, num_results: int, verified: bool | None = None) -> dict[str, list | int]:
         pass
     
     
-    def verify_record(self, record_id: int, symbol_id: int, locomotive_num: str, to_dict=True) -> dict[str, Any] | RecordType:
+    def verify_record(self, record_id: int, symbol_id: int, locomotive_num: str) -> dict[str, Any]:
         try:
             # args = {
             #     "id": record_id,
@@ -231,7 +231,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 "verified": True
             }
             
-            return self.update_with_pk(record_id, values, to_dict)  # Already flushes
+            return self.update_with_pk(record_id, values)  # Already flushes
             
         except Exception as e:
             raise repository_error_translator(
