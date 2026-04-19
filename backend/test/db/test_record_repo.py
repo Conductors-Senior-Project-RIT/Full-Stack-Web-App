@@ -1,21 +1,16 @@
 from datetime import datetime
-import pprint
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from sqlalchemy import text
-from sqlalchemy.exc import IntegrityError, ProgrammingError, SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
-from yaml import warnings
 
-from test_utils import TestTrainRecord, TestRepository, return_test_data
+from test_utils import TestRepository, TestTrainRecord, return_test_data
 
 from backend.database import db
-from backend.src.db.db_core.models import Base, BaseRecord
 from backend.src.db.base_record_repo import RecordRepository
-from backend.src.db.db_core.exceptions import RepositoryExistingRowError, RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
-from backend.src.db.db_core.repository import BaseRepository
-from backend.src.global_core.exceptions import LayerError
+from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.test.base_test_case import BaseTestCase
 
 
@@ -148,11 +143,8 @@ class TestRecordRepository(BaseTestCase):
         
         for sym, eng in test_cases:
             with self.subTest(sym=sym, eng=eng):
-                updated = self.repo.update_signal_values(1, sym, eng, False)
-                self.session.add(updated)
-                self.session.flush()
-                
-                result = self.repo.get(1, False)
+                updated = self.repo.update_signal_values(1, sym, eng)
+                result = self.repo.get(1)
                 self.assertEqual(updated, result)
 
     

@@ -161,14 +161,14 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
     
     @repository_error_handler()
-    def update_signal_values(self, record_id: int, symbol_id: int, engine_num: int, to_dict=True) -> dict[str, Any] | RecordType | None:
+    def update_signal_values(self, record_id: int, symbol_id: int, engine_num: int) -> dict[str, Any] | None:
         values = {}
         if symbol_id:
             values["symbol_id"] = symbol_id
         if engine_num:
             values["engine_num"] = engine_num
             
-        return self.update_with_pk(record_id, values, to_dict)  # Already flushes
+        return self.update_with_pk(record_id, values)  # Already flushes
 
 
     # Station Handler
