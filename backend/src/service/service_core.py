@@ -1,6 +1,6 @@
 from ..db.db_core.exceptions import RepositoryExistingRowError, RepositorySessionError, RepositoryParsingError, RepositoryNotFoundError, \
     RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryConnectionError
-from ..global_core.exceptions import LayerError, layer_error_handler
+from ..global_core.exceptions import LayerError, wrap_error_handler
 from ..db.record_types import RepositoryRecordInvalid # exists separately because of circular dependency issue; eventually needs to be refactored slightly
 
 
@@ -9,9 +9,14 @@ class BaseService:
         super().__init_subclass__(**kwargs)
         for attr, value in cls.__dict__.items():
             # If the value is a function, then wrap
-            if callable(value):
+            if callable(value) and not getattr(value, '_is_wrapped', False):
                 # Register class funtion from name (attr), with the error handler decorator wrapping function (value)
-                wrapped = layer_error_handler(value, SERVICE_ERROR_MAP, ServiceInternalError)
+                wrapped = wrap_error_handler(
+                    func=value,
+                    error_map=SERVICE_ERROR_MAP, 
+                    base_exception=ServiceInternalError,
+                )
+                wrapped._is_wrapped = True
                 setattr(cls, attr, wrapped)
 
 

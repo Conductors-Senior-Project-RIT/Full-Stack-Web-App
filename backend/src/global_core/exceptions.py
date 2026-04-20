@@ -66,6 +66,36 @@ class LayerError(Exception):
     def __cause__(self) -> Exception | None:
         """Override the default cause behavior to return exception if provided."""
         return getattr(self, 'cause', None)
+    
+def wrap_error_handler(func, error_map, base_exception, exclude=None, message=None):
+    @wraps(func)
+    def decorator(*args, **kwargs):
+        # Reference the instance calling the function
+        caller_name = args[0].__class__.__name__ if args else None
+        
+        try:
+            # Return the wrapped function in the try/except
+            return func(*args, **kwargs)
+        except Exception as e:
+            # Immediately raise the error if its type should be ignored during translation
+            if exclude and isinstance(e, exclude):
+                raise e
+
+            # Translate the respective exception to the correct type.
+            # Any exception in 'exclude' has been handled, so passing it into translation is unecessary
+            error = translate_error(
+                e,
+                error_map,
+                base_exception,
+                caller_name,
+                func.__name__,
+                f"{type(e).__name__}: {e}" if not message else message
+            )
+            
+            # Raise the error using 'from' to preserve traceback and root cause information
+            raise error from e
+    
+    return decorator
 
 def layer_error_handler(
         error_map: dict[Exception | tuple[Exception], tuple[Exception, bool]],
@@ -130,34 +160,9 @@ def layer_error_handler(
         not standalone functions.
     """
     def wrapper(func):
-        @wraps(func)
-        def decorator(*args, **kwargs):
-            # Reference the instance calling the function
-            caller_name = args[0].__class__.__name__ if args else None
-            
-            try:
-                # Return the wrapped function in the try/except
-                return func(*args, **kwargs)
-            except Exception as e:
-                # Immediately raise the error if its type should be ignored during translation
-                if exclude and isinstance(e, exclude):
-                    raise e
-
-                # Translate the respective exception to the correct type.
-                # Any exception in 'exclude' has been handled, so passing it into translation is unecessary
-                error = translate_error(
-                    e,
-                    error_map,
-                    base_exception,
-                    caller_name,
-                    func.__name__,
-                    f"{type(e).__name__}: {e}" if not message else message
-                )
-                
-                # Raise the error using 'from' to preserve traceback and root cause information
-                raise error from e
-        
-        return decorator
+        return wrap_error_handler(
+            func, error_map, base_exception, exclude, message
+        )
     return wrapper
 
 
