@@ -15,7 +15,7 @@ class EmailService:
         self.website_domain = os.getenv("WEBSITE_DOMAIN", "fallback-value")
         
         self.sent_from_email = os.getenv("BREVO_SENDER_EMAIL", "hello@brevo.com") # change this if email ever switches https://help.brevo.com/hc/en-us/articles/12163873383186-Authenticate-your-domain-with-Brevo-Brevo-code-DKIM-DMARC + https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email
-        
+    
 
     def _send(self, subject: str, email_body: str, send_to_email: str, send_to_name: str | None):
         """
@@ -43,6 +43,7 @@ class EmailService:
         except Exception as e:
             print(f"Unepected error sending email: {e}")
 
+
     def send_email(self, subject: str, email_body: str, send_to_email: str, send_to_name: str | None=None, sync=False):
         """
         sync argument determines if email is sent asynchronously 
@@ -56,8 +57,9 @@ class EmailService:
         if sync:
             self._send(subject, email_body, send_to_email, send_to_name)
         else:
-            Thread(target=self._send, # boot up new thread to start in background so main thread in flask isnt blocked
-                   args=(subject, email_body, send_to_email, send_to_name)).start() 
+            Thread(target=self._send, # boot up new thread to start in background so main thread in flask isn't blocked
+                   args=(subject, email_body, send_to_email, send_to_name),
+                   daemon=True).start() 
 
     """
     TODO: update email body with html content to be sent

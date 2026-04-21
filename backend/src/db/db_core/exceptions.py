@@ -2,7 +2,7 @@ from typing import Type
 
 from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError, SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
 
-from ...global_core.exceptions import LayerError, layer_error_handler, translate_error
+from ...global_core.exceptions import LayerError, layer_error_handler, translate_error, wrap_error_handler
 
 #################################################
 ##  REPOSITORY EXCEPTION HANDLING DEFINITIONS  ##
@@ -45,6 +45,28 @@ REPOSITORY_ERROR_MAP = {
     SQLAlchemyError: (RepositoryInternalError, False)
     
 }
+
+
+def wrap_repository_error_handler(func):
+    """Wraps a function with a layer error handler that translates exceptions into RepositoryErrors.
+    
+    Args:
+        func (callable): The function to wrap.
+        error_map (dict): A mapping of lower layer exceptions to RepositoryErrors and whether to show the original message.
+        base_exception (Type[RepositoryError]): The base RepositoryError to use if an exception is not found in the error_map.
+        exclude (Type[RepositoryError] or tuple of Type[RepositoryError]): A RepositoryError or tuple of RepositoryErrors to 
+            exclude from being caught and translated by the error handler.
+    
+    Returns:
+        callable: The wrapped function with repository error handling.
+    """
+    return wrap_error_handler(
+        func=func,
+        error_map=REPOSITORY_ERROR_MAP, 
+        base_exception=RepositoryInternalError,
+        exclude=RepositoryError
+    )
+
 
 def repository_error_translator(
     e: Exception,

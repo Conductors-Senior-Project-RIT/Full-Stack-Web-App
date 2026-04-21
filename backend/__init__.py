@@ -57,7 +57,7 @@ def create_app(config_name=None):
     from .src.api.signal_update_handler import SignalUpdater
     from .src.api.station_auth import StationAuth
     from .src.api.station_online import StationOnline
-    from .src.api.symbol_api import SymbolAPI
+    # from .src.api.symbol_api import SymbolAPI  # moved to volunteer handler since only volunteers need to interact with symbols
     from .src.api.time_frame_pull import recent_activities
     from .src.api.train_history import HistoryDB
 

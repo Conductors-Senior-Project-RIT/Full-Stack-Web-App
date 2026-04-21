@@ -196,7 +196,7 @@ class StationRepository(BaseRepository[Station]):
         return self.format_date(result)
     
     
-    def format_date(self, date: datetime) -> str:
+    def format_date(self, dt: datetime) -> str:
         """Formats a datetime object into a string. If the date is today, it is formatted as `HH:MM AM/PM`;
         otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`.
 
@@ -206,5 +206,5 @@ class StationRepository(BaseRepository[Station]):
         Returns:
             str: The formatted date string.
         """
-        return date.strftime("%I:%M %p") if date.date() == date.today() \
-            else date.strftime("%b %d, %Y at %I:%M %p")
+        return dt.strftime("%I:%M %p") if dt.date() == datetime.today().date() \
+            else dt.strftime("%b %d, %Y at %I:%M %p")

@@ -54,10 +54,17 @@ class LayerError(Exception):
         # If the app is in debugging mode or the error has been explicitly set to 
         # display, and a message has been provided, construct the error message accordingly.
         if (error_debugging or show_error) and message:
-            # Display the specific error message if provided, followed by the default message and additional error details.
+            # If message is not a string, attempt to convert it to a string for display. If this fails, default to an empty message.
+            if not isinstance(str, type(message)):
+                try:
+                    message = str(message)
+                except:
+                    message = ""
+            
             # The regex removes any existing "[ExceptionType]: " prefix from the original message to avoid exposing lower level details.
             exc_prefix_idx = message.find("]") if "]" in message else 0
-            print(caller_name, exc_prefix_idx)
+            
+            # Display the specific error message if provided, followed by the default message and additional error details.
             public = f"{point_of_error}{public.rstrip('.!')}: {message[exc_prefix_idx + 2:] if exc_prefix_idx != 0 else message}"
         
         # Attach the cause for exception for later reference

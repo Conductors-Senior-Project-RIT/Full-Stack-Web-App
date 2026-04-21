@@ -38,7 +38,7 @@ class HistoryDB(Resource):
         page = request.args.get("page", default=1, type=int)
 
         # Check our type and page arguments (typ checked in strategy creation)
-        validate_int_argument(id, "type", 1)
+        validate_int_argument(id, "id", 1)
         validate_int_argument(page, "page", 1)
         
         session = db.session
