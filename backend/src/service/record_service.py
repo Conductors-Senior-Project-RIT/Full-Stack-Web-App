@@ -71,6 +71,18 @@ class RecordService(BaseService):
         
         # Use the signal update function used in signal updater because the perform the same task
         repository.update_signal_values(record_id, symb, engi)
+        
+    
+    # Signal Update
+    def signal_update(self, record_id: int, symbol_id: int, engine_num: int):
+        result = self.get_first_repository().update_signal_values(record_id, symbol_id, engine_num)
+        if result is None:
+            raise ServiceResourceNotFound(
+                caller_name=self.__class__.__name__,
+                message=f"Could not find record with id {record_id} to update signal values, 0 rows updated.",
+                show_error=True
+            )
+        return result["id"]
 
 
     # Data Collation

@@ -157,12 +157,8 @@ class StationRepository(BaseRepository[Station]):
                 show_error=True
             )
         
-        # Format the seen date based on whether it was seen today
-        seen_date = result
-        formatted_date = seen_date.strftime("%I:%M %p") if seen_date.date() == date.today() \
-            else seen_date.strftime("%b %d, %Y at %I:%M %p")
-            
-        return formatted_date
+        # Format the seen date based on whether it was seen today    
+        return self.format_date(result)
 
         
     @repository_error_handler()
@@ -196,5 +192,19 @@ class StationRepository(BaseRepository[Station]):
                 message=f"Could not find station with id: {station_id}!",
                 show_error=True
             )
+            
+        return self.format_date(result)
+    
+    
+    def format_date(self, date: datetime) -> str:
+        """Formats a datetime object into a string. If the date is today, it is formatted as `HH:MM AM/PM`;
+        otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`.
 
-        return result
+        Args:
+            date (datetime): The datetime object to format.
+        
+        Returns:
+            str: The formatted date string.
+        """
+        return date.strftime("%I:%M %p") if date.date() == date.today() \
+            else date.strftime("%b %d, %Y at %I:%M %p")

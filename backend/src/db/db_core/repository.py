@@ -106,7 +106,7 @@ class BaseRepository(Generic[ModelType]):
         if not obj:
             raise RepositoryNotFoundError(
                 self.__class__.__name__, "get",
-                f"Could not find row in {self.model} with a pkey = {pkey}", True  
+                f"Could not {self.model.__name__.lower()} with a pkey = {pkey}", True  
             )
         
         # Return the retrieved instannce, either as its original ModelType or dictionary representation.

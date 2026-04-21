@@ -122,7 +122,7 @@ const VerifyHOT = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: modalSymbol,
+          symbol_name: modalSymbol,
         }),
       })
         .then(response => response.ok)

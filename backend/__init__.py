@@ -67,7 +67,7 @@ def create_app(config_name=None): # tests call this function to create flask app
     api.add_resource(SignalUpdater, "/api/add_signal_info")
     api.add_resource(StationAuth, "/api/station_auth")
     api.add_resource(recent_activities, "/api/recent_activities")
-    api.add_resource(SymbolAPI, "/api/symbols")
+    # api.add_resource(SymbolAPI, "/api/symbols")  # moved to volunteer handler since only volunteers need to interact with symbols
     api.add_resource(PushoverUpdater, "/api/PushoverUpdater")
     api.add_resource(RecordCollation, "/api/record_collation")
     api.add_resource(UserPreferences, '/api/user_preferences')

@@ -25,10 +25,10 @@ class StationOnline(Resource):
         stat_id = int(data.get("station_id"))
 
         if stat_id < 1:
-            raise BadRequest(f"Station ID must be greater than or equal to 1 but ({stat_id}) was provided!")
+            raise BadRequest(f"Station ID must be greater than or equal to 1, but ({stat_id}) was provided!")
 
         session = db.session
-        StationService(session).update_last_seen(stat_id)
+        formatted_date = StationService(session).update_last_seen(stat_id)
         session.commit()
 
-        return '', 204 # flask requires some response object to be returned (here, its done under the hood)
+        return {"last_seen": formatted_date}, 200 # flask requires some response object to be returned (here, its done under the hood)

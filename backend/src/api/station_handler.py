@@ -6,11 +6,12 @@ from backend.src.service.service_core import *
 from backend.database import db
 
 station_bp = Blueprint("station_bp", __name__)
-# CORS(station_bp)  # Enable CORS for the station_bp blueprint
+CORS(station_bp)  # Enable CORS for the station_bp blueprint
 
 @station_bp.route("/api/get-trains", methods=["GET"])
 def get_trains():
-    station = request.args.get("station")
+    """Get all EOT and HOT records that have been recorded at a station."""
+    station = request.args.get("station", default=None, type=str)
     if not station:
         raise BadRequest("Station not specified")
 
@@ -72,7 +73,8 @@ def get_trains():
 @station_bp.route("/api/get-pin-info", methods=["GET"])
 # todo: refactor like above, just will get most recent station for type
 def get_pin_info():
-    station = request.args.get("station")
+    """Get the most recent EOT and HOT records for a specified station."""
+    station = request.args.get("station", default=None, type=str)
     if not station:
         raise BadRequest("Station not specified")
 

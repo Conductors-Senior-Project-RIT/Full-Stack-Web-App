@@ -7,7 +7,11 @@ from ..service.record_service import RecordService
 
 class SignalUpdater(Resource):
     def post(self):
-        """Updates a record's engine number and/or symbol ID based on the provided arguments in the request body.
+        """
+        Updates a record's engine number and/or symbol ID based on the provided arguments in the request body.
+        
+        ** Should be a PUT request but previous team used POST for this endpoint so we will keep it as is for now to 
+        avoid breaking the frontend. **
 
         Returns:
             int: The status code of the request.
@@ -26,7 +30,7 @@ class SignalUpdater(Resource):
         # In order to update the record's fields, engine number and symbol id must be greater than 1
         if args["engi_number_id"] < 0 and args["symbol_id"] < 0:
             raise BadRequest(
-                f"Both engine [{args['engi_number_id']}] and symbol ID [{args['id_num']}] cannot be undefined (-1)"
+                f"Both engine [{args['engi_number_id']}] and symbol ID [{args['symbol_id']}] cannot be undefined (-1)"
             )
 
         # Flask creates a request-specific database session

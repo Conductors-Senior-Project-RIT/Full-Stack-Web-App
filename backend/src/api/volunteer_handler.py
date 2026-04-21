@@ -39,33 +39,36 @@ def check_jwt_auth():
         raise Unauthorized("User is not permitted!")
 
 
-@volunteer_bp.route("/api/add-pin", methods=["POST"])
+# NOTE: These routes and schema are unused and may be deleted in the future, 
+# but they are left here for now in case we want to add volunteer features that require them.
+
+# @volunteer_bp.route("/api/add-pin", methods=["POST"])
+# @jwt_required()
+# def add_pin():
+#     check_jwt_auth()
+#     data = request.get_json()
+#     lat = data.get("lat")
+#     lng = data.get("lng")
+
+#     if lat is None or lng is None:
+#         return {"message": "Invalid data"}, 400
+
+#     # Insert the pin into the database
+#     run_exec_cmd("INSERT INTO Pins (lat, lng) VALUES (%s, %s)", (lat, lng))
+#     return {"message": "Pin added successfully"}, 201
+
+
+# @volunteer_bp.route("/api/get-pins", methods=["GET"])
+# @jwt_required()
+# def get_pins():
+#     check_jwt_auth()
+#     pins = run_get_cmd("SELECT lat, lng FROM Pins")
+#     return [{"lat": pin[0], "lng": pin[1]} for pin in pins]
+
+
+@volunteer_bp.route("/api/symbols", methods=["GET", "POST"])
 @jwt_required()
-def add_pin():
-    check_jwt_auth()
-    data = request.get_json()
-    lat = data.get("lat")
-    lng = data.get("lng")
-
-    if lat is None or lng is None:
-        return {"message": "Invalid data"}, 400
-
-    # Insert the pin into the database
-    run_exec_cmd("INSERT INTO Pins (lat, lng) VALUES (%s, %s)", (lat, lng))
-    return {"message": "Pin added successfully"}, 201
-
-
-@volunteer_bp.route("/api/get-pins", methods=["GET"])
-@jwt_required()
-def get_pins():
-    check_jwt_auth()
-    pins = run_get_cmd("SELECT lat, lng FROM Pins")
-    return [{"lat": pin[0], "lng": pin[1]} for pin in pins]
-
-
-@volunteer_bp.route("/api/symbol", methods=["GET", "POST"])
-@jwt_required()
-def get_symbol():
+def symbols():
     """_summary_
 
     Returns:
