@@ -1,17 +1,19 @@
 import os
+
 from flask import Flask
 from flask_cors.extension import CORS
 from flask_restful import Api
 
-from backend.extensions import bcrypt, jwt
+from backend.extensions import jwt, bcrypt
+from backend.src.global_core.decorators import register_jwt_access_token_refresh
 from .config.settings import config_selection
 from .database import db
 
 error_debugging: bool = True
 
-def create_app(config_name=None): # tests call this function to create flask app
+def create_app(config_name=None):
     """
-    TODO: models for flask-alchemy(sqlalchemy)
+    App factory
     """
     
     # create and configure the app
@@ -36,9 +38,12 @@ def create_app(config_name=None): # tests call this function to create flask app
 
     db.init_app(app) # load settings for db engine/ bind flask-alchemy to app; flask-alchemy currently used as a connection manager with our raw sql lol
     jwt.init_app(app)
+    bcrypt.init_app(app)
+
+    register_jwt_access_token_refresh(app)
 
     api = Api(app)
-    # winging the setup here lol
+
     CORS(app)
     if app.config['TESTING']:
         api.resources = []  # Necessary to reset instances between tests

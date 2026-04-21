@@ -3,6 +3,8 @@ from flask_restful import reqparse
 from flask_jwt_extended import get_jwt, verify_jwt_in_request, jwt_required
 from flask_cors import CORS
 from werkzeug.exceptions import Unauthorized, BadRequest
+
+from backend.src.global_core.decorators import role_required
 from ..service.record_service import RecordService
 from ..service.symbol_service import SymbolService
 from ..db.trackSense_db_commands import *
@@ -14,29 +16,29 @@ CORS(volunteer_bp)  # Enable CORS for the volunteer_bp blueprint
 
 # jwt known to break with before request when using preflight like react fetch does.
 # @volunteer_bp.before_request
-def check_jwt_auth():
-    """Before a request is made to any route in this blueprint, this function checks 
-    whether the request includes a JWT with sufficient user privileges.
+# def check_jwt_auth():
+#     """Before a request is made to any route in this blueprint, this function checks 
+#     whether the request includes a JWT with sufficient user privileges.
 
-    Raises:
-        Unauthorized: An exception will be raised if the user role is not provided or if it does not have
-        the necessary user privileges.
-    """
-    # Verify that a JWT was provided
-    verify_jwt_in_request(locations=["cookies", "headers"])
+#     Raises:
+#         Unauthorized: An exception will be raised if the user role is not provided or if it does not have
+#         the necessary user privileges.
+#     """
+#     # Verify that a JWT was provided
+#     verify_jwt_in_request(locations=["cookies", "headers"])
     
-    # Access the set of additional claims created with JWT
-    claims = get_jwt()
-    # Obtain user's role from JWT if exists
-    user_role = claims.get("user_role")
+#     # Access the set of additional claims created with JWT
+#     claims = get_jwt()
+#     # Obtain user's role from JWT if exists
+#     user_role = claims.get("user_role")
     
-    # If user role is not present in claims, None is returned (error in authentication)
-    if user_role is None:
-        raise Unauthorized("User role undefined!")
+#     # If user role is not present in claims, None is returned (error in authentication)
+#     if user_role is None:
+#         raise Unauthorized("User role undefined!")
     
-    # Check if user unauthorized, not volunteer (1) or admin (0)
-    if user_role > 1:
-        raise Unauthorized("User is not permitted!")
+#     # Check if user unauthorized, not volunteer (1) or admin (0)
+#     if user_role > 1:
+#         raise Unauthorized("User is not permitted!")
 
 
 # NOTE: These routes and schema are unused and may be deleted in the future, 
@@ -74,7 +76,7 @@ def symbols():
     Returns:
         _type_: _description_
     """
-    check_jwt_auth()
+    # check_jwt_auth()
     # Retrieve the provided query parameters (if it exists)
     symbol_name = request.args.get("symbol_name", default=None, type=str)
     
@@ -97,13 +99,14 @@ def symbols():
 
         # If a name is provided, then use the service to create a new symbol
         service.create_symbol(symbol_name)
-        return 200
+    return {}, 200
 
 
 @volunteer_bp.get("/api/record_verifier")
-@jwt_required()
+# @jwt_required()
+@role_required(0, 1)
 def get_records():
-    check_jwt_auth()
+    # check_jwt_auth()
     page = request.args.get("page", default=1, type=int)
     typ = request.args.get("type", default=-1, type=int)
     
@@ -118,9 +121,9 @@ def get_records():
 
 
 @volunteer_bp.post("/api/record_verifier")
-@jwt_required()
+@role_required(0, 1)
 def post_record():
-    check_jwt_auth()
+    # check_jwt_auth()
     parser = reqparse.RequestParser()
     parser.add_argument("id", type=int, default=-1)
     parser.add_argument("type", type=int, default=-1)
@@ -140,4 +143,4 @@ def post_record():
         
     record_service = RecordService(args.type)
     record_service.verify_record(args.id, args.symbol, args.engine_number)
-    return 200
+    return {}, 200

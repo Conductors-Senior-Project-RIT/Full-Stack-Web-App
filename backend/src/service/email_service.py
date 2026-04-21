@@ -1,53 +1,85 @@
 import os
-from dotenv import load_dotenv
-import requests
+from threading import Thread
+from brevo import Brevo, SendTransacEmailRequestSender, SendTransacEmailRequestToItem
+from brevo.core.api_error import ApiError
 
-# from service_core import BaseService
+class EmailService:
+    """ 
+    currently using brevo: https://developers.brevo.com/docs/api-clients/python 
 
-# load_dotenv() fix later
-MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
-MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
-WEBSITE_DOMAIN = os.getenv("WEBSITE_DOMAIN")
-
-
-# class EmailService(BaseService):
-#     def __init__(self, session):
-#         super().__init__("Email")
-
-
-def send_welcome_email(email) -> bool:
+    TODO: Send emails from a custom domain then authenticate your domain with DKIM and DMARC
     """
-    Email sent after successful registration
+
+    def __init__(self) -> None:
+        self.client = Brevo(api_key=os.getenv("BREVO_API_KEY", "fallback-value")) # Override the default httpx client for proxies, custom transports, or mTLS:
+        self.website_domain = os.getenv("WEBSITE_DOMAIN", "fallback-value")
+        
+        self.sent_from_email = os.getenv("BREVO_SENDER_EMAIL", "hello@brevo.com") # change this if email ever switches https://help.brevo.com/hc/en-us/articles/12163873383186-Authenticate-your-domain-with-Brevo-Brevo-code-DKIM-DMARC + https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email
+        
+
+    def _send(self, subject: str, email_body: str, send_to_email: str, send_to_name: str | None):
+        """
+        NOTE: the SDK raises ApiError (or a typed subclass) for non-2xx HTTP responses
+        
+        Synchronous email send (default behavior will block main thread -> background jobs (flask docs) can handle cleanly.
+        """        
+        try: # at the moment: email errors are caught silently and not bubbled
+            self.client.transactional_emails.send_transac_email(
+                subject=subject,
+                html_content=email_body,
+                sender=SendTransacEmailRequestSender(
+                    name="FollowThatFRED",
+                    email=self.sent_from_email, 
+                ),
+                to=[
+                    SendTransacEmailRequestToItem(
+                        email=send_to_email,
+                        name=send_to_name,
+                    )
+                ],
+            )
+        except ApiError as e:
+            print(f"Email failed to send: {e.status_code} {e.body}")
+        except Exception as e:
+            print(f"Unepected error sending email: {e}")
+
+    def send_email(self, subject: str, email_body: str, send_to_email: str, send_to_name: str | None=None, sync=False):
+        """
+        sync argument determines if email is sent asynchronously 
+
+        send_to_name argument has placeholder value atm as users don't have usernames (no biggie)
+        """
+
+        if send_to_name is None:
+            send_to_name = send_to_email.split("@")[0] # for now use first part of email
+
+        if sync:
+            self._send(subject, email_body, send_to_email, send_to_name)
+        else:
+            Thread(target=self._send, # boot up new thread to start in background so main thread in flask isnt blocked
+                   args=(subject, email_body, send_to_email, send_to_name)).start() 
+
     """
-    response = requests.post(
-        f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
-        auth=("api", MAILGUN_API_KEY),
-        data={
-            "from": f"Follow That FRED! <no-reply@{MAILGUN_DOMAIN}>",
-            "to": email,
-            "subject": "Welcome to Our App!",
-            "text": f"Hi {email},\n\nThank you for registering with our app! We're excited to have you on board.\n\nBest regards,\nThe Team",
-        },
-    )
-
-    return response.status_code == 200
-
-def send_forgot_password_email(email: str, reset_token) -> bool:
+    TODO: update email body with html content to be sent
     """
-    Email sent to user who wants to reset their password
-    """
-    response = requests.post(
-        f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
-        auth=("api", MAILGUN_API_KEY),
-        data={
-            "from": f"Follow That FRED! <no-reply@{MAILGUN_DOMAIN}>",
-            "to": email,
-            "subject": "Password Reset Request",
-            "text": f"""Hi {email},\n\nA password reset request was made from your account. If you wish to reset your password, please click the following link: {WEBSITE_DOMAIN}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email.""",
-            "html": f"<html><body><h3>Hi {email},</h3>\n\n<p>A password reset request was made from your account. If you wish to reset your password, please click the following link: {WEBSITE_DOMAIN}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email.</p></body></html>",
-        },
-    )
+    def send_registered_email(self, send_to_email: str, send_to_name: str | None=None):
+        "register() route"
 
-    return response.status_code == 200
+        subject = "Welcome to Follow That FRED!"
+        email_body = f"<h1>Hello {send_to_name}, thanks for registering with us!<h1>"
+        send_to_email = send_to_email
 
+        self.send_email(subject, email_body, send_to_email, send_to_name)
 
+    def send_forgot_password_email(self, send_to_email, reset_token, send_to_name: str | None=None):
+        """
+        forgot_password() route
+        """
+        
+        subject = "Password Reset Request"
+        email_body = f"<h1>A password reset request was made from your account. If you wish to reset your password, please click the following link: {self.website_domain}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email!</h1>"
+        send_to_email = send_to_email
+
+        self.send_email(subject, email_body, send_to_email, send_to_name)
+
+email_service = EmailService()

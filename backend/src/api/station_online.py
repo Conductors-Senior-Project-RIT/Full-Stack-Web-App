@@ -5,8 +5,6 @@ from werkzeug.exceptions import BadRequest
 from ..service.station_service import StationService
 from backend.database import db
 
-# LOOK INTO THE RETUNR TYPE ERRORS BRO LOL
-
 class StationOnline(Resource):
     def get(self):
         station = request.args.get("station_name", default=None, type=str)

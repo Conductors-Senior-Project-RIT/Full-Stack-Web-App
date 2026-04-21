@@ -1,5 +1,5 @@
-# # Run all tests specific to repo only.
-# This is problematic
+# Run all tests specific to repo only with command below
+# ./run_test.sh --verbose backend.test.db 
 
 # from unittest import TestSuite
 

@@ -2,14 +2,21 @@ from flask import Flask, Response
 from werkzeug.exceptions import HTTPException
 
 from ...database import db
-from ..service.service_core import *
+
 from backend import error_debugging
+from ..service.service_core import (
+    ServiceError, ServiceInternalError, ServiceInvalidArgument, 
+    ServiceParsingError, ServiceResourceNotFound, ServiceTimeoutError,
+    ServiceExistingResourceError
+)
 
 ##########################
 ##  API ERROR HANDLING  ##
 ##########################
 
 # A translation dictionary for Service layer exceptions
+# TODO: ApiError can be thrown from brev python sdk in email_service so maybe thats something for me to add later here
+
 SERVICE_ERROR_CODES = {
     ServiceInvalidArgument: 400,
     ServiceResourceNotFound: 404,
