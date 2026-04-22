@@ -1,6 +1,4 @@
-from flask import Blueprint, abort, request, make_response
-from flask_bcrypt import Bcrypt
-from flask_cors import CORS
+from flask import Blueprint, request, make_response
 from flask_jwt_extended import (
     create_access_token,
     jwt_required,
@@ -9,50 +7,21 @@ from flask_jwt_extended import (
 
 from backend.src.global_core.decorators import role_required
 from ..service.user_service import UserService
-from werkzeug.exceptions import BadRequest, Unauthorized, NotFound, Forbidden
-from ..service.email_service import email_service
+from werkzeug.exceptions import BadRequest, Unauthorized, NotFound
+# from ..service.email_service import email_service 
 from backend.database import db
 
 """
-Todo: make the file route.py? 
-TODO: mention below:
-Switching security handling of passwords, easiest thing to do is for everyone to RESET THEIR PASSWORD
-werkzeug is good enough security at the moment, future teams can switch back to bcrypt.
-why? werkzeug doesn't require us to use another external dependency and don't have time to understand everything about bcrypt and I don't trust how the last group 
-handled security as i had to rewrite most of what they did relating to jwt....
-
-user_repo.py needs custom error handling so it can be caught here
-
-storing jwt in database for "get_authentication" defeats the whole purpose of storing it securely with cookies (using the helper function from werkzeug security library)
-"""
-
-# bcrypt = Bcrypt()
-# jwt = JWTManager()
-
-# load_dotenv()
-
-user_bp = Blueprint("user_bp", __name__)
-
-# CORS(user_bp)  # Enable CORS for the user_bp blueprint
-
-"""
-lets ditch the storing session token from database... im not sure why they did that as it beats the purpose of using
-jwt lol.
-
-using cookies to handle jwt 
+auth rewritten,  using cookies to handle jwt 
 
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"] --> is easer than [headers] but if can't complete will rollback to headers to be compatabile with app
 app.config["JWT_SECRET_KEY"] = "super-secret"
 app.config["JWT_COOKIE_SECURE"] = False
 app.config["JWT_COOKIE_CSRF_PROTECT"] --> since using cookies 
-
-check_jwt_auth() in volunteer hanlder is basically what im doing in the global_core/decorators.py class lol --> will just make it cleaner 
-
-TODO: refresh token 30 mins before it expires (check docs where it uses an `after_request` callback)
-@app.after_request
-def refresh_expiring_jwts(response)
 """
-@user_bp.route("/api/register", methods=["POST"])
+
+user_bp = Blueprint("user_bp", __name__)
+@user_bp.route("/api/register", methods=["POST"]) # works
 def register():
     data = request.get_json() # frontend's mimetype indicates JSON
     email = data.get("email")
@@ -145,7 +114,7 @@ def token_validation():
         return {"message": "Password reset token is valid"}, 200
 
     session.commit()
-    
+
     raise NotFound("Password reset token is invalid!")
 
 #secondly

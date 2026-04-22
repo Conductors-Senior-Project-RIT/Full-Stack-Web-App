@@ -67,13 +67,14 @@ class UserRepository(BaseRepository):
         "exception handler for email"
         sql = text("SELECT COUNT(1) FROM Users WHERE email = :email")
         result = self.session.execute(sql, {"email": email}).scalar_one()
-        return result > 0 # >0 because returning count
+        if result == 0:
+            raise self._construct_email_not_found(email)
         
     def email_exists(self, email: str) -> bool:
         "simple existence checker for email"
         sql = text("SELECT COUNT(1) FROM Users WHERE email = :email")
         result = self.session.execute(sql, {"email": email}).scalar_one()
-        return result is not None
+        return result > 0 # >0 because returning count
             
     def unique_id_exists(self, user_id: int):
         sql = text("SELECT COUNT(1) FROM Users WHERE id = :user_id")

@@ -2,7 +2,9 @@
 # default settings would refer to dev environment
 # TODO: def missing some variables to set, but will add along the way
 import os
-
+"""
+modify to make cleaner, add attr to base class lol and override in testconfig and prodconfig respsectively
+"""
 class Config(object):
     """
     Base configuration class
@@ -31,16 +33,23 @@ class DevConfig(Config):
     """
     Dev environment configuration
     """
-    # DEBUG = True | use --debug flag for the development environment (as per docs; script does this).
-    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "dev-jwt")
+    JWT_COOKIE_CSRF_PROTECT = False
+    JWT_COOKIE_SECURE = False
+    JWT_TOKEN_LOCATION = ["cookies"]
+
     SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI", "postgresql+psycopg2://test_user:pass@localhost:5432/test_db") # falls back to default testing db
+    SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret")
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "test-jwt")
 
 class TestConfig(Config):
     """
     Test environment configuration
     """
     TESTING = True
+    JWT_COOKIE_CSRF_PROTECT = False
+    JWT_COOKIE_SECURE = False
+    JWT_TOKEN_LOCATION = ["cookies"]
+
     SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret")
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "test-jwt")
     SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URI", "postgresql+psycopg2://test_user:pass@localhost:5432/test_db")

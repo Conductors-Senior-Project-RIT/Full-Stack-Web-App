@@ -3,6 +3,7 @@ import secrets
 
 from email_validator import validate_email, EmailNotValidError
 
+from backend.src.db.db_core.exceptions import RepositoryNotFoundError
 from backend.src.db.db_core.models import User
 from werkzeug.exceptions import BadRequest
 # from werkzeug.security import check_password_hash, generate_password_hash
@@ -49,9 +50,9 @@ class UserService(BaseService):
         """
         Validates user password, if nothing is returned something went wrong
         """
-        user = self._user_repo.get_user_info(email) 
-
-        if not user: # invalid email as there's no rows returned
+        try:
+            user = self._user_repo.get_user_info(email) 
+        except RepositoryNotFoundError:
             return None
 
         user_hashed_password = user.get("passwd")

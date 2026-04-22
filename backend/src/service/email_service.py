@@ -13,7 +13,7 @@ class EmailService:
     def __init__(self) -> None:
         self.client = Brevo(api_key=os.getenv("BREVO_API_KEY", "fallback-value")) # Override the default httpx client for proxies, custom transports, or mTLS:
         self.website_domain = os.getenv("WEBSITE_DOMAIN", "fallback-value")
-        
+        self.sent_from_name = os.getenv("BREVO_SENDER_NAME", "FollowThatFRED")
         self.sent_from_email = os.getenv("BREVO_SENDER_EMAIL", "hello@brevo.com") # change this if email ever switches https://help.brevo.com/hc/en-us/articles/12163873383186-Authenticate-your-domain-with-Brevo-Brevo-code-DKIM-DMARC + https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email
         
 
@@ -28,7 +28,7 @@ class EmailService:
                 subject=subject,
                 html_content=email_body,
                 sender=SendTransacEmailRequestSender(
-                    name="FollowThatFRED",
+                    name=self.sent_from_name,
                     email=self.sent_from_email, 
                 ),
                 to=[
@@ -49,10 +49,6 @@ class EmailService:
 
         send_to_name argument has placeholder value atm as users don't have usernames (no biggie)
         """
-
-        if send_to_name is None:
-            send_to_name = send_to_email.split("@")[0] # for now use first part of email
-
         if sync:
             self._send(subject, email_body, send_to_email, send_to_name)
         else:
@@ -64,6 +60,8 @@ class EmailService:
     """
     def send_registered_email(self, send_to_email: str, send_to_name: str | None=None):
         "register() route"
+        if send_to_name is None:
+            send_to_name = send_to_email.split("@")[0] # for now use first part of email
 
         subject = "Welcome to Follow That FRED!"
         email_body = f"<h1>Hello {send_to_name}, thanks for registering with us!<h1>"
@@ -75,10 +73,11 @@ class EmailService:
         """
         forgot_password() route
         """
-        
+        if send_to_name is None:
+            send_to_name = send_to_email.split("@")[0] # for now use first part of email
+
         subject = "Password Reset Request"
         email_body = f"<h1>A password reset request was made from your account. If you wish to reset your password, please click the following link: {self.website_domain}/reset-password?token={reset_token} \n\nIf you did not request to reset your password, please disregard this email!</h1>"
-        send_to_email = send_to_email
 
         self.send_email(subject, email_body, send_to_email, send_to_name)
 
