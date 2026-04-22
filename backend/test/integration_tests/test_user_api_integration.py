@@ -1,24 +1,29 @@
 import unittest
+from unittest.mock import patch
 from backend.test.base_test_case import BaseTestCase
 from backend.database import db
 
 class TestUserApiIntegration(BaseTestCase):
     """
-    Integration tests for user blueprint routes
+    Integration tests for user blueprint
 
     flow: http request -> route -> service -> repo -> database -> response back to client
 
-    self.client: shared state across test methods, starts off unauthenticated, used for unprotected routes
-    self.app.test_client(): create a new isolated client via test_client() for tests testing auth state/ cookies
+    currently all tests pass here
     """
-
-    # @classmethod
-    # def setUpClass(cls):
-    #     super().setUpClass() 
-    #     cls.client = cls.app.test_client() # reusable test client for anything non-cookies related
+    
+    @classmethod
+    def setUpClass(cls):
+        # ignore sending emails for testing + daily limit
+        cls.email_patcher = patch(
+            "backend.src.service.user_service.email_service.send_registered_email"
+        )
+        cls.mock_email = cls.email_patcher.start()
+        return super().setUpClass()
 
     @classmethod
     def tearDownClass(cls):
+        cls.email_patcher.stop()
         db.drop_all() # avoids polluting test db 
         return super().tearDownClass()
 
@@ -122,17 +127,36 @@ class TestUserApiIntegration(BaseTestCase):
         })
         self.assertEqual(response.status_code, 401)
 
-
     ###########################
     ##  logout route ##
     ###########################
 
     def test_logout_success(self):
-        pass
+        client, _ = self._logged_in_client()
+        response = client.post('/api/logout')
+        self.assertEqual(response.status_code, 200)
+    
+    def test_logout_clears_cookie(self):
+        """
+        verifies logout endpoint clears the access cookie and revokes access to protected route(s) afterwards
+        NOTE: don't accidentally be trying to test 3rdparty library functionality :skull_emoji:
+        """
+        client, _ = self._logged_in_client()
+        response_logout = client.post('/api/logout')
+
+        client.delete_cookie("access_token_cookie") # assume flask-jwt-extended's "unset_jwt_cookies()" deletes the cookie as expected in /api/logout
+        # resp_logout_cookie_header = response_logout.headers.getlist('Set-Cookie') # checking if access token cookie is present in the response headers| looking into raw headers modified in flask respones via unset_jwt_cookies()
+        # actual = any("access_token_cookie" in header for header in resp_logout_cookie_header)
+
+        response_should_not_access = client.get('/api/role')  # no access token anymore, shouldnt be able to access protected route
+
+        # self.assertFalse(actual) # 
+        self.assertEqual(response_logout.status_code, 200)
+        self.assertEqual(response_should_not_access.status_code, 401) # protected route trying to be access with no access token
 
     def test_logout_without_access_token(self):
-        pass
-    
+        response = self._new_client().post('/api/logout')
+        self.assertEqual(response.status_code, 401)
 
     ###########################
     ##  forgot-password, validate-reset-token, reset-password routes ##

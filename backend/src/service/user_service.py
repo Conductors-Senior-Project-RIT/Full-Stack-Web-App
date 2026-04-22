@@ -4,7 +4,6 @@ import secrets
 from email_validator import validate_email, EmailNotValidError
 
 from backend.src.db.db_core.exceptions import RepositoryNotFoundError
-from backend.src.db.db_core.models import User
 from werkzeug.exceptions import BadRequest
 # from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -63,7 +62,9 @@ class UserService(BaseService):
         #     return user
 
         return None
-
+    
+    "bottom functions not tested yet"
+    
     def update_user_role(self, email: str, new_role: str):
         """
         If none is returned, that means user email doesn't exist in our database. Hence, user must sign up
@@ -115,7 +116,12 @@ class UserService(BaseService):
 
         return True
 
-    " bottom 3 functions not tested yet"
+    def update_user_times(self, user_id: int, start_time: str, end_time: str):
+        """
+        Updates the notification start/end times for a user.
+        Repo raises RepositoryNotFoundError or RepositoryInternalError if  update fails (both bubble up to api error handler)
+        """
+        self._user_repo.update_user_times(user_id, start_time, end_time)
 
     def initialize_user_preferences(self, user_id: int):
         """

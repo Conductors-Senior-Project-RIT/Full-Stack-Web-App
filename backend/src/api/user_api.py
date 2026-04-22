@@ -75,7 +75,6 @@ def logout():
     unset_jwt_cookies(response)
     return response
 
-
 @user_bp.route("/api/role", methods=["GET"])
 @role_required()
 def get_user_role():
@@ -154,7 +153,7 @@ def update_times():
 
     session = db.session
     service = UserService(session)
-    service.update_user_times(current_user_id, starting_time, ending_time)  # TODO: Where did the method go???
+    service.update_user_times(current_user_id, starting_time, ending_time) 
     
     session.commit()
     return {"message": "Success"}, 200
