@@ -8,8 +8,8 @@ class Config(object):
     Base configuration class
     """
     # default config setting(s)
-    SECRET_KEY = os.environ.get("SECRET_KEY")
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
+    SECRET_KEY = os.environ.get("SECRET_KEY", "secret-key-def")
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "jwt-secret-key-def")
 
 class ProdConfig(Config):
     """
@@ -17,15 +17,10 @@ class ProdConfig(Config):
     """
     # DEBUG = False by default
     TESTING = False
-    SESSION_COOKIE_SECURE = True  # send cookies over HTTPS only
-    SESSION_COOKIE_HTTPONLY = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get("PROD_DATABASE_URI")
-
-    # if not SQLALCHEMY_DATABASE_URI: causes error @ class definition time, can add these checkers in create_app()
-    #     raise ValueError("Must provide DATABASE_URI environment variable for prod environment. Please set it.")
-
-    # if not SECRET_KEY:
-    #     raise ValueError("Must provide SECRET_KEY environment variable for prod environment. Please set it.")
+    JWT_COOKIE_CSRF_PROTECT = True
+    JWT_COOKIE_SECURE = True
+    JWT_TOKEN_LOCATION = ["headers", "cookies"]
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://tracksense:skillissue@localhost:5432/tracksense"
 
 class DevConfig(Config):
     """

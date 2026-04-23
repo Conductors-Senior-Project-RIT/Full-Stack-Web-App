@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_cors.extension import CORS
 from flask_restful import Api
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from backend.extensions import bcrypt, jwt
 from .config.settings import config_selection
@@ -76,5 +77,10 @@ def create_app(config_name=None): # tests call this function to create flask app
     app.register_blueprint(volunteer_handler.volunteer_bp)
 
     error_handler.register_error_handlers(app) 
+
+    # let flask know it is behind uwsgi proxy
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
 
     return app
