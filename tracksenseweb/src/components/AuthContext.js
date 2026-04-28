@@ -6,67 +6,49 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null); // Add state for user role
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
+  // on mount, check for valid role via endpoint (browser sends cookie now)
   useEffect(() => {
-    const token = getCookie('token');
-    if (token) {
-      verifyToken(token);
-    }
-  }, []);
+    const verifyAuth = async() => {
+      try {
+        const response = await fetch(`${config.apiUrl}/role`, {
+        credentials: 'include'});
+        if (!response.ok) throw new Error("Not logged in");
 
-  const login = () => {
-    setIsAuthenticated(true);
+        const data = await response.json();
+        setIsAuthenticated(true);
+        setUserRole(data.role);
+        } catch (error) {
+          setIsAuthenticated(false);
+          setUserRole(null);
+        } finally {
+          setIsAuthLoading(false); // making sure auth checking is always done at end
+        }
+      };
+    verifyAuth()}, []);
+
+  const login = async () => { // in this file's context, used to check for valid role after intial load 
+    const response = await fetch(`${config.apiUrl}/role`, {
+        credentials: 'include'});
+        if (!response.ok) return;
+
+        const data = await response.json()
+        setIsAuthenticated(true);
+        setUserRole(data.role)
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await fetch(`${config.apiUrl}/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
     setIsAuthenticated(false);
     setUserRole(null); // Clear user role on logout
-    document.cookie = 'token=; path=/; max-age=0'; // Remove the token cookie
-  };
-
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  };
-
-  const verifyToken = async (token) => {
-    try {
-      // const response = await fetch(`${config.apiUrl}/verify-token`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${token}`,
-      //   },
-      // });
-      // const data = await response.json();
-      // if (data.valid) {
-        setIsAuthenticated(true);
-
-        // Fetch user role
-        const roleResponse = await fetch(`${config.apiUrl}/role`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        const roleData = await roleResponse.json();
-        setUserRole(roleData.role); // Store user role in state
-      // } else {
-      //   setIsAuthenticated(false);
-      //   setUserRole(null);
-      //   document.cookie = 'token=; path=/; max-age=0'; // Remove the token cookie
-      // }
-    } catch (error) {
-      console.error('Error verifying token:', error);
-      setIsAuthenticated(false);
-      setUserRole(null);
-      document.cookie = 'token=; path=/; max-age=0'; // Remove the token cookie
-    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, login, logout, verifyToken }}>
+    <AuthContext.Provider value={{ isAuthenticated, userRole, isAuthLoading, login, logout}}>
       {children}
     </AuthContext.Provider>
   );
