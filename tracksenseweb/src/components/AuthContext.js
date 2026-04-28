@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
     });
     setIsAuthenticated(false);
     setUserRole(null); // Clear user role on logout
+    // setIsAuthLoading i sthat neede dhere!??!?
   };
 
   return (

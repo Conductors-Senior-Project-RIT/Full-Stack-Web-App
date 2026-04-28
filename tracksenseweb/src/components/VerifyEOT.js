@@ -10,6 +10,12 @@ import ReactPaginate from 'react-paginate';
 import './css/Paginate.css'
 import { useSearchParams } from 'react-router-dom';
 
+function getCsrfToken() {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; csrf_access_token=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
 const VerifyEOT = () => {
   //data
   const [data, setData] = useState([]);
@@ -28,53 +34,40 @@ const VerifyEOT = () => {
   const [modalIndex, setModalIndex] = useState(null);
   const [modalLocomotiveNum, setModalLocomotiveNum] = useState(null);
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  };
-
-  const performVerification = () => {
+  const performVerification = async () => {
     //first get the symbol id
     let symbolId = -1;
-    fetch(`${config.apiUrl}/symbol_ids?symbol_name=${modalSymbol}`)
-    .then(response => {
-      return response.json()
-    })
-    .then(data => {
-      // ensure we get a proper return - in theory this will always give a proper return
-      // TODO: add error handling here
-      symbolId = data.id
-      if (symbolId != -1) {
+
+    try{
+      const symbolResponse = await fetch(`${config.apiUrl}/symbol_ids?symbol_name=${modalSymbol}`);
+      const symbolData = await symbolResponse.json();
+      symbolId = symbolData.id;
+
+      if (symbolId !== -1) {
         console.log("symbolID: " + symbolId);
         console.log("modalID: " + modalId);
-        let token = getCookie('token');
-        fetch(
-          `${config.apiUrl}/record_verifier`, {
-            method:"PUT",
-            headers: {
-                "Content-Type": "application/json",
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              "id": modalId,
-              "symbol": symbolId,
-              "engine_number": modalLocomotiveNum
-            })
-          }
-        )
-        // using .then() in this manner forces the above fetch to finish before the rest of this is executed.
-        .then(response => response.ok)
-        .then (response => {
-          if (response) {
-            console.log("verified information sent, verifying data");
-            window.location.reload() //reload the page
-          }
-        })
+        const verifyResponse = await fetch(`${config.apiUrl}/record_verifier`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": getCsrfToken(),
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            "id": modalId,
+            "symbol": symbolId,
+            "engine_number": modalLocomotiveNum
+          })
+        });
+        if (verifyResponse.ok) {
+          console.log("verified information sent, verifying data");
+          window.location.reload();
+        }
       }
-    })
-  }
-
+    }catch(error){
+      console.error('error with verification:', error);
+    }
+  };
 
   const handleShow = (item, index) => {
     // get important information from the eot record
@@ -88,33 +81,29 @@ const VerifyEOT = () => {
     setModalId(record_id);
     setShow(true);
   };
+
   const handleClose = () => setShow(false);
-  const handleVerify = () => {
+
+  const handleVerify = async () => {
     handleClose();
     if (symbols.includes(modalSymbol)) {
       performVerification();
     }
     else {
-      // api call to add symbol
-      fetch (`${config.apiUrl}/symbols`, {
-        method:"POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          'name': modalSymbol
-        })
-      })
-      .then(
-        // doing this response check forces the first fetch to actually complete before execurting the rest of the code
-        response => response.ok
-      )
-      .then(
-        response => {
-          if (response)
-            performVerification()
-        })
-      
+      try {
+        // api call to add symbol
+        const response = await fetch(`${config.apiUrl}/symbols`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // "X-CSRF-TOKEN": getCsrfToken(), // this endpoint doesnt have @role_required() (@jwt_required but extra functionality); commented out for now
+          },
+          body: JSON.stringify({ 'name': modalSymbol })
+        });
+        if (response.ok) performVerification();
+      } catch (error) {
+        console.error('Error adding symbol:', error);
+      }
       //api call to verify with symbol ID
     }
   };
@@ -125,24 +114,34 @@ const VerifyEOT = () => {
   }
 
   useEffect(() => {
-    let token = getCookie('token');
-    fetch(`${config.apiUrl}/record_verifier?page=${page}&type=1`, {
-      method: "GET",
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-    })
-    .then(response => response.json())
-    .then(data => {
-      setData(data.results);
-      setTotalPages(data.totalPages);
-    })
-    .catch(error => console.error('Error fetching data:', error));
-    fetch(`${config.apiUrl}/symbols`)
-    .then(response => response.json())
-    .then(symbols => setSymbols(symbols))
-    .catch(error => console.error("A problem has occurred: ", error))
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${config.apiUrl}/record_verifier?page=${page}&type=1`, {
+          method: "GET",
+          credentials: "include",
+        });
+        const result = await response.json();
+        setData(result.results);
+        setTotalPages(result.totalPages);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+
+      try{
+        const symbolResponse = await fetch(`${config.apiUrl}/symbols`);
+        const symbolData = await symbolResponse.json();
+        if (symbolData && symbolData.results) {
+          setSymbols(symbolData.results);
+        } else {
+          console.error('Response payload empty!');
+        }
+      } catch (error) {
+        console.error("A problem has occurred: ", error);
+      }
+    };
+    fetchData();
   }, [page]);
+
     return (
       <div>
         <Modal
