@@ -11,6 +11,6 @@ else
 fi
 
 # wondering if i should add "$@" here like for the test script
-flask --app 'backend:create_app("dev")' run --port 5000 --debug  
+flask --app 'backend:create_app("dev")' run --port 5000 --debug
 
 read -p "Press Enter to exit..."
