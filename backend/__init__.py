@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_cors.extension import CORS
 from flask_restful import Api
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from backend.extensions import jwt, bcrypt
 from backend.src.global_core.decorators import register_jwt_access_token_refresh
@@ -17,6 +18,8 @@ def create_app(config_name=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True) # we're not using instance folders so maybe remove
 
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
     if config_name is None:
         config_name = os.environ.get("FLASK_APP_ENV", "dev").lower() # retrieves specified environment, dev environment is default
 
@@ -28,7 +31,7 @@ def create_app(config_name=None):
     print(f"Testing: {app.config['TESTING']}")
     print(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
     print(f"Secret Key Set: {bool(app.config.get('SECRET_KEY'))}") #if exists, show boolean
-    print(f"JWT Secret Key Set: {app.config.get('JWT_SECRET_KEY')}") #if exists, show boolean
+    print(f"JWT Secret Key Set: {bool(app.config.get('JWT_SECRET_KEY'))}") 
     print("=" * 50)
 
     db.init_app(app) # load settings for db engine/ bind flask-alchemy to app; flask-alchemy currently used as a connection manager with our raw sql lol
