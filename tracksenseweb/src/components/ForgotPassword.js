@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './css/Login.css';
-import { useAuth } from './AuthContext';
 import config from '../config';
 
 const ForgotPassword = () => {
@@ -29,31 +28,6 @@ const ForgotPassword = () => {
         console.error('Error:', error);
         setMessage('Error logging in');
       });
-
-    // const user = { email };
-    // console.log(user);
-    // fetch(`${config.apiUrl}/login`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(user)
-    // })
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     console.log('Response data:', data); 
-    //     if (data.access_token) { 
-    //       setMessage('Login successful');
-    //       document.cookie = `token=${data.access_token}; path=/; max-age=${7 * 24 * 60 * 60}`;  // Store token in a cookie for 7 days
-    //       login(); // Update the authentication state
-    //     } else {
-    //       setMessage(data.message);
-    //     }
-    //   })
-    //   .catch(error => {
-    //     console.error('Error:', error);
-    //     setMessage('Error logging in');
-    //   });
 
     // Send request to send user an email with a reset link
     // Along with that, store a secure token in the database with a certain expiration
