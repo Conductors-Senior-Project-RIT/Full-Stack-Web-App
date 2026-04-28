@@ -117,7 +117,7 @@ class UserRepository(BaseRepository):
         """
         
         result = self.session.execute(text(sql), {"role": new_role, "email": email}).scalar_one_or_none()
-        if not result:
+        if result is None:
             raise RepositoryInternalError(
                 self.__class__.__name__,
                 message="An error occurred updating account status, 0 changes made!",

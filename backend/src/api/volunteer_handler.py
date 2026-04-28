@@ -110,4 +110,5 @@ def post_record():
     session = db.session
     record_service = RecordService(session, args.type)
     record_service.verify_record(args.id, args.symbol, args.engine_number)
+    session.commit()
     return {}, 200
