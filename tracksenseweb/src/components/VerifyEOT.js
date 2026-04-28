@@ -39,7 +39,7 @@ const VerifyEOT = () => {
     let symbolId = -1;
 
     try{
-      const symbolResponse = await fetch(`${config.apiUrl}/symbol_ids?symbol_name=${modalSymbol}`);
+      const symbolResponse = await fetch(`${config.apiUrl}/symbols?symbol_name=${modalSymbol}`);
       const symbolData = await symbolResponse.json();
       symbolId = symbolData.id;
 
@@ -47,7 +47,7 @@ const VerifyEOT = () => {
         console.log("symbolID: " + symbolId);
         console.log("modalID: " + modalId);
         const verifyResponse = await fetch(`${config.apiUrl}/record_verifier`, {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": getCsrfToken(),
