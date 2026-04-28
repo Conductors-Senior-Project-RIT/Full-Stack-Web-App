@@ -1,8 +1,8 @@
 from functools import wraps
 from typing import Type
+import os
 
-TESTING_ENABLED = True
-
+TESTING_ENABLED = os.environ.get("FLASK_APP_ENV", "dev") != "prod" # hide internal error details in prod
 
 class LayerError(Exception):
     default_message = "Unknown error occurred!"

@@ -1,5 +1,6 @@
 from functools import wraps
 
+from flask import request
 from flask_jwt_extended import get_jwt, verify_jwt_in_request, create_access_token, get_jwt_identity, set_access_cookies
 
 from werkzeug.exceptions import Unauthorized, Forbidden
@@ -40,11 +41,15 @@ def register_jwt_access_token_refresh(app):
     @app.after_request
     def refresh_expiring_jwts(response):
         try:
+            if request.path == "/api/logout": # doesn't issue a token refresh when someone logs out
+                return response
+            
             exp_timestamp = get_jwt()["exp"]
             user_role = get_jwt()["user_role"]
 
             now = datetime.now(timezone.utc)
             target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+
             if target_timestamp > exp_timestamp:
                 additional_claims = {"user_role": user_role}  # preserve role when refreshing access token
                 access_token = create_access_token(identity=get_jwt_identity(), additional_claims=additional_claims)

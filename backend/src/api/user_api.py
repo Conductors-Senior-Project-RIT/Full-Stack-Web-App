@@ -70,7 +70,8 @@ def get_user_role():
 
 @user_bp.route("/api/forgot-password", methods=["POST"])
 def reset_password_request():
-    email = request.get_json()["email"]
+    data = request.get_json()
+    email = data.get("email")
 
     if not email:
         raise BadRequest("Email is required!")
@@ -151,4 +152,3 @@ def elevate_user():
 
     session.commit()
     return {"message": "User role updated successfully"}, 200
-
