@@ -139,18 +139,12 @@ class TestUserApiIntegration(BaseTestCase):
     def test_logout_clears_cookie(self):
         """
         verifies logout endpoint clears the access cookie and revokes access to protected route(s) afterwards
-        NOTE: don't accidentally be trying to test 3rdparty library functionality :skull_emoji:
         """
         client, _ = self._logged_in_client()
         response_logout = client.post('/api/logout')
-
-        client.delete_cookie("access_token_cookie") # assume flask-jwt-extended's "unset_jwt_cookies()" deletes the cookie as expected in /api/logout
-        # resp_logout_cookie_header = response_logout.headers.getlist('Set-Cookie') # checking if access token cookie is present in the response headers| looking into raw headers modified in flask respones via unset_jwt_cookies()
-        # actual = any("access_token_cookie" in header for header in resp_logout_cookie_header)
-
+        client.delete_cookie("access_token_cookie") # assuming flask-jwt-extended's "unset_jwt_cookies()" deletes the cookie as expected in /api/logout for this test
         response_should_not_access = client.get('/api/role')  # no access token anymore, shouldnt be able to access protected route
 
-        # self.assertFalse(actual) # 
         self.assertEqual(response_logout.status_code, 200)
         self.assertEqual(response_should_not_access.status_code, 401) # protected route trying to be access with no access token
 
