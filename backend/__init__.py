@@ -39,7 +39,8 @@ def create_app(config_name=None):
 
     api = Api(app)
 
-    CORS(app)
+    CORS(app, supports_credentials=True, origins=[os.environ.get("FRONTEND_BASE_URL","http://localhost:3000")]) # added CSRF protection to enable supports_credentials=True via getCsrfToken() and X-CSRF-TOKEN headers added to frontend
+
     if app.config['TESTING']:
         api.resources = []  # Necessary to reset instances between tests
     
