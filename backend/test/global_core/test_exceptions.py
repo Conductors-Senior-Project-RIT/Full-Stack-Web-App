@@ -53,7 +53,7 @@ class TestClass:
         Raises:
             ValueError: If `func` is not "decorator" or "translator".
         """
-        # Return a function that invokes 'exception_method' wrapped with the error handling decorator
+        # Return a function that invokes 'exception_method' wrapped with the error handling decorator signature
         if func == "decorator":
             @exc.layer_error_handler(
                 error_map=self.test_map,
@@ -66,7 +66,7 @@ class TestClass:
                 
             return test_decorator
         
-        # Return a function that invokes 'exception_method' wrapped with the error handling translator
+        # Return a function that invokes 'exception_method' error handling translator in a try/catch block
         elif func == "translator":
             def test_translator(self=self):
                 try:
@@ -82,7 +82,19 @@ class TestClass:
                     )
             
             return test_translator
-
+        
+        # Return a function that invokes 'exception_method' using the error handling wrapper
+        elif func == "wrapper":
+            wrapped = exc.wrap_error_handler(
+                self.exception_method,
+                self.test_map,
+                DefaultError,
+                exclude=exclude,
+                message=message
+            )
+            
+            return wrapped
+            
         else:
             raise ValueError("Invalid function type!")
 
@@ -119,7 +131,6 @@ class TestErrorHandling(unittest.TestCase):
             with self.assertRaises(TestError1):
                 mock.side_effect = ValueError
                 test_func()
-
             with self.assertRaises(TestError1):
                 mock.side_effect = IndexError
                 test_func()
@@ -164,5 +175,9 @@ class TestErrorHandling(unittest.TestCase):
     
     def testErrorHandlingTranslator(self):
         self.check_functions("translator")
+        
+        
+    def testErrorHandlingWrapper(self):
+        self.check_functions("wrapper")
         
         

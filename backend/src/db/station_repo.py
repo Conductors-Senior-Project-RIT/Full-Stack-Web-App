@@ -1,6 +1,6 @@
-from datetime import date, datetime
+from datetime import datetime
 from typing import Any
-from sqlalchemy import func, insert, select, text, update
+from sqlalchemy import func, insert, select, update
 
 from .db_core.models import Station
 
@@ -46,7 +46,7 @@ class StationRepository(BaseRepository[Station]):
         
         if result:
             raise RepositoryExistingRowError(
-                caller_name=self.__class__.__class__,
+                caller_name=self.__class__.__name__,
                 message=f"A station with the name {stat_name} already exists!",
                 show_error=True
             )
@@ -68,7 +68,7 @@ class StationRepository(BaseRepository[Station]):
         if not result:
             raise RepositoryInternalError(
                 caller_name=self.__class__.__name__,
-                message=f"Could not create a new station, 0 rows created.",
+                message="Could not create a new station, 0 rows created.",
                 show_error=True
             )
         
@@ -163,7 +163,8 @@ class StationRepository(BaseRepository[Station]):
         
     @repository_error_handler()
     def update_last_seen(self, station_id: int) -> datetime:
-        """Updates a station's last seen timestamp to the current time during execution.  
+        """Updates a station's last seen timestamp to the current time during execution.
+
         Returns a `datetime` instance representing the result.
 
         Args:

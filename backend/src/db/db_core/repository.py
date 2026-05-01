@@ -14,8 +14,9 @@ from .models import Base
 
 @runtime_checkable
 class AsDictConvertible(Protocol):
-    """This protocol can be passed into a class to specify dictionary
-    conversion capabilities."""
+    """This protocol can be passed into a class to specify dictionary conversion
+    capabilities.
+    """
     def _asdict(self) -> dict[str, Any]: ...  # pragma: no cover
     @property
     def _mapping(self) -> dict[str, Any]: ...  # pragma: no cover
@@ -34,31 +35,27 @@ FlexibleResult = Union[SingleResult, CollectionResult]
 
 
 class BaseRepository(Generic[ModelType]): 
-    """Base class for a repository, supporting CRUD functionality for 
-    SQLAlchemy ORMs. This class uses a generic, `ModelType`, which is bounded to 
-    the :class:`Base` class from `models`, defineing the model to operate on. Methods
-    in this class return `ModelType`, but conversion to a `dict` as a return type 
-    is supported if the provided model extends `Base`. 
-    
-    
+    """Base class for a repository, supporting CRUD functionality for SQLAlchemy ORMs. This
+    class uses a generic, `ModelType`, which is bounded to the :class:`Base` class from
+    `models`, defineing the model to operate on. Methods in this class return
+    `ModelType`, but conversion to a `dict` as a return type is supported if the
+    provided model extends `Base`.
+
     Args:
-        Generic (ModelType): A type variable representing an SQLAlchemy ORM model 
-            which extends :class:`Base`. The model provdided defines which table to manipulate
+        Generic (ModelType): A type variable representing an SQLAlchemy ORM model which
+            extends :class:`Base`. The model provdided defines which table to manipulate
             in a provided :class:`Session`.
-            
-    Notes:
-        - All methods in this class `flush` model changes in the session; however,
-        these changes are not reflected in the database until a higher layer
-        commits them.
+        Notes: - All methods in this class `flush` model changes in the session;
+            however, these changes are not reflected in the database until a higher
+            layer commits them.
     """
     
     def __init__(self, model: Type[ModelType], session: Session):
         """Constructor for a repository.
-        
-        Defines the model and `Session` that the repository operates on.
-        If the model and session are valid, this instance maintains a reference
-        to the model's primary key through `pkey`.
-        
+
+        Defines the model and `Session` that the repository operates on. If the model
+        and session are valid, this instance maintains a reference to the model's
+        primary key through `pkey`.
 
         Args:
             model (Type[ModelType]): _description_
@@ -80,22 +77,22 @@ class BaseRepository(Generic[ModelType]):
         
     @repository_error_handler()
     def get(self, pkey: Any, to_dict=True) -> SingleResult:
-        """Retrieves an ORM from the session's current state. By default,
-        this method returns a dictionary representation of the result, which 
-        can be turned off by setting `to_dict` to `False`. A :class:`RepositoryNotFoundError`
-        will is thrown if the primary key cannot be found in the current session.
+        """Retrieves an ORM from the session's current state. By default, this method
+        returns a dictionary representation of the result, which can be turned off by
+        setting `to_dict` to `False`. A :class:`RepositoryNotFoundError` will is thrown
+        if the primary key cannot be found in the current session.
 
         Args:
-            pkey (Any): Primary key to search for in the current session, typically
-                an `int` or `str`.
-                
+            pkey (Any): Primary key to search for in the current session, typically an
+                `int` or `str`.
             to_dict (bool, optional): Specifies whether retrieved instance should be
-                returned as a `ModelType` or `dict`. Setting this field to `True` returns
-                the results as a `dict`; otherwise, a `ModelType`. Default value is True.
+                returned as a `ModelType` or `dict`. Setting this field to `True`
+                returns the results as a `dict`; otherwise, a `ModelType`. Default value
+                is True.
 
         Raises:
-            RepositoryNotFoundError: Thrown if the instance cannot be found in the current
-                session with the provided `pkey`.
+            `RepositoryNotFoundError`: Thrown if the instance cannot be found in the
+                    current session with the provided `pkey`.
 
         Returns:
             SingleResult: A `ModelType` or `dict` instance of the result.
@@ -115,41 +112,45 @@ class BaseRepository(Generic[ModelType]):
     
     @repository_error_handler()
     def update(self, objs: list[tuple[ModelType, dict[str, Any]]], to_dict=True) -> CollectionResult:  
-        """
-        Updates the provided objects with the provided new values. 
-        
-        The `objs` parameter is a list of tuples, where each tuple contains an `ModelType` instance 
-        to update and a dictionary of new values to update that instance with. By default, this method 
-        returns a list of dictionary representations of the updated results, which can be turned off by 
-        setting `to_dict` to `False` to instead return a list of `ModelType` instances. 
+        """Updates the provided objects with the provided new values.
 
-        
+        The `objs` parameter is a list of tuples, where each tuple contains an
+        `ModelType` instance to update and a dictionary of new values to update that
+        instance with. By default, this method returns a list of dictionary
+        representations of the updated results, which can be turned off by setting
+        `to_dict` to `False` to instead return a list of `ModelType` instances.
+
         Args:
-            objs (list[tuple[ModelType, dict[str, Any]]]): A list of tuples, where each tuple contains an 
-                `ModelType` instance (index 0) to update and a dictionary of new values to update that instance 
-                with (index 1). The keys in the dictionary should correspond to column names in the table, and the 
-                values should be the new values to update those columns with. To prevent updates to the primary key, 
-                any keys in the update dictionaries that match the primary key column ({self.pkey}) are ignored.
-                An error will be thrown if any of the update dictionaries contain keys or values that are incompatible
-                with the model's attributes or corresponding column types.
-            
-            to_dict (bool, optional): Specifies whether updated instances should be returned as a `ModelType` or `dict`. 
-                Setting this field to `True` returns the results as a `dict`; otherwise, a `ModelType`. Default value is True.
-                
+            objs (list[tuple[ModelType, dict[str, Any]]]): A list of tuples, where each
+                tuple contains an `ModelType` instance (index 0) to update and a
+                dictionary of new values to update that instance with (index 1). The
+                keys in the dictionary should correspond to column names in the table,
+                and the values should be the new values to update those columns with. To
+                prevent updates to the primary key, any keys in the update dictionaries
+                that match the primary key column ({self.pkey}) are ignored. An error
+                will be thrown if any of the update dictionaries contain keys or values
+                that are incompatible with the model's attributes or corresponding
+                column types.
+            to_dict (bool, optional): Specifies whether updated instances should be
+                returned as a `ModelType` or `dict`. Setting this field to `True`
+                returns the results as a `dict`; otherwise, a `ModelType`. Default value
+                is True.
+
         Raises:
-            RepositoryInvalidArgumentError: Thrown if any of the provided objects are not instances of `ModelType` 
-                or if any of the provided update keys are not attributes of the table.
-            RepositoryParsingError: Thrown if any of the provided update values are incompatible with the corresponding 
-                column types in the model.
-                
+            `RepositoryInvalidArgumentError`: Thrown if any of the provided objects are
+                    not instances of `ModelType` or if any of the provided update keys
+                    are not attributes of the table.
+            `RepositoryParsingError`: Thrown if any of the provided update values are
+                    incompatible with the corresponding column types in the model.
+
         Returns:
-            CollectionResult: A list of `ModelType` or `dict` instance containing the updated results, depending on the 
-                value of `to_dict`. If the provided `objs` is empty, an empty list is returned. Additionally, if no updates
-                are made to the provided objects, an empty list is returned.
-                
-        Notes:
-            - Other `RepositoryError` exceptions may be thrown depending on errors raised when performing database operations, 
-            such as connection errors or internal errors.
+            CollectionResult: A list of `ModelType` or `dict` instance containing the
+                updated results, depending on the value of `to_dict`. If the provided
+                `objs` is empty, an empty list is returned. Additionally, if no updates
+                are made to the provided objects, an empty list is returned. Notes: -
+                Other `RepositoryError` exceptions may be thrown depending on errors
+                raised when performing database operations, such as connection errors or
+                internal errors.
         """
               
         # Return an empty list if the provided values to update is empty
@@ -201,28 +202,31 @@ class BaseRepository(Generic[ModelType]):
     
     @repository_error_handler()
     def update_with_pk(self, pkey: int | str, new_values: dict[str, Any], to_dict=True) -> SingleResult | None:
-        """
-        Updates a single ORM instance in the current session.
-        
-        If an instance can be found in the session from a provided primary key (`pkey`), its values will be updated to 
-        those present in `new_values`. Similar to other functions, the updated instance can be returned as a `ModelType`
-        or dictionary representation depending on the value of `to_dict`. If no updates are made, this function will
-        return `None`.
+        """Updates a single ORM instance in the current session.
+
+        If an instance can be found in the session from a provided primary key (`pkey`),
+        its values will be updated to those present in `new_values`. Similar to other
+        functions, the updated instance can be returned as a `ModelType` or dictionary
+        representation depending on the value of `to_dict`. If no updates are made, this
+        function will return `None`.
 
         Args:
             pkey (int | str): _description_
             new_values (dict[str, Any]): _description_
             to_dict (bool, optional): _description_. Defaults to True.
-            
+
         Raises:
-            RepositoryInvalidArgumentError: Thrown if any of the provided update keys are not attributes of the table.
-            RepositoryParsingError: Thrown if any of the provided update values are incompatible with the corresponding 
-                column types in the model.
-            RepositoryNotFoundError: Thrown if an instance cannot be found in the current session with the provided `pkey`.
+            `RepositoryInvalidArgumentError`: Thrown if any of the provided update keys
+                    are not attributes of the table.
+            `RepositoryParsingError`: Thrown if any of the provided update values are
+                    incompatible with the corresponding column types in the model.
+            `RepositoryNotFoundError`: Thrown if an instance cannot be found in the
+                    current session with the provided `pkey`.
 
         Returns:
-            SingleResult | None: A `ModelType` or `dict` instance containing the updated results, depending on the 
-                value of `to_dict`. If no updates are made, None is returned.
+            SingleResult | None: A `ModelType` or `dict` instance containing the updated
+                results, depending on the value of `to_dict`. If no updates are made,
+                None is returned.
         """
         # Get the instance to update with a matching primary key, and raise an error if it cannot be found
         obj = self.get(pkey, to_dict=False)
@@ -236,29 +240,34 @@ class BaseRepository(Generic[ModelType]):
         
     @repository_error_handler()
     def create(self, new_data: list[dict[str, Any]] | dict[str, Any], to_dict=True) -> CollectionResult:
-        """
-        Creates one or more new records in the database from the provided data.
+        """Creates one or more new records in the database from the provided data.
 
-        Instantiates model instance from the given data, adds them to the session, and flushes them to the database. 
-        The flush persists the records and generates neecessary values (e.g. primary keys). This method does not commit
-        these changes, thus, they are not reflected in the database until a higher layer commits them. 
+        Instantiates model instance from the given data, adds them to the session, and
+        flushes them to the database. The flush persists the records and generates
+        neecessary values (e.g. primary keys). This method does not commit these
+        changes, thus, they are not reflected in the database until a higher layer
+        commits them.
 
         Args:
-            new_data: A single dict or list of dicts mapping column names to values
-                    used to instantiate the model(s).
-            to_dict:  If True, returns the created records as a list of dicts.
-                    If False, returns the raw model instances. Defaults to True.
+            new_data: A single dict or list of dicts mapping column names to values used
+                to instantiate the model(s).
+            to_dict: If True, returns the created records as a list of dicts. If False,
+                returns the raw model instances. Defaults to True.
 
         Returns:
-            CollectionResult: By default, this method returns a list of dictionary representations of the created records, which can 
-            be turned off by setting `to_dict` to `False` to instead return a list of `ModelType` instances. If the provided `new_data` 
-            is empty, an empty list is returned.
+            CollectionResult: By default, this method returns a list of dictionary
+                representations of the created records, which can be turned off by
+                setting `to_dict` to `False` to instead return a list of `ModelType`
+                instances. If the provided `new_data` is empty, an empty list is
+                returned.
 
         Raises:
-            RepositoryParsingError:  This exception is thrown if any of of these conditions occur:
-                - If the provided data cannot be mapped to the model, such as invalid types (ProgrammingError)
-                - Malformed `new_data` (eg. not a valid `dict`) (TypeError).
-                - If a database error occurs during the flush, such as a primary key collision (IntegrityError).
+            `RepositoryParsingError`: This exception is thrown if any of of these
+                    conditions occur: - If the provided data cannot be mapped to the
+                    model, such as invalid types (ProgrammingError) - Malformed
+                    `new_data` (eg. not a valid `dict`) (TypeError). - If a database
+                    error occurs during the flush, such as a primary key collision
+                    (IntegrityError).
         """
         
         if not new_data:
@@ -284,18 +293,22 @@ class BaseRepository(Generic[ModelType]):
         
     @repository_error_handler()    
     def delete(self, value: int | str | ModelType) -> None:  
-        """Deletes an instance from the database that matches the provided value, which can be a primary key or an 
-        instance of `ModelType`. 
-        
-        If a primary key is provided, the instance with the matching primary key will be retrieved 
-        and deleted. If an instance of `ModelType` is provided, that instance will be deleted. In either case, the session is
-        flushed to reflect the changes in the current session, but these changes are not committed until a higher layer commits them.
+        """Deletes an instance from the database that matches the provided value, which can
+        be a primary key or an instance of `ModelType`.
+
+        If a primary key is provided, the instance with the matching primary key will be
+        retrieved and deleted. If an instance of `ModelType` is provided, that instance
+        will be deleted. In either case, the session is flushed to reflect the changes
+        in the current session, but these changes are not committed until a higher layer
+        commits them.
 
         Args:
-            value (int | str | ModelType): A primary key value or an instance of `ModelType` to delete from the database. 
-        
+            value (int | str | ModelType): A primary key value or an instance of
+                `ModelType` to delete from the database.
+
         Raises:
-            RepositoryNotFoundError: If the instance to delete cannot be found in the current session.
+            `RepositoryNotFoundError`: If the instance to delete cannot be found in the
+                    current session.
         """
         
         obj = value if issubclass(value.__class__, Base) else self.get(value, to_dict=False)
@@ -307,24 +320,27 @@ class BaseRepository(Generic[ModelType]):
     @repository_error_handler()
     def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible], convert_to_string: set[str] = {}) -> (
         dict[str, Any] | list[dict[str, Any]]):
-        """Converts one or more instances to their dictionary representations. The provided values 
-        should be instances of a type that supports dictionary conversion.
+        """Converts one or more instances to their dictionary representations. The provided
+        values should be instances of a type that supports dictionary conversion.
 
         Args:
-            values (AsDictConvertible | Sequence[AsDictConvertible]): A single instance or sequence of instances 
-                that support dictionary conversion, such as :class:`Base` or SQLAlchemy :class:`Row` objects.
-            
-            convert_to_string (set[str], optional): A set of keys specifying which fields in the resulting dictionaries 
-                should have their values converted to strings. Default value is an empty set, meaning no fields will be 
+            values (AsDictConvertible | Sequence[AsDictConvertible]): A single instance
+                or sequence of instances that support dictionary conversion, such as
+                :class:`Base` or SQLAlchemy :class:`Row` objects.
+            convert_to_string (set[str], optional): A set of keys specifying which
+                fields in the resulting dictionaries should have their values converted
+                to strings. Default value is an empty set, meaning no fields will be
                 converted to strings.
 
         Raises:
-            RepositoryParsingError: Raised if a provided object is not compatible with dictionary conversion.
+            `RepositoryParsingError`: Raised if a provided object is not compatible with
+                    dictionary conversion.
 
         Returns:
-            dict[str, Any] | list[dict[str, Any]]: A dictionary representation of the provided values.
-            IF any keys are specified in `convert_to_string`, then the corresponding values for those keys 
-            will be converted to strings in the returned dictionaries.
+            dict[str, Any] | list[dict[str, Any]]: A dictionary representation of the
+                provided values. IF any keys are specified in `convert_to_string`, then
+                the corresponding values for those keys will be converted to strings in
+                the returned dictionaries.
         """
         # Determine if the values given is iterable
         is_collection = isinstance(values, Iterable)

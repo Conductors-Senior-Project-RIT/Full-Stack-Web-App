@@ -12,9 +12,7 @@ from .database import db
 error_debugging: bool = True
 
 def create_app(config_name=None):
-    """
-    App factory
-    """
+    """App factory"""
     
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True) # we're not using instance folders so maybe remove

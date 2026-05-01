@@ -4,16 +4,14 @@
 import os
 
 class Config(object):
-    """
-    Base configuration class
-    """
+    """Base configuration class"""
     # default config setting(s)
     SECRET_KEY = os.environ.get("SECRET_KEY")
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 
 class ProdConfig(Config):
-    """
-    Production environment configuration - note sure if raising errors is necessary here but ill leave it for now
+    """Production environment configuration - note sure if raising errors is necessary here
+    but ill leave it for now
     """
     # DEBUG = False by default
     TESTING = False
@@ -28,18 +26,14 @@ class ProdConfig(Config):
     #     raise ValueError("Must provide SECRET_KEY environment variable for prod environment. Please set it.")
 
 class DevConfig(Config):
-    """
-    Dev environment configuration
-    """
+    """Dev environment configuration"""
     DEBUG = True  # use --debug flag for the development environment (as per docs; script does this).
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "dev-jwt")
     SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI", "postgresql+psycopg2://test_user:pass@localhost:5432/test_db") # falls back to default testing db
 
 class TestConfig(Config):
-    """
-    Test environment configuration
-    """
+    """Test environment configuration"""
     TESTING = True
     SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret")
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "test-jwt")

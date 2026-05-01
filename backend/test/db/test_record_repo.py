@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from test_utils import TestRepository, TestTrainRecord, return_test_data
+from test_utils import TestRepository, return_test_data
 
 from backend.database import db
 from backend.src.db.base_record_repo import RecordRepository

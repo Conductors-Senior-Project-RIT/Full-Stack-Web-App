@@ -12,12 +12,13 @@ At the moment: Helpful decorators for API
 """
 
 def role_required(*allowed_roles): 
-    """
-    Flask route decorator: can be used to verify user has a jwt in the request + their jwt has a claim indicating the user's role status
-    regular user (2), volunteer (1), admin (0)
+    """Flask route decorator: can be used to verify user has a jwt in the request + their
+    jwt has a claim indicating the user's role status regular user (2), volunteer (1),
+    admin (0)
 
-    Args: 
-        allowed_roles (tuple of integers 0, 1, 2): if nothing is passed, this decorator is just jwt_required()
+    Args:
+        allowed_roles (tuple of integers 0, 1, 2): if nothing is passed, this decorator
+            is just jwt_required()
     """
     def wrapper(fn):
         @wraps(fn)
