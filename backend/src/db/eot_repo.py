@@ -23,7 +23,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
     # below is train_history.py related
     def get_train_history(self, id: int, page: int, num_results: int) -> (
         list[dict[str, Any]] | dict[str, list[dict[str, Any]] | int]):
-        """ Retrieves EOT records for a specific train id
+        """ Retrieves an EOT record from a provided id.
         
         Args:
             id: The id of an EOT train record to retrieve.
@@ -115,14 +115,9 @@ class EOTRepository(RecordRepository[EOTRecord]):
         """
         recovery_request = True
 
-        sql = """
-            INSERT INTO EOTRecords (date_rec, symbol_id, station_recorded, unit_addr, brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge, arm_status, signal_strength) VALUES
-            (:date, :symbol_id, :station,  :unit_addr, :brake_pressure, :motion, :marker_light, :turbine, :battery_cond, :battery_charge, :arm_status, :signal_strength)
-            RETURNING id
-        """
         sql_args = {
-            "date": args["date_rec"],
-            "station": args["station_id"],
+            "date_rec": args["date_rec"],
+            "station_recorded": args["station_id"],
             "unit_addr": args["unit_addr"],
             "brake_pressure": args["brake_pressure"],
             "motion": args["motion"],
@@ -135,7 +130,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
             "symbol_id": args["symbol_id"]
         }
 
-        if args["date_rec"] is None:
+        if sql_args["date_rec"] is None:
             if datetime_string is None:
                 raise RepositoryInvalidArgumentError(
                     self.__class__.__name__,
@@ -143,10 +138,11 @@ class EOTRepository(RecordRepository[EOTRecord]):
                     show_error=True
                 )
             
-            sql_args["date"] = datetime_string
+            sql_args["date_rec"] = datetime_string
             recovery_request = False
 
-        result = self.session.execute(text(sql), sql_args).scalar_one_or_none()
+        result = self.create(sql_args, False)
+        
         if not result:
             raise RepositoryInternalError(
                 caller_name=self.__class__.__name__,
@@ -154,7 +150,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
                 show_error=True
             )
         
-        return result, recovery_request
+        return result[0].id, recovery_request
         
 
     # below is for station_handler.py 

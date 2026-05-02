@@ -54,22 +54,16 @@ class HOTRepository(RecordRepository[HOTRecord]):
         return result_dict
 
     @repository_error_handler()
-    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None) -> int: # type: ignore
+    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None) -> tuple[int, bool]: # type: ignore
         """
         TODO: Namespace is the type for args for post methods in train_history... look more into this
         TODO: run_exec_cmd returns none always... think of what to return lol
         """
-        recovery_request = True # what is this lol
-        
-        sql = """
-            INSERT INTO HOTRecords (date_rec, station_recorded, frame_sync, unit_addr, command, checkbits, parity) VALUES
-            (:date, :station, :frame_sync, :unit_addr, :command, :checkbits, :parity)
-            RETURNING id
-        """
+        recovery_request = True
         
         sql_args = {
-            "date": args["date_rec"],
-            "station": args["station_id"],
+            "date_rec": args["date_rec"],
+            "station_recorded": args["station_id"],
             "frame_sync": args["frame_sync"],
             "command": args["command"],
             "checkbits": args["checkbits"],
@@ -77,7 +71,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
             "unit_addr": args["unit_addr"],
         }
         
-        if args["date_rec"] is None:
+        if sql_args["date_rec"] is None:
             if datetime_string is None:
                 raise RepositoryInvalidArgumentError(
                     caller_name=self.__class__.__name__,
@@ -85,20 +79,19 @@ class HOTRepository(RecordRepository[HOTRecord]):
                     show_error=True
                 )
                 
-            sql_args["date"] = datetime_string
+            sql_args["date_rec"] = datetime_string
             recovery_request = False
             
-            
-        result_id = self.session.execute(text(sql), sql_args).scalar_one_or_none()
+        result = self.create(sql_args, False)    
 
-        if result_id is None:
+        if result is None:
             raise RepositoryInternalError(
                 caller_name=self.__class__.__name__,
                 message="Could not create new train record, 0 rows created!",
                 show_error=True
             )
             
-        return result_id, recovery_request
+        return result[0].id, recovery_request
 
 
     # below is for station_handler.py

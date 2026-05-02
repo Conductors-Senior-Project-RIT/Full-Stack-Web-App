@@ -32,12 +32,12 @@ class RecordService(BaseService):
         # TODO: Likely can just execute the code snippet below
         # return self.get_first_repository().get(record_id)
         
-    def post_train_history(self, args: dict, datetime_str: str):
+    def post_train_history(self, args: dict, datetime_str: str) -> int:
         # Get a single repository instantiated repository
         repository = self.get_first_repository()
         
         # Don't need to check num results, creation errors are checked in repo
-        _, recovery_request = repository.create_train_record(args, datetime_str)
+        record_id, recovery_request = repository.create_train_record(args, datetime_str)
         self.add_new_pin(repository, args["unit_addr"])
         
         has_notification = self.check_recent_notification(repository, args["unit_addr"], args["station_id"])
@@ -45,6 +45,8 @@ class RecordService(BaseService):
         if not has_notification and not recovery_request:
             # Send notification for HOT
             pass
+        
+        return record_id
 
         
     def check_recent_notification(self, repository: RecordRepository, unit_addr: str, station_id: int) -> bool:

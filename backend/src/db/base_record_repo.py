@@ -1,122 +1,183 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Generic, Type, TypeVar, Union
+from typing import Any, Generic, Optional, TypeVar
 from sqlalchemy import func, select, text, update
 from sqlalchemy.orm.session import Session
 
 from .db_core.models import BaseRecord
 from .db_core.repository import BaseRepository
 from .db_core.exceptions import (
-    RepositoryInternalError, RepositoryNotFoundError, RepositoryInvalidArgumentError, 
-    repository_error_handler, repository_error_translator)
+    RepositoryNotFoundError,
+    RepositoryInvalidArgumentError,
+    repository_error_handler,
+    repository_error_translator,
+)
 
 RecordType = TypeVar("RecordType", bound=BaseRecord)
 
-class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]): 
+
+class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
     def __init__(
-        self, 
-        model: Type[RecordType],
-        session: Session,  
-        record_name: str = "Unknown", 
-        record_identifier: str = "Unknown"
+        self,
+        model: RecordType,
+        session: Session,
+        record_name: str = "Unknown",
+        record_identifier: str = "Unknown",
     ):
+        """Constructor for a repository that interacts with different train records.
+
+        This abstract class contains concrete methods that execute shared functionality
+        over the generic model defined by a child class, restricted only to models that
+        extend `BaseRecord`. Additionally, this class also defines abstract methods
+        which must be implmeneted by the child classes.
+
+        See `record_types` for factory method implementations.
+
+        Args:
+            model (RecordType): An ORM class that defines what database table to perform
+                queries on. Only models that extend the `BaseRecord` are permitted.
+            session (Session): Specifies the database session the repository operates
+                in. All functions in this class flushes all changes to the session. It
+                is the job of higher layers to commit or rollback any changes.
+            record_name (str, optional): Attributes a name to the records in the
+                repository. Primarily for error logging purposes. Defaults to "Unknown".
+            record_identifier (str, optional): Attributes a unique identifer for records
+                in the repository. Particularly useful when parsing data. Defaults to
+                "Unknown".
+        """
         super().__init__(model, session)
         self.record_name = record_name
         self.record_identifier = record_identifier
-    
-    
+
     @repository_error_handler()
     def get_total_record_count(self) -> int:
-        """Retrieves total amount of records in a table
+        """Retrieves total number of records present in the table during a given session.
 
         Returns:
-            If db operation is successful, number of records in a table, otherwise, None  
-
-        TODO: integrate this function to replace sql queries in train_history.py's def get_eot()
-        
-        TODO: improve  documentation 
+            int: Number of records present in `model` (`RecordType`).
         """
         return self.session.query(func.count(self.model.id)).scalar()
-    
-        
+
     @abstractmethod
-    def get_train_history(self, id: int, page: int, num_results: int) -> list[dict[str,Any]]:
+    def get_train_history(
+        self, id: int, page: int, num_results: int
+    ) -> list[dict[str, Any]]:
+        """Returns a train record with the specified fields defined in a concrete
+        implementation.
+
+        Args:
+            id (int): A value corresponding to a record's primary key.
+
+        Returns:
+            list[dict[str,Any]]: Returns a list of dictionaries containing the fields
+                and corresponding values for a train record.
+        """
         pass
-    
+
     @abstractmethod
-    def create_train_record(self, args: dict[str, Any], datetime_string: str) -> tuple[int, bool]:
+    def create_train_record(
+        self, args: dict[str, Any], datetime_string: str
+    ) -> tuple[int, bool]:
+        """Creates a new train record with the provided values in `args`.
+
+        In the case of an error when creating a record the first time, a recovery
+        request can be sent. When a recovery request is sent, the datetime must be
+        passed as a parameter; otherwise, a `RepositoryInvalidArgumentError` will be
+        raised. In order to successfully create a new train record, the fields and
+        values in the dictionary must match the model to prevent an `IntegrityError`
+        occurring. Necessary fields and values should be defined in the child class
+        documentation.
+
+        Args:
+            args (dict[str, Any]): A dictionary containing values to insert into a new
+                record.
+            datetime_string (str): String representing when the record was received.
+                Must match the following format: `%Y-%m-%d %H:%M:%S`.
+
+        Returns:
+            tuple[int, bool]: The id of the newly created record, and whether a recovery
+                request was initiated.
+        """
         pass
 
     @repository_error_handler()
     def get_unit_record_ids(self, unit_addr: str, recent=False) -> int | list[int]:
-        # query = text(
-        #     f"""
-        #     SELECT id FROM {self._table_name}
-        #     WHERE unit_addr = :unit_addr
-        #     """
-        # )
-        
-        # args = {"unit_addr": unit_addr}
-        # resp_id = self.session.execute(query, args).scalars().all()
+        """Retrieves record IDs associated with a given unit address.
+
+        Queries the database session for all record IDs matching the specified unit
+        address, ordered ascending by ID. Optionally returns only the most recent
+        (highest) ID.
+
+        Args:
+            unit_addr (str): The unit address used to filter records.
+            recent (bool): If True, returns only the most recent record ID. Defaults to
+                False.
+
+        Returns:
+            int | list[int]: A single integer ID if `recent=True`, or a list of all
+                matching integer IDs if `recent=False`.
+
+        Raises:
+            `RepositoryNotFoundError`: If no records are found for the given
+                    `unit_addr`.
+        """
+
         stmt = (
             select(self.model.id)
             .where(self.model.unit_addr == unit_addr)
             .order_by(self.model.id.asc())
         )
         result = self.session.execute(stmt).scalars().all()
-        
+
         if not result:
             raise RepositoryNotFoundError(
                 caller_name=self.__class__.__name__,
                 message=f"Could not get record ID where the unit address = {unit_addr}",
-                show_error=False
+                show_error=False,
             )
-            
+
         return result[-1] if recent else result
-    
-    
+
     @repository_error_handler()
     def get_recent_trains(self, unit_addr: str, station_id: int) -> list[dict]:
-        # query = text(
-        #     f"""
-        #     SELECT * FROM {self._table_name}
-        #     WHERE unit_addr = :unit_addr AND station_recorded = :station_id AND date_rec >= NOW() - INTERVAL '10 minutes'
-        #     """
-        # )
-        
-        # args = {
-        #     "unit_addr": unit_addr, 
-        #     "station_id": station_id
-        # }
-        # results = self.session.execute(query, args).all()
-        
-        stmt = (
-            select(self.model)
-            .where(
-                self.model.unit_addr == unit_addr,
-                self.model.station_recorded == station_id,
-                self.model.date_rec >= func.now() - text("INTERVAL '10 minutes'")
-            )
+        """Retrieves train records from the last 10 minutes for a given unit and station.
+
+        Queries the database session for all records matching the specified unit address
+        and station ID where the recorded date is within the last 10 minutes.
+
+        Args:
+            unit_addr (str): The unit address used to filter records.
+            station_id (int): The station ID used to filter records.
+
+        Returns:
+            list[dict]: A list of matching train records as dictionaries. Returns an
+                empty list if no records are found.
+        """
+
+        stmt = select(self.model).where(
+            self.model.unit_addr == unit_addr,
+            self.model.station_recorded == station_id,
+            self.model.date_rec >= func.now() - text("INTERVAL '10 minutes'"),
         )
-        
+
         results = self.session.execute(stmt).all()
         return self.objs_to_dicts(results)
 
-    
     @repository_error_handler()
     def add_new_pin(self, record_id: int, unit_addr: str) -> list[int]:
-        # args = {"id": record_id, "unit_addr": unit_addr}
-        
-        # query = text(
-        #     f"""
-        #     UPDATE {self._table_name}
-        #     SET most_recent = false
-        #     WHERE id != :id and unit_addr = :unit_addr and most_recent = true
-        #     RETURNING id
-        #     """
-        # )
-        
-        # return self.session.execute(query, args).scalars().all()
+        """Sets the most recent column for a group of records with matching unit addresses.
+
+        Sets `most_recent` to false for all most recent records with matching unit
+        addresses with distinct IDs.
+
+        Args:
+            record_id (int): The record ID that is excluded from search.
+            unit_addr (str): The unit address used to filter records.
+
+        Returns:
+            list[int]: Returns a list of IDs of the records that were updated.
+        """
+
         stmt = (
             update(self.model)
             .where(
@@ -127,176 +188,270 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             .values(most_recent=False)
             .returning(self.model.id)
         )
-        
+
         result = self.session.execute(stmt).scalars().all()
         self.session.flush()
         return result
-        
-    
+
     @repository_error_handler()
     def get_record_column_by_unit_addr(
-        self, 
-        unit_addr: str, 
-        field_type: str, 
-        most_recent: bool | None = None, 
-    ) -> Any | list[Any]:    
-         
+        self, unit_addr: str, field_type: str, most_recent: Optional[bool] = None
+    ) -> list[Any]:
+        """Gets the values for each record with matching unit addresses for a given field.
+
+        Args:
+            unit_addr (str): The unit address used to filter records.
+            field_type (str): The column name to retrieve values from.
+            most_recent (bool | None, optional): Filters records by their recency. If
+                None, all records will be scanned. Defaults to None.
+
+        Raises:
+            `RepositoryInvalidArgumentError`: Raised if the model does not contain the
+                    provided field.
+
+        Returns:
+            list[Any]: Returns a list of values from records.
+        """
         if not hasattr(self.model, field_type):
             raise RepositoryInvalidArgumentError(
                 self.__class__.__name__,
                 f"Column '{field_type}' not found in {self.model.__name__}!",
-                True
+                True,
             )
-        
+
         stmt = (
             select(getattr(self.model, field_type))
             .where(self.model.unit_addr == unit_addr)
             .order_by(self.model.id.asc())
         )
-        
+
         if most_recent is not None:
             stmt = stmt.where(self.model.most_recent == most_recent)
-        
+
         return self.session.execute(stmt).scalars().all()
 
-    
     @repository_error_handler()
-    def update_signal_values(self, record_id: int, symbol_id: int, engine_num: int) -> dict[str, Any] | None:
+    def update_signal_values(
+        self, record_id: int, symbol_id: int, engine_num: int
+    ) -> dict[str, Any] | None:
+        """Updates a record's `symbol_id` and `engine_num` with a matching ID.
+
+        The values passed in must be of the correct type to prevent an `IntegrityError`.
+        Fields with invalid types or values will not be reflected in the database
+        session.
+
+        Args:
+            record_id (int): The ID of the record to update.
+            symbol_id (int): The new symbol ID value.
+            engine_num (int): The new engine number value.
+
+        Returns:
+            dict[str, Any] | None: Returns a dictionary containing the newly updated
+                values. Returns None if no updates were made in the session.
+        """
+        
         values = {}
         if isinstance(symbol_id, int) and symbol_id > 0:
             values["symbol_id"] = symbol_id
         if isinstance(engine_num, int) and engine_num > 0:
             values["engine_num"] = engine_num
-            
-        return self.update_with_pk(record_id, values)  # Already flushes
 
+        return self.update_with_pk(record_id, values)  # Already flushes
 
     # Station Handler
     def get_station_records(self, station_id: int, recent=False) -> list[dict[str, Any]]:
+        """Retrieves all train records a corresponding station ID.
+
+        Args:
+            station_id (int): The station ID used to filter results.
+            recent (bool, optional): Will call `get_recent_station_records` if True.
+                Defaults to False.
+
+        Raises:
+            `RepositoryError`: Raises a layer-specific error if an exception occurs.
+
+        Returns:
+            list[dict[str, Any]]: A list of dictionary representations of the records
+                retrieved.
+        """
+        
         try:
             if recent:
                 return self.get_recent_station_records(station_id)
-            
-            # args = {"station_id": station_id}
-            # query = text(
-            #     f"SELECT * FROM {self._table_name} WHERE station_recorded = :station_id"
-            # )
-            
+
             results = self.session.execute(
-                select(self.model)
-                .where(self.model.station_recorded == station_id)
+                select(self.model).where(self.model.station_recorded == station_id)
             ).all()
-  
+
             return self.objs_to_dicts(results)
-        
+
         except Exception as e:
             raise repository_error_translator(
-                e, self.__class__.__name__, None,
-                f"Error fetching records for a specific station {station_id}: {e}"
+                e,
+                self.__class__.__name__,
+                None,
+                f"Error fetching records for a specific station {station_id}: {e}",
             )
-        
-    
+
     @abstractmethod
     def get_recent_station_records(self, station_id: int) -> list[dict[str, Any]]:
+        """Retrieves the most recent records for a given station.
+
+        Queries the database for all records matching the specified station ID where
+        `most_recent` is True. Performs outer joins with other tables to include other
+        information.
+
+        Args:
+            station_id (int): The station ID used to filter records.
+
+        Returns:
+            list[dict[str, Any]]: A list of the most recent train records for a given
+                station as dictionaries. Returns an empty list if no records are found.
+        """
         pass
-    
-    
+
     @abstractmethod
-    def get_record_collation(self, page: int, num_results: int, verified: bool | None = None) -> dict[str, list | int]:
+    def get_record_collation(
+        self, page: int, num_results: int, verified: Optional[bool] = None
+    ) -> dict[str, list | int]:
+        """Retrieves a paginated collation of train records grouped by unit address and
+        station.
+
+        Executes a multi-stage SQL query that groups train records by unit address and
+        station, where a new group is formed when either the station changes or a
+        duration of more than 2 hours occurs between records. Returns the most recent
+        record per group along with aggregate details such as `first_seen`, `last_seen`,
+        `occurrence_count`, and `duration`. A second query retrieves the total count of
+        grouped records for pagination. Optionally filters results by verification
+        status if provided.
+
+        Args:
+            page (int): The page number to retrieve, 1-indexed.
+            num_results (int): The number of results to return per page.
+            verified (bool | None): If True or False, filters records by their
+                `verified` status. If None, no filter is applied. Defaults to None.
+
+        Returns:
+            dict[str, list | int]: A dictionary containing: - `results` (list): The
+                paginated and collated train records as dictionaries. - `totalPages`
+                (int): The total number of pages based on `num_results`.
+
+        Raises:
+            `RepositoryError`: If any stage of the query, count, or result parsing
+                    fails.
+        """
         pass
-    
-    
-    def verify_record(self, record_id: int, symbol_id: int, locomotive_num: str) -> dict[str, Any]:
+
+    def verify_record(
+        self, record_id: int, symbol_id: int, locomotive_num: str
+    ) -> dict[str, Any]:
+        """Verifies a record by updating its symbol ID, locomotive number, and verified
+        status.
+
+        Sets `verified` to True on the specified record along with the provided
+        `symbol_id` and `locomotive_num` values. Uses `update_with_pk` in
+        `BaseRepository` to flush changes to the session.
+
+        Args:
+            record_id (int): The primary key of the record to verify.
+            symbol_id (int): The updated symbol ID of the record.
+            locomotive_num (str): The updated locomotive number of the record.
+
+        Returns:
+            dict[str, Any]: The updated record as a dictionary representation.
+
+        Raises:
+            `RepositoryError`: If an exception occurs for any reason.
+        """
         try:
-            # args = {
-            #     "id": record_id,
-            #     "symbol": symbol_id,
-            #     "engine_num": engine_id,
-            # }
-            
-            # query = text(
-            #     f"""
-            #     UPDATE {self._table_name}
-            #     SET symbol_id = :symbol, 
-            #     locomotive_num = :engine_num,
-            #     verified = true
-            #     WHERE id = :id
-            #     RETURNING id, symbol_id, locomotive_num
-            #     """
-            # )
-            
             values = {
                 "symbol_id": symbol_id,
                 "locomotive_num": locomotive_num,
-                "verified": True
+                "verified": True,
             }
-            
+
             return self.update_with_pk(record_id, values)  # Already flushes
-            
+
         except Exception as e:
             raise repository_error_translator(
-                e, self.__class__.__name__, None,
-                f"Could not verify {self.record_name} {record_id}: {e}"
+                e,
+                self.__class__.__name__,
+                None,
+                f"Could not verify {self.record_name} {record_id}: {e}",
             )
-        
-        
+
     # Time frame
-    def get_records_in_timeframe(self, station_id: int, dt: datetime, recent: bool | None = None) -> list[dict[str, Any]]:
-        from .db_core.models import Symbol, Station
+    def get_records_in_timeframe(
+        self, station_id: int, dt: datetime, recent: Optional[bool] = None
+    ) -> list[dict[str, Any]]:
+        """Retrieves records at or after a given datetime, optionally filtered by station
+        and recency.
+
+        Queries the database for records with a `date_rec` at or after `dt`, joining
+        with `Station` and `Symbol` to include the station and symbol names reference in
+        the records. Appends a `Data_type` field derived from `record_identifier` to
+        each result. If `station_id` is -1, the station filter is not applied and
+        returns records across all stations. Furthermore, passing in a value for
+        `recent` will filter records based on the value provided.
+
+        Args:
+            station_id (int): The station ID to filter records by. Pass -1 to retrieve
+                records across all stations.
+            dt (datetime): A lower bound datetime instance to filter records by
+                `date_rec`.
+            recent (bool | None): If True or False, filters records by their
+                `most_recent` value. If None, no filter is applied. Defaults to None.
+
+        Returns:
+            list[dict[str, Any]]: A list of matching records as dictionaries, each
+                containing `id`, `unit_addr`, `date_rec`, `station_name`, `symb_name`,
+                `engine_num`, `locomotive_num`, and `Data_type`. Returns an empty list
+                if no records are found.
+
+        Raises:
+            `RepositoryError`: If an exception is raised for any reason.
+        """
         
+        from .db_core.models import Symbol, Station
+
         try:
-            # query_str = f"""
-            #     SELECT {self._table_name}.id, unit_addr, date_rec, stat.station_name, sym.symb_name, engine_num, locomotive_num FROM {self._table_name}
-            #     INNER JOIN Stations as stat on station_recorded = stat.id
-            #     INNER JOIN Symbols as sym on symbol_id = sym.id
-            #     WHERE date_rec >= :date_stamp 
-            #     """
-            
-            # args = {"date_stamp": dt}
-            
             stmt = (
                 select(
-                    self.model.id, 
+                    self.model.id,
                     self.model.unit_addr,
                     self.model.date_rec,
                     Station.station_name,
                     Symbol.symb_name,
                     self.model.engine_num,
-                    self.model.locomotive_num
+                    self.model.locomotive_num,
                 )
                 .join(Station, self.model.station_recorded == Station.id)
                 .outerjoin(Symbol, self.model.symbol_id == Symbol.id)
-                .where(self.model.date_rec >= dt)
+                .where(self.model.date_rec >= dt)  # Retrieved the date received is after a given date/time.
                 .order_by(self.model.date_rec.desc())
             )
-            
-            if station_id != -1:  
+
+            # Retrieve records only with a specified station ID
+            if station_id != -1:
                 stmt = stmt.where(Station.id == station_id)
-                # query_str += " AND stat.id = :station_id" if station_id != -1 else ""
-                # args["station_id"] = station_id
-            
+
+            # Retrieve records based on their recency status
             if recent is not None:
                 stmt = stmt.where(self.model.most_recent == recent)
-                # query_str += " AND most_recent = TRUE"
-                
-            #query = text(query_str)
+
             results = self.session.execute(stmt).all()
-            # if len(results) < 1:
-            #     raise RepositoryNotFoundError(
-            #         caller_name=self.__class__.__name__, 
-            #         message=f"Could not find record with corresponding station: {station_id}!",
-            #         show_error=False
-            #     )
-            
+
             results = self.objs_to_dicts(results)
             # Add data type to result
             for result in results:
                 result["Data_type"] = self.record_identifier.upper()
-            
+
             return results
-            
+
         except Exception as e:
             raise repository_error_translator(
-                e, self.__class__.__name__, None,
-                f"Could not retrieve {self.record_name}s in timeframe: {e}"
+                e,
+                self.__class__.__name__,
+                None,
+                f"Could not retrieve {self.record_name}s in timeframe: {e}",
             )

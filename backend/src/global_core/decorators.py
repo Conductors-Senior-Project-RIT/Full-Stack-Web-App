@@ -17,7 +17,7 @@ def role_required(*allowed_roles):
     admin (0)
 
     Args:
-        allowed_roles (tuple of integers 0, 1, 2): if nothing is passed, this decorator
+        allowed_roles (tuple of integers 0, 1, 2): If nothing is passed, this decorator
             is just jwt_required()
     """
     def wrapper(fn):
