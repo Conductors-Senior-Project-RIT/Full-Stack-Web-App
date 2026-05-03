@@ -5,19 +5,20 @@ from backend import error_debugging
 ExceptionType: TypeAlias = Union[Type[Exception], tuple[Type[Exception], ...]]
 ErrorMapping: TypeAlias = dict[ExceptionType, tuple[Type[Exception], bool]]
 
+
 class LayerError(Exception):
     """Parent class for exceptions that occur in any of the backend layers."""
-    
+
     # Default message of a layer error, can be changed by child exceptions.
     default_message = "Unknown error occurred!"
 
     def __init__(
-            self,
-            caller_name: Optional[str] = None,
-            poe: Optional[str] = None,
-            message: Optional[str] = None,
-            show_error=False,
-            cause: Optional[Exception] = None
+        self,
+        caller_name: Optional[str] = None,
+        poe: Optional[str] = None,
+        message: Optional[str] = None,
+        show_error=False,
+        cause: Optional[Exception] = None
     ):
         """Constructor for a `LayerError` instance.
 
@@ -50,37 +51,45 @@ class LayerError(Exception):
         # Construct the body of the error message based on parameters provided
         # Set the initial message to an error's default message
         public = self.default_message
-        
-        # If the app is in debugging mode or the error has been explicitly set to 
+
+        # If the app is in debugging mode or the error has been explicitly set to
         # display, and a message has been provided, construct the error message accordingly.
         if (error_debugging or show_error) and message:
             # If message is not a string, attempt to convert it to a string for display. If this fails, default to an empty message.
             if not isinstance(str, type(message)):
                 message = str(message)
-            
-            # The regex removes any existing "[ExceptionType]: " prefix from the original message to avoid exposing lower level details.
-            exc_prefix_idx = message.find("]") if "]" in message else 0
-            
+
+            print(error_debugging)
+            if not error_debugging:
+                # The regex removes any existing "[ExceptionType]: " prefix from the original message to avoid exposing lower level details.
+                exc_prefix_idx = message.find("]") if "]" in message else 0
+                new_message = (
+                    message[exc_prefix_idx + 2 :] if exc_prefix_idx != 0 else message
+                )
+            else:
+                # Otherwise, display everything.
+                new_message = message
+
             # Display the specific error message if provided, followed by the default message and additional error details.
-            public = f"{point_of_error}{public.rstrip('.!')}: {message[exc_prefix_idx + 2:] if exc_prefix_idx != 0 else message}"
-        
+            public = f"{point_of_error}{public.rstrip('.!')}: {new_message}"
+
         # Attach the cause for exception for later reference
         self.cause = cause
-        
+
         # Pass the final error message to the Exception constructor
         super().__init__(f"{caller}{public}")
-        
+
     def __cause__(self) -> Exception | None:
         """Override the default cause behavior to return exception if provided."""
-        return getattr(self, 'cause', None)
-    
-    
+        return getattr(self, "cause", None)
+
+
 def wrap_error_handler(
-    func, 
+    func,
     error_map: ErrorMapping,
     base_exception: Type[LayerError],
     exclude: Optional[ExceptionType] = None,
-    message: Optional[str] = None
+    message: Optional[str] = None,
 ):
     """Wraps a function with a general-purpose error-handling strategy.
 
@@ -134,13 +143,13 @@ def wrap_error_handler(
         ```
         ```
     """
-    
+
     @wraps(func)
     def decorator(*args, **kwargs):
         # Reference the instance calling the function
         func_name = getattr(func, "__name__", repr(func))
         caller_name = args[0].__class__.__name__ if args else None
-        
+
         try:
             # Return the wrapped function in the try/except
             return func(*args, **kwargs)
@@ -157,19 +166,20 @@ def wrap_error_handler(
                 base_exception,
                 caller_name,
                 func_name,
-                f"{type(e).__name__}: {e}" if not message else message
+                f"{type(e).__name__}: {e}" if not message else message,
             )
-            
+
             # Raise the error using 'from' to preserve traceback and root cause information
             raise error from e
-    
+
     return decorator
 
+
 def layer_error_handler(
-        error_map: ErrorMapping,
-        base_exception: Type[LayerError],
-        exclude: Optional[ExceptionType] = None,
-        message: Optional[str] = None
+    error_map: ErrorMapping,
+    base_exception: Type[LayerError],
+    exclude: Optional[ExceptionType] = None,
+    message: Optional[str] = None,
 ):
     """Decorator to provide error translation for exceptions in backend layers.
 
@@ -224,22 +234,22 @@ def layer_error_handler(
         ```
         ```
     """
+
     # Python decorators implicitly pass the function to wrap as an argument to `wrapper`.
     def wrapper(func):
-        return wrap_error_handler(
-            func, error_map, base_exception, exclude, message
-        )
+        return wrap_error_handler(func, error_map, base_exception, exclude, message)
+
     return wrapper
 
 
 def translate_error(
-        e: Exception,
-        error_map: ErrorMapping,
-        base_exception: Type[LayerError],
-        caller_name: Optional[str] = None,
-        point_of_error: Optional[str] = None,
-        message: Optional[str] = None,
-        exclude: Optional[ExceptionType] = None
+    e: Exception,
+    error_map: ErrorMapping,
+    base_exception: Type[LayerError],
+    caller_name: Optional[str] = None,
+    point_of_error: Optional[str] = None,
+    message: Optional[str] = None,
+    exclude: Optional[ExceptionType] = None,
 ) -> LayerError | Exception:
     """Translates a provided `Exception` instance using a map potential exception classes.
 
@@ -273,11 +283,13 @@ def translate_error(
     # Return the exception if its type exists in exclusion list
     if exclude and isinstance(e, exclude):
         return e
-    
+
     # Find the first matching type in the error map. Returns a tuple containing an exception class,
-    # and a boolean that determines whether previous exception details should be propogated. 
+    # and a boolean that determines whether previous exception details should be propogated.
     # If a match is not found, None is returned.
-    error_class = next((error_map[cls] for cls in error_map if isinstance(e, cls)), None)
+    error_class = next(
+        (error_map[cls] for cls in error_map if isinstance(e, cls)), None
+    )
 
     if error_class:
         layer_exception, show_error = error_class
@@ -288,14 +300,10 @@ def translate_error(
             poe=point_of_error,
             message=message,
             show_error=show_error,
-            cause=e
+            cause=e,
         )
 
     # Match not found, instantiate and return the fallback exception
     return base_exception(
-        caller_name,
-        poe=point_of_error,
-        message=message,
-        show_error=False,
-        cause=e
+        caller_name, poe=point_of_error, message=message, show_error=False, cause=e
     )

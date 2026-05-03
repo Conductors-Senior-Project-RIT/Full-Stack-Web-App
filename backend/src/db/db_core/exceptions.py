@@ -24,7 +24,7 @@ class RepositoryParsingError(RepositoryError):
     default_message = "An error occurred while parsing values!"
         
 class RepositoryNotFoundError(RepositoryError):
-    default_message = "Could not find value in database!" 
+    default_message = "Could not find resource!" 
     
 class RepositoryInvalidArgumentError(RepositoryError):
     default_message = "Invalid argument provided!" 

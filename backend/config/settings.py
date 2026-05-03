@@ -13,7 +13,7 @@ class ProdConfig(Config):
     """Production environment configuration - note sure if raising errors is necessary here
     but ill leave it for now
     """
-    # DEBUG = False by default
+    DEBUG = False # false by default
     TESTING = False
     SESSION_COOKIE_SECURE = True  # send cookies over HTTPS only
     SESSION_COOKIE_HTTPONLY = True
