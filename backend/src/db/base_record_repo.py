@@ -17,6 +17,23 @@ RecordType = TypeVar("RecordType", bound=BaseRecord)
 
 
 class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
+    """A database interface for train record querying.
+
+    This class inherits generic the CRUD functionality defined in `BaseRepository` that
+    may be useful for simple operations. Additionally, this abstract class contains
+    concrete methods which execute standardized functionality using the generic model
+    defined by a child class, restricted only to models that extend `BaseRecord`.
+    Additionally, this class also defines abstract methods which must be implmeneted by
+    the child classes.
+
+    Args:
+        ABC: This class is abstract and cannot be instantiated. A child class can extend
+            `BaseRepository` for a concrete implementation.
+        BaseRepository (RecordType): Inherits the methods present in `BaseRepository`
+            which operate on `RecordType` models.
+        Generic (RecordType): Defines the `RecordType` model for a repository instance.
+    """
+
     def __init__(
         self,
         model: RecordType,
@@ -25,11 +42,6 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         record_identifier: str = "Unknown",
     ):
         """Constructor for a repository that interacts with different train records.
-
-        This abstract class contains concrete methods that execute shared functionality
-        over the generic model defined by a child class, restricted only to models that
-        extend `BaseRecord`. Additionally, this class also defines abstract methods
-        which must be implmeneted by the child classes.
 
         See `record_types` for factory method implementations.
 
@@ -62,7 +74,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
     def get_train_history(
         self, id: int, page: int, num_results: int
     ) -> list[dict[str, Any]]:
-        """Returns a train record with the specified fields defined in a concrete
+        """Returns a train record with the specified columns, defined in the concrete
         implementation.
 
         Args:
@@ -136,6 +148,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 show_error=False,
             )
 
+        # Since we are ordering by ascending order, the most recent record is at the end.
         return result[-1] if recent else result
 
     @repository_error_handler()
@@ -154,6 +167,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 empty list if no records are found.
         """
 
+        # Receive records from the last ten minutes
         stmt = select(self.model).where(
             self.model.unit_addr == unit_addr,
             self.model.station_recorded == station_id,
@@ -183,14 +197,18 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             .where(
                 self.model.id != record_id,
                 self.model.unit_addr == unit_addr,
-                self.model.most_recent == True
+                self.model.most_recent.is_(True),
             )
             .values(most_recent=False)
             .returning(self.model.id)
         )
 
+        # Returns the IDs of the newly updated records
         result = self.session.execute(stmt).scalars().all()
+
+        # Flush the new changes to be reflected in the current session
         self.session.flush()
+
         return result
 
     @repository_error_handler()
@@ -212,6 +230,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         Returns:
             list[Any]: Returns a list of values from records.
         """
+        # Check if the provided column actually exists in the model
         if not hasattr(self.model, field_type):
             raise RepositoryInvalidArgumentError(
                 self.__class__.__name__,
@@ -225,6 +244,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             .order_by(self.model.id.asc())
         )
 
+        # Add the "where" component if looking for specific value
         if most_recent is not None:
             stmt = stmt.where(self.model.most_recent == most_recent)
 
@@ -249,7 +269,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             dict[str, Any] | None: Returns a dictionary containing the newly updated
                 values. Returns None if no updates were made in the session.
         """
-        
+
         values = {}
         if isinstance(symbol_id, int) and symbol_id > 0:
             values["symbol_id"] = symbol_id
@@ -259,7 +279,9 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         return self.update_with_pk(record_id, values)  # Already flushes
 
     # Station Handler
-    def get_station_records(self, station_id: int, recent=False) -> list[dict[str, Any]]:
+    def get_station_records(
+        self, station_id: int, recent=False
+    ) -> list[dict[str, Any]]:
         """Retrieves all train records a corresponding station ID.
 
         Args:
@@ -274,11 +296,13 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             list[dict[str, Any]]: A list of dictionary representations of the records
                 retrieved.
         """
-        
+
         try:
+            # If requesting recent station records, call a concrete implementation
             if recent:
                 return self.get_recent_station_records(station_id)
 
+            # Otherwise, just get all records from a station
             results = self.session.execute(
                 select(self.model).where(self.model.station_recorded == station_id)
             ).all()
@@ -364,6 +388,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             `RepositoryError`: If an exception occurs for any reason.
         """
         try:
+            # Assign a new symbol and locomotive number to a newly verified record if provided.
             values = {
                 "symbol_id": symbol_id,
                 "locomotive_num": locomotive_num,
@@ -411,7 +436,8 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         Raises:
             `RepositoryError`: If an exception is raised for any reason.
         """
-        
+        # We need to query from two different tables, so import them in the function
+        # to prevent unecessarily flooding the namespace.
         from .db_core.models import Symbol, Station
 
         try:
@@ -427,7 +453,9 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 )
                 .join(Station, self.model.station_recorded == Station.id)
                 .outerjoin(Symbol, self.model.symbol_id == Symbol.id)
-                .where(self.model.date_rec >= dt)  # Retrieved the date received is after a given date/time.
+                .where(
+                    self.model.date_rec >= dt
+                )  # Date received is after a given date/time.
                 .order_by(self.model.date_rec.desc())
             )
 

@@ -342,9 +342,14 @@ class BaseRepository(Generic[ModelType]):
                 the corresponding values for those keys will be converted to strings in
                 the returned dictionaries.
         """
+        if values is None:
+            return None
+        
         # Determine if the values given is iterable
-        is_collection = isinstance(values, Iterable)
+        is_collection = isinstance(values, (list, tuple, set))
         rows = values if is_collection else [values]
+        
+        print(f"Is collection: {is_collection}")
 
         results = []
         for r in rows:

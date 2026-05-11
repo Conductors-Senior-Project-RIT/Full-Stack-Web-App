@@ -8,7 +8,7 @@ const Station = ({ station, image, locationImage }) => {
   // State to store EOT/HOT records fetched from the backend
   const [Records, setRecords] = useState([]);
   // States for popups
-  const [popUpRecord, setPopUpRecords] = useState([]);
+  const [popUpRecord, setPopUpRecords] = useState({});
   const [showEOTPopUp, setShowEOTPopUp] = useState(false);
   const [showHOTPopUp, setShowHOTPopUp] = useState(false);
   // State to get the last seen time for the station
@@ -43,14 +43,14 @@ const Station = ({ station, image, locationImage }) => {
       fetch(`${config.apiUrl}/history?type=1&id=${id_num}`)
         .then(response => response.json())
         .then(data => {
-          setPopUpRecords(data || []);
+          setPopUpRecords(data || {});
           setShowEOTPopUp(true);
         });
     } else if (typ === "HOT") {
       fetch(`${config.apiUrl}/history?type=2&id=${id_num}`)
         .then(response => response.json())
         .then(data => {
-          setPopUpRecords(data || []);
+          setPopUpRecords(data || {});
           setShowHOTPopUp(true);
         });
     }
@@ -79,22 +79,22 @@ const Station = ({ station, image, locationImage }) => {
             <Modal.Title>Additional Information</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {popUpRecord.map((rec, index) => (
-              <p key={index}>
-                Date Recorded: {rec.date_rec}<br />
-                Station Recorded at: {rec.station_name}<br />
-                Train Symbol: {rec.symbol_name}<br />
-                Unit Address: {rec.unit_addr}<br />
-                Brake Pressure: {rec.brake_pressure}<br />
-                Motion: {rec.motion}<br />
-                Marker Light: {rec.marker_light}<br />
-                Turbine: {rec.turbine}<br />
-                Battery Condition: {rec.battery_cond}<br />
-                Battery Charge: {rec.battery_charge}<br />
-                Arm Status: {rec.arm_status}<br />
-                Signal Strength: {rec.signal_strength}<br />
+            {popUpRecord && (
+              <p key={popUpRecord.id}>
+                Date Recorded: {popUpRecord.date_rec}<br />
+                Station Recorded at: {popUpRecord.station_name}<br />
+                Train Symbol: {popUpRecord.symbol_name}<br />
+                Unit Address: {popUpRecord.unit_addr}<br />
+                Brake Pressure: {popUpRecord.brake_pressure}<br />
+                Motion: {popUpRecord.motion}<br />
+                Marker Light: {popUpRecord.marker_light}<br />
+                Turbine: {popUpRecord.turbine}<br />
+                Battery Condition: {popUpRecord.battery_cond}<br />
+                Battery Charge: {popUpRecord.battery_charge}<br />
+                Arm Status: {popUpRecord.arm_status}<br />
+                Signal Strength: {popUpRecord.signal_strength}<br />
               </p>
-            ))}
+            )}
           </Modal.Body>
           <Modal.Footer>
             <Button variant='primary' onClick={() => handleClosePopUp()}>Close</Button>

@@ -33,13 +33,14 @@ class RepositoryExistingRowError(RepositoryError):
     default_message = "The provided row already exists!"
 
 
+# It should be the Service layer's job to determine what error messages are shown to the API
 REPOSITORY_ERROR_MAP = {
     (TimeoutError, UnboundExecutionError, InterfaceError, NoSuchModuleError): 
-        (RepositoryConnectionError, False),
+        (RepositoryConnectionError, True),
     (TypeError, KeyError, ValueError, IndexError, ZeroDivisionError, 
      DataError, ProgrammingError, IntegrityError): 
-        (RepositoryParsingError, False),
-    SQLAlchemyError: (RepositoryInternalError, False)
+        (RepositoryParsingError, True),
+    SQLAlchemyError: (RepositoryInternalError, True)
     
 }
 
