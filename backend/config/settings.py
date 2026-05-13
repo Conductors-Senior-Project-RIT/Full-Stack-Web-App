@@ -9,8 +9,6 @@ class Config(object):
     JWT_COOKIE_CSRF_PROTECT = False
 
 class ProdConfig(Config):
-    """Production environment configuration - note sure if raising errors is necessary here
-    but ill leave it for now
     """
     Production environment config
     """
