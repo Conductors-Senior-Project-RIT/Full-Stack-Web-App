@@ -346,7 +346,7 @@ class BaseRepository(Generic[ModelType]):
             return None
         
         # Determine if the values given is iterable
-        is_collection = isinstance(values, (list, tuple, set))
+        is_collection = isinstance(values, Sequence)
         rows = values if is_collection else [values]
         
         print(f"Is collection: {is_collection}")

@@ -43,6 +43,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
         super().__init__(EOTRecord, session, "EOT Record", "eot")
 
     # below is train_history.py related
+    @repository_error_handler()
     def get_train_history(
         self, id: int, page: int, num_results: int
     ) -> list[dict[str, Any]]:
@@ -183,7 +184,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
         stmt = (
             select(self.model)
             .where(self.model.station_recorded == station_id)
-            .where(self.model.most_recent == True)
+            .where(self.model.most_recent.is_(True))
             .join(Symbol, Symbol.id == self.model.symbol_id, isouter=True)
             .join(EngineNumber, EngineNumber.id == self.model.engine_num, isouter=True)
         )
