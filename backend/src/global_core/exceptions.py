@@ -1,6 +1,5 @@
 from functools import wraps
 from typing import Optional, Type, TypeAlias, Union
-from backend import error_debugging
 
 ExceptionType: TypeAlias = Union[Type[Exception], tuple[Type[Exception], ...]]
 ErrorMapping: TypeAlias = dict[ExceptionType, tuple[Type[Exception], bool]]
@@ -44,7 +43,11 @@ class LayerError(Exception):
                 If provided, this exception is attached to the LayerError instance.
                 Defaults to None.
         """
+        # Prevent circular import
+        from backend import error_debugging
+        
         # Contruct the caller prefix and point of error message if provided
+        print(poe)
         caller = f"[{caller_name}] " if caller_name else ""
         point_of_error = f"Exception raised in {poe}! " if poe else ""
 
@@ -148,6 +151,10 @@ def wrap_error_handler(
     def decorator(*args, **kwargs):
         # Reference the instance calling the function
         func_name = getattr(func, "__name__", repr(func))
+        # Rename constructor function name
+        func_name = "initialization" if func_name == "__init__" else func_name
+        
+        # Get the class that called the function
         caller_name = args[0].__class__.__name__ if args else None
 
         try:
@@ -287,16 +294,15 @@ def translate_error(
     # Find the first matching type in the error map. Returns a tuple containing an exception class,
     # and a boolean that determines whether previous exception details should be propogated.
     # If a match is not found, None is returned.
-    error_class = next(
-        (error_map[cls] for cls in error_map if isinstance(e, cls)), None
-    )
+    error_class = next((error_map[cls] for cls in error_map if isinstance(e, cls)), None)
+    print(f"Error Class Exists: {error_class is not None}")
 
     if error_class:
         layer_exception, show_error = error_class
 
         # Return a new LayerError instance with the provided details
         return layer_exception(
-            caller_name,
+            caller_name=caller_name,
             poe=point_of_error,
             message=message,
             show_error=show_error,

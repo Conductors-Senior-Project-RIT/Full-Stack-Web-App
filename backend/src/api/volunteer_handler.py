@@ -2,7 +2,7 @@ from flask import Blueprint, abort, request
 from flask_restful import reqparse
 from werkzeug.exceptions import BadRequest
 
-from backend.src.global_core.decorators import role_required
+from backend.src.api.api_core.decorators import role_required
 from ..service.record_service import RecordService
 from ..service.symbol_service import SymbolService
 # from ..db.trackSense_db_commands import *
@@ -36,7 +36,7 @@ NOTE: Pins table doesn't have "lat" or "lng" fields so an error will always occu
 #     return [{"lat": pin[0], "lng": pin[1]} for pin in pins]
 
 
-@volunteer_bp.route("/api/symbol", methods=["GET", "POST"])
+@volunteer_bp.get("/api/symbols")
 @role_required(0, 1)
 def get_symbol():
     """_summary_
@@ -44,30 +44,42 @@ def get_symbol():
     Returns:
         _type_: _description_
     """
+    symbol_name = request.args.get("symbol_name", default=None, type=str)
 
     # Retrieve the provided query parameters (if it exists)
-    symbol_name = request.args.get("symbol_name", default=None, type=str)
-    
     session = db.session
     
     # Instantiate a symbol service
     service = SymbolService(session)
 
-    if request.method == "GET":
-        # The service supports an undefined symbol name and always returns a list
-        results = service.get_symbol(symbol_name)
-        
-        # Return results in the 'results' field for consistency
-        return {"results": results}, 200
+    # The service supports an undefined symbol name and always returns a list
+    results = service.get_symbol(symbol_name)
     
-    elif request.method == "POST":
-        # To create a new symbol, a name must be provided
-        if symbol_name is None:
-            abort(400, "Must provide a symbol name to create a record!")
+    # Return results in the 'results' field for consistency
+    return {"results": results}, 200
+    
+    
+@volunteer_bp.post("/api/symbols")
+@role_required(0, 1)
+def post_symbol():
+    # Get the symbol name if it exists
+    data = request.get_json()
+    symbol_name = data.get("name") if data else None
 
-        # If a name is provided, then use the service to create a new symbol
-        service.create_symbol(symbol_name)
-        session.commit()
+    # Retrieve the provided query parameters (if it exists)
+    session = db.session
+    
+    # Instantiate a symbol service
+    service = SymbolService(session)
+
+    # To create a new symbol, a name must be provided
+    if symbol_name is None:
+        abort(400, "Must provide a symbol name to create a record!")
+
+    # If a name is provided, then use the service to create a new symbol
+    service.create_symbol(symbol_name)
+    session.commit()
+    
     return {}, 200
 
 
@@ -94,13 +106,12 @@ def post_record():
     parser.add_argument("id", type=int, default=-1)
     parser.add_argument("type", type=int, default=-1)
     parser.add_argument("symbol", type=int, default=-1)
-    parser.add_argument("engine_number", type=int, default=-1)
+    parser.add_argument("engine_number", type=str, default="unknown")
     args = parser.parse_args()
         
     arg_validators = {
         "record ID": args.id,
-        "symbol ID": args.symbol,
-        "engine number": args.engine_number
+        "symbol ID": args.symbol
     }
     
     for arg, val in arg_validators.items():

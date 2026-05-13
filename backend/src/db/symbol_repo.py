@@ -58,8 +58,6 @@ class SymbolRepository(BaseRepository):
         symbols = list(self.session.execute(text(sql)).scalars().all())
         return symbols
 
-
-        
         
     def get_symbol_id(self, symbol_name: str) -> int | None:
         """Retrieves a symbol ID given the name of a symbol from the Symbols table.
@@ -83,6 +81,8 @@ class SymbolRepository(BaseRepository):
                     message=f"Could not find symbol with name = {symbol_name}",
                     show_error=False
                 )
+                
+            return symbol_id
         
         # Otherwise, we encountered an error while retrieving
         except Exception as e:

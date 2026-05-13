@@ -6,7 +6,8 @@ from flask_restful import Api
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from backend.extensions import jwt, bcrypt
-from backend.src.global_core.decorators import register_jwt_access_token_refresh
+from backend.src.api.api_core.decorators import register_jwt_access_token_refresh
+from backend.src.api.api_core import exceptions
 from .config.settings import config_selection
 from .database import db
 
@@ -34,6 +35,7 @@ def create_app(config_name=None):
     print(f"JWT Secret Key Set: {bool(app.config.get('JWT_SECRET_KEY'))}") 
     print("=" * 50)
     
+    # Used to define whether exceptions should be shown to client
     global error_debugging
     error_debugging = app.config['DEBUG'] or app.config['TESTING']
 
@@ -81,12 +83,12 @@ def create_app(config_name=None):
     api.add_resource(StationOnline, "/api/station_online")
 
     # blueprints + error handler registrations here
-    from .src.api import user_api, station_handler, volunteer_handler, error_handler
+    from .src.api import user_api, station_handler, volunteer_handler
 
     app.register_blueprint(user_api.user_bp)
     app.register_blueprint(station_handler.station_bp)
     app.register_blueprint(volunteer_handler.volunteer_bp)
 
-    error_handler.register_error_handlers(app) 
+    exceptions.register_error_handlers(app) 
 
     return app

@@ -39,6 +39,8 @@ class UserService(BaseService):
 
         if self._user_repo.email_exists(email): 
             raise BadRequest("Email already registered")
+        
+        print("Email does not exist")
 
         user_id = self._user_repo.create_new_user(email, hashed_password)
 

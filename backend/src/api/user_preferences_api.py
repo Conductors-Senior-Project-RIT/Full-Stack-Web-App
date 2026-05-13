@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import get_jwt_identity
 
-from backend.src.global_core.decorators import role_required
+from backend.src.api.api_core.decorators import role_required
 
 from ..service.user_service import UserService
 

@@ -48,7 +48,10 @@ const VerifyHOT = () => {
       }
 
       try {
-        const symbolResponse = await fetch(`${config.apiUrl}/symbols`);
+        const symbolResponse = await fetch(`${config.apiUrl}/symbols`, {
+          method: "GET",
+          credentials: "include"
+        });
         const symbolData = await symbolResponse.json();
         if (symbolData && symbolData.results) {
           setSymbols(symbolData.results);
@@ -65,14 +68,17 @@ const VerifyHOT = () => {
   // Perform verification
   const performVerification = () => {
     let symbolId = -1;
-    fetch(`${config.apiUrl}/symbols?symbol_name=${modalSymbol}`)
+    fetch(`${config.apiUrl}/symbols?symbol_name=${modalSymbol}`, {
+      method: "GET",
+      credentials: "include"
+    })
       .then(response => response.json())
       .then(data => {
 
         if (!data || !data.results)
           throw new Error("No results we returned!");
 
-        symbolId = data.results[0];
+        symbolId = data.results;
         if (symbolId !== -1) {
           fetch(`${config.apiUrl}/record_verifier`, {
             method: 'POST',
@@ -85,7 +91,7 @@ const VerifyHOT = () => {
               id: modalId,
               type: 2,
               symbol: symbolId,
-              engine_number: modalEngineNum,
+              engine_number: String(modalEngineNum),
             }),
           })
           .then(response => response.ok)
@@ -126,6 +132,7 @@ const VerifyHOT = () => {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": getCsrfToken(),
           },
+          credentials: "include",
           body: JSON.stringify({ name: modalSymbol }),
         });
         if (response.ok) performVerification();

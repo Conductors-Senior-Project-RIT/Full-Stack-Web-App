@@ -319,6 +319,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
 
             args = {"results_num": num_results, "offset": (page - 1) * num_results}
             results = self.session.execute(text(sql), args).all()
+            print(type(results))
             resp = self.objs_to_dicts(results, {"duration", "occurrence_count"})
 
         except Exception as e:

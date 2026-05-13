@@ -1,10 +1,9 @@
 from flask import Flask, Response
 from werkzeug.exceptions import HTTPException
 
-from ...database import db
+from ....database import db
 
-from backend import error_debugging
-from ..service.service_core import (
+from ...service.service_core import (
     ServiceError, ServiceInternalError, ServiceInvalidArgument, 
     ServiceParsingError, ServiceResourceNotFound, ServiceTimeoutError,
     ServiceExistingResourceError
@@ -54,6 +53,9 @@ def handle_service_errors(e: ServiceError) -> Response:
     # Rollback changes in the request's current session.
     db.session.rollback()
     
+    # TODO: Implement logging in the future
+    print(str(e))
+    
     # Return the corres.ponding error code if present
     return {"error": str(e)}, service_error_to_code(e)  
 
@@ -82,6 +84,8 @@ def handle_other_errors(e: Exception) -> Response:
     Returns:
         Response: Constructs a Flask Response with a general error message and code of 500.
     """
+    from backend import error_debugging
+    
     db.session.rollback()
     if(error_debugging): 
         return {"error": e.args[0]}, 500

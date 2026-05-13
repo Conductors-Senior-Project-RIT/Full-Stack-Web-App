@@ -39,9 +39,12 @@ const VerifyEOT = () => {
     let symbolId = -1;
 
     try{
-      const symbolResponse = await fetch(`${config.apiUrl}/symbols?symbol_name=${modalSymbol}`);
+      const symbolResponse = await fetch(`${config.apiUrl}/symbols?symbol_name=${modalSymbol}`, {
+        method: "GET",
+        credentials: "include"
+      });
       const symbolData = await symbolResponse.json();
-      symbolId = symbolData.id;
+      symbolId = symbolData.results;
 
       if (symbolId !== -1) {
         console.log("symbolID: " + symbolId);
@@ -54,9 +57,10 @@ const VerifyEOT = () => {
           },
           credentials: "include",
           body: JSON.stringify({
-            "id": modalId,
-            "symbol": symbolId,
-            "engine_number": modalLocomotiveNum
+            id: modalId,
+            type: 1,
+            symbol: symbolId,
+            engine_number: String(modalLocomotiveNum)
           })
         });
         if (verifyResponse.ok) {
@@ -96,8 +100,9 @@ const VerifyEOT = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // "X-CSRF-TOKEN": getCsrfToken(), // this endpoint doesnt have @role_required() (@jwt_required but extra functionality); commented out for now
+            "X-CSRF-TOKEN": getCsrfToken(), // this endpoint doesnt have @role_required() (@jwt_required but extra functionality); commented out for now
           },
+          credentials: "include",
           body: JSON.stringify({ 'name': modalSymbol })
         });
         if (response.ok) performVerification();
@@ -128,7 +133,10 @@ const VerifyEOT = () => {
       }
 
       try{
-        const symbolResponse = await fetch(`${config.apiUrl}/symbols`);
+        const symbolResponse = await fetch(`${config.apiUrl}/symbols`, {
+          method: "GET",
+          credentials: "include"
+        });
         const symbolData = await symbolResponse.json();
         if (symbolData && symbolData.results) {
           setSymbols(symbolData.results);

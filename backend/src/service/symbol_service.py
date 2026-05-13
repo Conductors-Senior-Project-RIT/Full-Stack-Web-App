@@ -6,11 +6,11 @@ class SymbolService(BaseService):
     def __init__(self, session):
         self._symbol_repo = SymbolRepository(session)
         
-    def get_symbol(self, symbol_name: str | None) -> list[str] | list[int]:
+    def get_symbol(self, symbol_name: str | None) -> list[str] | int:
         if symbol_name is None:
             return self._symbol_repo.get_symbol_names()
         else:
-            return [self._symbol_repo.get_symbol_id(symbol_name)]
+            return self._symbol_repo.get_symbol_id(symbol_name)
         
     def create_symbol(self, symbol_name: str):
         self._symbol_repo.insert_new_symbol(symbol_name)

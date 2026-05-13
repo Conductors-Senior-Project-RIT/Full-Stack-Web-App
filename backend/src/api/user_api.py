@@ -5,7 +5,7 @@ from flask_jwt_extended import (
     get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies,
 )
 
-from backend.src.global_core.decorators import role_required
+from backend.src.api.api_core.decorators import role_required
 from ..service.user_service import UserService
 from werkzeug.exceptions import BadRequest, Unauthorized, NotFound
 from backend.database import db
