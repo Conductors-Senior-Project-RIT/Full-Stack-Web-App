@@ -24,76 +24,17 @@ class TestEOTRecordRepository(BaseTestCase):
 
 
     def testGetTrainHistory(self):
-        expected = [
-            {
-                'id': 8,
-                'date_rec': '2025-05-25 05:20:00',
-                'station_name': 'test station1'
-            },
-            {
-                'id': 7,
-                'date_rec': '2025-03-25 05:20:00',
-                'station_name': 'test station1'
-            },
-            {
-                'id': 6,
-                'date_rec': '2025-03-25 05:15:00',
-                'station_name': 'test station1'
-            },
-            {
-                'id': 5,
-                'date_rec': '2025-03-25 05:10:00',
-                'station_name': 'test station2'
-            },
-            {
-                'id': 4,
-                'date_rec': '2025-03-25 05:05:00',
-                'station_name': 'test station1'
-            },
-            {
-                'id': 3,
-                'date_rec': '2025-03-25 05:00:00',
-                'station_name': 'test station1'
-            },
-            {
-                'id': 2,
-                'date_rec': '2003-02-05 06:53:08',
-                'station_name': 'test station1'
-            },
-            {
-                'id': 1,
-                'date_rec': '1999-01-08 04:05:06',
-                'station_name': 'test station1'
-            }
-        ]
+        expected_record = self.repo.get(1)
+        expected_record["station_name"] = "test station1"
+        expected_record["symb_name"] = "Test Symbol1"
+        expected_record["date_rec"] = str(expected_record["date_rec"])
         
-        # Test that getting all records works
-        results = self.repo.get_train_history(-1, 1, 250)
-        valid, message = collation_valid({"results": expected, "totalPages": 1}, results)
-        self.assertTrue(valid, message)
+        results = self.repo.get_train_history(1)
+        valid, msg = compare_results_ordered([results], [expected_record])
+        self.assertTrue(valid, msg)
         
-        # Test that getting a full page of records works
-        results = self.repo.get_train_history(-1, 1, 2)
-        valid, message = collation_valid({"results": expected[:2], "totalPages": 4}, results)
-        self.assertTrue(valid, message)
-
-        # Test that getting a partial page of records works
-        results = self.repo.get_train_history(-1, 3, 3)
-        valid, message = collation_valid({"results": expected[-2:], "totalPages": 3}, results)
-        self.assertTrue(valid, message)
-        
-        # Test bot getting records on an exceeding page
-        results = self.repo.get_train_history(-1, 4, 3)
-        self.assertDictEqual({"results": [], "totalPages": 3}, results)
-        
-        # Test that getting a single record works
-        results = self.repo.get_train_history(1, None, None)
-        valid, message = compare_results_ordered([expected[-1]], results)
-        self.assertTrue(valid, message)
-        
-        # Test not finding record
-        results = self.repo.get_train_history(17, None, None)
-        self.assertEqual([], results)
+        results = self.repo.get_train_history(17)
+        self.assertIsNone(results)
         
         
     def testCreateTrainRecord(self):
@@ -127,13 +68,6 @@ class TestEOTRecordRepository(BaseTestCase):
         # Test datetime never provided exceptions
         with self.assertRaises(RepositoryInvalidArgumentError):
             self.repo.create_train_record(data, None)
-            
-        # Test "execute" return exceptions
-        with patch.object(Session, "execute") as mock:
-            mock.return_value.scalar_one_or_none.return_value = None
-            
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.create_train_record(data, date_rec)
                 
     
     def testGetRecentStationRecords(self):

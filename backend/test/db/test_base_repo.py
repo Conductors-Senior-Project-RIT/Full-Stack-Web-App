@@ -31,8 +31,6 @@ class TestBaseRepository(BaseTestCase):
         self.test_data = return_test_data()
         self.session.add_all(self.test_data)
         self.session.flush()
-        print("Jigglebutt")
-        print([r.id for r in self.test_data])
         
     
     #################################

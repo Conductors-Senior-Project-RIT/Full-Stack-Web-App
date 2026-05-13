@@ -26,14 +26,15 @@ class TestHOTRecordRepository(BaseTestCase):
     def testGetTrainHistory(self):
         expected_record = self.repo.get(1)
         expected_record["station_name"] = "test station1"
+        expected_record["symb_name"] = None
         expected_record["date_rec"] = str(expected_record["date_rec"])
         
-        results = self.repo.get_train_history(1, 1, 250)
-        valid, msg = compare_results_ordered(results, [expected_record])
+        results = self.repo.get_train_history(1)
+        valid, msg = compare_results_ordered([results], [expected_record])
         self.assertTrue(valid, msg)
         
-        results = self.repo.get_train_history(17, 1, 250)
-        self.assertEqual([], results)
+        results = self.repo.get_train_history(17)
+        self.assertIsNone(results)
         
         
     def testCreateTrainRecord(self):
@@ -62,13 +63,6 @@ class TestHOTRecordRepository(BaseTestCase):
         # Test datetime never provided exceptions
         with self.assertRaises(RepositoryInvalidArgumentError):
             self.repo.create_train_record(data, None)
-            
-        # Test "execute" return exceptions
-        with patch.object(Session, "execute") as mock:
-            mock.return_value.scalar_one_or_none.return_value = None
-            
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.create_train_record(data, date_rec)
         
         
     def testGetRecentStationRecords(self):

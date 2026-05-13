@@ -47,7 +47,6 @@ class LayerError(Exception):
         from backend import error_debugging
         
         # Contruct the caller prefix and point of error message if provided
-        print(poe)
         caller = f"[{caller_name}] " if caller_name else ""
         point_of_error = f"Exception raised in {poe}! " if poe else ""
 
@@ -62,7 +61,6 @@ class LayerError(Exception):
             if not isinstance(str, type(message)):
                 message = str(message)
 
-            print(error_debugging)
             if not error_debugging:
                 # The regex removes any existing "[ExceptionType]: " prefix from the original message to avoid exposing lower level details.
                 exc_prefix_idx = message.find("]") if "]" in message else 0
@@ -295,7 +293,6 @@ def translate_error(
     # and a boolean that determines whether previous exception details should be propogated.
     # If a match is not found, None is returned.
     error_class = next((error_map[cls] for cls in error_map if isinstance(e, cls)), None)
-    print(f"Error Class Exists: {error_class is not None}")
 
     if error_class:
         layer_exception, show_error = error_class

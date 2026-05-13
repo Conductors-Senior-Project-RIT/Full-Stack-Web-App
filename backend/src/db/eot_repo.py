@@ -44,9 +44,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
 
     # below is train_history.py related
     @repository_error_handler()
-    def get_train_history(
-        self, id: int, page: int, num_results: int
-    ) -> list[dict[str, Any]]:
+    def get_train_history(self, id: int) -> list[dict[str, Any]]:
         """Returns an EOT record as a dictionary containing the following columns and their
         respective values: `id, date_rec, station_name, unit_addr, brake_pressure,
         motion, marker_light, turbine, battery_cond, battery_charge, arm_status,
@@ -54,7 +52,6 @@ class EOTRepository(RecordRepository[EOTRecord]):
 
         Args:
             id: A value corresponding to a record's primary key.
-            page: The page of records to return.
 
         Returns:
             If db operation is successful, a list of tuples containing EOT records for a
@@ -108,8 +105,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
 
         # resp = [row._asdict() for row in self.session.execute(text(sql), sql_args)]
 
-        results = self.session.execute(stmt).first()
-        print(hasattr(results, "_asdict"))
+        results = self.session.execute(stmt).one_or_none()
         return self.objs_to_dicts(results)
 
         # count = self.get_total_record_count()
@@ -319,7 +315,6 @@ class EOTRepository(RecordRepository[EOTRecord]):
 
             args = {"results_num": num_results, "offset": (page - 1) * num_results}
             results = self.session.execute(text(sql), args).all()
-            print(type(results))
             resp = self.objs_to_dicts(results, {"duration", "occurrence_count"})
 
         except Exception as e:
