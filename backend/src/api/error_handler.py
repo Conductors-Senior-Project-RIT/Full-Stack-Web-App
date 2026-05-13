@@ -83,8 +83,10 @@ def handle_other_errors(e: Exception) -> Response:
         Response: Constructs a Flask Response with a general error message and code of 500.
     """
     db.session.rollback()
-    if(error_debugging): return {"error": e.args[0]}, 500
-    return {"error": "Internal server error!"}, 500
+    if(error_debugging): 
+        return {"error": e.args[0]}, 500
+    else:
+        return {"error": "Internal error occurred!"}, 500
         
         
 def register_error_handlers(app: Flask):

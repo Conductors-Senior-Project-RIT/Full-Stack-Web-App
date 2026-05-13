@@ -7,20 +7,23 @@ const Admin = () => {
   const [role, setRole] = useState(1); // Default to Volunteer
   const [message, setMessage] = useState('');
 
-  const handleElevate = () => {
-    fetch(`${config.apiUrl}/elevate-user`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${document.cookie.split('token=')[1]}`
-      },
-      body: JSON.stringify({ email, role })
-    })
-      .then((response) => response.json())
-      .then((data) => setMessage(data.message))
-      .catch((error) => setMessage('Error elevating user'));
+  const handleElevate = async () => {
+    try {
+      const response = await fetch(`${config.apiUrl}/elevate-user`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, role }),
+      });
+      const data = await response.json();
+      setMessage(data.message);
+    } catch (error) {
+      setMessage('Error elevating user');
+    }
   };
-
+  
   return (
     <div className="admin-container">
       <h2>Elevate User Role</h2>

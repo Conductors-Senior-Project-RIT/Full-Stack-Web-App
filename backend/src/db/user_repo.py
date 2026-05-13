@@ -62,13 +62,14 @@ class UserRepository(BaseRepository):
         "exception handler for email"
         sql = text("SELECT COUNT(1) FROM Users WHERE email = :email")
         result = self.session.execute(sql, {"email": email}).scalar_one()
-        return result > 0 # >0 because returning count
+        if result == 0:
+            raise self._construct_email_not_found(email)
         
     def email_exists(self, email: str) -> bool:
         "simple existence checker for email"
         sql = text("SELECT COUNT(1) FROM Users WHERE email = :email")
         result = self.session.execute(sql, {"email": email}).scalar_one()
-        return result is not None
+        return result > 0 # >0 because returning count
             
     def unique_id_exists(self, user_id: int):
         sql = text("SELECT COUNT(1) FROM Users WHERE id = :user_id")
@@ -111,7 +112,7 @@ class UserRepository(BaseRepository):
         """
         
         result = self.session.execute(text(sql), {"role": new_role, "email": email}).scalar_one_or_none()
-        if not result:
+        if result is None:
             raise RepositoryInternalError(
                 self.__class__.__name__,
                 message="An error occurred updating account status, 0 changes made!",
@@ -153,8 +154,8 @@ class UserRepository(BaseRepository):
         
         sql = """
             UPDATE Users
-            SET starting_time = %(start_time)s, ending_time = %(ending_time)s
-            WHERE id = %(uid)s
+            SET starting_time = :start_time, ending_time = :ending_time
+            WHERE id = :uid
             RETURNING starting_time, ending_time
         """
         args = {
@@ -163,15 +164,15 @@ class UserRepository(BaseRepository):
             "uid": user_id,
         }
         
-        result = self.session.execute(text(sql), args).scalars()
-        if result != 2:
+        result = self.session.execute(text(sql), args).one_or_none()
+        if result is None:
             raise RepositoryInternalError(
                 self.__class__.__name__,
                 message="An error occurred updating user times, 0 changes made!",
                 show_error=True
             )
         
-        return result[0], result[1]
+        return result.starting_time, result.ending_time
 
 
     # below is related to userpreferencesapi.py, they get user_id many different ways lol
@@ -179,22 +180,21 @@ class UserRepository(BaseRepository):
         sql = text("SELECT starting_time, ending_time FROM Users WHERE id = :user_id")
         args = {"user_id": user_id}
         
-        user_times = self.session.execute(sql, args).scalars()
+        user_times = self.session.execute(sql, args).one_or_none()
 
-        if user_times != 2: # Incorrectly sized results
+        if user_times is  None: # Incorrectly sized results
             raise self._construct_id_not_found(user_id)
 
-        return user_times[0], user_times[1]
+        return user_times.starting_time, user_times.ending_time
 
-    def get_station_id_from_user_preferences(self, user_id: int) -> ScalarResult[Any]:
+    def get_station_id_from_user_preferences(self, user_id: int) -> list:
         # Check if a single user with provided id exists, otherwise raise exception
         self.unique_id_exists(user_id)
         
         sql = text("SELECT station_id FROM UserPreferences WHERE user_id = :user_id")
         args = {"user_id": user_id}
         
-        return self.session.execute(sql, args).scalars()
-
+        return self.session.execute(sql, args).all()
 
     def delete_user_preferences(self, user_id: int) -> ScalarResult[Any]:
         sql = """
