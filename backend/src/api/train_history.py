@@ -12,13 +12,6 @@ from backend.src.service.record_service import RecordService
 
 # load_dotenv()
 
-def validate_int_argument(value: int, name: str, min_value: int):
-    if not isinstance(value, int):
-        raise BadRequest(f"{name} ({value}) is not an integer!")
-    if not isinstance(min_value, int):
-        raise BadRequest(f"{name} minimum value {min_value} is not an integer.")
-    if value < min_value:
-        raise BadRequest(f"Provided {name} must be greater than {min_value} but was given {value}...")
 
 class HistoryDB(Resource):
     def get(self):
@@ -35,15 +28,14 @@ class HistoryDB(Resource):
         # Argument checking goes here
         typ = request.args.get("type", default=-1, type=int)
         id = request.args.get("id", default=-1, type=int)
-        page = request.args.get("page", default=1, type=int)
 
         # Check our type and page arguments (typ checked in strategy creation)
-        validate_int_argument(id, "id", 1)
-        validate_int_argument(page, "page", 1)
+        if id < 1:
+            raise BadRequest(f"Record ID must be greater than 1! Provided: {id}")
         
         session = db.session
         th_service = RecordService(session, typ)
-        results = th_service.get_train_history(id, page)
+        results = th_service.get_train_history(id)
         session.commit()
         
         return results, 200

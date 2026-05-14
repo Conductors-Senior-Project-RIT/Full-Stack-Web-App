@@ -24,7 +24,7 @@ const Station = ({ station, image, locationImage }) => {
   });
 
   useEffect(() => {
-    fetch(`${config.apiUrl}/recent_activities?station_name=${station}&most_recent=0&timerange=12:00:00`)
+    fetch(`${config.apiUrl}/recent_activities?station_name=${station}&timerange=12:00:00`)
       .then(response => response.json())
       .then(data => {
         const records = [...data.reduce((map, item) => {
@@ -113,16 +113,16 @@ const Station = ({ station, image, locationImage }) => {
             <Modal.Title>Additional Information</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {popUpRecord.map((rec, index) => (
-              <p key={index}>
-                Date Recorded: {rec.date_rec}<br />
-                Station Recorded at: {rec.station_name}<br />
-                Train Symbol: {rec.symbol_name}<br />
-                Unit Address: {rec.unit_addr}<br />
-                Command: {rec.command}<br />
-                Signal Strength: {rec.signal_strength}<br />
+            {popUpRecord && (
+              <p key={popUpRecord.id}>
+                Date Recorded: {popUpRecord.date_rec}<br />
+                Station Recorded at: {popUpRecord.station_name}<br />
+                Train Symbol: {popUpRecord.symbol_name}<br />
+                Unit Address: {popUpRecord.unit_addr}<br />
+                Command: {popUpRecord.command}<br />
+                Signal Strength: {popUpRecord.signal_strength}<br />
               </p>
-            ))}
+            )}
           </Modal.Body>
           <Modal.Footer>
             <Button variant='primary' onClick={() => handleClosePopUp()}>Close</Button>

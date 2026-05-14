@@ -44,6 +44,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
                 self.model.unit_addr,
                 self.model.command, 
                 self.model.checkbits, 
+                self.model.signal_strength,
                 self.model.parity, 
                 self.model.verified
             )

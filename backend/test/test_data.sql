@@ -11,7 +11,7 @@ INSERT INTO Engine_Numbers (id, eng_num) VALUES
 (2, 'C3PO');
 
 INSERT INTO Users (id, email, passwd, acc_status) VALUES
-(1, 'test@test.test', 'hashed_pswd', 0);
+(1, 'test@gmail.com', '$2b$12$REvUFYyQ.W13brwfMiDWYuYl1SmoxTJyCbdhCv9efuI9jgd4AO79u', 0);
 
 
 INSERT INTO EOTRecords (id, unit_addr, date_rec, station_recorded, symbol_id, most_recent) VALUES

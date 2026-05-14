@@ -23,7 +23,7 @@ class recent_activities(Resource):
         recent = request.args.get("most_recent", default=True, type=bool)
         station = request.args.get("station_name", default=None, type=str)
 
-        if time_range == None:
+        if time_range is None:
             raise BadRequest("Invalid time range!")
 
         session = db.session

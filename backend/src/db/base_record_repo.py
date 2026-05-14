@@ -71,9 +71,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         return self.session.query(func.count(self.model.id)).scalar()
 
     @abstractmethod
-    def get_train_history(
-        self, id: int, page: int, num_results: int
-    ) -> list[dict[str, Any]]:
+    def get_train_history(self, id: int) -> list[dict[str, Any]]:
         """Returns a train record with the specified columns, defined in the concrete
         implementation.
 
@@ -439,7 +437,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         # We need to query from two different tables, so import them in the function
         # to prevent unecessarily flooding the namespace.
         from .db_core.models import Symbol, Station
-
+        
         try:
             stmt = (
                 select(
@@ -456,7 +454,6 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 .where(
                     self.model.date_rec >= dt
                 )  # Date received is after a given date/time.
-                .order_by(self.model.date_rec.desc())
             )
 
             # Retrieve records only with a specified station ID
@@ -466,6 +463,9 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             # Retrieve records based on their recency status
             if recent is not None:
                 stmt = stmt.where(self.model.most_recent == recent)
+                
+            # Order in descending order
+            stmt.order_by(self.model.date_rec.desc())
 
             results = self.session.execute(stmt).all()
 

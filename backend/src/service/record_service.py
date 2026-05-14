@@ -1,5 +1,6 @@
 import datetime
 from typing import Any
+import zoneinfo
 
 import backend.src.db.record_types as record_types
 from ..db.base_record_repo import RecordRepository
@@ -27,10 +28,8 @@ class RecordService(BaseService):
             raise ServiceInternalError("Could not access record repository!")
 
 
-    def get_train_history(self, record_id: int, page_num: int) -> dict[str, Any]:
-        return self.get_first_repository().get_train_history(record_id, page_num, RESULTS_NUM)
-        # TODO: Likely can just execute the code snippet below
-        # return self.get_first_repository().get(record_id)
+    def get_train_history(self, record_id: int) -> dict[str, Any]:
+        return self.get_first_repository().get_train_history(record_id)
         
     def post_train_history(self, args: dict, datetime_str: str) -> int:
         # Get a single repository instantiated repository
@@ -105,8 +104,8 @@ class RecordService(BaseService):
     def time_frame_pull(self, time_range: str, recent: bool, station_id: int, station_name: str):
         try:
             time_increments = time_range.split(":")
-            
-            curr_date = datetime.datetime.now()
+            est = zoneinfo.ZoneInfo("America/New_York")
+            curr_date = datetime.datetime.now(tz=est).replace(tzinfo=None)
             delta = datetime.timedelta(
                 hours=int(time_increments[0]),
                 minutes=int(time_increments[1]),
@@ -117,6 +116,12 @@ class RecordService(BaseService):
             if station_id == -1:
                 if station_name:
                     station_id = self._station_repo.get_station_id(station_name)
+                else:
+                    raise ServiceInvalidArgument(
+                        self.__class__.__name__,
+                        message="Did not provide station name or ID!",
+                        show_error=True
+                    )
                 
             # Should never occur, but to be safe..
             if len(self._record_repo) < 1:
