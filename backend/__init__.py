@@ -83,10 +83,9 @@ def create_app(config_name=None):
     api.add_resource(StationOnline, "/api/station_online")
 
     # blueprints + error handler registrations here
-    from .src.api import user_api, station_handler, volunteer_handler
+    from .src.api import user_api, volunteer_handler
 
     app.register_blueprint(user_api.user_bp)
-    app.register_blueprint(station_handler.station_bp)
     app.register_blueprint(volunteer_handler.volunteer_bp)
 
     exceptions.register_error_handlers(app) 

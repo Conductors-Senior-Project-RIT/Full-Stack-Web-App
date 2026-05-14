@@ -1,17 +1,16 @@
-"""
-HOT database layer 
+"""HOT database layer
 
 This module handles all database CRUD operations for HOT records
 """
 from math import ceil
-from typing import Any, Optional, Type
+from typing import Any
 from sqlalchemy import func, select, text
 from sqlalchemy.orm.session import Session
 
 from .db_core.models import HOTRecord
 
 from .db_core.exceptions import (
-    RepositoryInternalError, RepositoryInvalidArgumentError, repository_error_handler, repository_error_translator
+    repository_error_handler, repository_error_translator
 )
 
 from .base_record_repo import RecordRepository
@@ -25,22 +24,25 @@ class HOTRepository(RecordRepository[HOTRecord]):
     # below is train_history.py related
     @repository_error_handler()
     def get_train_history(self, record_id: int) -> dict:
+        """Returns an HOT record as a dictionary containing the following columns and their
+        respective values: `id, date_rec, station_name, symb_name, unit_addr, command,
+        checkbits, signal_strength, parity, verified`.
+
+        Args:
+            id (int): A value corresponding to a record's primary key.
+
+        Returns:
+            dict[str, Any]: If the operation is successful, a dictonary is returned
+                containining the specificied columns and values for a given record.
+        """
         from .db_core.models import Station, Symbol
-        
-        # sql = """
-        #         SELECT HOTRecords.id, date_rec, stat.station_name, symbol_id, unit_addr, command, checkbits, parity, verified FROM HOTRecords
-        #         INNER JOIN Stations as stat on station_recorded = stat.id
-        #         WHERE HOTRecords.id = :id
-        #         LIMIT :results_num OFFSET :offset * :results_num
-        #         """
-        # sql_args = {"id": id, "results_num": num_results, "offset": page - 1}
+
         stmt = (
             select(
                 self.model.id, 
                 func.to_char(self.model.date_rec, "YYYY-MM-DD HH24:MI:SS").label("date_rec"),
                 Station.station_name,
                 Symbol.symb_name,
-                self.model.symbol_id,
                 self.model.unit_addr,
                 self.model.command, 
                 self.model.checkbits, 
@@ -54,28 +56,6 @@ class HOTRepository(RecordRepository[HOTRecord]):
         )
         
         results = self.session.execute(stmt).one_or_none()
-        return self.objs_to_dicts(results)
-
-
-    # below is for station_handler.py
-    @repository_error_handler()
-    def get_recent_station_records(self, station_id: int) -> list[dict[str, Any]]:
-        """Retrieves the most recent HOT records for a given station id.
-
-        """
-        # sql = """
-        #     SELECT * FROM HOTRecords 
-        #     WHERE station_recorded = :station_id and most_recent = true
-        # """
-        # args = {"station_id": station_id}
-        
-        stmt = (
-            select(HOTRecord)
-            .where(HOTRecord.station_recorded == station_id)
-            .where(HOTRecord.most_recent == True)
-        )
-        results = self.session.execute(stmt).all()
-        
         return self.objs_to_dicts(results)
 
 

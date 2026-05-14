@@ -129,7 +129,7 @@ class RecordService(BaseService):
 
             results = []
             for repo in self._record_repo:
-                repo_resp = repo.get_records_in_timeframe(station_id, timeframe, recent)
+                repo_resp = repo.get_records_at_station(station_id, timeframe, recent)
                 results.extend(repo_resp)
             
             results.sort(key=lambda x: x["date_rec"], reverse=True)

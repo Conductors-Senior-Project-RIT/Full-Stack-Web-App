@@ -162,7 +162,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
         Raises:
             `RepositoryNotFoundError`: If no records are found for the given
-                `unit_addr`.
+                    `unit_addr`.
         """
 
         stmt = (
@@ -309,61 +309,6 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
         return self.update_with_pk(record_id, values)  # Already flushes
 
-    # Station Handler
-    def get_station_records(
-        self, station_id: int, recent=False
-    ) -> list[dict[str, Any]]:
-        """Retrieves all train records a corresponding station ID.
-
-        Args:
-            station_id (int): The station ID used to filter results.
-            recent (bool, optional): Will call `get_recent_station_records` if True.
-                Defaults to False.
-
-        Raises:
-            `RepositoryError`: Raises a layer-specific error if an exception occurs.
-
-        Returns:
-            list[dict[str, Any]]: A list of dictionary representations of the records
-                retrieved.
-        """
-
-        try:
-            # If requesting recent station records, call a concrete implementation
-            if recent:  # pragma: no branch
-                return self.get_recent_station_records(station_id)
-
-            # Otherwise, just get all records from a station
-            results = self.session.execute(
-                select(self.model).where(self.model.station_recorded == station_id)
-            ).all()
-
-            return self.objs_to_dicts(results)
-
-        except Exception as e:
-            raise repository_error_translator(
-                e,
-                self.__class__.__name__,
-                None,
-                f"Error fetching records for a specific station {station_id}: {e}",
-            )
-
-    @abstractmethod
-    def get_recent_station_records(self, station_id: int) -> list[dict[str, Any]]:
-        """Retrieves the most recent records for a given station.
-
-        Queries the database for all records matching the specified station ID where
-        `most_recent` is True. Performs outer joins with other tables to include other
-        information.
-
-        Args:
-            station_id (int): The station ID used to filter records.
-
-        Returns:
-            list[dict[str, Any]]: A list of the most recent train records for a given
-                station as dictionaries. Returns an empty list if no records are found.
-        """
-        pass
 
     @abstractmethod
     def get_record_collation(
@@ -437,26 +382,41 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             )
 
     # Time frame
-    def get_records_in_timeframe(
-        self, station_id: int, dt: datetime, recent: Optional[bool] = None
+    def get_records_at_station(
+        self, 
+        station_id: Optional[int] = -1, 
+        dt: Optional[datetime] = None, 
+        recent: Optional[bool] = None,
+        all_cols: bool = False
     ) -> list[dict[str, Any]]:
-        """Retrieves records at or after a given datetime, optionally filtered by station
-        and recency.
+        """Retrieves records with the station they were recorded at.
 
-        Queries the database for records with a `date_rec` at or after `dt`, joining
-        with `Station` and `Symbol` to include the station and symbol names reference in
-        the records. Appends a `Data_type` field derived from `record_identifier` to
-        each result. If `station_id` is -1, the station filter is not applied and
-        returns records across all stations. Furthermore, passing in a value for
-        `recent` will filter records based on the value provided.
+        Records can be filtered based on the station they were recorded by passing a
+        matching `station_id`. If `station_id` is `-1`, the station filter is not
+        applied and will return records across all stations. When `dt` is provided, the
+        database is queried to filter all records with a `date_rec` at or after `dt`. If
+        a value is passed for `recent`, the records will be filtered with their matching
+        recency status.
+
+        If `all_cols` is `False`, only the following columns are retrieved: `id,
+        unit_addr, date_rec, station_name, symb_name, engine_num, locomotive_num`;
+        otherwise, every column in a record is retrieved, including the corresponding
+        `symb_name` and `station_name`.
+
+        The query used, joins with `Station` and `Symbol` to include the station and
+        symbol name references in the returned records. A record's `Data_type` field,
+        which is derived from a repository's `record_identifier`, is appended to each
+        result.
 
         Args:
-            station_id (int): The station ID to filter records by. Pass -1 to retrieve
-                records across all stations.
-            dt (datetime): A lower bound datetime instance to filter records by
-                `date_rec`.
-            recent (bool | None): If True or False, filters records by their
+            station_id (int, optional): The station ID to filter records by. Pass -1 to
+                retrieve records across all stations. Defaults to -1.
+            dt (datetime, optional): A lower bound datetime instance to filter records
+                by `date_rec`. Defaults to None.
+            recent (bool, optional): If True or False, filters records by their
                 `most_recent` value. If None, no filter is applied. Defaults to None.
+            all_cols (bool): If True, all columns of a record are returned; otherwise,
+                only a portion are returned.
 
         Returns:
             list[dict[str, Any]]: A list of matching records as dictionaries, each
@@ -468,39 +428,44 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             `RepositoryError`: If an exception is raised for any reason.
         """
         # We need to query from two different tables, so import them in the function
-        # to prevent unecessarily flooding the namespace.
+        # to prevent unecessarily flooding the namespace or circular imports.
         from .db_core.models import Symbol, Station
 
         try:
+            cols = [Station.station_name, Symbol.symb_name]
+            if all_cols:
+                cols.extend([self.model])
+            else:
+                cols.extend([
+                    self.model.id, 
+                    self.model.unit_addr, 
+                    self.model.date_rec, 
+                    self.model.engine_num, 
+                    self.model.locomotive_num
+                ])
+                
+            filters = []
+            if dt is not None:
+                filters.append(self.model.date_rec >= dt)
+            
+            if station_id != -1:
+                filters.append(Station.id == station_id)
+            
+            if recent is not None:
+                filters.append(self.model.most_recent == recent)
+            
+            
             stmt = (
-                select(
-                    self.model.id,
-                    self.model.unit_addr,
-                    self.model.date_rec,
-                    Station.station_name,
-                    Symbol.symb_name,
-                    self.model.engine_num,
-                    self.model.locomotive_num,
-                )
+                select(*cols)
                 .join(Station, self.model.station_recorded == Station.id)
                 .outerjoin(Symbol, self.model.symbol_id == Symbol.id)
-                .where(
-                    self.model.date_rec >= dt
-                )  # Date received is after a given date/time.
+                .where(*filters)
+                .order_by(self.model.date_rec.desc())
             )
 
-            # Retrieve records only with a specified station ID
-            if station_id != -1:
-                stmt = stmt.where(Station.id == station_id)
-
-            # Retrieve records based on their recency status
-            if recent is not None:
-                stmt = stmt.where(self.model.most_recent == recent)
-
-            # Order in descending order
-            stmt.order_by(self.model.date_rec.desc())
-
-            results = self.objs_to_dicts(self.session.execute(stmt).all())
+            to_str = {"date_rec"} if all_cols else {}
+            results = self.objs_to_dicts(self.session.execute(stmt).all(), to_str)
+            
             # Add data type to result
             for result in results:
                 result["Data_type"] = self.record_identifier.upper()
@@ -512,5 +477,5 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 e,
                 self.__class__.__name__,
                 None,
-                f"Could not retrieve {self.record_name}s in timeframe: {e}",
+                f"Could not retrieve {self.record_name}s at station{f' {station_id}' if station_id != -1 else "s"}: {e}",
             )

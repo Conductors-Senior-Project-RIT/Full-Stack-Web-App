@@ -35,12 +35,6 @@ class TestEOTRecordRepository(BaseTestCase):
         
         results = self.repo.get_train_history(17)
         self.assertIsNone(results)
-                
-    
-    def testGetRecentStationRecords(self):
-        expected = self.repo.objs_to_dicts([self.repo.get(i) for i in range(7, 9)], {"date_rec"})
-        results = self.repo.get_recent_station_records(1)
-        self.assertListEqual(expected, results)
         
         
     def testGetRecordCollation(self):

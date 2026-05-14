@@ -41,16 +41,16 @@ class EOTRepository(RecordRepository[EOTRecord]):
     @repository_error_handler()
     def get_train_history(self, id: int) -> dict[str, Any]:
         """Returns an EOT record as a dictionary containing the following columns and their
-        respective values: `id, date_rec, station_name, unit_addr, brake_pressure,
-        motion, marker_light, turbine, battery_cond, battery_charge, arm_status,
-        signal_strength, verified`.
+        respective values: `id, date_rec, station_name, symb_name, unit_addr,
+        brake_pressure, motion, marker_light, turbine, battery_cond, battery_charge,
+        arm_status, signal_strength, verified`.
 
         Args:
             id (int): A value corresponding to a record's primary key.
 
         Returns:
             dict[str, Any]: If the operation is successful, a dictonary is returned
-                containining the specific columns and values for a given record.
+                containining the specificied columns and values for a given record.
         """
         from .db_core.models import Station, Symbol
 
@@ -82,33 +82,6 @@ class EOTRepository(RecordRepository[EOTRecord]):
         results = self.session.execute(stmt).one_or_none()
         return self.objs_to_dicts(results)
 
-    # Below is station_handler.py related
-    def get_recent_station_records(self, station_id: int) -> list[dict[str, Any]]:
-        """Retrieves most recent EOT records from a station with a matching station id.
-
-        Args:
-            station_id (int): The ID of a station which defines which HOT records to
-                retrieve.
-
-        Returns:
-            list[dict[str, Any]]: A list of HOT records respresented as dictionaries
-                that have a matching station ID.
-        """
-        from .db_core.models import Symbol, EngineNumber
-
-        stmt = (
-            select(self.model)
-            .where(self.model.station_recorded == station_id)
-            .where(self.model.most_recent.is_(True))
-            .join(Symbol, Symbol.id == self.model.symbol_id, isouter=True)
-            .join(EngineNumber, EngineNumber.id == self.model.engine_num, isouter=True)
-        )
-
-        results = self.session.execute(stmt).all()
-        return self.objs_to_dicts(
-            results, {"date_rec"}
-        )  # Convert 'date_rec' to a string.
-
     # below is for eot_collation
     def get_record_collation(
         self, page: int, num_results: int, verified: bool | None = None
@@ -136,10 +109,9 @@ class EOTRepository(RecordRepository[EOTRecord]):
                 `verified` status. If None, no filter is applied. Defaults to None.
 
         Returns:
-            dict[str, list | int]: A dictionary containing: 
-                - `results` (list[dict]): The paginated and collated HOT records as 
-                    dictionaries. 
-                - `totalPages` (int): The total number of pages based on `num_results`.
+            dict[str, list | int]: A dictionary containing: - `results` (list[dict]):
+                The paginated and collated HOT records as dictionaries. - `totalPages`
+                (int): The total number of pages based on `num_results`.
 
         Raises:
             `RepositoryError`: If any stage of the query, count, or result parsing

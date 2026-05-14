@@ -183,22 +183,6 @@ class TestRecordRepository(BaseTestCase):
                 updated = self.repo.update_signal_values(1, sym, eng)
                 result = self.repo.get(1)
                 self.assertEqual(updated, result)
-
-    
-    ###########################
-    ##  get_station_records  ##
-    ###########################
-    def testGetStationRecords(self):
-        self.maxDiff = None
-        # All tests will be executed with recent=False in this class
-        expected = [self.test_data[0], self.test_data[2]]
-        result = self.repo.get_station_records(1)
-        self.assertListEqual(expected, result)
-        
-        with patch.object(Session, "execute") as mock:
-            mock.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.get_station_records(1)
         
         
     #####################
@@ -268,30 +252,30 @@ class TestRecordRepository(BaseTestCase):
             }
         ]
         dt = datetime.strptime("1998-01-08 04:05:06", "%Y-%m-%d %H:%M:%S")
-        results = self.repo.get_records_in_timeframe(-1, dt, False)
+        results = self.repo.get_records_at_station(-1, dt, False)
         valid, msg = compare_results_pkey(expected[2:], results, "id")
         self.assertTrue(valid, msg)
         
-        results = self.repo.get_records_in_timeframe(1, dt, False)
+        results = self.repo.get_records_at_station(1, dt, False)
         valid, msg = compare_results_pkey([expected[3]], results, "id")
         self.assertTrue(valid, msg)
         
-        results = self.repo.get_records_in_timeframe(-1, dt, True)
+        results = self.repo.get_records_at_station(-1, dt, True)
         valid, msg = compare_results_pkey(expected[:2], results, "id")
         self.assertTrue(valid, msg)
         
-        results = self.repo.get_records_in_timeframe(1, dt, True)
+        results = self.repo.get_records_at_station(1, dt, True)
         valid, msg = compare_results_pkey([expected[1]], results, "id")
         self.assertTrue(valid, msg)
         
-        results = self.repo.get_records_in_timeframe(1, dt)
+        results = self.repo.get_records_at_station(1, dt)
         valid, msg = compare_results_pkey(expected[1::2], results, "id")
         self.assertTrue(valid, msg)
         
         with patch.object(Session, "execute") as mock:
             mock.side_effect = SQLAlchemyError
             with self.assertRaises(RepositoryInternalError):
-                self.repo.get_records_in_timeframe(-1, dt, True)
+                self.repo.get_records_at_station(-1, dt, True)
                 
                 
 if __name__ == "__main__":

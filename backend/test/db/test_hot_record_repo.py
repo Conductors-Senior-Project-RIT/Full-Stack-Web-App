@@ -37,13 +37,6 @@ class TestHOTRecordRepository(BaseTestCase):
         self.assertIsNone(results)
         
         
-    def testGetRecentStationRecords(self):
-        expected = [self.repo.get(i) for i in range(2, 8)]
-        expected.remove(expected[4])
-        results = self.repo.get_recent_station_records(1)
-        self.assertListEqual(expected, results)
-        
-        
     def testGetRecordCollation(self):
         expected = [
             {
