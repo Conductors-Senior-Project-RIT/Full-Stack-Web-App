@@ -70,8 +70,10 @@ class HistoryDB(Resource):
         parser.add_argument("command", type=str, default=None)
         parser.add_argument("checkbits", type=str, default=None)
         parser.add_argument("parity", type=str, default=None)
-        args = parser.parse_args()
+        args = dict(parser.parse_args())
         
+        # TODO: Change this in standalone app
+        args["station_recorded"] = args["station_id"]
         typ = args["type"]
         
         session = db.session

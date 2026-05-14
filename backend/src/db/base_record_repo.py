@@ -7,6 +7,7 @@ from sqlalchemy.orm.session import Session
 from .db_core.models import BaseRecord
 from .db_core.repository import BaseRepository
 from .db_core.exceptions import (
+    RepositoryInternalError,
     RepositoryNotFoundError,
     RepositoryInvalidArgumentError,
     repository_error_handler,
@@ -84,19 +85,19 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         """
         pass
 
-    @abstractmethod
+    @repository_error_handler()
     def create_train_record(
-        self, args: dict[str, Any], datetime_string: str
+        self, args: dict[str, Any], datetime_string: str | None
     ) -> tuple[int, bool]:
         """Creates a new train record with the provided values in `args`.
 
         In the case of an error when creating a record the first time, a recovery
         request can be sent. When a recovery request is sent, the datetime must be
         passed as a parameter; otherwise, a `RepositoryInvalidArgumentError` will be
-        raised. In order to successfully create a new train record, the fields and
-        values in the dictionary must match the model to prevent an `IntegrityError`
-        occurring. Necessary fields and values should be defined in the child class
-        documentation.
+        raised. In order to successfully create a new train record, the keys and values
+        in the dictionary must include all non-nullable columns and correct value types
+        with that of the model to prevent an `IntegrityError` occurring. Keys not
+        present in the model are ignored.
 
         Args:
             args (dict[str, Any]): A dictionary containing values to insert into a new
@@ -108,7 +109,35 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             tuple[int, bool]: The id of the newly created record, and whether a recovery
                 request was initiated.
         """
-        pass
+        recovery_request = True
+
+        # Check to see if any of the keys in the 'args' dict aren't a column in the table
+        sql_args = {}
+        for key, value in args.items():
+            if hasattr(self.model, key):
+                sql_args[key] = value
+
+        if sql_args["date_rec"] is None:
+            if datetime_string is None:
+                raise RepositoryInvalidArgumentError(
+                    self.__class__.__name__,
+                    message="Record timestamp must be provided!",
+                    show_error=True,
+                )
+
+            sql_args["date_rec"] = datetime_string
+            recovery_request = False
+
+        result = self.create(sql_args, False)
+
+        if not result:
+            raise RepositoryInternalError(
+                caller_name=self.__class__.__name__,
+                message="Could not create new train record, 0 rows created!",
+                show_error=True,
+            )
+
+        return result[0].id, recovery_request
 
     @repository_error_handler()
     def get_unit_record_ids(self, unit_addr: str, recent=False) -> int | list[int]:
@@ -297,7 +326,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
         try:
             # If requesting recent station records, call a concrete implementation
-            if recent:
+            if recent:  #pragma: no branch
                 return self.get_recent_station_records(station_id)
 
             # Otherwise, just get all records from a station
@@ -437,7 +466,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         # We need to query from two different tables, so import them in the function
         # to prevent unecessarily flooding the namespace.
         from .db_core.models import Symbol, Station
-        
+
         try:
             stmt = (
                 select(
@@ -463,7 +492,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             # Retrieve records based on their recency status
             if recent is not None:
                 stmt = stmt.where(self.model.most_recent == recent)
-                
+
             # Order in descending order
             stmt.order_by(self.model.date_rec.desc())
 

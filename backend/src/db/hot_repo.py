@@ -56,46 +56,6 @@ class HOTRepository(RecordRepository[HOTRecord]):
         results = self.session.execute(stmt).one_or_none()
         return self.objs_to_dicts(results)
 
-    @repository_error_handler()
-    def create_train_record(self, args: dict[str, Any], datetime_string: str | None = None) -> tuple[int, bool]: # type: ignore
-        """
-        TODO: Namespace is the type for args for post methods in train_history... look more into this
-        TODO: run_exec_cmd returns none always... think of what to return lol
-        """
-        recovery_request = True
-        
-        sql_args = {
-            "date_rec": args["date_rec"],
-            "station_recorded": args["station_id"],
-            "frame_sync": args["frame_sync"],
-            "command": args["command"],
-            "checkbits": args["checkbits"],
-            "parity": args["parity"],
-            "unit_addr": args["unit_addr"],
-        }
-        
-        if sql_args["date_rec"] is None:
-            if datetime_string is None:
-                raise RepositoryInvalidArgumentError(
-                    caller_name=self.__class__.__name__,
-                    message="Record timestamp must be provided!",
-                    show_error=True
-                )
-                
-            sql_args["date_rec"] = datetime_string
-            recovery_request = False
-            
-        result = self.create(sql_args, False)    
-
-        if result is None:
-            raise RepositoryInternalError(
-                caller_name=self.__class__.__name__,
-                message="Could not create new train record, 0 rows created!",
-                show_error=True
-            )
-            
-        return result[0].id, recovery_request
-
 
     # below is for station_handler.py
     @repository_error_handler()

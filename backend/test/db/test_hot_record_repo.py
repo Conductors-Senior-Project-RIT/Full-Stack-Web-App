@@ -37,34 +37,6 @@ class TestHOTRecordRepository(BaseTestCase):
         self.assertIsNone(results)
         
         
-    def testCreateTrainRecord(self):
-        date_rec = datetime.strptime("2026-01-08 04:05:06:-0400", "%Y-%m-%d %H:%M:%S:%z")
-        data = {
-            "date_rec": date_rec,
-            "station_id": 2,
-            "frame_sync": "beep",
-            "command": "boop",
-            "checkbits": "C1",
-            "parity": "T2",
-            "unit_addr": "CT12"
-        }
-        
-        # Test recovery request creation
-        result_id, result_recov = self.repo.create_train_record(data, None)
-        self.assertEqual(8, result_id)
-        self.assertEqual(True, result_recov)
-        
-        # Test non-recovery request creation
-        data["date_rec"] = None
-        result_id, result_recov = self.repo.create_train_record(data, date_rec)
-        self.assertEqual(9, result_id)
-        self.assertEqual(False, result_recov)
-        
-        # Test datetime never provided exceptions
-        with self.assertRaises(RepositoryInvalidArgumentError):
-            self.repo.create_train_record(data, None)
-        
-        
     def testGetRecentStationRecords(self):
         expected = [self.repo.get(i) for i in range(2, 8)]
         expected.remove(expected[4])
@@ -154,7 +126,6 @@ class TestHOTRecordRepository(BaseTestCase):
         for i in range(1, 6):
             self.repo.verify_record(i, 1, "cheese balls")
         for i in range(2, 5):
-            expected[i]["symbol_id"] = 1
             expected[i]["verified"] = True 
             expected[i]["locomotive_num"] = "cheese balls"  
             expected[i]["symb_name"] = "Test Symbol1"

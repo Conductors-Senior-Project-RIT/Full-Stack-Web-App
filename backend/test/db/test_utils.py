@@ -24,9 +24,6 @@ class TestRepository(RecordRepository):
     def get_train_history(self, id, page, num_results):
         pass
 
-    def create_train_record(self, args, datetime_string):
-        pass
-
     def get_recent_station_records(self, station_id):
         pass
 

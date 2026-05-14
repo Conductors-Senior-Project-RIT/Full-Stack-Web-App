@@ -115,62 +115,6 @@ class EOTRepository(RecordRepository[EOTRecord]):
         #     "totalPages": ceil(count / num_results),
         # }
 
-    def create_train_record(
-        self, args: dict[str, Any], datetime_string: str
-    ) -> tuple[int, bool]:  # post_eot()
-        """Inserts a new eot record in EOTRecords table
-
-        Args:
-            datetime_string: date and time when an eot record is created
-            args: named arguments to pass into parameterized query
-
-        Returns:
-            The id of the EOT record created and the recovery request.
-
-        Raises:
-            `TODO`: integrate this function to replace sql queries in train_history.py's
-                    post_eot() | train_history post() looks gross with
-                    parser.add_argument... how to make cleaner?
-            `TODO`: improve documentation
-        """
-        recovery_request = True
-
-        sql_args = {
-            "date_rec": args["date_rec"],
-            "station_recorded": args["station_id"],
-            "unit_addr": args["unit_addr"],
-            "brake_pressure": args["brake_pressure"],
-            "motion": args["motion"],
-            "marker_light": args["marker_light"],
-            "turbine": args["turbine"],
-            "battery_cond": args["battery_cond"],
-            "battery_charge": args["battery_charge"],
-            "arm_status": args["arm_status"],
-            "signal_strength": args["signal_strength"],
-            "symbol_id": args["symbol_id"],
-        }
-
-        if sql_args["date_rec"] is None:
-            if datetime_string is None:
-                raise RepositoryInvalidArgumentError(
-                    self.__class__.__name__,
-                    message="Record timestamp must be provided!",
-                    show_error=True,
-                )
-
-            sql_args["date_rec"] = datetime_string
-            recovery_request = False
-
-        result = self.create(sql_args, False)
-
-        if not result:
-            raise RepositoryInternalError(
-                caller_name=self.__class__.__name__,
-                message="Could not create new train record, 0 rows created!",
-                show_error=True,
-            )
-
-        return result[0].id, recovery_request
 
     # below is for station_handler.py
     def get_recent_station_records(self, station_id: int) -> list[dict[str, Any]]:

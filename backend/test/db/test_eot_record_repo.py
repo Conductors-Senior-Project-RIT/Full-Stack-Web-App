@@ -35,39 +35,6 @@ class TestEOTRecordRepository(BaseTestCase):
         
         results = self.repo.get_train_history(17)
         self.assertIsNone(results)
-        
-        
-    def testCreateTrainRecord(self):
-        date_rec = datetime.strptime("2026-01-08 04:05:06", "%Y-%m-%d %H:%M:%S")
-        data = {
-            "date_rec": date_rec,
-            "station_id": 2,
-            "unit_addr": "CT12",
-            "brake_pressure": "heavy",
-            "motion": "moving",
-            "marker_light": "bright",
-            "turbine": "spinning",
-            "battery_cond": "blowing up",
-            "battery_charge": "dead",
-            "arm_status": "fully loaded",
-            "signal_strength": 1.0,
-            "symbol_id": None
-        }
-        
-        # Test recovery request creation
-        result_id, result_recov = self.repo.create_train_record(data, None) 
-        self.assertEqual(9, result_id)
-        self.assertTrue(result_recov)
-        
-        # Test non-recovery request creation
-        data["date_rec"] = None
-        result_id, result_recov = self.repo.create_train_record(data, date_rec)
-        self.assertEqual(10, result_id)
-        self.assertFalse(result_recov)
-        
-        # Test datetime never provided exceptions
-        with self.assertRaises(RepositoryInvalidArgumentError):
-            self.repo.create_train_record(data, None)
                 
     
     def testGetRecentStationRecords(self):
@@ -87,7 +54,6 @@ class TestEOTRecordRepository(BaseTestCase):
                 'occurrence_count': "1",
                 'station_name': 'test station1',
                 'unit_addr': '1234',
-                'symbol_id': 1,
                 'symb_name': 'Test Symbol1',
             },
             {
@@ -99,7 +65,6 @@ class TestEOTRecordRepository(BaseTestCase):
                 'occurrence_count': "2",
                 'station_name': 'test station1',
                 'unit_addr': '1234',
-                'symbol_id': 1,
                 'symb_name': 'Test Symbol1',
             },
             {
@@ -111,7 +76,6 @@ class TestEOTRecordRepository(BaseTestCase):
                 'occurrence_count': "1",
                 'station_name': 'test station2',
                 'unit_addr': '1234',
-                'symbol_id': None,
                 'symb_name': None,
             },
             {
@@ -123,7 +87,6 @@ class TestEOTRecordRepository(BaseTestCase):
                 'occurrence_count': "2",
                 'station_name': 'test station1',
                 'unit_addr': '1234',
-                'symbol_id': None,
                 'symb_name': None,
             },
             {
@@ -135,7 +98,6 @@ class TestEOTRecordRepository(BaseTestCase):
                 'occurrence_count': "1",
                 'station_name': 'test station1',
                 'unit_addr': '1337',
-                'symbol_id': None,
                 'symb_name': None,
             },
             {
@@ -147,7 +109,6 @@ class TestEOTRecordRepository(BaseTestCase):
                 'occurrence_count': "1",
                 'station_name': 'test station1',
                 'unit_addr': '727',
-                'symbol_id': 1,
                 'symb_name': 'Test Symbol1',
             }
         ]
@@ -175,7 +136,6 @@ class TestEOTRecordRepository(BaseTestCase):
         for i in range(1, 6):
             self.repo.verify_record(i, 1, "cheese balls")
         for i in range(2, len(expected)):
-            expected[i]["symbol_id"] = 1
             expected[i]["verified"] = True 
             expected[i]["locomotive_num"] = "cheese balls"  
             expected[i]["symb_name"] = "Test Symbol1"

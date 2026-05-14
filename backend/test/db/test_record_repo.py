@@ -1,4 +1,5 @@
 from datetime import datetime
+from pprint import pprint
 import unittest
 from unittest.mock import patch
 
@@ -6,7 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from .test_utils import TestRepository, return_test_data
+from .test_utils import TestRepository, compare_results_pkey, return_test_data
 
 from backend.database import db
 from backend.src.db.base_record_repo import RecordRepository
@@ -49,6 +50,42 @@ class TestRecordRepository(BaseTestCase):
         # Test invalid id
         with self.assertRaises(RepositoryNotFoundError):
             self.repo.get(-1)
+            
+    
+    def testCreateTrainRecord(self):
+        date_rec = datetime.strptime("2026-01-08 04:05:06:-0400", "%Y-%m-%d %H:%M:%S:%z")
+        data = {
+            "date_rec": date_rec,
+            "unit_addr": "CT12",
+            "station_recorded": 2
+        }
+        
+        # Test recovery request creation
+        result_id, result_recov = self.repo.create_train_record(data, None)
+        self.assertEqual(5, result_id)
+        self.assertEqual(True, result_recov)
+        
+        # Test non-recovery request creation
+        data["date_rec"] = None
+        result_id, result_recov = self.repo.create_train_record(data, date_rec)
+        self.assertEqual(6, result_id)
+        self.assertEqual(False, result_recov)
+        
+        # Test that fields not in model are removed
+        data["armed"] = "and hammered"
+        result_id, _ = self.repo.create_train_record(data, date_rec)
+        new_record = self.repo.get(result_id, True)
+        self.assertNotIn("armed", new_record)
+        
+        # Test datetime never provided exceptions
+        with self.assertRaises(RepositoryInvalidArgumentError):
+            self.repo.create_train_record(data, None)
+            
+        # Test create returning nothing raises error
+        with patch.object(self.repo, "create") as mock:
+            mock.return_value = None
+            with self.assertRaises(RepositoryInternalError):
+                self.repo.create_train_record(data, date_rec)
             
             
     def testGetUnitRecordIds(self):
@@ -191,8 +228,8 @@ class TestRecordRepository(BaseTestCase):
         expected = [
             {
                 'id': 4, 
-                'date_rec': self.test_data[3].date_rec, 
                 'unit_addr': '2222', 
+                'date_rec': self.test_data[3].date_rec, 
                 'station_name': 'test station2',
                 'symb_name': 'Test Symbol2', 
                 'engine_num': 2, 
@@ -201,8 +238,8 @@ class TestRecordRepository(BaseTestCase):
             },
             {
                 'id': 3, 
-                'date_rec': self.test_data[2].date_rec, 
                 'unit_addr': '1111', 
+                'date_rec': self.test_data[2].date_rec, 
                 'station_name': 'test station1',
                 'symb_name': 'Test Symbol1', 
                 'engine_num': 1, 
@@ -211,8 +248,8 @@ class TestRecordRepository(BaseTestCase):
             },
             {
                 'id': 2,
-                'date_rec': self.test_data[1].date_rec,
                 'unit_addr': '2222', 
+                'date_rec': self.test_data[1].date_rec,
                 'station_name': 'test station2',
                 'symb_name': 'Test Symbol2', 
                 'engine_num': 2, 
@@ -221,8 +258,8 @@ class TestRecordRepository(BaseTestCase):
             },
             {
                 'id': 1,
-                'date_rec': self.test_data[0].date_rec,
                 'unit_addr': '1111', 
+                'date_rec': self.test_data[0].date_rec,
                 'station_name': 'test station1',
                 'symb_name': 'Test Symbol1', 
                 'engine_num': 1, 
@@ -232,19 +269,24 @@ class TestRecordRepository(BaseTestCase):
         ]
         dt = datetime.strptime("1998-01-08 04:05:06", "%Y-%m-%d %H:%M:%S")
         results = self.repo.get_records_in_timeframe(-1, dt, False)
-        self.assertListEqual(expected[2:], results)
+        valid, msg = compare_results_pkey(expected[2:], results, "id")
+        self.assertTrue(valid, msg)
         
         results = self.repo.get_records_in_timeframe(1, dt, False)
-        self.assertListEqual([expected[3]], results)
+        valid, msg = compare_results_pkey([expected[3]], results, "id")
+        self.assertTrue(valid, msg)
         
         results = self.repo.get_records_in_timeframe(-1, dt, True)
-        self.assertListEqual(expected[:2], results)
+        valid, msg = compare_results_pkey(expected[:2], results, "id")
+        self.assertTrue(valid, msg)
         
         results = self.repo.get_records_in_timeframe(1, dt, True)
-        self.assertListEqual([expected[1]], results)
+        valid, msg = compare_results_pkey([expected[1]], results, "id")
+        self.assertTrue(valid, msg)
         
         results = self.repo.get_records_in_timeframe(1, dt)
-        self.assertListEqual(expected[1::2], results)
+        valid, msg = compare_results_pkey(expected[1::2], results, "id")
+        self.assertTrue(valid, msg)
         
         with patch.object(Session, "execute") as mock:
             mock.side_effect = SQLAlchemyError
