@@ -21,17 +21,16 @@ class AsDictConvertible(Protocol):
     @property
     def _mapping(self) -> dict[str, Any]: ...  # pragma: no cover
     
-    
 # A generic type variable in is constrained to only accept types that are subclasses of Base.
 # Provides type safety by rejecting incompatible types at runtime.
 ModelType = TypeVar("ModelType", bound=Base)
 
 # Return type can be an ORM or dict instance
-SingleResult = Union[ModelType, dict[str, Any]]
+SingleResult = ModelType | dict[str, Any]
 # Return type can be a list of ORMs or dicts
-CollectionResult = Union[list[ModelType], list[dict[str, Any]]]
+CollectionResult = list[ModelType] | list[dict[str, Any]]
 # Return type can be a single or a collection of result(s)
-FlexibleResult = Union[SingleResult, CollectionResult]
+FlexibleResult = SingleResult | CollectionResult
 
 
 class BaseRepository(Generic[ModelType]): 

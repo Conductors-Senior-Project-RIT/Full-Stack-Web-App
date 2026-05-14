@@ -14,18 +14,19 @@ from .db_core.exceptions import (
     repository_error_translator,
 )
 
+
+# Define the type of models accepted by this class
 RecordType = TypeVar("RecordType", bound=BaseRecord)
 
 
 class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
     """A database interface for train record querying.
 
-    This class inherits generic the CRUD functionality defined in `BaseRepository` that
+    This class inherits the generic CRUD functionality defined in `BaseRepository` that
     may be useful for simple operations. Additionally, this abstract class contains
-    concrete methods which execute standardized functionality using the generic model
-    defined by a child class, restricted only to models that extend `BaseRecord`.
-    Additionally, this class also defines abstract methods which must be implmeneted by
-    the child classes.
+    concrete methods which execute standardized functionality using the model defined by
+    a child class, restricted only to models that extend `BaseRecord`. Additionally,
+    this class also defines abstract methods which must be implmeneted by child classes.
 
     Args:
         ABC: This class is abstract and cannot be instantiated. A child class can extend
@@ -80,8 +81,8 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             id (int): A value corresponding to a record's primary key.
 
         Returns:
-            list[dict[str,Any]]: Returns a list of dictionaries containing the fields
-                and corresponding values for a train record.
+            dict[str, Any]: Returns a dictionary containing the fields and corresponding
+                values for a train record.
         """
         pass
 
@@ -91,13 +92,13 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
     ) -> tuple[int, bool]:
         """Creates a new train record with the provided values in `args`.
 
-        In the case of an error when creating a record the first time, a recovery
-        request can be sent. When a recovery request is sent, the datetime must be
-        passed as a parameter; otherwise, a `RepositoryInvalidArgumentError` will be
-        raised. In order to successfully create a new train record, the keys and values
-        in the dictionary must include all non-nullable columns and correct value types
-        with that of the model to prevent an `IntegrityError` occurring. Keys not
-        present in the model are ignored.
+        When an error occurs during the initial creation of a record, a recovery request
+        can be sent. When a recovery request is sent, the datetime must be passed as a
+        parameter; otherwise, a `RepositoryInvalidArgumentError` is raised. In order to
+        successfully create a new train record, the keys and values in the dictionary
+        must include all non-nullable columns and correct value types with that of the
+        model to prevent an `IntegrityError` occurring. Keys not present in the model
+        are ignored.
 
         Args:
             args (dict[str, Any]): A dictionary containing values to insert into a new
@@ -117,6 +118,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             if hasattr(self.model, key):
                 sql_args[key] = value
 
+        # If the datetime a record was received is not passed in 'args', add 'datetime_string' into the dictionary.
         if sql_args["date_rec"] is None:
             if datetime_string is None:
                 raise RepositoryInvalidArgumentError(
@@ -126,10 +128,11 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 )
 
             sql_args["date_rec"] = datetime_string
-            recovery_request = False
+            recovery_request = False  # Indicate that a recovery request was not initiated
 
-        result = self.create(sql_args, False)
+        result = self.create(sql_args, False)  # Already flushes
 
+        # Should not happen if args contains items
         if not result:
             raise RepositoryInternalError(
                 caller_name=self.__class__.__name__,
@@ -137,6 +140,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 show_error=True,
             )
 
+        # The 'create' function returns a list of ORM instances, access the first index since only one record is created
         return result[0].id, recovery_request
 
     @repository_error_handler()
@@ -158,7 +162,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
         Raises:
             `RepositoryNotFoundError`: If no records are found for the given
-                    `unit_addr`.
+                `unit_addr`.
         """
 
         stmt = (
@@ -326,7 +330,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
         try:
             # If requesting recent station records, call a concrete implementation
-            if recent:  #pragma: no branch
+            if recent:  # pragma: no branch
                 return self.get_recent_station_records(station_id)
 
             # Otherwise, just get all records from a station
@@ -496,9 +500,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             # Order in descending order
             stmt.order_by(self.model.date_rec.desc())
 
-            results = self.session.execute(stmt).all()
-
-            results = self.objs_to_dicts(results)
+            results = self.objs_to_dicts(self.session.execute(stmt).all())
             # Add data type to result
             for result in results:
                 result["Data_type"] = self.record_identifier.upper()

@@ -62,7 +62,7 @@ class LayerError(Exception):
                 message = str(message)
 
             if not error_debugging:
-                # The regex removes any existing "[ExceptionType]: " prefix from the original message to avoid exposing lower level details.
+                # The regex removes any existing "[LayerError]: " prefix from the original message to avoid exposing lower level details.
                 exc_prefix_idx = message.find("]") if "]" in message else 0
                 new_message = (
                     message[exc_prefix_idx + 2 :] if exc_prefix_idx != 0 else message
