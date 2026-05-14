@@ -283,7 +283,7 @@ class EOTRepository(RecordRepository[EOTRecord]):
                     d.id,
                     TO_CHAR(d.date_rec, 'YYYY-MM-DD HH24:MI:SS') AS date_rec,
                     d.station_name,
-                    d.symbol_id,
+                    f.symb_name,
                     d.unit_addr,
                     d.brake_pressure,
                     d.motion,

@@ -108,7 +108,7 @@ const Data = () => {
                             <tr key={index}>
                                 <td>{item.station_name}</td>
                                 <td>{item.first_seen}</td>
-                                <td>{item.symbol_name}</td>
+                                <td>{item.symb_name}</td>
                                 <td>{item.unit_addr}</td>
                                 <td>{item.brake_pressure}</td>
                                 <td>{item.motion}</td>

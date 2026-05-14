@@ -102,7 +102,7 @@ const HotData = () => {
                         <tr key={index}>
                             <td>{item.station_name}</td>
                             <td>{item.first_seen}</td>
-                            <td>{item.symbol_name}</td>
+                            <td>{item.symb_name}</td>
                             <td>{item.unit_addr}</td>
                             <td>{item.signal_strength}</td>
                             <td>{item.locomotive_num}</td>

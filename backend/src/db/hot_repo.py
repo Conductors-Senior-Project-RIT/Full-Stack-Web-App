@@ -194,7 +194,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
                     d.id,
                     TO_CHAR(d.date_rec, 'YYYY-MM-DD HH24:MI:SS') AS date_rec,
                     d.station_name,
-                    d.symbol_id,
+                    f.symb_name,
                     d.unit_addr,
                     d.signal_strength,
                     d.command,
