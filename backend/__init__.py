@@ -1,3 +1,9 @@
+"""
+Application factory for the Flask backend.
+
+Call 'create_app(config_name)' to instantiate and configure a Flask app with
+the database, JWT, CORS, REST resources, and blueprints registered.
+"""
 import os
 
 from flask import Flask
@@ -14,7 +20,17 @@ from .database import db
 error_debugging: bool = True
 
 def create_app(config_name=None):
-    """App factory"""
+    """Creates and configures a Flask application instance.
+
+    Initializes extensions (e.g. SQLAlchemy, JWT...), registers routes, blueprints, and error handlers.
+
+    Args:
+        config_name (str | None): Config key used to select from 'config_selection'.
+            If no config_name provided, default config is 'dev' (same as testing environment; to make it simpler, a test and prod config should suffice...)
+
+    Returns:
+        Flask: a fully configured Flask application instance.
+    """
     
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True) # we're not using instance folders so maybe remove

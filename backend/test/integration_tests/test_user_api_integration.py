@@ -5,10 +5,11 @@ from backend.database import db
 
 class TestUserApiIntegration(BaseTestCase):
     """
-    Integration tests for user blueprint
+    Integration tests for user blueprint routes
 
+    Goes through the full request -> service -> repo -> database -> response stack without mocking internal layers. Email sending is patched to avoid hitting the external service and daily send limits.
+    
     flow: http request -> route -> service -> repo -> database -> response back to client
-
     currently all tests pass here
     """
     
