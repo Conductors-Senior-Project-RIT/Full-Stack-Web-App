@@ -1,3 +1,6 @@
+"""
+User authentication and account management related endpoints 
+"""
 from flask import Blueprint, request, make_response
 from flask_jwt_extended import (
     create_access_token,
@@ -13,6 +16,12 @@ from backend.database import db
 user_bp = Blueprint("user_bp", __name__)
 @user_bp.route("/api/register", methods=["POST"])
 def register():
+    """Registers a new user with their email + password
+
+    The email is normalized, password is hashed, a user record is created and initalized with default station preferences then an email is sent. 
+
+    Returns: a response with a message and HTTP status code 
+    """
     data = request.get_json() # frontend's mimetype indicates JSON
     email = data.get("email")
     password = data.get("password")
@@ -32,6 +41,12 @@ def register():
 
 @user_bp.route("/api/login", methods=["POST"])
 def login():
+    """Authenticates a user and sets a JWT access cookie
+    
+    Validates provided credentials and issue a JWT containing the user's ID and role for easy access in routes.
+
+    Returns: A response with a message and HTTP status code
+    """
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
@@ -57,6 +72,12 @@ def login():
 @user_bp.route("/api/logout", methods=["POST"])
 @role_required()
 def logout():
+    """Clears a user's JWT access cookie, logging them out.
+
+    Requires a valid JWT cookie
+
+    Returns: A response with a message and HTTP status code.
+    """
     response = make_response({"message": "logout successful"}, 200)
     unset_jwt_cookies(response)
     return response
@@ -64,12 +85,22 @@ def logout():
 @user_bp.route("/api/role", methods=["GET"])
 @role_required()
 def get_user_role():
+    """Returns the role of the currently authenticated user.
+
+    "user_role" is retrieved from the JWT claims
+
+    Returns: Response containing 'role' and an HTTP status code
+    """
     claims = get_jwt()
     user_role = claims.get("user_role")
     return {"role": user_role}, 200
 
 @user_bp.route("/api/forgot-password", methods=["POST"])
 def reset_password_request():
+    """A password reset link is sent to the provided email
+
+    Returns: Response with a message and 200 http status code
+    """
     data = request.get_json()
     email = data.get("email")
 
@@ -85,6 +116,10 @@ def reset_password_request():
 
 @user_bp.route("/api/validate-reset-token", methods=["GET"])
 def token_validation():
+    """Checks whether a password reset token is valid and not expired.
+
+    Returns: Response message with HTTP status code 
+    """
     token = request.args.get("token")
     
     if not token:
@@ -101,6 +136,12 @@ def token_validation():
 
 @user_bp.route("/api/reset-password", methods=["PUT"])
 def reset_password():
+    """Resets a user's password using a valid reset token.
+
+    New password is hashed and password reset token is deleted.
+
+    Returns: Response with a message and HTTP status code
+    """
     data = request.get_json()
     password = data.get("password")
     
@@ -123,6 +164,12 @@ def reset_password():
 @user_bp.route("/api/user_preferences/time", methods=["PUT"])
 @jwt_required()
 def update_times():
+    """Updates the notification start and end times for a user.
+    
+    User id retrieved from JWT identity and updates their stored time preferences
+
+    Returns: Response with a message and HTTP status code
+    """
     current_user_id = int(get_jwt_identity())
     data = request.get_json()
     starting_time = data.get("starting_time")
@@ -142,6 +189,10 @@ def update_times():
 @user_bp.route("/api/elevate-user", methods=["PUT"])
 @role_required(0) # admin only
 def elevate_user():
+    """Updates an existing user's role. Only admins should access this route.
+
+    Returns: Reponse with a message and HTTP status code
+    """
     data = request.get_json()
     email_to_elevate = data.get("email")
     new_role = data.get("role")
