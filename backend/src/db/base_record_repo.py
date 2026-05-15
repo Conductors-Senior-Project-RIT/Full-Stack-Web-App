@@ -1,12 +1,13 @@
-from abc import ABC, abstractmethod
 from datetime import datetime
+from math import ceil
 from typing import Any, Generic, Optional, TypeVar
 from sqlalchemy import func, select, text, update
 from sqlalchemy.orm.session import Session
 
-from .db_core.models import BaseRecord
+from .db_core.models import BaseRecord, CollationMixin
 from .db_core.repository import BaseRepository
 from .db_core.exceptions import (
+    RepositoryError,
     RepositoryInternalError,
     RepositoryNotFoundError,
     RepositoryInvalidArgumentError,
@@ -17,9 +18,10 @@ from .db_core.exceptions import (
 
 # Define the type of models accepted by this class
 RecordType = TypeVar("RecordType", bound=BaseRecord)
+CollationType = TypeVar("CollationType", bound=CollationMixin)
 
 
-class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
+class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     """A database interface for train record querying.
 
     This class inherits the generic CRUD functionality defined in `BaseRepository` that
@@ -39,6 +41,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
     def __init__(
         self,
         model: RecordType,
+        collation: CollationType,
         session: Session,
         record_name: str = "Unknown",
         record_identifier: str = "Unknown",
@@ -60,6 +63,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 "Unknown".
         """
         super().__init__(model, session)
+        self.collation = collation
         self.record_name = record_name
         self.record_identifier = record_identifier
 
@@ -72,19 +76,41 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
         """
         return self.session.query(func.count(self.model.id)).scalar()
 
-    @abstractmethod
-    def get_train_history(self, id: int) -> list[dict[str, Any]]:
+    def get_train_history(self, record_id: int) -> list[dict[str, Any]]:
         """Returns a train record with the specified columns, defined in the concrete
         implementation.
 
         Args:
-            id (int): A value corresponding to a record's primary key.
+            record_id (int): A value corresponding to a record's primary key.
 
         Returns:
             dict[str, Any]: Returns a dictionary containing the fields and corresponding
                 values for a train record.
         """
-        pass
+        from .db_core.models import Station, Symbol
+
+        columns = [
+            self.model.id,
+            func.to_char(self.model.date_rec, "YYYY-MM-DD HH24:MI:SS").label(
+                "date_rec"
+            ),
+            Station.station_name,
+            Symbol.symb_name,
+            self.model.unit_addr,
+            self.model.verified,
+        ]
+
+        columns.extend(self.model.get_unique_fields())
+
+        stmt = (
+            select(*columns)
+            .join(Station, Station.id == self.model.station_recorded, isouter=True)
+            .outerjoin(Symbol, Symbol.id == self.model.symbol_id)
+            .where(self.model.id == record_id)
+        )
+
+        results = self.session.execute(stmt).one_or_none()
+        return self.objs_to_dicts(results)
 
     @repository_error_handler()
     def create_train_record(
@@ -128,7 +154,9 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 )
 
             sql_args["date_rec"] = datetime_string
-            recovery_request = False  # Indicate that a recovery request was not initiated
+            recovery_request = (
+                False  # Indicate that a recovery request was not initiated
+            )
 
         result = self.create(sql_args, False)  # Already flushes
 
@@ -309,8 +337,6 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
         return self.update_with_pk(record_id, values)  # Already flushes
 
-
-    @abstractmethod
     def get_record_collation(
         self, page: int, num_results: int, verified: Optional[bool] = None
     ) -> dict[str, list | int]:
@@ -340,7 +366,42 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             `RepositoryError`: If any stage of the query, count, or result parsing
                     fails.
         """
-        pass
+        try:
+            stmt = select(self.collation)
+
+            if verified is not None:
+                stmt = stmt.where(self.collation.verified == verified)
+
+            stmt = (
+                stmt.order_by(self.collation.date_rec.desc())
+                .limit(num_results)
+                .offset((page - 1) * num_results)
+            )
+
+            results = self.session.execute(stmt).all()
+            count = len(results)
+            
+            print(
+                f"COUNT: {count}",
+                f"PAGE: {page}\n"
+                f"NUM_RESULTS: {num_results}\n"
+                f"VERIFIED: {verified}"
+            )
+
+            return {
+                "results": self.objs_to_dicts(
+                    results, {"duration", "occurrence_count"}
+                ),
+                "totalPages": ceil(count / num_results),
+            }
+
+        except Exception as e:
+            raise repository_error_translator(
+                e,
+                self.__class__.__name__,
+                message=f"Error collating {self.record_identifier.upper()} records: {e}",
+                exclude=RepositoryError,
+            )
 
     def verify_record(
         self, record_id: int, symbol_id: int, locomotive_num: str
@@ -383,11 +444,11 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
     # Time frame
     def get_records_at_station(
-        self, 
-        station_id: Optional[int] = -1, 
-        dt: Optional[datetime] = None, 
+        self,
+        station_id: Optional[int] = -1,
+        dt: Optional[datetime] = None,
         recent: Optional[bool] = None,
-        all_cols: bool = False
+        all_cols: bool = False,
     ) -> list[dict[str, Any]]:
         """Retrieves records with the station they were recorded at.
 
@@ -436,25 +497,26 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
             if all_cols:
                 cols.extend([self.model])
             else:
-                cols.extend([
-                    self.model.id, 
-                    self.model.unit_addr, 
-                    self.model.date_rec, 
-                    self.model.engine_num, 
-                    self.model.locomotive_num
-                ])
-                
+                cols.extend(
+                    [
+                        self.model.id,
+                        self.model.unit_addr,
+                        self.model.date_rec,
+                        self.model.engine_num,
+                        self.model.locomotive_num,
+                    ]
+                )
+
             filters = []
             if dt is not None:
                 filters.append(self.model.date_rec >= dt)
-            
+
             if station_id != -1:
                 filters.append(Station.id == station_id)
-            
+
             if recent is not None:
                 filters.append(self.model.most_recent == recent)
-            
-            
+
             stmt = (
                 select(*cols)
                 .join(Station, self.model.station_recorded == Station.id)
@@ -465,7 +527,7 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
 
             to_str = {"date_rec"} if all_cols else {}
             results = self.objs_to_dicts(self.session.execute(stmt).all(), to_str)
-            
+
             # Add data type to result
             for result in results:
                 result["Data_type"] = self.record_identifier.upper()
@@ -477,5 +539,5 @@ class RecordRepository(ABC, BaseRepository[RecordType], Generic[RecordType]):
                 e,
                 self.__class__.__name__,
                 None,
-                f"Could not retrieve {self.record_name}s at station{f' {station_id}' if station_id != -1 else "s"}: {e}",
+                f"Could not retrieve {self.record_name}s at station{f' {station_id}' if station_id != -1 else 's'}: {e}",
             )

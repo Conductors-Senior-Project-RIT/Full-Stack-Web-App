@@ -94,6 +94,217 @@ CREATE TABLE IF NOT EXISTS HOTRecords(
     signal_strength         FLOAT DEFAULT 0.0 NOT NULL
 );
 
+CREATE OR REPLACE VIEW EOTCollation AS (
+	WITH StationChanges AS (
+		SELECT
+			e.id,
+			e.date_rec,
+			e.station_recorded,
+			e.symbol_id,
+			e.unit_addr,
+			e.brake_pressure,
+			e.motion,
+			e.marker_light,
+			e.turbine,
+			e.battery_cond,
+			e.battery_charge,
+			e.arm_status,
+			e.signal_strength,
+			e.verified,
+			e.locomotive_num,
+			LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_station,
+			LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) AS prev_date_rec,
+			CASE
+				WHEN LAG(e.station_recorded) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) IS DISTINCT FROM e.station_recorded THEN 1
+				WHEN e.date_rec - LAG(e.date_rec) OVER (PARTITION BY e.unit_addr ORDER BY e.date_rec) > INTERVAL '2 hours' THEN 1
+				ELSE 0
+			END AS is_new_group
+		FROM EOTRecords e
+	),
+	GroupedRecords AS (
+		SELECT
+			id,
+			date_rec,
+			station_recorded,
+			symbol_id,
+			unit_addr,
+			brake_pressure,
+			motion,
+			marker_light,
+			turbine,
+			battery_cond,
+			battery_charge,
+			arm_status,
+			signal_strength,
+			verified,
+			locomotive_num,
+			SUM(is_new_group) OVER (PARTITION BY unit_addr ORDER BY date_rec) AS group_id
+		FROM StationChanges
+	),
+	UnitAddrOccurrences AS (
+		SELECT
+			unit_addr,
+			station_recorded,
+			group_id,
+			MIN(date_rec) AS first_seen,
+			MAX(date_rec) AS last_seen
+		FROM GroupedRecords
+		GROUP BY unit_addr, station_recorded, group_id
+	),
+	UnitAddrDetails AS (
+		SELECT
+			g.id,
+			g.date_rec,
+			stat.station_name,
+			g.symbol_id,
+			g.unit_addr,
+			g.brake_pressure,
+			g.motion,
+			g.marker_light,
+			g.turbine,
+			g.battery_cond,
+			g.battery_charge,
+			g.arm_status,
+			g.signal_strength,
+			g.verified,
+			g.station_recorded,
+			g.locomotive_num,
+			uo.first_seen,
+			uo.last_seen,
+			ROW_NUMBER() OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id ORDER BY g.date_rec DESC) AS row_num,
+			COUNT(*) OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id) AS occurrence_count
+		FROM GroupedRecords g
+		INNER JOIN Stations stat ON g.station_recorded = stat.id
+		INNER JOIN UnitAddrOccurrences uo
+			ON g.unit_addr = uo.unit_addr
+			AND g.station_recorded = uo.station_recorded
+			AND g.group_id = uo.group_id
+	)
+	SELECT
+		d.id,
+		TO_CHAR(d.date_rec, 'YYYY-MM-DD HH24:MI:SS') AS date_rec,
+		d.station_name,
+		d.unit_addr,
+		d.brake_pressure,
+		d.motion,
+		d.marker_light,
+		d.turbine,
+		d.battery_cond,
+		d.battery_charge,
+		d.arm_status,
+		d.signal_strength,
+		d.verified,
+		TO_CHAR(d.first_seen, 'YYYY-MM-DD HH24:MI:SS') AS first_seen,
+		TO_CHAR(d.last_seen, 'YYYY-MM-DD HH24:MI:SS') AS last_seen,
+		d.occurrence_count,
+		AGE(d.last_seen, d.first_seen) AS duration,
+		CASE WHEN d.symbol_id IS NULL THEN NULL ELSE f.symb_name END,
+		d.locomotive_num
+	FROM UnitAddrDetails d
+	LEFT JOIN Symbols f
+	ON d.symbol_id = f.id
+	WHERE d.row_num = 1
+);
+
+CREATE OR REPLACE VIEW HOTCollation AS (
+	WITH StationChanges AS (
+		SELECT
+			h.id,
+			h.date_rec,
+			h.station_recorded,
+			h.symbol_id,
+			h.unit_addr,
+			h.signal_strength,
+			h.command,
+			h.frame_sync,
+			h.checkbits,
+			h.parity,
+			h.verified,
+			h.locomotive_num,
+			LAG(h.station_recorded) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) AS prev_station,
+			LAG(h.date_rec) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) AS prev_date_rec,
+			CASE
+				WHEN LAG(h.station_recorded) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) IS DISTINCT FROM h.station_recorded THEN 1
+				WHEN h.date_rec - LAG(h.date_rec) OVER (PARTITION BY h.unit_addr ORDER BY h.date_rec) > INTERVAL '2 hours' THEN 1
+				ELSE 0
+			END AS is_new_group
+		FROM HOTRecords h
+	),
+	GroupedRecords AS (
+		SELECT
+			id,
+			date_rec,
+			station_recorded,
+			symbol_id,
+			unit_addr,
+			signal_strength,
+			command,
+			frame_sync,
+			checkbits,
+			parity,
+			verified,
+			locomotive_num,
+			SUM(is_new_group) OVER (PARTITION BY unit_addr ORDER BY date_rec) AS group_id
+		FROM StationChanges
+	),
+	UnitAddrOccurrences AS (
+		SELECT
+			unit_addr,
+			station_recorded,
+			group_id,
+			MIN(date_rec) AS first_seen,
+			MAX(date_rec) AS last_seen
+		FROM GroupedRecords
+		GROUP BY unit_addr, station_recorded, group_id
+	),
+	UnitAddrDetails AS (
+		SELECT
+			g.id,
+			g.date_rec,
+			stat.station_name,
+			g.symbol_id,
+			g.unit_addr,
+			g.signal_strength,
+			g.command,
+			g.frame_sync,
+			g.checkbits,
+			g.parity,
+			g.verified,
+			g.locomotive_num,
+			g.station_recorded,
+			uo.first_seen,
+			uo.last_seen,
+			ROW_NUMBER() OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id ORDER BY g.date_rec DESC) AS row_num,
+			COUNT(*) OVER (PARTITION BY g.unit_addr, g.station_recorded, g.group_id) AS occurrence_count
+		FROM GroupedRecords g
+		INNER JOIN Stations stat ON g.station_recorded = stat.id
+		INNER JOIN UnitAddrOccurrences uo
+			ON g.unit_addr = uo.unit_addr
+			AND g.station_recorded = uo.station_recorded
+			AND g.group_id = uo.group_id
+	)
+	SELECT
+		d.id,
+		TO_CHAR(d.date_rec, 'YYYY-MM-DD HH24:MI:SS') AS date_rec,
+		d.station_name,
+		d.unit_addr,
+		d.signal_strength,
+		d.command,
+		d.frame_sync,
+		d.checkbits,
+		d.parity,
+		d.verified,
+		TO_CHAR(d.first_seen, 'YYYY-MM-DD HH24:MI:SS') AS first_seen,
+		TO_CHAR(d.last_seen, 'YYYY-MM-DD HH24:MI:SS') AS last_seen,
+		d.occurrence_count,
+		AGE(d.last_seen, d.first_seen) AS duration,
+		CASE WHEN d.symbol_id IS NULL THEN NULL ELSE f.symb_name END,
+		d.locomotive_num
+	FROM UnitAddrDetails d
+	LEFT JOIN Symbols f
+	ON d.symbol_id = f.id
+	WHERE d.row_num = 1
+);
 
 CREATE TABLE IF NOT EXISTS NotificationConfig(
     id                      SERIAL NOT NULL PRIMARY KEY,
@@ -115,6 +326,12 @@ CREATE TABLE IF NOT EXISTS UserPreferences (
     station_id      INT NOT NULL,      -- The ID of the location
     PRIMARY KEY (user_id, station_id), -- Composite primary key to ensure uniqueness
     FOREIGN KEY (station_id) REFERENCES Stations(id) -- Ensures station_id exists in the station table
+);
+
+CREATE TABLE IF NOT EXISTS TestTable (
+    id          SERIAL PRIMARY KEY,
+    test_col    VARCHAR(240) DEFAULT 'testDefault' NOT NULL,
+    date        TIMESTAMP NOT NULL
 );
 
 CREATE OR REPLACE FUNCTION update_station_last_seen()

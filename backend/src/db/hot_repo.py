@@ -134,7 +134,6 @@ class HOTRepository(RecordRepository[HOTRecord]):
                     d.id,
                     TO_CHAR(d.date_rec, 'YYYY-MM-DD HH24:MI:SS') AS date_rec,
                     d.station_name,
-                    f.symb_name,
                     d.unit_addr,
                     d.signal_strength,
                     d.command,
@@ -161,6 +160,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
             args = {"results_num": num_results, "offset": (page - 1) * num_results}
             results = self.session.execute(text(sql), args).all()
             resp = self.objs_to_dicts(results, {"duration", "occurrence_count"})
+            print("NUM:", len(resp))
             
         except Exception as e:
             raise repository_error_translator(
@@ -245,6 +245,7 @@ class HOTRepository(RecordRepository[HOTRecord]):
                     WHERE verified = {verified}
                 """
             count = self.session.execute(text(count_sql)).scalar_one()
+            print("COUNT:", count)
             
         except Exception as e:
             raise repository_error_translator(
