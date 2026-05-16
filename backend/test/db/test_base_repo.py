@@ -9,13 +9,16 @@ from backend.database import db
 from backend.src.db.db_core.exceptions import RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.src.db.db_core.repository import BaseRepository
 from backend.test.base_test_case import BaseTestCase
-from backend.test.db.test_utils import TestRepository, TestRepository, TestTrainRecord, return_test_data
+from backend.test.db.test_utils import TestTrainRecord, TestRepository, return_test_data
 
 
 class TestBaseRepository(BaseTestCase):  
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        
+        TestTrainRecord.__table__.create(db.engine, checkfirst=True)
+        
         with db.engine.connect() as conn:
             conn.execute(text("TRUNCATE trainrecords RESTART IDENTITY CASCADE"))
             conn.commit()

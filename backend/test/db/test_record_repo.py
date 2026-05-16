@@ -20,6 +20,10 @@ class TestRecordRepository(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        
+        from backend.test.db.test_utils import TestTrainRecord
+        TestTrainRecord.__table__.create(db.engine, checkfirst=True)
+        
         with db.engine.connect() as conn:
             conn.execute(text("TRUNCATE trainrecords RESTART IDENTITY CASCADE"))
             conn.commit()
