@@ -8,6 +8,11 @@ from backend.src.db.user_repo import UserRepository
 from backend.test.base_test_case import BaseTestCase
 
 class TestUserRepository(BaseTestCase): # testing user model
+    """Unit tests for UserRepository database operations.
+
+    Each test method runs in a rolled back transaction so no state persists between tests.
+    """
+
     def setUp(self):
         """
         Creating a fake User so certain attributes are easier to test (like getting the right user id)

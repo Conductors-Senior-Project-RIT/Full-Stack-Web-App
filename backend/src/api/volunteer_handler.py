@@ -1,3 +1,8 @@
+"""
+Volunteer and admin endpoints for symbol management and record verification.
+
+Routes here are restricted to admin (role 0) and volunteer (role 1) users only.
+"""
 from flask import Blueprint, abort, request
 from flask_restful import reqparse
 from werkzeug.exceptions import BadRequest
@@ -39,11 +44,14 @@ NOTE: Pins table doesn't have "lat" or "lng" fields so an error will always occu
 @volunteer_bp.get("/api/symbols")
 @role_required(0, 1)
 def get_symbol():
-    """_summary_
+    """Retrieves symbols which can optionally be filtered by symbol name.
+
+    If no 'symbol_name' query parameter is provided, all symbols are returned.
 
     Returns:
-        _type_: _description_
+        Response: Returns a list of matching symbols under a 'results' key along wtih a 200 status code.
     """
+
     symbol_name = request.args.get("symbol_name", default=None, type=str)
 
     # Retrieve the provided query parameters (if it exists)
@@ -62,6 +70,16 @@ def get_symbol():
 @volunteer_bp.post("/api/symbols")
 @role_required(0, 1)
 def post_symbol():
+    """Creates a new symbol with the provided symbol name.
+
+    Requires a 'name' field in the request body.
+
+    Returns:
+        Response: Returns an empty response with a 200 status code.
+
+    Raises:
+        BadRequest: If no symbol name is provided in the request body.
+    """
     # Get the symbol name if it exists
     data = request.get_json()
     symbol_name = data.get("name") if data else None
@@ -86,6 +104,16 @@ def post_symbol():
 @volunteer_bp.get("/api/record_verifier")
 @role_required(0, 1)
 def get_records():
+    """Retrieves a paginated list of unverified records for a given record type.
+
+    Accepts 'page' and 'type' as query parameters.
+
+    Returns:
+        Response: Returns a paginated collation of unverified records with a 200 status code.
+
+    Raises:
+        BadRequest: If the provided page number is less than 1
+    """
     page = request.args.get("page", default=1, type=int)
     typ = request.args.get("type", default=-1, type=int)
     
@@ -102,6 +130,16 @@ def get_records():
 @volunteer_bp.post("/api/record_verifier")
 @role_required(0, 1)
 def post_record():
+    """Verifies a train record by assigning a symbol and engine number.
+
+    Requires 'id', 'type', 'symbol', and 'engine_number' in the request body.
+
+    Returns:
+        Response: Returns an empty response with a 200 status code.
+
+    Raises:
+        BadRequest: If the record ID or symbol ID is less than 1
+    """
     parser = reqparse.RequestParser()
     parser.add_argument("id", type=int, default=-1)
     parser.add_argument("type", type=int, default=-1)
