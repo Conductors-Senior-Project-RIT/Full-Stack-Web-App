@@ -1,40 +1,51 @@
 from datetime import datetime
+from typing import Optional
 
-from sqlalchemy import (
-    String,
-    TIMESTAMP,
-)
+from sqlalchemy import TIMESTAMP, Integer, String
 from sqlalchemy.orm import Mapped, configure_mappers, mapped_column
-from backend.database import db
 
+from backend.src.db.db_core.models import Base
 
-class TestModel(db.Model):
+class TestModel(Base):
     __tablename__ = "testtable"
-    __table_args__ = {"extend_existing": True}
-
+    __table_args__ = {'extend_existing': True}
+    
     id: Mapped[int] = mapped_column(primary_key=True)
-    test_col: Mapped[str] = mapped_column(
-        String(240), default="testDefault", server_default="testDefault"
-    )
-    date: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
+    date_rec: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
+    station_recorded: Mapped[int] = mapped_column(Integer, nullable=False)
+    unit_addr: Mapped[Optional[str]] = mapped_column(String(240), default="unknown", server_default="unknown")
+    locomotive_num: Mapped[Optional[str]] = mapped_column(String(240), nullable=True, default="unknown", server_default="unknown")
+    
+configure_mappers()
 
-
-def get_test_data() -> list[TestModel]:
+    
+def return_test_data() -> list[dict]:
+    """Returns a list of test data to be used in testing the record and base repositories."""
     return [ 
         TestModel(
-            date=datetime.strptime("1999-01-08 04:05:06", "%Y-%m-%d %H:%M:%S"),
-            test_col="test1"
+            date_rec=datetime.strptime("1999-01-08 04:05:06", "%Y-%m-%d %H:%M:%S"),
+            station_recorded=1,
+            unit_addr="1111",
+            locomotive_num="CT10"
         ),
         TestModel(
-            date=datetime.strptime("1999-01-08 04:05:06", "%Y-%m-%d %H:%M:%S"),
-            test_col="test2"
+            date_rec=datetime.strptime("2003-02-05 06:53:08", "%Y-%m-%d %H:%M:%S"),
+            station_recorded=2,
+            unit_addr="2222",
+            locomotive_num="CT10"
         ),
         TestModel(
-            date=datetime.strptime("1999-01-08 04:05:06", "%Y-%m-%d %H:%M:%S")
+            date_rec=datetime.now(),
+            station_recorded=1,
+            unit_addr="1111",
+            locomotive_num="TG20"
         ),
         TestModel(
-            date=datetime.strptime("1999-01-08 04:05:06", "%Y-%m-%d %H:%M:%S")
-        ),
+            date_rec=datetime.now(),
+            station_recorded=2,
+            unit_addr="2222",
+            locomotive_num="TG20"
+        )
     ]
 
 

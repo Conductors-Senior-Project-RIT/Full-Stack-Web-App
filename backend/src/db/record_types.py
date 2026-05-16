@@ -1,12 +1,10 @@
 # An enumeration of train record types
 from enum import Enum
 
-from .dpu_repo import DPURepository
 from .base_record_repo import RecordRepository
 # from backend.src.db.database_core import RepositoryRecordInvalid
-from .eot_repo import EOTRepository
-from .hot_repo import HOTRepository
 from .db_core.exceptions import RepositoryError
+from .db_core.models import EOTRecord, EOTCollation, HOTRecord, HOTCollation
 
 """
 start of error: station_repo.py imports ..db.database_core.py BaseRepository
@@ -44,9 +42,9 @@ def get_record_repository(session, value: int | RecordTypes) -> RecordRepository
     
     match value:
         case RecordTypes.EOT | RecordTypes.EOT.value:
-            return EOTRepository(session)
+            return RecordRepository(EOTRecord, EOTCollation, session, "EOT Record", "eot")
         case RecordTypes.HOT | RecordTypes.HOT.value:
-            return HOTRepository(session)
+            return RecordRepository(HOTRecord, HOTCollation, session, "HOT Record", "hot")
         # case RecordTypes.DPU | RecordTypes.DPU.value:
         #     return DPURepository(session)
         

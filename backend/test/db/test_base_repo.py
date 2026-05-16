@@ -9,7 +9,7 @@ from backend.database import db
 from backend.src.db.db_core.exceptions import RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.src.db.db_core.repository import BaseRepository
 from backend.test.base_test_case import BaseTestCase
-from backend.test.db.test_utils import TestTrainRecord, TestRepository, return_test_data
+from backend.test.db.test_utils import TestModel, return_test_data
 
 
 class TestBaseRepository(BaseTestCase):  
@@ -17,19 +17,20 @@ class TestBaseRepository(BaseTestCase):
     def setUpClass(cls):
         super().setUpClass()
         
-        TestTrainRecord.__table__.create(db.engine, checkfirst=True)
+        TestModel.__table__.drop(db.engine, checkfirst=True)
+        TestModel.__table__.create(db.engine)
         
         with db.engine.connect() as conn:
-            conn.execute(text("TRUNCATE trainrecords RESTART IDENTITY CASCADE"))
+            conn.execute(text(f"TRUNCATE {TestModel.__tablename__} RESTART IDENTITY CASCADE"))
             conn.commit()
       
     def setUp(self):
         super().setUp()
-        self.repo = TestRepository(self.session)
+        self.repo = BaseRepository(TestModel, self.session)
         
         # Reset sequence before inserting so ids start at 1
         self.session.execute(text(
-            "SELECT setval(pg_get_serial_sequence('trainrecords', 'id'), coalesce(MAX(id), 1), false) FROM trainrecords"
+            f"SELECT setval(pg_get_serial_sequence('{TestModel.__tablename__}', 'id'), coalesce(MAX(id), 1), false) FROM {TestModel.__tablename__}"
         ))
         self.test_data = return_test_data()
         self.session.add_all(self.test_data)
@@ -55,7 +56,7 @@ class TestBaseRepository(BaseTestCase):
         # Test if inspection doesn't find primary key
         with patch('backend.src.db.db_core.repository.inspect') as mock_inspect:
             mock_inspect.return_value.primary_key = []
-            self.repo = BaseRepository(TestTrainRecord, self.session)
+            self.repo = BaseRepository(TestModel, self.session)
             self.assertEqual(None, self.repo.pkey) 
         
     def testRepositoryGet(self):
@@ -176,7 +177,7 @@ class TestBaseRepository(BaseTestCase):
         
         # Test that ModelType is returned when to_dict is False
         result = self.repo.create(new_record_data, to_dict=False)[0]
-        self.assertIsInstance(result, TestTrainRecord)
+        self.assertIsInstance(result, TestModel)
         self.assertEqual(8, result.id)
         
     def testRepositoryCreateErrors(self):

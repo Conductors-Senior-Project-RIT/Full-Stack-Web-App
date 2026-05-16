@@ -1,27 +1,27 @@
+from pprint import pprint
 import unittest
 from datetime import datetime
 from unittest.mock import patch
+from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from backend.test.db.test_utils import collation_valid, compare_results_ordered
-from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryParsingError
+from backend.test.db.test_utils import collation_valid, compare_results_ordered, compare_results_pkey
+from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.database import db
-from backend.src.db.eot_repo import EOTRepository
+from backend.src.db.record_types import get_record_repository
 from backend.test.base_test_case import BaseTestCase
 
 
 class TestEOTRecordRepository(BaseTestCase):
     def setUp(self):
         self.session = db.session
-        self.repo = EOTRepository(self.session)
+        self.repo = get_record_repository(self.session, 1)
 
         
     def tearDown(self):
         self.session.rollback() # revert changes made from every test_method ran
         self.session.close()
-
-
 
     def testGetTrainHistory(self):
         expected_record = self.repo.get(1)
@@ -30,7 +30,7 @@ class TestEOTRecordRepository(BaseTestCase):
         expected_record["date_rec"] = str(expected_record["date_rec"])
         
         results = self.repo.get_train_history(1)
-        valid, msg = compare_results_ordered([results], [expected_record])
+        valid, msg = compare_results_pkey([results], [expected_record], "id")
         self.assertTrue(valid, msg)
         
         results = self.repo.get_train_history(17)
@@ -122,10 +122,6 @@ class TestEOTRecordRepository(BaseTestCase):
         valid, message = collation_valid({"results": expected[4:], "totalPages": 2}, results)
         self.assertTrue(valid, message)
         
-        # Test getting no records
-        results = self.repo.get_record_collation(3, 4, None)
-        self.assertEqual({"results": [], "totalPages": 2}, results)
-        
         # Test getting verified records
         for i in range(1, 6):
             self.repo.verify_record(i, 1, "cheese balls")
@@ -148,18 +144,16 @@ class TestEOTRecordRepository(BaseTestCase):
     def testGetRecordCollationExceptions(self):
         # Test that exception is handled in collation step
         with patch.object(Session, "execute") as mock_session:
-            mock_session.return_value.all.side_effect = SQLAlchemyError
+            mock_session.return_value.scalars.return_value.all.side_effect = SQLAlchemyError
             with self.assertRaises(RepositoryInternalError):
                 self.repo.get_record_collation(1, 250, None)
-            
-        # Test that exception is handled in counting step
-        with patch.object(Session, "execute") as mock_session:
-            mock_session.return_value.scalar_one.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.get_record_collation(1, 250, None)
+                
+        # Test exception raised when page is out of range
+        with self.assertRaises(RepositoryNotFoundError):
+            self.repo.get_record_collation(3, 4, None)
         
         # Test that exception is handled in parsing step
-        with patch("backend.src.db.eot_repo.ceil", side_effect=ValueError()):
+        with patch("backend.src.db.base_record_repo.ceil", side_effect=ValueError()):
             with self.assertRaises(RepositoryParsingError):
                 self.repo.get_record_collation(1, 250, None)
             

@@ -1,4 +1,7 @@
 from sqlalchemy import (
+    Boolean,
+    Float,
+    Interval,
     String,
     Integer,
     ForeignKey,
@@ -8,7 +11,7 @@ from sqlalchemy import (
     inspect,
     text,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 from sqlalchemy.ext.declarative import AbstractConcreteBase
 from sqlalchemy.dialects.postgresql import ARRAY
 from datetime import datetime, time, timedelta
@@ -49,6 +52,7 @@ class Base(db.Model):
 
 class Station(Base):
     __tablename__ = "stations"
+    __table_args__ = {"extend_existing": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     station_name: Mapped[str] = mapped_column(String(240), nullable=False)
@@ -72,7 +76,7 @@ class User(Base):
     passwd: Mapped[str] = mapped_column(String(240), nullable=False)
     token: Mapped[Optional[str]] = mapped_column(String(480), nullable=True)
     # 2 is normal user, 1 is volunteer, 0 is admin (ken)
-    acc_status: Mapped[int] = mapped_column(default=2, server_default=text(2), nullable=False)
+    acc_status: Mapped[int] = mapped_column(default=2, server_default=text("2"), nullable=False)
     starting_time: Mapped[time] = mapped_column(
         Time(timezone=True),
         default=time(0, 0),
@@ -125,19 +129,51 @@ class BaseRecord(AbstractConcreteBase, Base):
     locomotive_num: Mapped[str] = mapped_column(String(240), default="unknown", server_default="unknown")
     signal_strength: Mapped[float] = mapped_column(default=0.0, server_default=text("0.0"))
 
+    @declared_attr
+    def station_recorded(cls) -> Mapped[int]:
+        return mapped_column(ForeignKey("stations.id"), nullable=False)
+
+    @declared_attr
+    def symbol_id(cls) -> Mapped[Optional[int]]:
+        return mapped_column(ForeignKey("symbols.id"))
+
+    @declared_attr
+    def engine_num(cls) -> Mapped[Optional[int]]:
+        return mapped_column(ForeignKey("engine_numbers.id"))
+
+    @declared_attr
+    def verifier_id(cls) -> Mapped[Optional[int]]:
+        return mapped_column(ForeignKey("users.id"))
+
+    @declared_attr
+    def station(cls) -> Mapped["Station"]:
+        return relationship("Station")
+
+    @declared_attr
+    def symbol(cls) -> Mapped[Optional["Symbol"]]:
+        return relationship("Symbol")
+
+    @declared_attr
+    def engine(cls) -> Mapped[Optional["EngineNumber"]]:
+        return relationship("EngineNumber")
+
+    @declared_attr
+    def verifier(cls) -> Mapped[Optional["User"]]:
+        return relationship("User")
+
 class CollationMixin:
-    id: Mapped[int] = mapped_column(primary_key=True)
-    date_rec: Mapped[datetime]
-    station_name: Mapped[str]
-    symb_name: Mapped[str | None]
-    unit_addr: Mapped[str]
-    signal_strength: Mapped[float]
-    verified: Mapped[bool]
-    first_seen: Mapped[datetime]
-    last_seen: Mapped[datetime]
-    occurrence_count: Mapped[int]
-    duration: Mapped[timedelta | None]
-    locomotive_num: Mapped[str | None]
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    date_rec: Mapped[datetime] = mapped_column(TIMESTAMP)
+    station_name: Mapped[str] = mapped_column(String)
+    symb_name: Mapped[str | None] = mapped_column(String)
+    unit_addr: Mapped[str] = mapped_column(String)
+    signal_strength: Mapped[float] = mapped_column(Float)
+    verified: Mapped[bool] = mapped_column(Boolean)
+    first_seen: Mapped[datetime] = mapped_column(TIMESTAMP)
+    last_seen: Mapped[datetime] = mapped_column(TIMESTAMP)
+    occurrence_count: Mapped[int] = mapped_column(Integer)
+    duration: Mapped[timedelta | None] = mapped_column(Interval)
+    locomotive_num: Mapped[str | None] = mapped_column(String)
 
 
 class EOTMixin:
@@ -152,17 +188,16 @@ class EOTMixin:
 
 class EOTRecord(EOTMixin, BaseRecord):
     __tablename__ = "eotrecords"
+    __table_args__ = {"extend_existing": True}
     __mapper_args__ = {"polymorphic_identity": "eot", "concrete": True}
 
-    station_recorded: Mapped[int] = mapped_column(ForeignKey("stations.id"), nullable=False)
-    symbol_id: Mapped[Optional[int]] = mapped_column(ForeignKey("symbols.id"))
-    engine_num: Mapped[Optional[int]] = mapped_column(ForeignKey("engine_numbers.id"))
-    verifier_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
+    @declared_attr
+    def station(cls) -> Mapped["Station"]:
+        return relationship("Station", back_populates="eot_records")
 
-    station: Mapped["Station"] = relationship("Station", back_populates="eot_records")
-    symbol: Mapped[Optional["Symbol"]] = relationship("Symbol")
-    engine: Mapped[Optional["EngineNumber"]] = relationship("EngineNumber")
-    verifier: Mapped[Optional["User"]] = relationship("User", back_populates="verified_eot")
+    @declared_attr
+    def verifier(cls) -> Mapped[Optional["User"]]:
+        return relationship("User", back_populates="verified_eot")
 
     @classmethod
     def get_unique_fields(cls) -> List[str]:
@@ -181,6 +216,8 @@ class EOTRecord(EOTMixin, BaseRecord):
 class EOTCollation(EOTMixin, CollationMixin, Base):
     __tablename__ = "eotcollation"
     __table_args__ = {"info": {"is_view": True}}
+    
+    total_count: Mapped[int] = mapped_column(Integer)
 
 
 class HOTMixin:
@@ -193,21 +230,22 @@ class HOTMixin:
 class HOTCollation(HOTMixin, CollationMixin, Base):
     __tablename__ = "hotcollation"
     __table_args__ = {"info": {"is_view": True}}
+    
+    total_count: Mapped[int] = mapped_column(Integer)
 
 
 class HOTRecord(HOTMixin, BaseRecord):
     __tablename__ = "hotrecords"
+    __table_args__ = {"extend_existing": True}
     __mapper_args__ = {"polymorphic_identity": "hot", "concrete": True}
     
-    station_recorded: Mapped[int] = mapped_column(ForeignKey("stations.id"), nullable=False)
-    symbol_id: Mapped[Optional[int]] = mapped_column(ForeignKey("symbols.id"))
-    engine_num: Mapped[Optional[int]] = mapped_column(ForeignKey("engine_numbers.id"))
-    verifier_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
-    
-    station: Mapped["Station"] = relationship("Station", back_populates="hot_records")
-    symbol: Mapped[Optional["Symbol"]] = relationship("Symbol")
-    engine: Mapped[Optional["EngineNumber"]] = relationship("EngineNumber")
-    verifier: Mapped[Optional["User"]] = relationship("User", back_populates="verified_hot")
+    @declared_attr
+    def station(cls) -> Mapped["Station"]:
+        return relationship("Station", back_populates="hot_records")
+
+    @declared_attr
+    def verifier(cls) -> Mapped[Optional["User"]]:
+        return relationship("User", back_populates="verified_hot")
 
     @classmethod
     def get_unique_fields(cls) -> List[str]:

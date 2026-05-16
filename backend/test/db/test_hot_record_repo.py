@@ -5,15 +5,15 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
 from backend.test.db.test_utils import collation_valid, compare_results_ordered
-from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryParsingError
+from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
 from backend.database import db
-from backend.src.db.hot_repo import HOTRepository
+from backend.src.db.record_types import get_record_repository
 from backend.test.base_test_case import BaseTestCase
 
 class TestHOTRecordRepository(BaseTestCase):
     def setUp(self):
         self.session = db.session
-        self.repo = HOTRepository(self.session)
+        self.repo = get_record_repository(self.session, 2)
         
     def tearDown(self):
         self.session.rollback() # revert changes made from every test_method ran
@@ -109,11 +109,7 @@ class TestHOTRecordRepository(BaseTestCase):
         # Portion of result with last partition
         results = self.repo.get_record_collation(3, 2, None)
         valid, message = collation_valid({"results": expected[4:], "totalPages": 3}, results)
-        self.assertTrue(valid, message)  
-        
-        # Test getting no records
-        results = self.repo.get_record_collation(3, 3, None)
-        self.assertEqual({"results": [], "totalPages": 2}, results)      
+        self.assertTrue(valid, message)       
         
         # Test getting verified records
         for i in range(1, 6):
@@ -137,18 +133,16 @@ class TestHOTRecordRepository(BaseTestCase):
     def testGetRecordCollationExceptions(self):
         # Test that exception is handled in collation step
         with patch.object(Session, "execute") as mock_session:
-            mock_session.return_value.all.side_effect = SQLAlchemyError
+            mock_session.return_value.scalars.return_value.all.side_effect = SQLAlchemyError
             with self.assertRaises(RepositoryInternalError):
                 self.repo.get_record_collation(1, 250, None)
+                
+        # Test exception raised when page is out of range
+        with self.assertRaises(RepositoryNotFoundError):
+            self.repo.get_record_collation(3, 3, None)
             
-        # Test that exception is handled in counting step
-        with patch.object(Session, "execute") as mock_session:
-            mock_session.return_value.scalar_one.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.get_record_collation(1, 250, None)
-        
         # Test that exception is handled in parsing step
-        with patch("backend.src.db.hot_repo.ceil", side_effect=ValueError()):
+        with patch("backend.src.db.base_record_repo.ceil", side_effect=ValueError()):
             with self.assertRaises(RepositoryParsingError):
                 self.repo.get_record_collation(1, 250, None)
         

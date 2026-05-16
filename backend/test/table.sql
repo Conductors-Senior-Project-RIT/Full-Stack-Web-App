@@ -198,8 +198,9 @@ CREATE OR REPLACE VIEW EOTCollation AS (
 		TO_CHAR(d.last_seen, 'YYYY-MM-DD HH24:MI:SS') AS last_seen,
 		d.occurrence_count,
 		AGE(d.last_seen, d.first_seen) AS duration,
-		CASE WHEN d.symbol_id IS NULL THEN NULL ELSE f.symb_name END,
-		d.locomotive_num
+		CASE WHEN d.symbol_id IS NULL THEN NULL ELSE f.symb_name END AS symb_name,
+		d.locomotive_num,
+        COUNT(*) OVER () AS total_count
 	FROM UnitAddrDetails d
 	LEFT JOIN Symbols f
 	ON d.symbol_id = f.id
@@ -298,8 +299,9 @@ CREATE OR REPLACE VIEW HOTCollation AS (
 		TO_CHAR(d.last_seen, 'YYYY-MM-DD HH24:MI:SS') AS last_seen,
 		d.occurrence_count,
 		AGE(d.last_seen, d.first_seen) AS duration,
-		CASE WHEN d.symbol_id IS NULL THEN NULL ELSE f.symb_name END,
-		d.locomotive_num
+		CASE WHEN d.symbol_id IS NULL THEN NULL ELSE f.symb_name END AS symb_name,
+		d.locomotive_num,
+        COUNT(*) OVER () AS total_count
 	FROM UnitAddrDetails d
 	LEFT JOIN Symbols f
 	ON d.symbol_id = f.id
@@ -328,11 +330,6 @@ CREATE TABLE IF NOT EXISTS UserPreferences (
     FOREIGN KEY (station_id) REFERENCES Stations(id) -- Ensures station_id exists in the station table
 );
 
-CREATE TABLE IF NOT EXISTS TestTable (
-    id          SERIAL PRIMARY KEY,
-    test_col    VARCHAR(240) DEFAULT 'testDefault' NOT NULL,
-    date        TIMESTAMP NOT NULL
-);
 
 CREATE OR REPLACE FUNCTION update_station_last_seen()
 RETURNS TRIGGER AS $$

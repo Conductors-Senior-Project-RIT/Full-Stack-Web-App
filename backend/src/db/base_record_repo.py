@@ -104,11 +104,11 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         stmt = (
             select(*columns)
-            .join(Station, Station.id == self.model.station_recorded, isouter=True)
+            .join(Station, Station.id == self.model.station_recorded)
             .outerjoin(Symbol, Symbol.id == self.model.symbol_id)
             .where(self.model.id == record_id)
         )
-
+  
         results = self.session.execute(stmt).one_or_none()
         return self.objs_to_dicts(results)
 
@@ -378,15 +378,15 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 .offset((page - 1) * num_results)
             )
 
-            results = self.session.execute(stmt).all()
-            count = len(results)
+            results = self.session.execute(stmt).scalars().all()
+            count = results[0].total_count if results else 0
             
-            print(
-                f"COUNT: {count}",
-                f"PAGE: {page}\n"
-                f"NUM_RESULTS: {num_results}\n"
-                f"VERIFIED: {verified}"
-            )
+            if count == 0:
+                raise RepositoryNotFoundError(
+                    self.__class__.__name__,
+                    message=f"Could not find any records on page {page}!",
+                    show_error=True
+                )
 
             return {
                 "results": self.objs_to_dicts(

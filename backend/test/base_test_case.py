@@ -25,6 +25,10 @@ class BaseTestCase(unittest.TestCase):
         cls.app = create_app(config_name="test")
         cls.app_context = cls.app.app_context()
         cls.app_context.push()
+        with db.engine.connect() as conn:
+            conn.execute(text("DROP SCHEMA public CASCADE"))
+            conn.execute(text("CREATE SCHEMA public"))
+            conn.commit()
         # TODO: create schema + mock data via ORM, not raw SQL so schema changes are automatically handled with Flask-Migrate
         cls.database_loader("table.sql")
         cls.database_loader("test_data.sql")
