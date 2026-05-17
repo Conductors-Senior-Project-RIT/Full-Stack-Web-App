@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from sqlalchemy import (
     Boolean,
     Float,
@@ -160,6 +162,10 @@ class BaseRecord(AbstractConcreteBase, Base):
     @declared_attr
     def verifier(cls) -> Mapped[Optional["User"]]:
         return relationship("User")
+    
+    @classmethod
+    def get_unique_fields(cls) -> List[str]:
+        pass
 
 class CollationMixin:
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

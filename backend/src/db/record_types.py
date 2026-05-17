@@ -1,7 +1,7 @@
 # An enumeration of train record types
 from enum import Enum
 
-from .base_record_repo import RecordRepository
+from .record_repo import RecordRepository
 # from backend.src.db.database_core import RepositoryRecordInvalid
 from .db_core.exceptions import RepositoryError
 from .db_core.models import EOTRecord, EOTCollation, HOTRecord, HOTCollation

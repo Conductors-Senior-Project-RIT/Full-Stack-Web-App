@@ -1,7 +1,7 @@
 from datetime import datetime
 from math import ceil
 from typing import Any, Generic, Optional, TypeVar
-from sqlalchemy import func, select, text, update
+from sqlalchemy import func, inspect, select, text, update
 from sqlalchemy.orm.session import Session
 
 from .db_core.models import BaseRecord, CollationMixin
@@ -76,6 +76,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         """
         return self.session.query(func.count(self.model.id)).scalar()
 
+    @repository_error_handler()
     def get_train_history(self, record_id: int) -> list[dict[str, Any]]:
         """Returns a train record with the specified columns, defined in the concrete
         implementation.
@@ -288,7 +289,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         Returns:
             list[Any]: Returns a list of values from records.
-        """
+        """  
         # Check if the provided column actually exists in the model
         if not hasattr(self.model, field_type):
             raise RepositoryInvalidArgumentError(
@@ -380,13 +381,6 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
             results = self.session.execute(stmt).scalars().all()
             count = results[0].total_count if results else 0
-            
-            if count == 0:
-                raise RepositoryNotFoundError(
-                    self.__class__.__name__,
-                    message=f"Could not find any records on page {page}!",
-                    show_error=True
-                )
 
             return {
                 "results": self.objs_to_dicts(
@@ -495,7 +489,8 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         try:
             cols = [Station.station_name, Symbol.symb_name]
             if all_cols:
-                cols.extend([self.model])
+                mapper = inspect(self.model)
+                cols.extend([getattr(self.model, c.key) for c in mapper.mapper.column_attrs])
             else:
                 cols.extend(
                     [

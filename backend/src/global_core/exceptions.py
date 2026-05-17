@@ -76,7 +76,6 @@ class LayerError(Exception):
 
         # Attach the cause for exception for later reference
         self.cause = cause
-        print(self.cause)  # Temp logging
 
         # Pass the final error message to the Exception constructor
         super().__init__(f"{caller}{public}")

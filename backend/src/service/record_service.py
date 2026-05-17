@@ -3,7 +3,7 @@ from typing import Any
 import zoneinfo
 
 import backend.src.db.record_types as record_types
-from ..db.base_record_repo import RecordRepository
+from ..db.record_repo import RecordRepository
 from ..db.station_repo import StationRepository
 from ..service.service_core import *
 
