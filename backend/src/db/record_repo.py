@@ -78,8 +78,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
     @repository_error_handler()
     def get_train_history(self, record_id: int) -> list[dict[str, Any]]:
-        """Returns a train record with the specified columns, defined in the concrete
-        implementation.
+        """Returns a train record with the following columns: `id, date_rec, station_name,
+        symb_name, unit_addr, verified` and the columns defined in a concrete model's
+        `get_unique_fields` function.
 
         Args:
             record_id (int): A value corresponding to a record's primary key.
@@ -289,7 +290,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         Returns:
             list[Any]: Returns a list of values from records.
-        """  
+        """
         # Check if the provided column actually exists in the model
         if not hasattr(self.model, field_type):
             raise RepositoryInvalidArgumentError(
