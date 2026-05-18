@@ -1,5 +1,3 @@
-from abc import abstractmethod
-
 from sqlalchemy import (
     Boolean,
     Float,
@@ -23,20 +21,50 @@ from ....database import db
 
 
 class Base(db.Model):
+    """Defines the ORM base in which all models extend.
+
+    All classes that extend this class will contain useful functions such as `_asdict`
+    and `copy` (see function docs for further information).
+    
+    This model is abstract and cannot be instantiated.
+
+    Args:
+        db (Model): Inherits a declarative base, which is created by SQLAlchemy after a
+            Flask app has been created and connected to the database.
+    """
     __abstract__ = True
 
     def __init__(self, **kwargs):
+        """A `Model` instance can be constructed by passing in a set of `kwargs`."""
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def _asdict(self):
+    def _asdict(self) -> dict:
+        """Returns an model instance as a dictionary representation.
+        
+        Returns:
+            dict: Dictionary of column and value pairs.
+        """
         mapper = inspect(self.__class__)
         return {col.key: getattr(self, col.key) for col in mapper.columns}
 
-    def __hash__(self):
+    def __hash__(self) -> int:
+        """Calculates the hash of an instance.
+
+        Returns:
+            int: This instance's hash.
+        """
         return hash(tuple(sorted(self._asdict().items())))
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
+        """Compares whether this instance is equal to another instance.
+
+        Args:
+            other (Any): An instance to compare with.
+
+        Returns:
+            bool: True if this instance is equal to another; otherwise, false.
+        """
         if self is other:
             return True
 
@@ -49,6 +77,11 @@ class Base(db.Model):
         return False
 
     def copy(self) -> Self:
+        """Creates a copy of an instance as a new instance.
+
+        Returns:
+            Self: A copy of this instance.
+        """
         return self.__class__(**self._asdict())
 
 
@@ -165,7 +198,7 @@ class BaseRecord(AbstractConcreteBase, Base):
     
     @classmethod
     def get_unique_fields(cls) -> List[str]:
-        pass
+        raise NotImplementedError()
 
 class CollationMixin:
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

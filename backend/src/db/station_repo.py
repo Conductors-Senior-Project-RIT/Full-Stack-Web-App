@@ -1,15 +1,29 @@
 from datetime import datetime
 from typing import Any
+
 from sqlalchemy import func, insert, select, update
 
 from .db_core.models import Station
-
 from .db_core.exceptions import RepositoryNotFoundError, RepositoryInternalError, RepositoryInvalidArgumentError, \
     RepositoryExistingRowError, repository_error_handler, repository_error_translator
 from .db_core.repository import BaseRepository
 
 class StationRepository(BaseRepository[Station]):
+    """A database interface for querying station records.
+
+    This class inherits the generic CRUD functionality defined in `BaseRepository` that
+    may be useful for simple operations. This class contains concrete methods which
+    execute functionality using the `Station` model.
+    """
+    
     def __init__(self, session):
+        """Constructor for a repository that interacts station records.
+
+        Args:
+            session (Session): Specifies the database session the repository operates
+                in. All functions in this class flushes all changes to the session. It
+                is the job of higher layers to commit or rollback any changes.
+        """
         super().__init__(Station, session)
         
 
@@ -18,8 +32,8 @@ class StationRepository(BaseRepository[Station]):
         """Returns a collection of ID and station name pairs from the `Stations` table.
 
         Returns:
-            (list[dict[str, Any]]):  A list of tuples containing station IDs and names if the 
-                operation was successful.
+            (list[dict[str, Any]]): A list of tuples containing station IDs and names if
+                the operation was successful.
         """
         # Attempt to retrieve and parse all station ID and name pairs.
         stmt = select(self.model.id, self.model.station_name)
@@ -31,12 +45,13 @@ class StationRepository(BaseRepository[Station]):
             
     @repository_error_handler()
     def create_new_station(self, stat_name: str, hashed_password: str) -> int:
-        """Creates a new station from `stat_name` and a `hashed_password` in the `Stations` table.
-        
+        """Creates a new station from `stat_name` and a `hashed_password` in the `Stations`
+        table.
+
         Args:
             station_name (str): The name of a new station.
             hashed_password (str): A hashed password for the new station.
-            
+
         Returns:
             int: Returns the id of the new station created
         """
@@ -71,18 +86,21 @@ class StationRepository(BaseRepository[Station]):
                 message="Could not create a new station, 0 rows created.",
                 show_error=True
             )
-        
+            
+        # Flush the new changes to the session if succcessful
+        self.session.flush()
         return result
 
 
     @repository_error_handler()
     def update_station_password(self, station_id: int, hashed_password: str) -> str:
-        """Updates a station's password with `hashed_password` with a matching `station_id`.
-        
+        """Updates a station's password with `hashed_password` if a matching `station_id`
+        exists.
+
         Args:
             station_name (int): The ID of the station to update.
             hashed_password (str): The new hashed password for the station.
-            
+
         Returns:
             str: The newly updated password from the database session.
         """
@@ -99,7 +117,7 @@ class StationRepository(BaseRepository[Station]):
             
 
     def get_station_id(self, stat_name: str) -> int:
-        """Returns the ID of a station with a given `stat_name`.
+        """Returns the ID of a station with a matching station name.
 
         Args:
             stat_name (str): The name of the station.
@@ -132,15 +150,15 @@ class StationRepository(BaseRepository[Station]):
 
     @repository_error_handler()
     def get_last_seen(self, stat_name: str) -> str:
-        """Returns a formatted string of the station's last seen timestamp. 
-        If the timestamp occurred today, the string is formatted as: `HH:MM AM/PM`; 
-        otherwise, it is formatted as: `MON DD, YYYY at HH:MM AM/PM`.
+        """Returns a formatted string of the station's last seen timestamp. If the
+        timestamp occurred today, the string is formatted as: `HH:MM AM/PM`; otherwise,
+        it is formatted as: `MON DD, YYYY at HH:MM AM/PM`.
 
         Args:
             stat_name (str): The name of the station to retrieve from.
 
         Raises:
-            RepositoryNotFoundError: Raised if a station is not found.
+            `RepositoryNotFoundError`: Raised if a station is not found.
 
         Returns:
             str: A formatted string of a station's last seen timestamp.
@@ -171,7 +189,7 @@ class StationRepository(BaseRepository[Station]):
             station_id (int): The ID of the station to update.
 
         Raises:
-            RepositoryNotFoundError: Raised if a station is not found.
+            `RepositoryNotFoundError`: Raised if a station is not found.
 
         Returns:
             datetime: A timestamp of the result.
@@ -198,12 +216,12 @@ class StationRepository(BaseRepository[Station]):
     
     
     def format_date(self, dt: datetime) -> str:
-        """Formats a datetime object into a string. If the date is today, it is formatted as `HH:MM AM/PM`;
-        otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`.
+        """Formats a datetime object into a string. If the date is today, it is formatted
+        as `HH:MM AM/PM`; otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`.
 
         Args:
             date (datetime): The datetime object to format.
-        
+
         Returns:
             str: The formatted date string.
         """

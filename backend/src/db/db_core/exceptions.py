@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Optional, Type
 
 from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError, SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
 
@@ -38,10 +38,8 @@ REPOSITORY_ERROR_MAP = {
     (TimeoutError, UnboundExecutionError, InterfaceError, NoSuchModuleError): 
         (RepositoryConnectionError, True),
     (TypeError, KeyError, ValueError, IndexError, ZeroDivisionError, 
-     DataError, ProgrammingError, IntegrityError): 
-        (RepositoryParsingError, True),
+     DataError, ProgrammingError, IntegrityError): (RepositoryParsingError, True),
     SQLAlchemyError: (RepositoryInternalError, True)
-    
 }
 
 
@@ -51,13 +49,6 @@ def wrap_repository_error_handler(func):
 
     Args:
         func (callable): The function to wrap.
-        error_map (dict): A mapping of lower layer exceptions to RepositoryErrors and
-            whether to show the original message.
-        base_exception (Type[RepositoryError]): The base RepositoryError to use if an
-            exception is not found in the error_map.
-        exclude (Type[RepositoryError] or tuple of Type[RepositoryError]): A
-            RepositoryError or tuple of RepositoryErrors to exclude from being caught
-            and translated by the error handler.
 
     Returns:
         callable: The wrapped function with repository error handling.
@@ -72,29 +63,32 @@ def wrap_repository_error_handler(func):
 
 def repository_error_translator(
     e: Exception,
-    caller_name: str | None = None,
-    point_of_error: str | None = None,
-    message: str | None = None,
-    exclude: tuple[Type[Exception]] | Type[Exception] | None = None
+    caller_name: Optional[str] = None,
+    point_of_error: Optional[str] = None,
+    message: Optional[str] = None,
+    exclude: Optional[tuple[Type[Exception]] | Type[Exception]] = None
 ) -> RepositoryError:
-    """Translates a provided exception into a `RepositoryError`. See
-    :func:`layer_error_handler` for more details.
+    """Translates a provided exception into a `RepositoryError`. See `layer_error_handler`
+    for more details.
 
     Args:
-        e (Exception): _description_
-        caller_name (str | None, optional): _description_. Defaults to None.
-        point_of_error (str | None, optional): _description_. Defaults to None.
-        message (str | None, optional): _description_. Defaults to None.
-        exclude (tuple[Type[Exception]] | Type[Exception] | None, optional):
-            _description_. Defaults to None.
+        e (Exception): An exception that is to be translated.
+        caller_name (str, optional): The class that called this function. Defaults to
+            None.
+        point_of_error (str, optional): The location/function the error occurred in.
+            Defaults to None.
+        message (str, optional): An optional message to provide in a `RepositoryError`.
+            Defaults to None.
+        exclude (tuple[Type[Exception]] | Type[Exception], optional): A single or
+            collection of exceptions to exclude from translation. Defaults to None.
 
     Returns:
         RepositoryError: If a matching translation is found in `error_map`, a subclass
-            instance of :class:`RepositoryError` is returned. In the case a match is not
-            found, a :class:`RepositoryInternalError` is instantiated and returned as a
-            fallback, preventing lower-level implementation details from propagating
-            upwards. If the provided exception `e` is an instance with a matching type
-            in `exclude`, it is returned as-is.
+            instance of `RepositoryError` is returned. In the case a match is not found,
+            a `RepositoryInternalError` is instantiated and returned as a fallback,
+            preventing lower-level implementation details from propagating upwards. If
+            the provided exception `e` is an instance with a matching type in `exclude`,
+            it is returned as-is.
     """
     return translate_error(
         e,
@@ -107,11 +101,11 @@ def repository_error_translator(
     )
     
 def repository_error_handler(
-    message: str | None = None, 
-    exclude: tuple[Type[Exception]] | Type[Exception] | None = None
+    message: Optional[str] = None, 
+    exclude: Optional[tuple[Type[Exception]] | Type[Exception]] = None
 ):
     """Decorator used to provide error translation for exceptions thrown in the Repository
-    layer. See :func:`layer_error_handler` for more implementation and argument details.
+    layer. See `layer_error_handler` for more implementation and argument details.
 
     Examples:
         ```
@@ -122,12 +116,10 @@ def repository_error_handler(
 
 
     Args:
-        e (Exception):
-        caller_name (str | None, optional): Defaults to None.
-        point_of_error (str | None, optional): Defaults to None.
-        message (str | None, optional): Defaults to None.
-        exclude (tuple[Type[Exception]] | Type[Exception] | None, optional): Defaults to
-            None.
+        message (str, optional): An optional message to provide in a `RepositoryError`.
+            Defaults to None.
+        exclude (tuple[Type[Exception]] | Type[Exception], optional): A single or
+            collection of exceptions to exclude from translation. Defaults to None.
 
     Returns:
         callabe: The original function wrapped with exception handling logic, with its

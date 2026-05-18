@@ -1,6 +1,6 @@
 from datetime import datetime
 from math import ceil
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, Type, TypeVar
 from sqlalchemy import func, inspect, select, text, update
 from sqlalchemy.orm.session import Session
 
@@ -25,34 +25,39 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     """A database interface for train record querying.
 
     This class inherits the generic CRUD functionality defined in `BaseRepository` that
-    may be useful for simple operations. Additionally, this abstract class contains
-    concrete methods which execute standardized functionality using the model defined by
-    a child class, restricted only to models that extend `BaseRecord`. Additionally,
-    this class also defines abstract methods which must be implmeneted by child classes.
+    may be useful for simple operations. This class contains concrete methods which
+    execute standardized functionality using the model defined in an instance,
+    restricted only to models that extend `BaseRecord`. The behavior and results are
+    defined by the `BaseRecord` and `CollationMixin` models.
 
     Args:
         ABC: This class is abstract and cannot be instantiated. A child class can extend
             `BaseRepository` for a concrete implementation.
         BaseRepository (RecordType): Inherits the methods present in `BaseRepository`
-            which operate on `RecordType` models.
-        Generic (RecordType): Defines the `RecordType` model for a repository instance.
+            which operate on `BaseRecord` models.
+        Generic (RecordType): Defines a generic type in which the repository instance
+            uses. Bound to models that extend `BaseRecord`.
     """
 
     def __init__(
         self,
-        model: RecordType,
-        collation: CollationType,
+        model: Type[BaseRecord],
+        collation: Type[CollationMixin],
         session: Session,
         record_name: str = "Unknown",
         record_identifier: str = "Unknown",
     ):
-        """Constructor for a repository that interacts with different train records.
+        """Constructor for a repository that interacts with various kinds of train records.
 
         See `record_types` for factory method implementations.
 
         Args:
-            model (RecordType): An ORM class that defines what database table to perform
-                queries on. Only models that extend the `BaseRecord` are permitted.
+            model (Type[BaseRecord]): An ORM class that defines what database table to
+                perform queries on and map results to. Only models that extend
+                `BaseRecord` are permitted.
+            collation (Type[CollationMixin]): An ORM model that defines the attributes
+                of the results returned by `get_record_collation`. Only models that
+                extend `CollationMixin` are permitted.
             session (Session): Specifies the database session the repository operates
                 in. All functions in this class flushes all changes to the session. It
                 is the job of higher layers to commit or rollback any changes.
@@ -80,7 +85,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     def get_train_history(self, record_id: int) -> list[dict[str, Any]]:
         """Returns a train record with the following columns: `id, date_rec, station_name,
         symb_name, unit_addr, verified` and the columns defined in a concrete model's
-        `get_unique_fields` function.
+        `get_unique_fields` method.
 
         Args:
             record_id (int): A value corresponding to a record's primary key.
@@ -91,6 +96,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         """
         from .db_core.models import Station, Symbol
 
+        # Include the columns that will be present in the results across all records
         columns = [
             self.model.id,
             func.to_char(self.model.date_rec, "YYYY-MM-DD HH24:MI:SS").label(
@@ -102,6 +108,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             self.model.verified,
         ]
 
+        # Extend to get model specific records columns
         columns.extend(self.model.get_unique_fields())
 
         stmt = (
@@ -110,7 +117,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             .outerjoin(Symbol, Symbol.id == self.model.symbol_id)
             .where(self.model.id == record_id)
         )
-  
+
         results = self.session.execute(stmt).one_or_none()
         return self.objs_to_dicts(results)
 
@@ -318,8 +325,8 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         """Updates a record's `symbol_id` and `engine_num` with a matching ID.
 
         The values passed in must be of the correct type to prevent an `IntegrityError`.
-        Fields with invalid types or values will not be reflected in the database
-        session.
+        Thus, this method ignores new values with invalid types such that they will not
+        be reflected in the database session.
 
         Args:
             record_id (int): The ID of the record to update.
@@ -347,11 +354,16 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         Executes a multi-stage SQL query that groups train records by unit address and
         station, where a new group is formed when either the station changes or a
-        duration of more than 2 hours occurs between records. Returns the most recent
-        record per group along with aggregate details such as `first_seen`, `last_seen`,
-        `occurrence_count`, and `duration`. A second query retrieves the total count of
-        grouped records for pagination. Optionally filters results by verification
-        status if provided.
+        duration of more than 2 hours elapses between records. Returns the most recent
+        record per group along with aggregate information such as `first_seen`,
+        `last_seen`, `occurrence_count`, and `duration`. The total count of grouped
+        records for pagination is appended to each collation result and can be accessed
+        via `total_count` (see the collation ORMs in `db_core.models` for more details).
+        Optionally filters results by verification status if provided.
+
+        This function uses collation views to query results which should already be
+        added to the Tracksense PostgreSQL database server. However, it can be found in
+        `backend/table.sql` if it is removed for any reason.
 
         Args:
             page (int): The page number to retrieve, 1-indexed.
@@ -369,11 +381,13 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                     fails.
         """
         try:
+            # Construct the statement via a PSQL view defined by the collation ORM
             stmt = select(self.collation)
 
             if verified is not None:
                 stmt = stmt.where(self.collation.verified == verified)
 
+            # Additional filters to limit the results on a page, and offset based on the page specified
             stmt = (
                 stmt.order_by(self.collation.date_rec.desc())
                 .limit(num_results)
@@ -381,11 +395,17 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             )
 
             results = self.session.execute(stmt).scalars().all()
+
+            # By returning scalars, collation instances are returned, which contain the total number of results
             count = results[0].total_count if results else 0
 
             return {
                 "results": self.objs_to_dicts(
-                    results, {"duration", "occurrence_count"}
+                    results,
+                    {
+                        "duration",
+                        "occurrence_count",
+                    },  # We need to convert `duration` and `occurrence_count` to strings
                 ),
                 "totalPages": ceil(count / num_results),
             }
@@ -491,7 +511,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             cols = [Station.station_name, Symbol.symb_name]
             if all_cols:
                 mapper = inspect(self.model)
-                cols.extend([getattr(self.model, c.key) for c in mapper.mapper.column_attrs])
+                cols.extend(
+                    [getattr(self.model, c.key) for c in mapper.mapper.column_attrs]
+                )
             else:
                 cols.extend(
                     [

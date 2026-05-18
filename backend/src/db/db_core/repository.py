@@ -35,15 +35,15 @@ FlexibleResult = SingleResult | CollectionResult
 
 class BaseRepository(Generic[ModelType]): 
     """Base class for a repository, supporting CRUD functionality for SQLAlchemy ORMs. This
-    class uses a generic, `ModelType`, which is bounded to the :class:`Base` class from
+    class uses a generic, `ModelType`, which is bounded to the `Base` class from
     `models`, defineing the model to operate on. Methods in this class return
     `ModelType`, but conversion to a `dict` as a return type is supported if the
     provided model extends `Base`.
 
     Args:
         Generic (ModelType): A type variable representing an SQLAlchemy ORM model which
-            extends :class:`Base`. The model provdided defines which table to manipulate
-            in a provided :class:`Session`.
+            extends `Base`. The model provdided defines which table to manipulate
+            in a provided `Session`.
         Notes: - All methods in this class `flush` model changes in the session;
             however, these changes are not reflected in the database until a higher
             layer commits them.
@@ -78,7 +78,7 @@ class BaseRepository(Generic[ModelType]):
     def get(self, pkey: Any, to_dict=True) -> SingleResult:
         """Retrieves an ORM from the session's current state. By default, this method
         returns a dictionary representation of the result, which can be turned off by
-        setting `to_dict` to `False`. A :class:`RepositoryNotFoundError` will is thrown
+        setting `to_dict` to `False`. A `RepositoryNotFoundError` will is thrown
         if the primary key cannot be found in the current session.
 
         Args:
@@ -325,7 +325,7 @@ class BaseRepository(Generic[ModelType]):
         Args:
             values (AsDictConvertible | Sequence[AsDictConvertible]): A single instance
                 or sequence of instances that support dictionary conversion, such as
-                :class:`Base` or SQLAlchemy :class:`Row` objects.
+                `Base` or SQLAlchemy `Row` objects.
             convert_to_string (set[str], optional): A set of keys specifying which
                 fields in the resulting dictionaries should have their values converted
                 to strings. Default value is an empty set, meaning no fields will be
