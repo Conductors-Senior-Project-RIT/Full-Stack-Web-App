@@ -95,10 +95,10 @@ def post_symbol():
         abort(400, "Must provide a symbol name to create a record!")
 
     # If a name is provided, then use the service to create a new symbol
-    service.create_symbol(symbol_name)
+    symb_id = service.create_symbol(symbol_name)
     session.commit()
     
-    return {}, 200
+    return {"id": symb_id}, 200
 
 
 @volunteer_bp.get("/api/record_verifier")

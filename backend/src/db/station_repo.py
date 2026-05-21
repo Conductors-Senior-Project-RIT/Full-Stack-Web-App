@@ -59,37 +59,22 @@ class StationRepository(BaseRepository[Station]):
         stmt = select(self.model.id).where(self.model.station_name == stat_name)
         result = self.session.execute(stmt).scalar_one_or_none()
         
-        if result:
+        if result is not None:
             raise RepositoryExistingRowError(
                 caller_name=self.__class__.__name__,
                 message=f"A station with the name {stat_name} already exists!",
                 show_error=True
             )
         
-        # Create the query to insert a new station record, returning the new id
-        stmt = (
-            insert(self.model)
-            .values(
-                station_name = stat_name,
-                passwd = hashed_password
-            )
-            .returning(self.model.id)
+        # Add a new station instance to the session
+        new_station = self.model(
+            station_name = stat_name, 
+            passwd = hashed_password
         )
-        
-        # Execute the query, and return the id
-        result = self.session.execute(stmt).scalar_one_or_none()
-        
-        # If the returned id is None, something went wrong
-        if not result:
-            raise RepositoryInternalError(
-                caller_name=self.__class__.__name__,
-                message="Could not create a new station, 0 rows created.",
-                show_error=True
-            )
-            
-        # Flush the new changes to the session if succcessful
+        self.session.add(new_station)
         self.session.flush()
-        return result
+        return new_station.id
+
 
 
     @repository_error_handler()
@@ -195,6 +180,7 @@ class StationRepository(BaseRepository[Station]):
             datetime: A timestamp of the result.
         """
         # Update a station's last seen to the current timestamp, returning the new value
+        # Probably can use ORM-style like update_station_password, but func.now() matches timezone in db
         stmt = (
             update(self.model)
             .values(last_seen = func.now())

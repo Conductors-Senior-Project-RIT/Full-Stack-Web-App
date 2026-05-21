@@ -9,6 +9,8 @@ from ..db.db_core.exceptions import (
     wrap_error_handler,
     LayerError,
 )
+from ..db.record_types import RepositoryRecordInvalid
+
 
 
 class BaseService:
@@ -20,7 +22,7 @@ class BaseService:
                 # Register class funtion from name (attr), with the error handler decorator wrapping function (value)
                 wrapped = wrap_error_handler(
                     func=value,
-                    error_map=_get_error_map(),
+                    error_map=SERIVCE_ERROR_MAP,
                     base_exception=ServiceInternalError,
                 )
                 wrapped._is_wrapped = True
@@ -56,15 +58,13 @@ class ServiceInvalidArgument(ServiceError):
 
 
 # Maps a Repository layer error to a corresponding Service layer error, and whether the lower layer message should be shown
-def _get_error_map():
-    from ..db.record_types import RepositoryRecordInvalid
-    return {
-        RepositorySessionError: (ServiceInternalError, True),
-        RepositoryExistingRowError: (ServiceExistingResourceError, True),
-        RepositoryParsingError: (ServiceInternalError, False),
-        RepositoryConnectionError: (ServiceTimeoutError, False),
-        RepositoryNotFoundError: (ServiceResourceNotFound, True),
-        RepositoryRecordInvalid: (ServiceInvalidArgument, True),
-        RepositoryInvalidArgumentError: (ServiceInvalidArgument, True),
-        RepositoryInternalError: (ServiceInternalError, False),
-    }
+SERIVCE_ERROR_MAP = {
+    RepositorySessionError: (ServiceInternalError, True),
+    RepositoryExistingRowError: (ServiceExistingResourceError, True),
+    RepositoryParsingError: (ServiceParsingError, False),
+    RepositoryConnectionError: (ServiceTimeoutError, False),
+    RepositoryNotFoundError: (ServiceResourceNotFound, True),
+    RepositoryRecordInvalid: (ServiceInvalidArgument, True),
+    RepositoryInvalidArgumentError: (ServiceInvalidArgument, True),
+    RepositoryInternalError: (ServiceInternalError, False),
+}

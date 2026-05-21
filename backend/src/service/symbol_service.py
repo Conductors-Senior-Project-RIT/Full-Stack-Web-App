@@ -13,5 +13,5 @@ class SymbolService(BaseService):
             return self._symbol_repo.get_symbol_id(symbol_name)
         
     def create_symbol(self, symbol_name: str):
-        self._symbol_repo.insert_new_symbol(symbol_name)
+        return self._symbol_repo.insert_new_symbol(symbol_name)
         
