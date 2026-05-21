@@ -15,7 +15,7 @@ There are three layers that exist in the form of Python modules: `backend/src/[a
 ### Summary
 
 ### Endpoints
-#### /symbols
+#### `/symbols`
 **Body:**
 ```json
 {
