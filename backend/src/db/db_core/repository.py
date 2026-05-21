@@ -29,8 +29,6 @@ ModelType = TypeVar("ModelType", bound=Base)
 SingleResult = ModelType | dict[str, Any]
 # Return type can be a list of ORMs or dicts
 CollectionResult = list[ModelType] | list[dict[str, Any]]
-# Return type can be a single or a collection of result(s)
-FlexibleResult = SingleResult | CollectionResult
 
 
 class BaseRepository(Generic[ModelType]): 
@@ -366,7 +364,7 @@ class BaseRepository(Generic[ModelType]):
                 try:
                     results.append(dict(row))
                 # Raise an exception if the row cannot be converted
-                except:
+                except Exception:
                     raise RepositoryParsingError(
                         cls.__name__,
                         "objs_to_dicts",

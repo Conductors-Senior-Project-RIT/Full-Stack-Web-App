@@ -1,6 +1,6 @@
 from typing import Optional, Type
 
-from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError, SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
+from sqlalchemy.exc import DataError, IntegrityError, MultipleResultsFound, NoResultFound, ProgrammingError, SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
 
 from ...global_core.exceptions import LayerError, layer_error_handler, translate_error, wrap_error_handler
 
@@ -39,6 +39,8 @@ REPOSITORY_ERROR_MAP = {
         (RepositoryConnectionError, True),
     (TypeError, KeyError, ValueError, IndexError, ZeroDivisionError, 
      DataError, ProgrammingError, IntegrityError): (RepositoryParsingError, True),
+    NoResultFound: (RepositoryNotFoundError, True),
+    MultipleResultsFound: (RepositoryExistingRowError, True),
     SQLAlchemyError: (RepositoryInternalError, True)
 }
 

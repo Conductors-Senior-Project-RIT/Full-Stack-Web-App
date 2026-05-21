@@ -82,7 +82,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         return self.session.query(func.count(self.model.id)).scalar()
 
     @repository_error_handler()
-    def get_train_history(self, record_id: int) -> list[dict[str, Any]]:
+    def get_train_history(self, record_id: int) -> dict[str, Any]:
         """Returns a train record with the following columns: `id, date_rec, station_name,
         symb_name, unit_addr, verified` and the columns defined in a concrete model's
         `get_unique_fields` method.
@@ -118,7 +118,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             .where(self.model.id == record_id)
         )
 
-        results = self.session.execute(stmt).one_or_none()
+        results = self.session.execute(stmt).one()
         return self.objs_to_dicts(results)
 
     @repository_error_handler()
