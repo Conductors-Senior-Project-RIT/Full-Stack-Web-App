@@ -1,6 +1,6 @@
 # Backend Documentation
 
-The project we received at the beginning of the year was essentially a prototype; therefore, limited effort was dedicated to planning and building a robust backend architecture. Everything in the backend was directly derived from the content we learned in SWEN344, and all logic was embedded into the Flask endpoint handlers.
+The project we received at the beginning of the year was essentially a prototype and limited effort was dedicated to planning and building a robust backend architecture. Everything in the backend was directly derived from the content we learned in SWEN344, and all logic was embedded into the Flask endpoint handlers.
 
 Our team decided to dedicate most of our time to refactoring the architecture of the backend in hopes of reducing the degree of technical debt in the future. We settled upon a layered architecture, which would delegate functional reponsibilities that span across the layers. Overall, we believe that this would ease the process modifying anything in the backend.
 
