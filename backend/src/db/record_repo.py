@@ -419,7 +419,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             )
 
     def verify_record(
-        self, record_id: int, symbol_id: int, locomotive_num: str
+        self, record_id: int, symbol_id: int, locomotive_num: str | None
     ) -> dict[str, Any]:
         """Verifies a record by updating its symbol ID, locomotive number, and verified
         status.
@@ -431,7 +431,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         Args:
             record_id (int): The primary key of the record to verify.
             symbol_id (int): The updated symbol ID of the record.
-            locomotive_num (str): The updated locomotive number of the record.
+            locomotive_num (str | None): The updated locomotive number of the record.
 
         Returns:
             dict[str, Any]: The updated record as a dictionary representation.
@@ -440,12 +440,12 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             `RepositoryError`: If an exception occurs for any reason.
         """
         try:
-            # Assign a new symbol and locomotive number to a newly verified record if provided.
-            values = {
-                "symbol_id": symbol_id,
-                "locomotive_num": locomotive_num,
-                "verified": True,
-            }
+            values = {"verified": True}
+            
+            if symbol_id > 0:
+                values["symbol_id"] = symbol_id
+            if locomotive_num is not None:
+                values["locomotive_num"] = locomotive_num
 
             return self.update_with_pk(record_id, values)  # Already flushes
 

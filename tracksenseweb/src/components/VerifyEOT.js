@@ -60,7 +60,7 @@ const VerifyEOT = () => {
             id: modalId,
             type: 1,
             symbol: symbolId,
-            engine_number: String(modalLocomotiveNum)
+            locomotive: String(modalLocomotiveNum)
           })
         });
         if (verifyResponse.ok) {
@@ -196,6 +196,7 @@ const VerifyEOT = () => {
                           <th>Location</th>
                           <th>Timestamp</th>
                           <th>Unit Address</th>
+                          <th>Locomotive</th>
                           <th>Pressure</th>
                           <th>Motion</th>
                           <th>Marker Light</th>
@@ -203,6 +204,7 @@ const VerifyEOT = () => {
                           <th>Battery Cond.</th>
                           <th>Battery Charge</th>
                           <th>Arm Status</th>
+                          <th>Actions</th>
                       </tr>
                   </thead>
                   <tbody>
@@ -211,6 +213,7 @@ const VerifyEOT = () => {
                               <td>{item.station_name}</td>
                               <td>{item.date_rec}</td>
                               <td>{item.unit_addr}</td>
+                              <td>{item.locomotive_num}</td>
                               <td>{item.brake_pressure}</td>
                               <td>{item.motion}</td>
                               <td>{item.marker_light}</td>

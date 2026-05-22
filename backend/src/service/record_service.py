@@ -96,8 +96,8 @@ class RecordService(BaseService):
         return self.get_first_repository().get_record_collation(page, RESULTS_NUM, False)
         
         
-    def verify_record(self, record_id: int, symbol_id: int, engine_id: int):
-        self.get_first_repository().verify_record(record_id, symbol_id, engine_id)
+    def verify_record(self, record_id: int, symbol_id: int, locomotive_num: str | None):
+        self.get_first_repository().verify_record(record_id, symbol_id, locomotive_num)
         
         
     # Time frame pull

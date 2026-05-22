@@ -130,9 +130,9 @@ def get_records():
 @volunteer_bp.post("/api/record_verifier")
 @role_required(0, 1)
 def post_record():
-    """Verifies a train record by assigning a symbol and engine number.
+    """Verifies a train record by assigning a symbol and locomotive number.
 
-    Requires 'id', 'type', 'symbol', and 'engine_number' in the request body.
+    Requires 'id', 'type', 'symbol', and 'locomotive' in the request body.
 
     Returns:
         Response: Returns an empty response with a 200 status code.
@@ -144,7 +144,7 @@ def post_record():
     parser.add_argument("id", type=int, default=-1)
     parser.add_argument("type", type=int, default=-1)
     parser.add_argument("symbol", type=int, default=-1)
-    parser.add_argument("engine_number", type=str, default="unknown")
+    parser.add_argument("locomotive", type=str, default=None)
     args = parser.parse_args()
         
     arg_validators = {
@@ -158,6 +158,6 @@ def post_record():
     
     session = db.session
     record_service = RecordService(session, args.type)
-    record_service.verify_record(args.id, args.symbol, args.engine_number)
+    record_service.verify_record(args.id, args.symbol, args.locomotive)
     session.commit()
     return {}, 200

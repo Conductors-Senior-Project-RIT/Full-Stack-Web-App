@@ -196,3 +196,45 @@ GET https://followthatfred.com/api/record_verifier?page=1&type=2
     "totalCount": 5
 }
 ```
+
+## POST `/record_verifier`
+Verifies a train record by assigning a symbol and engine number. *Should be a PUT request, but last year's team used POST.*
+
+### Body Parameters
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `id` | integer | Yes | ID of the record to verify. Must be greater than 1. |
+| `type` | integer | Yes | The type of the train record that is being verified. EOT: 1, HOT: 2, DPU: 3. Currently, DPU is not supported. |
+| `symbol` | integer | No | The ID of the symbol being assigned to a record. This column is not updated if a value is not provided, or the value is less than `1`. |
+| `locomotive` | string | No | The locomotive number being assigned to a record. This column is not updated if a value is not provided. |
+
+
+
+### Response `200`
+
+Returns an empty JSON object on success.
+
+
+### Example
+
+**Request:**
+
+```
+GET https://followthatfred.com/api/record_verifier
+```
+
+```json
+{
+    "id": 1,
+    "type": 1,
+    "symbol": 2,
+    "locomotive": "7475"
+}
+```
+
+**Response:**
+
+```json
+{}
+```

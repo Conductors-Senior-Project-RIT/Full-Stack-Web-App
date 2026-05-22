@@ -174,7 +174,7 @@ class RecordRepositoryTestMixin:
 
     def test_verify_record(self):
         """Test the various branches for `verify_record()` on provided `self.repo`."""
-        sym, loc = 2, "RG00"
+        sym, loc = 2, "LOC12"
 
         # Get the updated instance in session
         updated = self.repo.verify_record(1, sym, loc)

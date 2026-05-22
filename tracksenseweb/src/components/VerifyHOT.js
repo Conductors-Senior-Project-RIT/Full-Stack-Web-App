@@ -27,7 +27,7 @@ const VerifyHOT = () => {
   const [modalId, setModalId] = useState(null);
   const [modalUnitAddr, setModalUnitAddr] = useState(null);
   const [modalSymbol, setModalSymbol] = useState(null);
-  const [modalEngineNum, setModalEngineNum] = useState(null);
+  const [modalLocomotiveNum, setModalLocomotiveNum] = useState(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "1");
@@ -91,7 +91,7 @@ const VerifyHOT = () => {
               id: modalId,
               type: 2,
               symbol: symbolId,
-              engine_number: String(modalEngineNum),
+              locomotive: String(modalLocomotiveNum),
             }),
           })
           .then(response => response.ok)
@@ -111,7 +111,7 @@ const VerifyHOT = () => {
     setModalId(item.id);
     setModalUnitAddr(item.unit_addr);
     setModalSymbol(item.symbol);
-    setModalEngineNum(item.locomotive_num);
+    setModalLocomotiveNum(item.locomotive_num);
     setShow(true);
   };
 
@@ -175,11 +175,11 @@ const VerifyHOT = () => {
               <Typeahead options={symbols} onInputChange={(e) => {setModalSymbol(e.target.value);}} onChange={(val) => { setModalSymbol(val[0]);}} value={modalSymbol}/>
             </Form.Group>
             <Form.Group>
-              <Form.Label>Engine Number</Form.Label>
+              <Form.Label>Locomotive Number</Form.Label>
               <Form.Control
                 type="text"
-                value={modalEngineNum}
-                onChange={(e) => setModalEngineNum(e.target.value)}
+                value={modalLocomotiveNum}
+                onChange={(e) => setModalLocomotiveNum(e.target.value)}
               />
             </Form.Group>
           </Form>
