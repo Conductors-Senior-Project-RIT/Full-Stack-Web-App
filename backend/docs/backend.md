@@ -13,9 +13,10 @@ There are three layers that exist in the form of Python modules: `backend/src/[a
 **The layered architecture above provides a high-level illustration of the different interactions and dependencies in the system.** *Note: Additional database tables exist but have been excluded for simplicity.*
 
 
+# Layer-Specific Documentation
+- ### [API](api.md)
+- ### [Service](relative/path/to/file.md)
+- ### [Repository](relative/path/to/file.md)
 
-## Service
-
-## Repository
-
-## Error Handling
+# Other Documentation
+- ### [Error Handling](relative/path/to/file.md)

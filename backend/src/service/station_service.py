@@ -1,3 +1,4 @@
+from datetime import datetime
 import hashlib
 import random
 import string
@@ -43,7 +44,22 @@ class StationService(BaseService):
 
     # -- Station Online -- #
     def get_last_seen(self, station_name: str) -> str:
-        return self._station_repo.get_last_seen(station_name)
+        dt = self._station_repo.get_last_seen(station_name)
+        return self.format_date(dt)
         
     def update_last_seen(self, station_id: int) -> str:
-        return self._station_repo.update_last_seen(station_id)
+        dt = self._station_repo.update_last_seen(station_id)
+        return self.format_date(dt)
+
+    def format_date(self, dt: datetime) -> str:
+        """Formats a datetime object into a string. If the date is today, it is formatted
+        as `HH:MM AM/PM`; otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`.
+
+        Args:
+            date (datetime): The datetime object to format.
+
+        Returns:
+            str: The formatted date string.
+        """
+        return dt.strftime("%I:%M %p") if dt.date() == datetime.today().date() \
+            else dt.strftime("%b %d, %Y at %I:%M %p")

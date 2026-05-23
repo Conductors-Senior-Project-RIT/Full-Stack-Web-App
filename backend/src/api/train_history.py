@@ -19,7 +19,6 @@ class HistoryDB(Resource):
         Returns train records of a specified type using provided request parameters.
         "typ": Specifies what type of train record(s) to return. 1: EOT, 2: HOT, 3: DPU (default -1: collection of EOT)
         "id": The id of a train record to retrieve.
-        "page": The page of records to return.
 
         Returns:
             Response: Returns an individual train record response payload with a status code. Response payload may include a
@@ -29,7 +28,7 @@ class HistoryDB(Resource):
         typ = request.args.get("type", default=-1, type=int)
         id = request.args.get("id", default=-1, type=int)
 
-        # Check our type and page arguments (typ checked in strategy creation)
+        # Check our type and page arguments, type is checked in service constructor.
         if id < 1:
             raise BadRequest(f"Record ID must be greater than 1! Provided: {id}")
         
@@ -74,7 +73,7 @@ class HistoryDB(Resource):
         
         # TODO: Change this in standalone app
         args["station_recorded"] = args["station_id"]
-        typ = args["type"]
+        typ = args.pop("type")
         
         session = db.session
 

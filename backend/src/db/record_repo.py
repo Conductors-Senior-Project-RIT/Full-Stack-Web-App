@@ -147,10 +147,14 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         """
         recovery_request = True
 
-        # Check to see if any of the keys in the 'args' dict aren't a column in the table
+        # Get only the columns actually mapped on the concrete model
+        mapper = inspect(self.model)
+        mapped_keys = {attr.key for attr in mapper.mapper.columns}
+
         sql_args = {}
         for key, value in args.items():
-            if hasattr(self.model, key):
+            if key in mapped_keys:
+                print(f"Adding {key} to sql args with value {value}")
                 sql_args[key] = value
 
         # If the datetime a record was received is not passed in 'args', add 'datetime_string' into the dictionary.

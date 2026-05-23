@@ -161,7 +161,7 @@ class StationRepository(BaseRepository[Station]):
             )
         
         # Format the seen date based on whether it was seen today    
-        return self.format_date(result)
+        return result
 
         
     @repository_error_handler()
@@ -198,18 +198,5 @@ class StationRepository(BaseRepository[Station]):
                 show_error=True
             )
             
-        return self.format_date(result)
-    
-    
-    def format_date(self, dt: datetime) -> str:
-        """Formats a datetime object into a string. If the date is today, it is formatted
-        as `HH:MM AM/PM`; otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`.
+        return result
 
-        Args:
-            date (datetime): The datetime object to format.
-
-        Returns:
-            str: The formatted date string.
-        """
-        return dt.strftime("%I:%M %p") if dt.date() == datetime.today().date() \
-            else dt.strftime("%b %d, %Y at %I:%M %p")

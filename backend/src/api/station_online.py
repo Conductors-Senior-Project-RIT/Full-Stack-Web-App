@@ -13,12 +13,11 @@ class StationOnline(Resource):
 
         session = db.session
         formatted_date = StationService(session).get_last_seen(station)
-        session.commit()
 
         return {"last_seen": formatted_date}, 200
     
 
-    def put(self):
+    def post(self):
         data = request.get_json()
         stat_id = int(data.get("station_id"))
 
