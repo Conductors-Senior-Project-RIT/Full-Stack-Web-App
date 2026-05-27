@@ -78,7 +78,7 @@ def create_app(config_name=None):
     from .src.api.station_auth import StationAuth
     from .src.api.station_online import StationOnline
     # from .src.api.symbol_api import SymbolAPI  # moved to volunteer handler since only volunteers need to interact with symbols
-    from .src.api.time_frame_pull import recent_activities
+    from .src.api.time_frame_pull import RecentActivities
     from .src.api.train_history import HistoryDB
 
     # register routes (some are useless)
@@ -91,7 +91,7 @@ def create_app(config_name=None):
     )  # Register the load example data resource
     api.add_resource(SignalUpdater, "/api/add_signal_info")
     api.add_resource(StationAuth, "/api/station_auth")
-    api.add_resource(recent_activities, "/api/recent_activities")
+    api.add_resource(RecentActivities, "/api/recent_activities")
     # api.add_resource(SymbolAPI, "/api/symbols")  # moved to volunteer handler since only volunteers need to interact with symbols
     api.add_resource(PushoverUpdater, "/api/PushoverUpdater")
     api.add_resource(RecordCollation, "/api/record_collation")

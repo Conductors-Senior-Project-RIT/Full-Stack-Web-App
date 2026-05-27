@@ -6,15 +6,20 @@ from ..service.record_service import RecordService
 
 
 class SignalUpdater(Resource):
-    def post(self):
-        """
-        Updates a record's engine number and/or symbol ID based on the provided arguments in the request body.
-        
-        ** Should be a PUT request but previous team used POST for this endpoint so we will keep it as is for now to 
-        avoid breaking the frontend. **
+    def put(self):
+        """Updates a record's engine number and/or symbol ID based on the provided
+        arguments in the request body.
+
+        Args:
+            type (int): The type of train record to update. EOT: 1, HOT: 2, DPU: 3.
+            id_num (int): The ID of the record to update. Must be greater than 0.
+            symbol_id (int, optional): The new symbol ID to set for the record. Must be
+                greater than or equal to 0. Default: -1 (undefined)
+            engi_number_id (int, optional): The new engine number ID to set for the
+                record. Must be greater than or equal to 0. Default: -1 (undefined)
 
         Returns:
-            int: The status code of the request.
+            Response: The status code of the request.
         """
         parser = reqparse.RequestParser()
         parser.add_argument("type", default=-1, type=int)
@@ -23,11 +28,11 @@ class SignalUpdater(Resource):
         parser.add_argument("engi_number_id", default=-1, type=int)
         args = parser.parse_args()
 
-        # It is clear that the primary key of a record must be greater than 1
+        # The primary key of a record must be greater than 1
         if args["id_num"] < 1:
             raise BadRequest(f"Ivalid record ID: {args["id_num"]}")
         
-        # In order to update the record's fields, engine number and symbol id must be greater than 1
+        # In order to update the record's fields, engine number and symbol id must also be greater than 1
         if args["engi_number_id"] < 0 and args["symbol_id"] < 0:
             raise BadRequest(
                 f"Both engine [{args['engi_number_id']}] and symbol ID [{args['symbol_id']}] cannot be undefined (-1)"
@@ -38,8 +43,6 @@ class SignalUpdater(Resource):
         
         # Will raise an exception if the provided record type is not valid
         service = RecordService(session, args["type"])
-        
-        # Update the symbol id and engine number if valid
         service.signal_update(args["id_num"], args["symbol_id"], args["engi_number_id"])
         
         # Commit the changes of the session to the database if successful
