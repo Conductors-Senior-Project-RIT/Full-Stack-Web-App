@@ -27,7 +27,7 @@ class recent_activities(Resource):
             raise BadRequest("Invalid time range!")
 
         session = db.session
-        # We don't need type
+        # If type is not provided, the service pulls from all repositories
         record_service = RecordService(session, typ)
         results = record_service.time_frame_pull(
             time_range, recent, stat_id, station
