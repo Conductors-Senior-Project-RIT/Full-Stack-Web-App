@@ -40,7 +40,7 @@ class RecordCollation(Resource):
         
         # Will raise an exception if the provided record type is not valid
         record_service = RecordService(session, typ)
-        results = record_service.collate_records(page)
+        results = record_service.get_collated_records(page)
         
         # The service already returns a JSON-serializable response, so just return the result
         return results, 200

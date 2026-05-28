@@ -134,7 +134,7 @@ def get_records():
 
     # Call the record service to retrieve the unverified records, and return the results
     record_service = RecordService(session, typ)
-    results = record_service.get_unverified_records(page)
+    results = record_service.get_collated_records(page, verified=False)
     return results, 200
 
 

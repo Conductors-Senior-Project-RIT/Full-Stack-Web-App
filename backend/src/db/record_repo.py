@@ -352,7 +352,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
     def get_record_collation(
         self, page: int, num_results: int, verified: Optional[bool] = None
-    ) -> dict[str, list | int]:
+    ) -> tuple[list[dict], int]:
         """Retrieves a paginated collation of train records grouped by unit address and
         station.
 
@@ -376,9 +376,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 `verified` status. If None, no filter is applied. Defaults to None.
 
         Returns:
-            dict[str, list | int]: A dictionary containing: - `results` (list): The
-                paginated and collated train records as dictionaries. - `totalPages`
-                (int): The total number of pages based on `num_results`.
+            tuple[list[dict], int]: A tuple containing: 
+                - list: The paginated and collated train records as dictionaries. 
+                - int: The total number of pages based on `num_results`.
 
         Raises:
             `RepositoryError`: If any stage of the query, count, or result parsing
@@ -402,17 +402,12 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
             # By returning scalars, collation instances are returned, which contain the total number of results
             count = results[0].total_count if results else 0
+            
+            # Convert `duration` and `occurrence_count` to strings manually
+            records = self.objs_to_dicts(results, {"duration", "occurrence_count"})
+            total_pages = ceil(count / num_results)
 
-            return {
-                "results": self.objs_to_dicts(
-                    results,
-                    {
-                        "duration",
-                        "occurrence_count",
-                    },  # We need to convert `duration` and `occurrence_count` to strings
-                ),
-                "totalPages": ceil(count / num_results),
-            }
+            return records, total_pages
 
         except Exception as e:
             raise repository_error_translator(

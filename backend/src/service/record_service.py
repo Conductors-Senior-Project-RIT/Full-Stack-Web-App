@@ -1,10 +1,9 @@
 import datetime
-from typing import Any
+from typing import Any, Optional
 import zoneinfo
 
 import backend.src.db.record_types as record_types
 from ..db.record_repo import RecordRepository
-from ..db.station_repo import StationRepository
 from ..service.service_core import *
 
 # Constant for number of results per page during collation
@@ -17,7 +16,6 @@ class RecordService(BaseService):
             if record_type is not None else 
             record_types.get_all_repositories(session)
         )
-        self._station_repo = StationRepository(session)
         self._session = session
         
     
@@ -77,32 +75,27 @@ class RecordService(BaseService):
     # Signal Update
     def signal_update(self, record_id: int, symbol_id: int, engine_num: int):
         result = self.get_first_repository().update_signal_values(record_id, symbol_id, engine_num)
-        if result is None:
-            raise ServiceResourceNotFound(
-                caller_name=self.__class__.__name__,
-                message=f"Could not find record with id {record_id} to update signal values, 0 rows updated.",
-                show_error=True
-            )
         return result["id"]
 
 
     # Data Collation
-    def collate_records(self, page: int) -> dict[str, list | int]:
-        return self.get_first_repository().get_record_collation(page, RESULTS_NUM)
-    
-    
-    # Log Verification
-    def get_unverified_records(self, page: int) -> dict[str, list | int]:
-        return self.get_first_repository().get_record_collation(page, RESULTS_NUM, False)
-        
-        
+    def get_collated_records(self, page: int, verified: Optional[bool] = None) -> dict[str, list | int]:
+        results, pages = self.get_first_repository().get_record_collation(page, RESULTS_NUM, verified)
+        return {"results": results, "totalPages": pages}
+
+
     def verify_record(self, record_id: int, symbol_id: int, locomotive_num: str | None):
         self.get_first_repository().verify_record(record_id, symbol_id, locomotive_num)
         
         
     # Time frame pull
     def time_frame_pull(self, time_range: str, recent: bool, station_id: int, station_name: str):
+        # This is the only method that needs to access StationRepository.
+        from ..db.station_repo import StationRepository
+        
         try:
+            station_repo = StationRepository(self._session)
+            
             time_increments = time_range.split(":")
             est = zoneinfo.ZoneInfo("America/New_York")
             curr_date = datetime.datetime.now(tz=est).replace(tzinfo=None)
@@ -115,7 +108,7 @@ class RecordService(BaseService):
             
             if station_id == -1:
                 if station_name:
-                    station_id = self._station_repo.get_station_id(station_name)
+                    station_id = station_repo.get_station_id(station_name)
                 else:
                     raise ServiceInvalidArgument(
                         self.__class__.__name__,

@@ -12,7 +12,6 @@ from ..db.db_core.exceptions import (
 from ..db.record_types import RepositoryRecordInvalid
 
 
-
 class BaseService:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

@@ -3,6 +3,8 @@ from threading import Thread
 from brevo import Brevo, SendTransacEmailRequestSender, SendTransacEmailRequestToItem
 from brevo.core.api_error import ApiError
 
+from .service_core import ServiceInternalError
+
 class EmailService:
     """ 
     currently using brevo: https://developers.brevo.com/docs/api-clients/python 
@@ -23,7 +25,7 @@ class EmailService:
         
         Synchronous email send (default behavior will block main thread -> background jobs (flask docs) can handle cleanly.
         """        
-        try: # at the moment: email errors are caught silently and not bubbled
+        try:
             self.client.transactional_emails.send_transac_email(
                 subject=subject,
                 html_content=email_body,
@@ -38,10 +40,21 @@ class EmailService:
                     )
                 ],
             )
-        except ApiError as e:
-            print(f"Email failed to send: {e.status_code} {e.body}")
+
         except Exception as e:
-            print(f"Unepected error sending email: {e}")
+            # If the error is an ApiError, we can extract the status code and body for more context.
+            if isinstance(e, ApiError):
+                msg = f"Email failed to send: {e.status_code} {e.body}"
+            
+            # Otherwise, we just log the error message.
+            else:
+                msg = f"Unexpected error sending email: {e}"
+            
+            # Hide the error details from the user, but keep the message for debugging purposes.
+            raise ServiceInternalError(
+                self.__class__.__name__,
+                message=msg, show_error=False
+            )
 
 
     def send_email(self, subject: str, email_body: str, send_to_email: str, send_to_name: str | None=None, sync=False):
@@ -67,7 +80,6 @@ class EmailService:
 
         subject = "Welcome to Follow That FRED!"
         email_body = f"<h1>Hello {send_to_name}, thanks for registering with us!<h1>"
-        send_to_email = send_to_email
 
         self.send_email(subject, email_body, send_to_email, send_to_name)
 
