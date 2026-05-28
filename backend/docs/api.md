@@ -252,7 +252,7 @@ GET https://followthatfred.com/api/record_verifier
 
 Most of the endpoints relating to Stations were unused but have been kept in the repository if needed in the future. Only the used endpoints are documented here.
 
-## GET `station_online`
+## GET `/station_online`
 Retrieves the time and/or date that the server received a ping notification from a station.
 
 Uses `StationService`.
@@ -293,7 +293,7 @@ GET https://followthatfred.com/api/station_online?station_name=Solvay
 }
 ```
 
-## POST `station_online`
+## POST `/station_online`
 
 Updates the time and date a station pinged the server. This endpoint serves as the point a station can ping the server. Should be a PUT
 request, but last year's team used a POST.
