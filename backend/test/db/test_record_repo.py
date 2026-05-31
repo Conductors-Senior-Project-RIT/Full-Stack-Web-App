@@ -17,7 +17,7 @@ from backend.src.db.db_core.exceptions import (
     RepositoryParsingError,
 )
 from backend.test.base_test_case import BaseTestCase
-from .test_utils import compare_results_ordered, collation_valid
+from backend.test.db.test_utils import compare_results_ordered, collation_valid
 
 # Current test data has 8 records
 TEST_RECORD_COUNT = 8
@@ -37,25 +37,32 @@ class RecordRepositoryTestMixin:
 
     def test_create_train_record(self):
         """Test the various branches for `create_train_record()` on provided `self.repo`."""
-        date_rec = datetime.strptime(
-            "2026-01-08 04:05:06:-0400", "%Y-%m-%d %H:%M:%S:%z"
-        )
+        date_rec = "2026-01-08 04:05:06"
+        dt_rec = datetime.fromisoformat(date_rec)
         data = {"date_rec": date_rec, "unit_addr": "CT12", "station_recorded": 2}
 
         # Test recovery request creation
-        result_id, result_recov = self.repo.create_train_record(data, None)
+        result_id, result_recov = self.repo.create_train_record(data, dt_rec)
         self.assertEqual(TEST_RECORD_COUNT + 1, result_id)
         self.assertEqual(True, result_recov)
+        
+        # Check that the datetime is correctly stored as a datetime object in the database
+        new_record = self.repo.get(result_id, False)
+        self.assertEqual(new_record.date_rec, dt_rec)
 
         # Test non-recovery request creation
         data["date_rec"] = None
-        result_id, result_recov = self.repo.create_train_record(data, date_rec)
+        result_id, result_recov = self.repo.create_train_record(data, dt_rec)
         self.assertEqual(TEST_RECORD_COUNT + 2, result_id)
         self.assertEqual(False, result_recov)
+        
+        # Again make sure the date_rec is correctly stored as a datetime object in the database
+        new_record = self.repo.get(result_id, False)
+        self.assertEqual(new_record.date_rec, dt_rec)
 
         # Test that fields not in model are removed
         data["armed"] = "and hammered"
-        result_id, _ = self.repo.create_train_record(data, date_rec)
+        result_id, _ = self.repo.create_train_record(data, dt_rec)
         new_record = self.repo.get(result_id, True)
         self.assertNotIn("armed", new_record)
 
@@ -98,11 +105,15 @@ class RecordRepositoryTestMixin:
         expected = self.repo.create([data for _ in range(2)])
 
         # Test successful retrieval of new record
-        results = self.repo.get_recent_trains("3333", 2)
+        results = self.repo.get_recent_trains("3333", 2, id_only=False)
         self.assertListEqual(expected, results)
+        
+        # Test retrieval of only ids
+        results = self.repo.get_recent_trains("3333", 2, id_only=True)
+        self.assertListEqual([r["id"] for r in expected], results)
 
         # Test failed retrieval of records
-        results = self.repo.get_recent_trains("bruh", 1)
+        results = self.repo.get_recent_trains("bruh", 1, id_only=False)
         self.assertListEqual([], results)
 
     def test_add_new_pin(self):
@@ -244,8 +255,8 @@ class RecordRepositoryTestMixin:
         valid, msg = compare_results_ordered([results], [expected_record])
         self.assertTrue(valid, msg)
 
-        results = self.repo.get_train_history(17)
-        self.assertIsNone(results)
+        with self.assertRaises(RepositoryNotFoundError):
+            self.repo.get_train_history(17)
 
     def test_get_record_collation(self):
         """Test the various branches for `get_record_collation()` on provided `self.repo`."""
@@ -315,33 +326,33 @@ class RecordRepositoryTestMixin:
         # All results in one page
         results = self.repo.get_record_collation(1, 250, None)
         valid, message = collation_valid(
-            {"results": expected, "totalPages": 1}, results
+            (expected, 1), results
         )
         self.assertTrue(valid, message)
 
         # First page of 2
         results = self.repo.get_record_collation(1, 2, None)
         valid, message = collation_valid(
-            {"results": expected[0:2], "totalPages": 3}, results
+            (expected[0:2], 3), results
         )
         self.assertTrue(valid, message)
 
         # Last page
         results = self.repo.get_record_collation(3, 2, None)
         valid, message = collation_valid(
-            {"results": expected[4:], "totalPages": 3}, results
+            (expected[4:], 3), results
         )
         self.assertTrue(valid, message)
 
         # None verified yet
         results = self.repo.get_record_collation(1, 250, True)
-        valid, message = collation_valid({"results": [], "totalPages": 0}, results)
+        valid, message = collation_valid(([], 0), results)
         self.assertTrue(valid, message)
 
         # All unverified
         results = self.repo.get_record_collation(1, 250, False)
         valid, message = collation_valid(
-            {"results": expected, "totalPages": 1}, results
+            (expected, 1), results
         )
         self.assertTrue(valid, message)
 

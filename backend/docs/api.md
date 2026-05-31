@@ -201,8 +201,8 @@ GET https://followthatfred.com/api/record_verifier?page=1&type=2
 }
 ```
 
-## POST `/record_verifier`
-Verifies a train record by assigning a symbol and engine number. *Should be a PUT request, but last year's team used POST.*
+## PUT `/record_verifier`
+Verifies a train record by assigning a symbol and locomotive number.
 
 Uses `RecordService`.
 

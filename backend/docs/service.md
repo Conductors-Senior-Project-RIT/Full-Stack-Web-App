@@ -49,28 +49,182 @@ This layer employs the standardized functionality from `global_core.exceptions` 
 
 Handles business logic for signal/train record related data processing. Inherits [`BaseService`](#base-service).
 
-## \_\_init\_\_
+## `__init__`
 
-Upon initialization, a `RecordRepository` is instantiated using the provided `record_type`. Uses `get_record_repository` or `get_all_repositories` if `record_type` is `None`, which are factory functions in `db.record_types` designed for `RecordRepository` initialization. Repositories are always stored in a list; use `get_first_repository` to access the repository passed in through the constructor. The service instance is initialized with a SQLAlchemy session to be shared across all repository instances.
+Upon initialization, a `RecordRepository` is instantiated using the provided `record_type`. Uses `get_record_repository` or `get_all_repositories` (if `record_type` is `None`), which are factory functions in `db.record_types` designed for `RecordRepository` initialization. Repositories are always stored in a list; use `get_first_repository` to access the repository passed in through the constructor. The service instance is initialized with a SQLAlchemy session to be shared across all repository instances.
 
-## get_train_history
+If an invalid value is passed in for `record_type`, a [`ServiceInvalidArgument`](#error-types) is raised.
 
-## post_train_history
+### Arguments
 
-### check_recent_notification
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `session` | Session | Yes | The SQLAlchemy session to be used for database transactions in the service's repositories. |
+| `record_type` | int *or* None | Yes | An integer corresponding to a record type, or None if repositories for all record types should be initialized. The integer values corresponding to each record type are defined in [`db.record_types`]().
 
-### add_new_pin
+## `get_train_record`
+Queries the repository created in the constructor to return the signal/train record with the provided ID. The columns queried vary for each record type.
 
-### attempt_auto_fill
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `record_id` | int | Yes | A value corresponding to a record's primary key. |
 
-## signal_update
+### Returns
+*dict*: A dictionary with keys associated to predefined columns and their values.
 
-## get_collated_records
+***All Records Return the Following Columns:***
+| Name | Type |
+|------|------|
+| `id` | int |
+| `date_rec` | str |
+| `station_name` | str |
+| `symb_name` | str |
+| `unit_addr` | str |
+| `verified` | bool |
 
-## verify_record
+&nbsp;
 
-## time_frame_pull
+***EOT Records Return the Following Additional Columns:***
+| Name | Type |
+|------|------|
+| `brake_pressure` | str |
+| `motion` | str |
+| `marker_light` | str |
+| `turbine` | str |
+| `batter_cond` | str |
+| `battery_charge` | str |
+| `arm_status` | str |
+| `signal_strength` | str |
 
+&nbsp;
+
+***HOT Records Return the Following Additional Columns:***
+| Name | Type |
+|------|------|
+| `frame_sync` | str |
+| `command` | str |
+| `checkbits` | str |
+| `parity` | str |
+
+## `create_train_record`
+
+Creates a new record in the database. Afterwards, the following logic occurs:
+- Attempt to automatically update a new record's symbol ID and engine number from the previous most recent record: [`attempt_auto_fill`](#attempt_auto_fill).
+- Update the recency status of the previous record so that the newly created record is the most recent: [`add_new_pin`](#add_new_pin).
+- Check to see if a notification needs to be sent: [`check_recent_notification`](#check_recent_notification).
+- Send a notification to subscribed users using a notification service (future implementation).
+
+The notification system was broken when we received the project; however, the request should also determine whether input data warrants sending a notification, and then make the appropriate calls to notify users about the new train data. A service for sending notifications could be implemented in a similar way like [`EmailService`](#emailservice).
+
+Creates a record using the repository created during initialization.
+
+
+### Arguments
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `args` | dict | Yes | A dictionary containing the values of the new record, where the keys correspond to the database columns in a record's table. See the repository documentation for details about the required values: [`create_train_record`](./repository.md). |
+
+### Returns
+*int*: ID of the newly created record.
+
+## `check_recent_notification`
+Checks if any train records with the specified unit address have been detected at a station within the last 10 minutes. If records exist, then this method indicates that a notification should be sent. Checks for records using the repository created during initialization. Called in [`create_train_record`](#create_train_record). 
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `unit_addr` | str | Yes | The unit address corresponding to a record. |
+| `station_id` | str | Yes | The station ID a signal was detected at. |
+
+### Returns
+*bool*: True if a notification should be sent out for a new record; otherwise, false.
+
+
+## `add_new_pin`
+Updates the most recent record with the provided unit address using the repository created during initialization. Called in [`create_train_record`](#create_train_record). 
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `unit_addr` | str | Yes | The unit address shared by multiple records  to be updated. |
+
+### Returns
+*None*
+
+
+## `attempt_auto_fill`
+Updates a record with the symbol ID and engine number of the previous most recent record with the same unit address. Updates the record table using the repository created during initialization. Called in [`create_train_record`](#create_train_record). 
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `unit_addr` | str | Yes | The unit address of a record to update. |
+
+### Returns
+*None*
+
+## `signal_update`
+Updates the symbol ID and engine number of a record using the repository created during initialization.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `record_id` | str | Yes | The ID of the record to update. |
+| `symbol_id` | int | No | The ID of a symbol to add to a record. |
+| `engine_num` | int | No | The engine number to add to a record. |
+
+### Returns
+*int **or** None*: Returns the ID if the record has been successfully updated; otherwise, this method returns `None`.
+
+## `get_collated_records`
+
+Retrieves a paginated collation of train records grouped by unit address and station. The number of records returned is defined by `NUM_RESULTS` (a constant declared in this module), and the total number of pages is calculated based on the total number of results. Can return records that are verified, unverified, or both depending on the value of the `verified` parameter. See `get_record_collation` in `db.record_repo.RecordRepository` for more details on the record values returned by this method.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `page` | int | Yes | The page number of records to retrieve, 1-indexed. |
+| `verified` | bool | No | The ID of a symbol to add to a record. |
+| `engine_num` | int | No | If True or False, filters records by their `verified` status. If None, no filter is applied. Defaults to None. |
+
+### Returns
+*dict*: Returns a dictionary with two keys:
+- `results`: A list of records, where each record is a dictionary with keys
+corresponding to database columns. The columns returned vary for each
+record type, for more information on the columns returned for each record type, check [`get_record_collation`]() for more details.
+- `totalPages`: The total number of pages available based on the number of
+results and `NUM_RESULTS`.
+
+## `verify_record`
+Verifies a record by updating its symbol ID, locomotive number, and setting its `verified` flag to true. Updates a record using the repository created during initialization.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `record_id` | str | Yes | The ID of the record to update. |
+| `symbol_id` | int | No | The ID of a symbol to add to a record. |
+| `locomotive_num` | str *or* None | No | The locomotive number to add to a record. |
+
+### Returns
+*None*
+
+## `time_frame_pull`
+Pulls all records that have been recorded at a station within a provided timerange from the current time. The resulting records will be sorted in descending order by the date they were received. This method queries record repositories for each record type, and will query a [`StationRepository`]() if the station ID is not provided.
+
+Only pulls from all repositories if this service has been instantiated with a `record_type` value of `None`; otherwise, only records with the type passed into the constructor will be retrieved.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `time_range` | str | Yes | A string in the format "HH:MM:SS" representing the time range to pull records from relative to the current time. |
+| `recent` | bool | No | If True or False, only returns records based on their `most_recent` flag; otherwise, returns all records within the time frame. |
+| `station_id` | int | No | The ID of the station to pull records from. If not provided, `station_name` must be provided. |
+| `station_name` | str | No | The name of the station to pull records from. If not provided, `station_id` must be provided. |
+
+### Returns
+*list[dict[str, Any]]*: A list of dictionaries, each representing a record within the specified time frame. Each dictionary will contain a key named: `Data_type` which specifies the type of record.
 
 # StationService
 

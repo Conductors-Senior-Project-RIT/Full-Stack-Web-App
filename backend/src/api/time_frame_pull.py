@@ -53,7 +53,7 @@ class RecentActivities(Resource):
         # If type is not provided, the service pulls from all repositories
         record_service = RecordService(session, typ)
         results = record_service.time_frame_pull(
-            time_range, recent, stat_id, station
+            time_range, stat_id, station, recent
         )
         
         # The service already returns a JSON-serializable response, so just return the result

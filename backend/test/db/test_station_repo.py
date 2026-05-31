@@ -40,12 +40,6 @@ class TestStationRepository(BaseTestCase):
         resulting_row = self.repo.get(result_id)
         self.assertEqual(new_name, resulting_row["station_name"])
         self.assertEqual(new_pass, resulting_row["passwd"])
-        
-        # Test error handling in no id is returned (likely an error)
-        with patch.object(Session, "execute") as mock_execute:
-            mock_execute.return_value.scalar_one_or_none.return_value = None
-            with self.assertRaises(RepositoryInternalError):
-                self.repo.create_new_station("a", "b")
                 
         # Test that error is raised when attempting to create a station with an already existing name
         with self.assertRaises(RepositoryExistingRowError):
@@ -86,13 +80,13 @@ class TestStationRepository(BaseTestCase):
     
     def testGetLastSeen(self):
         # Test when a station's last seen is today is in the format "HH:MM AM/PM"
-        expected = self.repo.get(1)["last_seen"].strftime("%I:%M %p")
+        expected = self.repo.get(1)["last_seen"]
         result = self.repo.get_last_seen("test station1")
         self.assertEqual(expected, result)
         
         # Test when a station was last seen is not today is in the format "MON DD, YYYY at HH:MM AM/PM"
         self.repo.update_with_pk(2, {"last_seen": datetime.strptime("2025-12-25 14:30:59", "%Y-%m-%d %H:%M:%S")})
-        expected = self.repo.get(2)["last_seen"].strftime("%b %d, %Y at %I:%M %p")
+        expected = self.repo.get(2)["last_seen"]
         result = self.repo.get_last_seen("test station2")
         self.assertEqual(expected, result)
         

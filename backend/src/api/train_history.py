@@ -40,7 +40,7 @@ class HistoryDB(Resource):
         # Create a request-specific database session, call the record service to retrieve the train record
         session = db.session
         service = RecordService(session, typ)
-        results = service.get_train_history(id)
+        results = service.get_train_record(id)
         
         # The service already returns a JSON-serializable response, so just return the result
         return results, 200
@@ -59,9 +59,6 @@ class HistoryDB(Resource):
         Returns:
             Response: Returns the status code of the request.
         """
-        date_rec = datetime.datetime.now()
-        dt_str = date_rec.strftime("%Y-%m-%d %H:%M:%S")
-        
         parser = reqparse.RequestParser()
         parser.add_argument("date_rec", default=None, type=str)
         parser.add_argument("type", default=-1, type=int)
@@ -92,7 +89,7 @@ class HistoryDB(Resource):
 
         # Call the record service to create a new train record, and commit the changes to the database if successful
         service = RecordService(session, typ)
-        new_id = service.post_train_history(args, dt_str)
+        new_id = service.create_train_record(args)
         session.commit()
         
         return new_id, 201

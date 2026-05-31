@@ -49,33 +49,27 @@ def return_test_data() -> list[dict]:
     ]
 
 
-def collation_valid(e: dict, r: dict) -> tuple[bool, str | None]:
+def collation_valid(e: tuple, r: tuple) -> tuple[bool, str | None]:
     """
     The return value of a record collation is a dictionary containing two keys: 'results' and 'totalPages'.
     Results contains a list of dictionaries containing the resulting records from the collation query.
     Total pages contains the total number of pages of collation results from the size of a page given.
 
     Args:
-        e (dict): The expected results of a collation operation.
-        r (dict): The actual results of a collation operation.
+        e (tuple): The expected results of a collation operation. (results, totalPages)
+        r (tuple): The actual results of a collation operation. (results, totalPages)
 
     Returns:
         tuple[bool, str | None]: A tuple containing whether the expected and actual results match, and a message
         specifying the mismatch if present.
     """
-    if "results" not in r:
-        return False, "'results' key does not exist."
-
-    if "totalPages" not in r:
-        return False, "'totalPages' does not exist."
-
-    if r["totalPages"] != e["totalPages"]:
+    if r[1] != e[1]:
         return (
             False,
-            f"Actual Total Pages: {r['totalPages']} != Expected Total Pages: {e['totalPages']}",
+            f"Actual Total Pages: {r[1]} != Expected Total Pages: {e[1]}",
         )
 
-    return compare_results_ordered(e["results"], r["results"])
+    return compare_results_ordered(e[0], r[0])
 
 
 def compare_results_ordered(a: list[dict], b: list[dict]) -> tuple[bool, str | None]:

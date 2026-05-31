@@ -123,7 +123,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
     @repository_error_handler()
     def create_train_record(
-        self, args: dict[str, Any], datetime_string: str | None
+        self, args: dict[str, Any], datetime_received: datetime
     ) -> tuple[int, bool]:
         """Creates a new train record with the provided values in `args`.
 
@@ -138,8 +138,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         Args:
             args (dict[str, Any]): A dictionary containing values to insert into a new
                 record.
-            datetime_string (str): String representing when the record was received.
-                Must match the following format: `%Y-%m-%d %H:%M:%S`.
+            datetime_received (datetime): The datetime when the record was received.
 
         Returns:
             tuple[int, bool]: The id of the newly created record, and whether a recovery
@@ -154,22 +153,22 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         sql_args = {}
         for key, value in args.items():
             if key in mapped_keys:
-                print(f"Adding {key} to sql args with value {value}")
                 sql_args[key] = value
 
         # If the datetime a record was received is not passed in 'args', add 'datetime_string' into the dictionary.
         if sql_args["date_rec"] is None:
-            if datetime_string is None:
+            if datetime_received is None:
                 raise RepositoryInvalidArgumentError(
                     self.__class__.__name__,
                     message="Record timestamp must be provided!",
                     show_error=True,
                 )
 
-            sql_args["date_rec"] = datetime_string
-            recovery_request = (
-                False  # Indicate that a recovery request was not initiated
-            )
+            sql_args["date_rec"] = datetime_received
+            # Indicate that a recovery request was not initiated
+            recovery_request = False
+        else:
+            sql_args["date_rec"] = datetime.fromisoformat(sql_args["date_rec"])
 
         result = self.create(sql_args, False)  # Already flushes
 
@@ -224,7 +223,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         return result[-1] if recent else result
 
     @repository_error_handler()
-    def get_recent_trains(self, unit_addr: str, station_id: int) -> list[dict]:
+    def get_recent_trains(self, unit_addr: str, station_id: int, id_only: bool = True) -> list[dict]:
         """Retrieves train records from the last 10 minutes for a given unit and station.
 
         Queries the database session for all records matching the specified unit address
@@ -233,21 +232,24 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         Args:
             unit_addr (str): The unit address used to filter records.
             station_id (int): The station ID used to filter records.
+            id_only (bool): If True, returns only the IDs of the matching records. Defaults to False.
 
         Returns:
             list[dict]: A list of matching train records as dictionaries. Returns an
                 empty list if no records are found.
         """
+        # Select only IDs if specified, otherwise select all columns to return as dictionaries
+        stmt = select(self.model.id) if id_only else select(self.model)
 
         # Receive records from the last ten minutes
-        stmt = select(self.model).where(
+        stmt = stmt.where(
             self.model.unit_addr == unit_addr,
             self.model.station_recorded == station_id,
             self.model.date_rec >= func.now() - text("INTERVAL '10 minutes'"),
         )
 
-        results = self.session.execute(stmt).all()
-        return self.objs_to_dicts(results)
+        results = self.session.execute(stmt).scalars().all()
+        return list(results) if id_only else self.objs_to_dicts(results)
 
     @repository_error_handler()
     def add_new_pin(self, record_id: int, unit_addr: str) -> list[int]:

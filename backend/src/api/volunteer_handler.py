@@ -138,11 +138,10 @@ def get_records():
     return results, 200
 
 
-@volunteer_bp.post("/api/record_verifier")
+@volunteer_bp.put("/api/record_verifier")
 @role_required(0, 1)
-def post_record():
-    """Verifies a train record by assigning a symbol and engine number. *Should be a PUT
-    request, but last year's team used POST.*
+def put_record():
+    """Verifies a train record by assigning a symbol and locomotive number.
 
     Arguments should be provided in the request body as a JSON object.
 

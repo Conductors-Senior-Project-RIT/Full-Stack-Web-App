@@ -81,7 +81,7 @@ const VerifyHOT = () => {
         symbolId = data.results;
         if (symbolId !== -1) {
           fetch(`${config.apiUrl}/record_verifier`, {
-            method: 'POST',
+            method: 'PUT',
             headers: {
               "Content-Type": "application/json",
               "X-CSRF-TOKEN": getCsrfToken(),

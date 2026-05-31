@@ -50,7 +50,7 @@ const VerifyEOT = () => {
         console.log("symbolID: " + symbolId);
         console.log("modalID: " + modalId);
         const verifyResponse = await fetch(`${config.apiUrl}/record_verifier`, {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": getCsrfToken(),

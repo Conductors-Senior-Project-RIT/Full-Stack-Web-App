@@ -291,6 +291,10 @@ class TestBaseRepository(BaseTestCase):
         result = self.repo.objs_to_dicts([])
         self.assertEqual([], result)
         
+        # Test that None is returned when given None
+        result = self.repo.objs_to_dicts(None)
+        self.assertIsNone(result)
+        
     
 if __name__ == "__main__":
     unittest.main()
