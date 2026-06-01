@@ -238,7 +238,7 @@ Converts one or more instances to their dictionary representations. The provided
 columns in the resulting dictionaries should have their values converted to strings. Default value is an empty set, meaning no fields will be converted to strings. |
 
 ### Raises
-[(RepositoryParsingError)](#error-types): Raised if a provided object is not compatible with dictionary conversion.
+[*RepositoryParsingError*](#error-types): Raised if a provided object is not compatible with dictionary conversion.
 
 ### Returns
 *dict[str, Any] **or** list[dict[str, Any]]*: A dictionary representation of the provided values. If any keys are specified in `convert_to_string`, then the corresponding values for those keys will be converted to strings in the returned dictionaries.
@@ -293,8 +293,7 @@ Constructor for a repository that interacts with various kinds of train records.
 | `model` | Type of [`BaseRecord`](#baserecord) | Yes | An ORM class that defines what database table to perform queries on and map results to. Only models that extend `BaseRecord` are permitted. |
 | `collation` | Type of [`CollationMixin`](#collationmixin) | Yes | An ORM model that defines the attributes of the results returned by [`get_record_collation`](#collationmixin). Only models that extend `CollationMixin` are permitted. |
 | `session` | Session | Yes | Specifies the database session the repository operates in. All functions in this class flushes all changes to the session. It is the job of higher layers to commit or rollback any changes. |
-| `record_name` | str | No | Attributes a name to the records in the
-repository. Primarily for error logging purposes. Defaults to "Unknown". |
+| `record_name` | str | No | Attributes a name to the records in the repository. Primarily for error logging purposes. Defaults to "Unknown". |
 | `record_identifier` | str | No | Attributes a unique identifer for records in the repository. Particularly useful when parsing data. Defaults to "Unknown". |
 
 ## `get_total_record_count`
