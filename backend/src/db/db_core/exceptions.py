@@ -82,7 +82,7 @@ def repository_error_translator(
         message (str, optional): An optional message to provide in a `RepositoryError`.
             Defaults to None.
         exclude (tuple[Type[Exception]] | Type[Exception], optional): A single or
-            collection of exceptions to exclude from translation. Defaults to None.
+            collection of exception types to exclude from translation. Defaults to None.
 
     Returns:
         RepositoryError: If a matching translation is found in `error_map`, a subclass

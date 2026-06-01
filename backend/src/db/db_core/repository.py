@@ -6,7 +6,10 @@ from sqlalchemy.orm.session import Session
 from sqlalchemy.exc import NoInspectionAvailable
 
 from .exceptions import (
-    RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError, 
+    RepositoryInvalidArgumentError, 
+    RepositoryNotFoundError, 
+    RepositoryParsingError, 
+    RepositorySessionError,
     repository_error_handler
 )
 from .models import Base
@@ -34,7 +37,7 @@ CollectionResult = list[ModelType] | list[dict[str, Any]]
 class BaseRepository(Generic[ModelType]): 
     """Base class for a repository, supporting CRUD functionality for SQLAlchemy ORMs. This
     class uses a generic, `ModelType`, which is bounded to the `Base` class from
-    `models`, defineing the model to operate on. Methods in this class return
+    `models`, defining the model to operate on. Methods in this class return
     `ModelType`, but conversion to a `dict` as a return type is supported if the
     provided model extends `Base`.
 
@@ -47,7 +50,7 @@ class BaseRepository(Generic[ModelType]):
             layer commits them.
     """
     
-    def __init__(self, model: Type[ModelType], session: Session):
+    def __init__(self, model: ModelType, session: Session):
         """Constructor for a repository.
 
         Defines the model and `Session` that the repository operates on. If the model
@@ -55,11 +58,26 @@ class BaseRepository(Generic[ModelType]):
         primary key through `pkey`.
 
         Args:
-            model (Type[ModelType]): _description_
-            session (Session, optional): _description_. Defaults to None.
+            model (ModelType): The SQLAlchemy ORM model which extends `Base` 
+                that the repository will operate on. The model provided defines which 
+                table to manipulate in a provided `Session`.
+            session (Session): The SQLAlchemy session to use for database operations.
         """
         
+        if not model:
+            raise RepositoryInvalidArgumentError(
+                self.__class__.__name__,
+                message="A valid model must be provided to a repository!", 
+                show_error=False
+            )
         self.model = model
+        
+        if not session:
+            raise RepositorySessionError(
+                self.__class__.__name__,
+                message="A valid SQLAlchemy session must be provided to a repository!",
+                show_error=False
+            )
         self.session = session
         
         # Extract the primary key by inspecting the model's attributes
@@ -74,16 +92,16 @@ class BaseRepository(Generic[ModelType]):
         
     @repository_error_handler()
     def get(self, pkey: Any, to_dict=True) -> SingleResult:
-        """Retrieves an ORM from the session's current state. By default, this method
-        returns a dictionary representation of the result, which can be turned off by
-        setting `to_dict` to `False`. A `RepositoryNotFoundError` will is thrown
-        if the primary key cannot be found in the current session.
+        """Retrieves an ORM instance from the session's current state. By default, this 
+        method returns a dictionary representation of the result, which can be turned off 
+        by setting `to_dict` to `False`. A `RepositoryNotFoundError` will is thrown if the 
+        primary key cannot be found in the current session.
 
         Args:
-            pkey (Any): Primary key to search for in the current session, typically an
-                `int` or `str`.
+            pkey (Any): Primary key value to search for in the current session, typically 
+                an `int` or `str`.
             to_dict (bool, optional): Specifies whether retrieved instance should be
-                returned as a `ModelType` or `dict`. Setting this field to `True`
+                returned as the `ModelType` or `dict`. Setting this field to `True`
                 returns the results as a `dict`; otherwise, a `ModelType`. Default value
                 is True.
 
@@ -119,7 +137,7 @@ class BaseRepository(Generic[ModelType]):
 
         Args:
             objs (list[tuple[ModelType, dict[str, Any]]]): A list of tuples, where each
-                tuple contains an `ModelType` instance (index 0) to update and a
+                tuple contains a `ModelType` instance (index 0) to update and a
                 dictionary of new values to update that instance with (index 1). The
                 keys in the dictionary should correspond to column names in the table,
                 and the values should be the new values to update those columns with. To
@@ -144,10 +162,12 @@ class BaseRepository(Generic[ModelType]):
             CollectionResult: A list of `ModelType` or `dict` instance containing the
                 updated results, depending on the value of `to_dict`. If the provided
                 `objs` is empty, an empty list is returned. Additionally, if no updates
-                are made to the provided objects, an empty list is returned. Notes: -
-                Other `RepositoryError` exceptions may be thrown depending on errors
-                raised when performing database operations, such as connection errors or
-                internal errors.
+                are made to the provided objects, an empty list is returned. 
+        
+        Notes:
+            Other `RepositoryError` exceptions may be thrown depending on errors
+            raised when performing database operations, such as connection errors or
+            internal errors.
         """
               
         # Return an empty list if the provided values to update is empty
@@ -208,9 +228,17 @@ class BaseRepository(Generic[ModelType]):
         function will return `None`.
 
         Args:
-            pkey (int | str): _description_
-            new_values (dict[str, Any]): _description_
-            to_dict (bool, optional): _description_. Defaults to True.
+            pkey (int | str): The primary key value corresponding to the instance to update. 
+                This value is used to retrieve the instance from the current session, and an 
+                error is thrown if an instance with a matching primary key cannot be found.
+            new_values (dict[str, Any]): A dictionary mapping column names to new values to 
+                update the instance with. The keys in this dictionary should correspond to 
+                column names in the table, and the values should be the new values to update 
+                those columns with.
+            to_dict (bool, optional): Specifies whether the updated instance should be
+                returned as a `ModelType` or `dict`. Setting this field to `True`
+                returns the results as a `dict`; otherwise, a `ModelType`. Default value
+                is True.
 
         Raises:
             `RepositoryInvalidArgumentError`: Thrown if any of the provided update keys
@@ -241,7 +269,7 @@ class BaseRepository(Generic[ModelType]):
 
         Instantiates model instance from the given data, adds them to the session, and
         flushes them to the database. The flush persists the records and generates
-        neecessary values (e.g. primary keys). This method does not commit these
+        necessary values (e.g. primary keys). This method does not commit these
         changes, thus, they are not reflected in the database until a higher layer
         commits them.
 
@@ -260,11 +288,12 @@ class BaseRepository(Generic[ModelType]):
 
         Raises:
             `RepositoryParsingError`: This exception is thrown if any of of these
-                    conditions occur: - If the provided data cannot be mapped to the
-                    model, such as invalid types (ProgrammingError) - Malformed
-                    `new_data` (eg. not a valid `dict`) (TypeError). - If a database
-                    error occurs during the flush, such as a primary key collision
-                    (IntegrityError).
+                    conditions occur: 
+                    - If the provided data cannot be mapped to the model, such as invalid 
+                    types (ProgrammingError) 
+                    - Malformed `new_data` (eg. not a valid `dict`) (TypeError). 
+                    - If a database error occurs during the flush, such as a primary key 
+                    collision (IntegrityError).
         """
         
         if not new_data:
@@ -335,7 +364,7 @@ class BaseRepository(Generic[ModelType]):
 
         Returns:
             dict[str, Any] | list[dict[str, Any]]: A dictionary representation of the
-                provided values. IF any keys are specified in `convert_to_string`, then
+                provided values. If any keys are specified in `convert_to_string`, then
                 the corresponding values for those keys will be converted to strings in
                 the returned dictionaries.
         """

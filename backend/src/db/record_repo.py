@@ -27,12 +27,10 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     This class inherits the generic CRUD functionality defined in `BaseRepository` that
     may be useful for simple operations. This class contains concrete methods which
     execute standardized functionality using the model defined in an instance,
-    restricted only to models that extend `BaseRecord`. The behavior and results are
+    restricted only to models that extend `BaseRecord`. The results are
     defined by the `BaseRecord` and `CollationMixin` models.
 
     Args:
-        ABC: This class is abstract and cannot be instantiated. A child class can extend
-            `BaseRepository` for a concrete implementation.
         BaseRepository (RecordType): Inherits the methods present in `BaseRepository`
             which operate on `BaseRecord` models.
         Generic (RecordType): Defines a generic type in which the repository instance
@@ -52,10 +50,10 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         See `record_types` for factory method implementations.
 
         Args:
-            model (Type[BaseRecord]): An ORM class that defines what database table to
+            model (BaseRecord): An ORM class that defines what database table to
                 perform queries on and map results to. Only models that extend
                 `BaseRecord` are permitted.
-            collation (Type[CollationMixin]): An ORM model that defines the attributes
+            collation (CollationMixin): An ORM model that defines the attributes
                 of the results returned by `get_record_collation`. Only models that
                 extend `CollationMixin` are permitted.
             session (Session): Specifies the database session the repository operates
@@ -77,7 +75,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         """Retrieves total number of records present in the table during a given session.
 
         Returns:
-            int: Number of records present in `model` (`RecordType`).
+            int: Number of records present in the provided table defined by `model`.
         """
         return self.session.query(func.count(self.model.id)).scalar()
 

@@ -40,7 +40,7 @@ class Base(db.Model):
             setattr(self, key, value)
 
     def _asdict(self) -> dict:
-        """Returns an model instance as a dictionary representation.
+        """Returns a model instance as a dictionary representation.
         
         Returns:
             dict: Dictionary of column and value pairs.
@@ -198,6 +198,7 @@ class BaseRecord(AbstractConcreteBase, Base):
     
     @classmethod
     def get_unique_fields(cls) -> List[str]:
+        """Provides a list of fields that are unique to a record type."""
         raise NotImplementedError()
 
 class CollationMixin:

@@ -1,6 +1,8 @@
 # An enumeration of train record types
 from enum import Enum
 
+from sqlalchemy.orm import Session
+
 from .record_repo import RecordRepository
 from .db_core.exceptions import RepositoryError
 from .db_core.models import EOTRecord, EOTCollation, HOTRecord, HOTCollation
@@ -43,12 +45,12 @@ def has_value(value: int):
     return any(value == item.value for item in RecordTypes)
 
 
-def get_record_repository(session, value: int | RecordTypes) -> RecordRepository | None:
+def get_record_repository(session: Session, value: int | RecordTypes) -> RecordRepository | None:
     """This function acts as a factory for instantiating a `RecordRepository`.
 
     Given a `value` that corresponds to a valid train record type, a new
     `RecordRepository` instance will be returned, including the appropriate ORM model
-    and collation.
+    and collation types.
 
     Args:
         session (Session): An SQLAlchemy database session created by a Flask endpoint in
@@ -82,16 +84,17 @@ def get_record_repository(session, value: int | RecordTypes) -> RecordRepository
     raise RepositoryRecordInvalid(str(value))
 
 
-def get_all_repositories(session) -> list[RecordRepository]:
-    """Returns a list of `RecordRepository` instances for every train record type.
+def get_all_repositories(session: Session) -> list[RecordRepository]:
+    """Returns a list of `RecordRepository` instances for every train/signal record type.
 
     Args:
         session (Session): An SQLAlchemy database session created by a Flask endpoint in
             which all new repository instances operate with.
 
     Returns:
-        list[RecordRepository]: A list of `RecordRepository` instances with
-            completed repository functionality.
+        list[RecordRepository]: A list of `RecordRepository` instances. Each repository 
+            corresponds to a train/signal record type. If a record type does not have an 
+            implemented repository, it is not included in the returned list.
     """
 
     valid_types = list(RecordTypes)
