@@ -15,8 +15,8 @@ There are three layers that exist in the form of Python modules: `backend/src/[a
 
 # Layer-Specific Documentation
 - ### [API](api.md)
-- ### [Service](relative/path/to/file.md)
-- ### [Repository](relative/path/to/file.md)
+- ### [Service](service.md)
+- ### [Repository](repository.md)
 
 # Other Documentation
-- ### [Error Handling](relative/path/to/file.md)
+- ### [Error Handling](errors.md)
