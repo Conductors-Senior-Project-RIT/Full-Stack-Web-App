@@ -227,18 +227,82 @@ Only pulls from all repositories if this service has been instantiated with a `r
 *list[dict[str, Any]]*: A list of dictionaries, each representing a record within the specified time frame. Each dictionary will contain a key named: `Data_type` which specifies the type of record.
 
 # StationService
+Handles business logic for station related data processing. Inherits [`BaseService`](#base-service).
 
-## get_stations
+## `__init__`
+Initializes a `StationRepository` with a provided **SQLAlchemy** session.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `session` | Session | Yes | The SQLAlchemy session to be used for database transactions in the service's repositories. |
+
+## `get_stations`
+Returns a list of station ID and name pairs from the database as dictionaries.
+
+### Returns
+*list[dict]*: A list of dictionaries containing station IDs and names.
+
+## `create_station`
+Creates a new station in the database with the provided name. Additionally, a random password is generated using [`generate_password_string`](#generate_password_string), and associated with the new station.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `station_name` | str | Yes | The name of the new station. |
+
+### Returns
+*str*: The new randomly generated password for the new station.
 
 ## update_station_password
+Generates and updates the password of a specified station. The password is generated using [`generate_password_string`](#generate_password_string).
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `station_id` | int | Yes | The ID corresponding to the station to update. |
+
+### Returns
+*str*: The new randomly generated password for the station.
 
 ## generate_password_string
+Generates a password string of 10 to 15 random uppercase ASCII and digit characters. Additionally, the password is hashed using SHA256.
+
+### Returns
+*tuple[str, str]*: Returns two strings in which the first is the unhashed password and the second is the hashed password.
+
 
 ## get_last_seen
+Returns a formatted timestamp string of when a station last pinged the server.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `station_name` | str | Yes | The name of the station. |
+
+### Returns
+*str*: A formatted string containing the time and/or date of the ping. If the date is today, it is formatted as `HH:MM AM/PM`; otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`.
+
 
 ## update_last_seen
+Updates a station's ping timestamp to the date and time at which this method is called.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `station_id` | int | Yes | The ID of the station to update. |
+
 
 ## format_date
+Formats a datetime object into a string. If the date is today, it is formatted as `HH:MM AM/PM`; otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `dt` | daatetime | Yes | The datetime instance to format. |
+
+### Returns
+*str*: The formatted date string.
 
 
 # SymbolService

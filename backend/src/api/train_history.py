@@ -1,4 +1,3 @@
-import datetime
 import http.client
 import urllib
 from ..db.trackSense_db_commands import *
@@ -47,7 +46,9 @@ class HistoryDB(Resource):
             
 
     def post(self):
-        """Adds new record to the database. Additionally, handles logic for updating the
+        """Adds new record to the database. 
+        
+        Additionally, handles logic for updating the
         map pins to know which signals are the most recently detected with that unit
         address. The notification system was broken when we received the project;
         however, the request should also determine whether input data warrants sending a
