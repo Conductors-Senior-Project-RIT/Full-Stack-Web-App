@@ -324,8 +324,6 @@ Returns a train record with the following columns: `id, date_rec, station_name, 
 | `unit_addr` | str |
 | `verified` | bool |
 
-&nbsp;
-
 ***EOT Records Return the Following Additional Columns:***
 | Name | Type |
 |------|------|
@@ -337,8 +335,6 @@ Returns a train record with the following columns: `id, date_rec, station_name, 
 | `battery_charge` | str |
 | `arm_status` | str |
 | `signal_strength` | str |
-
-&nbsp;
 
 ***HOT Records Return the Following Additional Columns:***
 | Name | Type |
