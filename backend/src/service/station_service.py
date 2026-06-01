@@ -10,6 +10,7 @@ from .service_core import BaseService
 
 
 class StationService(BaseService):
+    """Handles business logic for station related data processing."""
     def __init__(self, session: Session):
         """Initializes a `StationRepository` with a provided **SQLAlchemy** session.
 

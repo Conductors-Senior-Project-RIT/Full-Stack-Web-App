@@ -102,7 +102,7 @@ class SymbolRepository(BaseRepository):
                 f"Could not retrieve symbol ID for {symbol_name}: {e}",
             )
 
-    def insert_new_symbol(self, symbol_name: str):
+    def insert_new_symbol(self, symbol_name: str) -> int:
         """Creates a new symbol in the database.
 
         Args:

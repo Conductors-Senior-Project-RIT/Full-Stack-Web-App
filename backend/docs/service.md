@@ -235,7 +235,7 @@ Initializes a `StationRepository` with a provided **SQLAlchemy** session.
 ### Arguments
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `session` | Session | Yes | The SQLAlchemy session to be used for database transactions in the service's repositories. |
+| `session` | Session | Yes | The SQLAlchemy session to be used for database transactions in the service's repository. |
 
 ## `get_stations`
 Returns a list of station ID and name pairs from the database as dictionaries.
@@ -306,12 +306,36 @@ Formats a datetime object into a string. If the date is today, it is formatted a
 
 
 # SymbolService
-Not much currently, but might be very useful in the future for symbol tracking.
+Handles business logic for symbol related data processing. There isn't much currently, but might be very useful in the future for symbol operations.
+
+## `__init__`
+Initializes a `SymbolRepository` with a provided **SQLAlchemy** session.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `session` | Session | Yes | The SQLAlchemy session to be used for database transactions in the service's repository. |
 
 ## get_symbol
+If a symbol name is provided, the ID corresponding to that symbol is returned; otherwise, a list of all symbols names in the database are returned.
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `symbol_name` | str *or* None | Yes | The name of a symbol to retrieve. Can be `None` to retrieve all symbol names. |
+
+### Returns
+*list[str] **or** str*:  A list of symbol names or the ID of a specific symbol.
 
 ## create_symbol
+Creates a new symbol in the database with the provided name. A symbol with the same name must not already exist in the database, otherwise an error is raised.
 
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `symbol_name` | str | Yes | The name of the new symbol to be created. |
+
+### Returns
+*int*: The ID of the newly created symbol.
 
 # UserService
 
