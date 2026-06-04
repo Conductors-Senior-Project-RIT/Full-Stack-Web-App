@@ -445,7 +445,7 @@ Gets the values for each record with matching unit addresses for a given field.
 |------|------|----------|-------------|
 | `unit_addr` | str | Yes | The unit address used to filter records. |
 | `field_type` | str | Yes | The column name to retrieve values from. |
-| `most_recent` | bool *or* None | Filters records by their recency. If None, all records will be scanned. Defaults to None. |
+| `most_recent` | bool *or* None | No | Filters records by their recency. If None, all records will be scanned. Defaults to None. |
 
 ### Raises
 [*RepositoryInvalidArgumentError*](#error-types): Raised if the model does not contain the provided field.
@@ -499,7 +499,7 @@ Verifies a record by updating its symbol ID, locomotive number, and verified sta
 |------|------|----------|-------------|
 | `record_id` | int | Yes | The ID of the record to update. |
 | `symbol_id` | int | No | The updated symbol ID of the record. |
-| `locomotive_num` | str *or* None | The updated locomotive number of the record. |
+| `locomotive_num` | str *or* None | No | The updated locomotive number of the record. |
 
 ### Raises
 [*RepositoryError*](#error-types): If an exception occurs for any reason.
