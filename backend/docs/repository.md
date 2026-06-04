@@ -119,7 +119,7 @@ Below are the following exceptions that can be raised by any of the methods in t
 | `RepositoryNotFoundError` | Resource is not found such as a non-existing database row. |
 | `RepositoryExistingRowError` | New resource requests to be created but conflicts with an existing one. |
 | `RepositoryInvalidArgumentError` | Invalid argument is provided. |
-| `RepositoryRecordInvalid` | Invalid record type is provided to `get_record_repository` (see [`db.record_types`](#record_types)). |
+| `RepositoryRecordInvalid` | Invalid record type is provided to [`get_record_repository`](#get_record_repository). |
 | `RepositoryInternalError` | An unknown exception raised in the layer. |
 
 ## Repository Error Mapping
