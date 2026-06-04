@@ -284,6 +284,8 @@ Returns a list of [`RecordRepository`](#recordrepository) instances for every tr
 # RecordRepository
 A database interface for train/signal record querying. This class inherits the generic CRUD functionality defined in [`BaseRepository`](#baserepository) that may be useful for simple operations. This class also contains concrete methods which execute standardized functionality using the model defined in an instance, restricted only to models that extend [`BaseRecord`](#baserecord). The results are defined by the [`BaseRecord`](#baserecord) and [`CollationMixin`](#collationmixin) models.
 
+This class functions a little bit differently than what was shown in our final presentation. Once we switched to ORMs, the strategy pattern we used was redundant.
+
 ## `__init__`
 Constructor for a repository that interacts with various kinds of train records. See [`record_types`](#record_types) for factory method implementations.
 
