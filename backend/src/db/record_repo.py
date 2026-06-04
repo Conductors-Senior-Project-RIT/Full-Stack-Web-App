@@ -183,11 +183,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
     @repository_error_handler()
     def get_unit_record_ids(self, unit_addr: str, recent=False) -> int | list[int]:
-        """Retrieves record IDs associated with a given unit address.
-
-        Queries the database session for all record IDs matching the specified unit
-        address, ordered ascending by ID. Optionally returns only the most recent
-        (highest) ID.
+        """Queries the database session and the model defined in the constructor
+        for all record IDs matching the specified unit address, ordered ascending by ID. 
+        Optionally returns only the most recent (highest) ID.
 
         Args:
             unit_addr (str): The unit address used to filter records.
@@ -222,10 +220,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
     @repository_error_handler()
     def get_recent_trains(self, unit_addr: str, station_id: int, id_only: bool = True) -> list[dict]:
-        """Retrieves train records from the last 10 minutes for a given unit and station.
-
-        Queries the database session for all records matching the specified unit address
-        and station ID where the recorded date is within the last 10 minutes.
+        """Queries the database session and the model defined in the constructor 
+        for all records matching the specified unit address and station ID where the recorded date 
+        is within the last 10 minutes.
 
         Args:
             unit_addr (str): The unit address used to filter records.
@@ -257,7 +254,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         addresses with distinct IDs.
 
         Args:
-            record_id (int): The record ID that is excluded from search.
+            record_id (int): The record ID that is excluded from update.
             unit_addr (str): The unit address used to filter records.
 
         Returns:
@@ -328,8 +325,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     ) -> dict[str, Any] | None:
         """Updates a record's `symbol_id` and `engine_num` with a matching ID.
 
-        The values passed in must be of the correct type to prevent an `IntegrityError`.
-        Thus, this method ignores new values with invalid types such that they will not
+        This method ignores new values with invalid types such that they will not
         be reflected in the database session.
 
         Args:
@@ -370,7 +366,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         `backend/table.sql` if it is removed for any reason.
 
         Args:
-            page (int): The page number to retrieve, 1-indexed.
+            page (int): The page number (offset) to retrieve, 1-indexed.
             num_results (int): The number of results to return per page.
             verified (bool | None): If True or False, filters records by their
                 `verified` status. If None, no filter is applied. Defaults to None.
@@ -419,7 +415,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
     def verify_record(
         self, record_id: int, symbol_id: int, locomotive_num: str | None
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         """Verifies a record by updating its symbol ID, locomotive number, and verified
         status.
 
@@ -428,12 +424,13 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         `BaseRepository` to flush changes to the session.
 
         Args:
-            record_id (int): The primary key of the record to verify.
+            record_id (int): The ID of the record to verify.
             symbol_id (int): The updated symbol ID of the record.
             locomotive_num (str | None): The updated locomotive number of the record.
 
         Returns:
-            dict[str, Any]: The updated record as a dictionary representation.
+            dict[str, Any]: The updated record as a dictionary representation. None, if
+                no updates were made in the session.
 
         Raises:
             `RepositoryError`: If an exception occurs for any reason.
@@ -478,10 +475,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         otherwise, every column in a record is retrieved, including the corresponding
         `symb_name` and `station_name`.
 
-        The query used, joins with `Station` and `Symbol` to include the station and
-        symbol name references in the returned records. A record's `Data_type` field,
-        which is derived from a repository's `record_identifier`, is appended to each
-        result.
+        Joins with `Station` and `Symbol` to include the station and symbol name references 
+        in the returned records. A record's `Data_type` field, which is derived from a 
+        repository's `record_identifier`, is appended to each result.
 
         Args:
             station_id (int, optional): The station ID to filter records by. Pass -1 to
@@ -490,8 +486,8 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 by `date_rec`. Defaults to None.
             recent (bool, optional): If True or False, filters records by their
                 `most_recent` value. If None, no filter is applied. Defaults to None.
-            all_cols (bool): If True, all columns of a record are returned; otherwise,
-                only a portion are returned.
+            all_cols (bool, optional): If True, all columns of a record are returned; 
+                otherwise, only a portion are returned. Defaults to False.
 
         Returns:
             list[dict[str, Any]]: A list of matching records as dictionaries, each
@@ -507,7 +503,10 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         from .db_core.models import Symbol, Station
 
         try:
+            # Station name and symbol name always included
             cols = [Station.station_name, Symbol.symb_name]
+            
+            # Retrieve all of a model's columns if requested, otherwise just return a subset of them
             if all_cols:
                 mapper = inspect(self.model)
                 cols.extend(
@@ -524,6 +523,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                     ]
                 )
 
+            # Build the list of filters based on the provided parameters
             filters = []
             if dt is not None:
                 filters.append(self.model.date_rec >= dt)
@@ -542,10 +542,11 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 .order_by(self.model.date_rec.desc())
             )
 
+            # Convert `date_rec` to a string
             to_str = {"date_rec"} if all_cols else {}
             results = self.objs_to_dicts(self.session.execute(stmt).all(), to_str)
 
-            # Add data type to result
+            # Add data type to result (used for front-end purposes)
             for result in results:
                 result["Data_type"] = self.record_identifier.upper()
 

@@ -11,7 +11,21 @@ from .db_core.exceptions import (
 
 
 class SymbolRepository(BaseRepository):
+    """A database interface for querying symbol records.
+
+    This class inherits the generic CRUD functionality defined in `BaseRepository` 
+    that may be useful for simple operations. This class contains concrete methods 
+    which execute functionality using the `Symbol` model.
+    """
     def __init__(self, session):
+        """Constructor for a repository that interacts with symbol records. 
+        References a database session that is used by all queries.
+        
+        Args:
+            session (Session): Specifies the database session the repository operates
+                in. All functions in this class flushes all changes to the session. It
+                is the job of higher layers to commit or rollback any changes.
+        """
         super().__init__(Symbol, session)
 
     def get_symbol_name(self, id: int) -> str:
@@ -115,19 +129,19 @@ class SymbolRepository(BaseRepository):
             `RepositoryExistingRowError`: Raised if a symbol with the same name already exists.
             `RepositoryError`: Raised if any other errors occur (SQLAlchemy or psycopg2).
         """
-        # Check to see if symbol name exists
-        stmt = select(self.model.id).where(self.model.symb_name == symbol_name)
-        result = self.session.execute(stmt).scalar_one_or_none()
-
-        if result is not None:
-            raise RepositoryExistingRowError(
-                caller_name=self.__class__.__name__,
-                message=f"A symbol with the name {symbol_name} already exists!",
-                show_error=True,
-            )
-
-        # Attempt to insert the new symbol into the Symbols table
         try:
+            # Check to see if symbol name exists
+            stmt = select(self.model.id).where(self.model.symb_name == symbol_name)
+            result = self.session.execute(stmt).scalar_one_or_none()
+
+            if result is not None:
+                raise RepositoryExistingRowError(
+                    caller_name=self.__class__.__name__,
+                    message=f"A symbol with the name {symbol_name} already exists!",
+                    show_error=True,
+                )
+
+            # Attempt to insert the new symbol into the Symbols table
             new_symbol = self.model(symb_name=symbol_name)
             self.session.add(new_symbol)
             self.session.flush()

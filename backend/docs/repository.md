@@ -5,7 +5,7 @@ As previously mentioned, changes can either be committed to the database if succ
 
 
 ![Repository-Diagram](./diagrams/repository.png)
-**The class diagram above provides a somewhat simplified overview for the connected components in this layer.**
+**The class diagram above provides a somewhat simplified overview for the connected components in this layer. `RecordRepository` uses the `Station` and `Symbol` models for the [`get_train_history`](#get_train_history) and [`get_records_at_station`](#get_records_at_station) queries, which isn't shown in the diagram.**
 
 # ORM Models
 All of the models are defined in `db.db_core.models`. All models inherit [`Base`](#base), an abstract class that provides useful methods and contains SQLAlchemy metadata of the database. Some models contain `relationship` attributes that define how tables are related to one another. Most models are simply Python ORM mappings of the existing tables, so only the `Base` and `Record` models will be covered here.
@@ -282,7 +282,7 @@ Returns a list of [`RecordRepository`](#recordrepository) instances for every tr
 *list[RecordRepository]*: A list of `RecordRepository` instances. Each repository corresponds to a train/signal record type. If a record type does not have an implemented repository, it is not included in the returned list.
 
 # RecordRepository
-A database interface for train record querying. This class inherits the generic CRUD functionality defined in [`BaseRepository`](#baserepository) that may be useful for simple operations. This class also contains concrete methods which execute standardized functionality using the model defined in an instance, restricted only to models that extend [`BaseRecord`](#baserecord). The results are defined by the [`BaseRecord`](#baserecord) and [`CollationMixin`](#collationmixin) models.
+A database interface for train/signal record querying. This class inherits the generic CRUD functionality defined in [`BaseRepository`](#baserepository) that may be useful for simple operations. This class also contains concrete methods which execute standardized functionality using the model defined in an instance, restricted only to models that extend [`BaseRecord`](#baserecord). The results are defined by the [`BaseRecord`](#baserecord) and [`CollationMixin`](#collationmixin) models.
 
 ## `__init__`
 Constructor for a repository that interacts with various kinds of train records. See [`record_types`](#record_types) for factory method implementations.
@@ -346,8 +346,361 @@ Returns a train record with the following columns: `id, date_rec, station_name, 
 
 
 ## `create_train_record`
+Creates a new train record with the provided values in `args`. When an error occurs during the initial creation of a record, a recovery request can be sent. When a recovery request is sent, the datetime must be passed as a parameter; otherwise, a `RepositoryInvalidArgumentError` is raised. In order to successfully create a new train record, the keys and values in the dictionary must include **all non-nullable columns** and **correct value types** with that of the model to prevent an `IntegrityError` occurring. Keys not present as columns in the model are ignored.
+
+### Arguments:
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `args` | dict[str, int] | Yes | A dictionary containing values to insert into a new record. |
+| `datetime_received` | datetime | No | The datetime when the record was received. This argument must be provided if `date_rec` is not a key in `args`.
+
+**EOT & HOT Fields in `args`**
+| Name | Type | Nullable | Default |
+|------|------|----------|---------|
+| `date_rec` | str | No | *N/A* |
+| `station_recorded` | int | No | *N/A* |
+| `symbol_id` | int | Yes | `None` |
+| `engine_num` | int | Yes | `None` |
+| `unit_addr` | str | Yes | `"unknown"` |
+| `verified` | bool | Yes | `False` |
+| `verifier_id` | int | Yes | `None` |
+| `most_recent` | bool | Yes | `True` |
+| `locomotive_num` | str | Yes | `"unknown"` |
+| `signal_strength` | float | Yes | `0.0` |
+
+**EOT Fields in `args`**
+| Name | Type | Nullable | Default |
+|------|------|----------|---------|
+| `brake_pressure` | str | Yes | `"unknown"` |
+| `motion` | str | Yes | `"unknown"` |
+| `marker_light` | str | Yes | `"unknown"` |
+| `turbine` | str | Yes | `"unknown"` |
+| `battery_cond` | str | Yes | `"unknown"` |
+| `battery_charge` | str | Yes | `"unknown"` |
+| `arm_status` | str | Yes | `"unknown"` |
+
+**HOT Fields in `args`**
+| Name | Type | Nullable | Default |
+|------|------|----------|---------|
+| `frame_sync` | str | Yes | `"unknown"` |
+| `command` | str | Yes | `"unknown"` |
+| `checkbits` | str | Yes | `"unknown"` |
+| `parity` | str | Yes | `"unknown"` |
+
+### Raises
+[*RepositoryInvalidArgumentError*](#error-types): If no timestamp is provided for both `datetime_received` and `date_rec` (in `args`).
+
+[*RepositoryParsingError*](#error-types): If a non-nullable column or an incorrect value type is provided in `args` 
+
+### Returns:
+*tuple[int, bool]*: Returns the ID of the newly created record and whether a recovery request was used to create the record.
+
+## `get_unit_record_ids`
+Retrieves record IDs associated with a given unit address. Queries the database session and the model defined in the constructor for all record IDs matching the specified unit address, ordered ascending by ID. Optionally returns only the most recent (highest) ID.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `unit_addr` | str | Yes | The unit address used to filter records. |
+| `recent` | bool | No | If True, returns only the most recent record ID. Defaults to False. | 
+
+### Raises
+[*RepositoryNotFoundError*](#error-types): If no records are found for the given `unit_addr`.
+
+### Returns
+*int **or** list[int]* A single integer ID if `recent=True`, or a list of all matching integer IDs if `recent=False`.
+
+## `get_recent_trains`
+Queries the database session and model defined in the constructor for all records matching the specified unit address and station ID where the recorded date is within the last 10 minutes.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `unit_addr` | str | Yes | The unit address used to filter records. |
+| `station_id` | int | Yes | The station ID used to filter records. |
+| `id_only` | bool | No | If True, returns only the IDs of the matching records. Defaults to False. |
+
+### Returns
+*list[dict]*: A list of matching train records as dictionaries. Returns an empty list if no records are found.
+
+
+## `add_new_pin`
+Sets the most recent column for a group of records with matching unit addresses. Sets `most_recent` to false for all most recent records with matching unit addresses with distinct IDs.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `record_id` | int | Yes | The record ID that is excluded from update. |
+| `unit_addr` | str | Yes | The unit address used to filter records. |
+
+### Returns
+*list[int]*: Returns a list of IDs of the records that were updated.
+
+
+## `get_record_column_by_unit_addr`
+Gets the values for each record with matching unit addresses for a given field.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `unit_addr` | str | Yes | The unit address used to filter records. |
+| `field_type` | str | Yes | The column name to retrieve values from. |
+| `most_recent` | bool *or* None | Filters records by their recency. If None, all records will be scanned. Defaults to None. |
+
+### Raises
+[*RepositoryInvalidArgumentError*](#error-types): Raised if the model does not contain the provided field.
+
+### Returns
+*list[Any]*: Returns a list of values from records.
+
+
+## `update_signal_values`
+Updates a record's `symbol_id` and `engine_num` with a matching ID. This method ignores new values with invalid types such that they will not be reflected in the database session.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `record_id` | int | Yes | The ID of the record to update. |
+| `symbol_id` | int | No | The new symbol ID value. |
+| `engine_num` | int | No | The new engine number value. |
+
+### Returns
+*dict[str, Any] **or** None*: Returns a dictionary containing the newly updated values. Returns None if no updates were made in the session.
+
 
 ## `get_record_collation`
+Retrieves a paginated collation of train records grouped by unit address and station.
+
+Executes a multi-stage SQL query that groups train records by unit address and station, where a new group is formed when either the station changes or a duration of more than 2 hours elapses between records. Returns the most recent record per group along with aggregate information such as `first_seen`, `last_seen`, `occurrence_count`, and `duration`. The total count of grouped records for pagination is appended to each collation result and can be accessed via `total_count` (see the [collation ORMs](#collationmixin) in [`db_core.models`](#orm-models) for more details). Optionally filters results by verification status if provided.
+
+This function uses collation views to query results which should already be added to the Tracksense PostgreSQL database server. However, it can be found in `backend/test/table.sql` if it is removed for any reason.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `page` | int | Yes | The page number (offset) to retrieve, 1-indexed. |
+| `num_results` | int | Yes | The number of results to return per page. |
+| `verified` | bool | No | If True or False, filters records by their `verified` status. If None, no filter is applied. Defaults to None. |
+
+### Raises
+[*RepositoryError*](#error-types): If any stage of the query, count, or result parsing fails.
+
+### Returns
+A tuple containing: 
+- *list[dict]*: The paginated and collated train records as dictionaries (index 0).
+- *int*: The total number of pages based on `num_results` (index 1).
+
+
+## `verify_record`
+Verifies a record by updating its symbol ID, locomotive number, and verified status. Sets `verified` to True on the specified record along with the provided `symbol_id` and `locomotive_num` values. Uses [`update_with_pk`](#update_with_pk) in [`BaseRepository`](#baserepository) to flush changes to the session.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `record_id` | int | Yes | The ID of the record to update. |
+| `symbol_id` | int | No | The updated symbol ID of the record. |
+| `locomotive_num` | str *or* None | The updated locomotive number of the record. |
+
+### Raises
+[*RepositoryError*](#error-types): If an exception occurs for any reason.
+
+### Returns
+*dict[str, Any] **or** None*: The updated record as a dictionary representation. None if no updates were made in the session.
+
+## `get_records_at_station`
+Retrieves records with the station they were recorded at. 
+
+Records can be filtered based on the station they were recorded by passing a matching `station_id`. If `station_id` is `-1`, the station filter is not applied and will return records across all stations. When `dt` is provided, the database is queried to filter all records with a `date_rec` at or after `dt`. If a value is passed for `recent`, the records will be filtered with their matching recency status.
+
+If `all_cols` is `False`, only the following columns are retrieved: `id, unit_addr, date_rec, station_name, symb_name, engine_num, locomotive_num`; otherwise, every column in a record is retrieved, including the corresponding `symb_name` and `station_name`.
+
+Joins with `Station` and `Symbol` to include the station and symbol name references in the returned records. A record's `Data_type` field, which is derived from a repository's `record_identifier`, is appended to each result.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `station_id` | int | No | The station ID to filter records by. Pass `-1` to retrieve records across all stations. Defaults to `-1`. |
+| `dt` | datetime | No | A lower bound datetime instance to filter records by `date_rec`. Defaults to None. |
+| `recent` | bool | No | If True or False, filters records by their `most_recent` value. If None, no filter is applied. Defaults to None. |
+| `all_cols` | bool | No | If True, all columns of a record are returned;  otherwise, only a portion are returned. Defaults to False. |
+
+### Raises
+[*RepositoryError*](#error-types): If an exception is raised for any reason.
+
+### Returns
+*list[dict[str, Any]]*: A list of matching records as dictionaries, each containing `id`, `unit_addr`, `date_rec`, `station_name`, `symb_name`, `engine_num`, `locomotive_num`, `Data_type`, and additional columns if specified. Returns an empty list if no records are found.
+
 
 # StationRepository
+A database interface for querying station records.
+
+This class inherits the generic CRUD functionality defined in `BaseRepository` that may be useful for simple operations. This class contains concrete methods which execute functionality using the `Station` model.
+
+
+## `__init__`
+Constructor for a repository that interacts with station records. References a database session that is used by all queries.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `session` | Session | Yes | Specifies the database session the repository operates in. All functions in this class flushes all changes to the session. It is the job of higher layers to commit or rollback any changes. |
+
+
+## `get_stations`
+Returns a collection of ID and station name pairs from the database.
+
+### Returns
+(list[dict[str, Any]]): A list of dictionaries containing `id` and `station_name` for each station.
+
+
+## `create_new_station`
+Creates a new station from `stat_name` and a `hashed_password` in the database.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `station_name` | str | Yes | The name of a new station. Must not already exist in the database. |
+| `hashed_password` | str | Yes | A hashed password for the new station. |
+
+### Raises
+[*RepositoryExistingRowError*](#error-types): Raised if a station with the same name already exists.
+
+### Returns
+*int*: The ID of the newly created station.
+
+## `update_station_password`
+Updates a station's password with `hashed_password` if a matching `station_id` exists.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `station_name` | str | Yes | The ID of the station to update. |
+| `hashed_password` | str | Yes | The new hashed password for the station. |
+
+### Raises
+[*RepositoryNotFoundError*](#error-types): Raised if a station with `station_id` does not exist.
+
+[*RepositoryInvalidArgumentError*](#error-types): Raised if either argument is of the incorrect type.
+
+
+## `get_station_id`
+Returns the ID of a station with a matching station name.
+
+### Arguments:
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `station_name` | str | Yes | The name of the station. |
+
+### Raises
+[*RepositoryNotFoundError*](#error-types): Raised if a station with `stat_name` does not exist.
+
+### Return
+*str*: The ID of the station.
+
+
+## `get_last_seen`
+Returns a datetime instance of the station's last seen timestamp.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `stat_name` | str | Yes | The name of the station. |
+
+Raises:
+[*RepositoryNotFoundError*](#error-types): Raised if a station is not found.
+
+### Returns
+*datetime*: A datetime instance of a station's last seen timestamp.
+
+
+## `update_last_seen`
+Updates a station's last seen timestamp to the current time during execution.
+
+### Arguments:
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `station_id` | str | Yes | The ID of the station to update. |
+
+### Raises
+[*RepositoryNotFoundError*](#error-types): Raised if a station is not found.
+
+### Return
+*datetime*: A datetime instance representing the updated timestamp.
+
+
+
+# SymbolRepository
+A database interface for querying symbol records.
+
+This class inherits the generic CRUD functionality defined in `BaseRepository` that may be useful for simple operations. This class contains concrete methods which execute functionality using the `Symbol` model.
+
+
+## `__init__`
+Constructor for a repository that interacts with symbol records. References a database session that is used by all queries.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `session` | Session | Yes | Specifies the database session the repository operates in. All functions in this class flushes all changes to the session. It is the job of higher layers to commit or rollback any changes. |
+
+
+## `get_symbol_name`
+Returns the name of a symbol when provided with its corresponding ID.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `id` | int | Yes | ID of a symbol. |
+
+Returns:
+*str*: A corresponding symbol name.
+    
+Raises:
+[*RepositoryNotFoundError*](#error-types): Raised if a symbol row is not found with the provided ID.
+
+## `get_symbol_names`
+Retrieves all symbol names stored in the database.
+
+### Returns
+*list*: All list of symbol names as strings if the database retrieval was successful.
+
+
+## `get_symbol_id`
+Retrieves a symbol ID given the name of a symbol from the database.
+
+### Arguments:
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `symbol_name` | str | Yes | The name of the symbol in the database. |
+
+### Returns
+*int*: The ID of the symbol as an int if the database retrieval was successful.
+        
+### Raises
+[*RepositoryNotFoundError*](#error-types): Raised if a symbol row is not found with the provided name.
+
+
+## `insert_new_symbol`
+Creates a new symbol in the database.
+
+### Arguments:
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `symbol_name` | str | Yes | The name of the symbol to create in the database. |
+
+### Returns
+*int*: The ID of the newly created symbol.
+
+### Raises
+[*RepositoryExistingRowError*](#error-types): Raised if a symbol with the same name already exists.
+
+
+
+# UserRepository
+
+
+
+
+
+
 

@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import func, insert, select, update
+from sqlalchemy import func, select, update
+from sqlalchemy.orm import Session
 
 from .db_core.models import Station
 from .db_core.exceptions import RepositoryNotFoundError, RepositoryInternalError, RepositoryInvalidArgumentError, \
@@ -16,8 +17,8 @@ class StationRepository(BaseRepository[Station]):
     execute functionality using the `Station` model.
     """
     
-    def __init__(self, session):
-        """Constructor for a repository that interacts station records.
+    def __init__(self, session: Session):
+        """Constructor for a repository that interacts with station records.
 
         Args:
             session (Session): Specifies the database session the repository operates
@@ -32,8 +33,8 @@ class StationRepository(BaseRepository[Station]):
         """Returns a collection of ID and station name pairs from the `Stations` table.
 
         Returns:
-            (list[dict[str, Any]]): A list of tuples containing station IDs and names if
-                the operation was successful.
+            (list[dict[str, Any]]): A list of dictionaries containing `id` and `station_name`
+                for each station.
         """
         # Attempt to retrieve and parse all station ID and name pairs.
         stmt = select(self.model.id, self.model.station_name)
@@ -51,6 +52,10 @@ class StationRepository(BaseRepository[Station]):
         Args:
             station_name (str): The name of a new station.
             hashed_password (str): A hashed password for the new station.
+
+        Raises:
+            `RepositoryExistingRowError`: Raised if a station with the same name already
+                exists.
 
         Returns:
             int: Returns the id of the new station created
@@ -86,6 +91,11 @@ class StationRepository(BaseRepository[Station]):
             station_name (int): The ID of the station to update.
             hashed_password (str): The new hashed password for the station.
 
+        Raises:
+            `RepositoryNotFoundError`: Raised if a station with `station_id` does not exist.
+            `RepositoryInvalidArgumentError`: Raised if either argument is of the incorrect
+                type.
+
         Returns:
             str: The newly updated password from the database session.
         """
@@ -106,6 +116,10 @@ class StationRepository(BaseRepository[Station]):
 
         Args:
             stat_name (str): The name of the station.
+
+        Raises:
+            `RepositoryNotFoundError`: Raised if a station with `stat_name` 
+                does not exist.
 
         Returns:
             str: The ID of the station.
@@ -134,29 +148,27 @@ class StationRepository(BaseRepository[Station]):
         
 
     @repository_error_handler()
-    def get_last_seen(self, stat_name: str) -> str:
-        """Returns a formatted string of the station's last seen timestamp. If the
-        timestamp occurred today, the string is formatted as: `HH:MM AM/PM`; otherwise,
-        it is formatted as: `MON DD, YYYY at HH:MM AM/PM`.
+    def get_last_seen(self, station_name: str) -> datetime:
+        """Returns a datetime instance of the station's last seen timestamp.
 
         Args:
-            stat_name (str): The name of the station to retrieve from.
+            station_name (str): The name of the station to retrieve from.
 
         Raises:
             `RepositoryNotFoundError`: Raised if a station is not found.
 
         Returns:
-            str: A formatted string of a station's last seen timestamp.
+            datetime: A datetime instance of a station's last seen timestamp.
         """
         # Get the last seen field from a station's corresponding name
-        stmt = select(self.model.last_seen).where(self.model.station_name == stat_name)
+        stmt = select(self.model.last_seen).where(self.model.station_name == station_name)
         result = self.session.execute(stmt).scalar_one_or_none()
         
         # If result is None, it was likely not found
         if not result:
             raise RepositoryNotFoundError(
                 caller_name=self.__class__.__name__, 
-                message=f"Could not find {stat_name}!",
+                message=f"Could not find {station_name}!",
                 show_error=True
             )
         
@@ -166,9 +178,8 @@ class StationRepository(BaseRepository[Station]):
         
     @repository_error_handler()
     def update_last_seen(self, station_id: int) -> datetime:
-        """Updates a station's last seen timestamp to the current time during execution.
-
-        Returns a `datetime` instance representing the result.
+        """Updates a station's last seen timestamp to the current time 
+        during execution.
 
         Args:
             station_id (int): The ID of the station to update.
@@ -199,4 +210,3 @@ class StationRepository(BaseRepository[Station]):
             )
             
         return result
-
