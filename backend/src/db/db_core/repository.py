@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Any, Generic, Protocol, Type, TypeVar, Union, runtime_checkable
+from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
 
 from sqlalchemy import Row, Sequence, inspect
 from sqlalchemy.orm.session import Session

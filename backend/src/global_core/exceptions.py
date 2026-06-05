@@ -16,16 +16,15 @@ class LayerError(Exception):
         caller_name: Optional[str] = None,
         poe: Optional[str] = None,
         message: Optional[str] = None,
-        show_error=False,
-        cause: Optional[Exception] = None
+        show_error: bool = False,
+        cause: Optional[Exception] = None,
     ):
         """Constructor for a `LayerError` instance.
-
-        The contents of a message include the following: * An optional caller prefix in
-        the format `[caller_name]` * A public-facing message, either the class's
-        `default_message` or, if debugging is enabled, the location and details of the
-        error.
-
+        The contents of a message include the following:
+        - An optional caller prefix in the format `[caller_name]`
+        - A public-facing message, either the class's `default_message` or, if 
+        debugging is enabled, the location and details of the error.
+        
         Args:
             caller_name (str, optional): Name of the caller (typically a class) used as
                 a prefix for the error message, e.g., the name of the service or
@@ -45,40 +44,50 @@ class LayerError(Exception):
         """
         # Prevent circular import
         from backend import error_debugging
-        
-        # Contruct the caller prefix and point of error message if provided
-        caller = f"[{caller_name}] " if caller_name else ""
-        point_of_error = f"Exception raised in {poe}! " if poe else ""
 
+        # Attach the cause exception for later reference
+        self.cause = cause
+        
         # Construct the body of the error message based on parameters provided
-        # Set the initial message to an error's default message
-        public = self.default_message
+        public = self._build_public(poe, message, show_error, cause, error_debugging)
+        
+        # Construct the final message
+        final = f"[{caller_name}] {public}" if caller_name else public
+        super().__init__(final)
+
+
+    def _build_public(self, poe, message, show_error, cause, error_debugging) -> str:
+        # Set the initial message to the error's default message
+        if not (error_debugging or show_error) or not message:
+            return self.default_message
 
         # If the app is in debugging mode or the error has been explicitly set to
         # display, and a message has been provided, construct the error message accordingly.
-        if (error_debugging or show_error) and message:
-            # If message is not a string, attempt to convert it to a string for display. If this fails, default to an empty message.
-            if not isinstance(str, type(message)):
-                message = str(message)
+        body = self._build_body(message, error_debugging, cause)
+        
+        # Construct the caller prefix and point of error message if provided
+        prefix = f"Exception raised in {poe}! " if poe and error_debugging else ""
+        
+        # Display the specific error message if provided, followed by the default message and additional error details.
+        return f"{prefix}{body}"
 
-            if not error_debugging:
-                # The regex removes any existing "[LayerError]: " prefix from the original message to avoid exposing lower level details.
-                exc_prefix_idx = message.find("]") if "]" in message else 0
-                new_message = (
-                    message[exc_prefix_idx + 2 :] if exc_prefix_idx != 0 else message
-                )
-            else:
-                # Otherwise, display everything.
-                new_message = message
 
-            # Display the specific error message if provided, followed by the default message and additional error details.
-            public = f"{point_of_error}{public.rstrip('.!')}: {new_message}"
+    def _build_body(self, message, error_debugging, cause) -> str:
+        # If message is not a string, attempt to convert it to a string for display.
+        # If this fails, default to an empty message.
+        message = message if isinstance(message, str) else str(message)
 
-        # Attach the cause for exception for later reference
-        self.cause = cause
+        if not error_debugging:
+            # This removes any existing "[LayerError]: " prefix from the original
+            # message to avoid exposing lower level details.
+            idx = message.find("]")
+            return message[idx + 2:] if idx > 0 else message
 
-        # Pass the final error message to the Exception constructor
-        super().__init__(f"{caller}{public}")
+        # Otherwise, display everything and show the cause.
+        # Append cause details if it's not already a LayerError
+        if cause and not isinstance(cause, LayerError):
+            message += f" | {type(cause).__name__}: {cause}"
+        return message
 
     def __cause__(self) -> Exception | None:
         """Override the default cause behavior to return exception if provided."""
@@ -95,19 +104,16 @@ def wrap_error_handler(
     """Wraps a function with a general-purpose error-handling strategy.
 
     Catches exceptions and translates them into layer-specific errors via a provided
-    error map (see `wrap_error_handler` for more details). Any exception not covered by
-    `error_map` or the `exclude` is caught and re-raised as the provided
-    `base_exception` or itself, respectively. Preserves the original exception as the
-    cause via `raise ... from e`.
+    error map. Any exception not covered by `error_map` or the `exclude` is caught and 
+    re-raised as the provided `base_exception` or itself, respectively. Preserves the 
+    original exception as the cause via `raise ... from e`.
 
     Args:
-        error_map (ErrorMapping): A dictionary mapping of source exception type(s) to a
-            tuple of `(Exception, bool)`, where the bool indicates whether the
-            translated error should provide specifics in its message. Both single
-            exception types and tuples of exception types are valid as keys, allowing
-            multiple exceptions to map to the same target. Broader exceptions should be
-            placed lower in the map because translation works by selecting the first
-            match. See `ErrorMapping` for the required structure.
+        error_map (ErrorMapping): A dictionary mapping of exception translations. Both 
+            single exception types and tuples of exception types are valid as keys, 
+            allowing multiple exceptions to map to the same target. Broader exceptions 
+            should be placed lower in the map because translation works by selecting the 
+            first match. See `ErrorMapping` for the required structure.
         base_exception (Type[LayerError]): The fallback exception type raised when a
             caught exception has no matching entry in `error_map`. Ensures unhandled
             exceptions are still wrapped in a layer-appropriate error to prevent leaking

@@ -1,6 +1,8 @@
 from datetime import datetime
 from math import ceil
 from typing import Any, Generic, Optional, Type, TypeVar
+import sys
+
 from sqlalchemy import func, inspect, select, text, update
 from sqlalchemy.orm.session import Session
 
@@ -79,7 +81,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         """
         return self.session.query(func.count(self.model.id)).scalar()
 
-    @repository_error_handler()
+
     def get_train_history(self, record_id: int) -> dict[str, Any]:
         """Returns a train record with the following columns: `id, date_rec, station_name,
         symb_name, unit_addr, verified` and the columns defined in a concrete model's
@@ -93,31 +95,39 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 values for a train record.
         """
         from .db_core.models import Station, Symbol
+        
+        try:
+            # Include the columns that will be present in the results across all records
+            columns = [
+                self.model.id,
+                func.to_char(self.model.date_rec, "YYYY-MM-DD HH24:MI:SS").label(
+                    "date_rec"
+                ),
+                Station.station_name,
+                Symbol.symb_name,
+                self.model.unit_addr,
+                self.model.verified,
+            ]
 
-        # Include the columns that will be present in the results across all records
-        columns = [
-            self.model.id,
-            func.to_char(self.model.date_rec, "YYYY-MM-DD HH24:MI:SS").label(
-                "date_rec"
-            ),
-            Station.station_name,
-            Symbol.symb_name,
-            self.model.unit_addr,
-            self.model.verified,
-        ]
+            # Extend to get model specific records columns
+            columns.extend(self.model.get_unique_fields())
 
-        # Extend to get model specific records columns
-        columns.extend(self.model.get_unique_fields())
+            stmt = (
+                select(*columns)
+                .join(Station, Station.id == self.model.station_recorded)
+                .outerjoin(Symbol, Symbol.id == self.model.symbol_id)
+                .where(self.model.id == record_id)
+            )
 
-        stmt = (
-            select(*columns)
-            .join(Station, Station.id == self.model.station_recorded)
-            .outerjoin(Symbol, Symbol.id == self.model.symbol_id)
-            .where(self.model.id == record_id)
-        )
-
-        results = self.session.execute(stmt).one()
-        return self.objs_to_dicts(results)
+            results = self.session.execute(stmt).one()
+            return self.objs_to_dicts(results)
+        
+        except Exception as e:
+            raise repository_error_translator(
+                e, self.__class__.__name__,
+                sys._getframe().f_code.co_name,
+                f"Could not get record with ID = {record_id}!"
+            )
 
     @repository_error_handler()
     def create_train_record(
@@ -158,8 +168,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             if datetime_received is None:
                 raise RepositoryInvalidArgumentError(
                     self.__class__.__name__,
-                    message="Record timestamp must be provided!",
-                    show_error=True,
+                    sys._getframe().f_code.co_name,
+                    "Record timestamp must be provided!",
+                    True
                 )
 
             sql_args["date_rec"] = datetime_received
@@ -173,9 +184,10 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         # Should not happen if args contains items
         if not result:
             raise RepositoryInternalError(
-                caller_name=self.__class__.__name__,
-                message="Could not create new train record, 0 rows created!",
-                show_error=True,
+                self.__class__.__name__,
+                sys._getframe().f_code.co_name,
+                "Could not create new train record, 0 rows created!",
+                True
             )
 
         # The 'create' function returns a list of ORM instances, access the first index since only one record is created
@@ -210,9 +222,10 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         if not result:
             raise RepositoryNotFoundError(
-                caller_name=self.__class__.__name__,
-                message=f"Could not get record ID where the unit address = {unit_addr}",
-                show_error=False,
+                self.__class__.__name__,
+                sys._getframe().f_code.co_name,
+                f"Could not get record ID where the unit address = {unit_addr}",
+                True
             )
 
         # Since we are ordering by ascending order, the most recent record is at the end.
@@ -303,6 +316,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         if not hasattr(self.model, field_type):
             raise RepositoryInvalidArgumentError(
                 self.__class__.__name__,
+                sys._getframe().f_code.co_name,
                 f"Column '{field_type}' not found in {self.model.__name__}!",
                 True,
             )
@@ -409,8 +423,8 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             raise repository_error_translator(
                 e,
                 self.__class__.__name__,
-                message=f"Error collating {self.record_identifier.upper()} records: {e}",
-                exclude=RepositoryError,
+                sys._getframe().f_code.co_name,
+                f"Error collating {self.record_identifier.upper()} records: {e}"
             )
 
     def verify_record(
@@ -449,8 +463,8 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             raise repository_error_translator(
                 e,
                 self.__class__.__name__,
-                None,
-                f"Could not verify {self.record_name} {record_id}: {e}",
+                sys._getframe().f_code.co_name,
+                f"Could not verify {self.record_name} {record_id}: {e}"
             )
 
     # Time frame
@@ -556,6 +570,6 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             raise repository_error_translator(
                 e,
                 self.__class__.__name__,
-                None,
+                sys._getframe().f_code.co_name,
                 f"Could not retrieve {self.record_name}s at station{f' {station_id}' if station_id != -1 else 's'}: {e}",
             )

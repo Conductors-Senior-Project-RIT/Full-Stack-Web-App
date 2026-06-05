@@ -1,3 +1,4 @@
+import sys
 from sqlalchemy import select
 
 from .db_core.models import Symbol
@@ -50,9 +51,10 @@ class SymbolRepository(BaseRepository):
 
             if not result:
                 raise RepositoryNotFoundError(
-                    caller_name=self.__class__.__name__,
-                    message=f"Symbol with ID = {id}, could not be found!",
-                    show_error=False,
+                    self.__class__.__name__,
+                    sys._getframe().f_code.co_name,
+                    f"Symbol with ID = {id}, could not be found!",
+                    False,
                 )
 
             return result
@@ -61,7 +63,7 @@ class SymbolRepository(BaseRepository):
             raise repository_error_translator(
                 e,
                 self.__class__.__name__,
-                None,
+                sys._getframe().f_code.co_name,
                 f"Could not retrieve symbol name for ({id}): {e}",
             )
 
@@ -100,9 +102,10 @@ class SymbolRepository(BaseRepository):
 
             if symbol_id is None:
                 raise RepositoryNotFoundError(
-                    caller_name=self.__class__.__name__,
-                    message=f"Could not find symbol with name = {symbol_name}",
-                    show_error=False,
+                    self.__class__.__name__,
+                    sys._getframe().f_code.co_name,
+                    f"Could not find symbol with name = {symbol_name}",
+                    False,
                 )
 
             return symbol_id
@@ -112,7 +115,7 @@ class SymbolRepository(BaseRepository):
             raise repository_error_translator(
                 e,
                 self.__class__.__name__,
-                None,
+                sys._getframe().f_code.co_name,
                 f"Could not retrieve symbol ID for {symbol_name}: {e}",
             )
 
@@ -136,9 +139,10 @@ class SymbolRepository(BaseRepository):
 
             if result is not None:
                 raise RepositoryExistingRowError(
-                    caller_name=self.__class__.__name__,
-                    message=f"A symbol with the name {symbol_name} already exists!",
-                    show_error=True,
+                    self.__class__.__name__,
+                    sys._getframe().f_code.co_name,
+                    f"A symbol with the name {symbol_name} already exists!",
+                    True,
                 )
 
             # Attempt to insert the new symbol into the Symbols table
@@ -152,6 +156,6 @@ class SymbolRepository(BaseRepository):
             raise repository_error_translator(
                 e,
                 self.__class__.__name__,
-                None,
+                sys._getframe().f_code.co_name,
                 f"Could not create new symbol '{symbol_name}': {e}",
             )

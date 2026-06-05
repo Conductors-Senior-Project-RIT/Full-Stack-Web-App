@@ -6,7 +6,7 @@ import unittest
 from sqlalchemy import text
 
 from backend.database import db
-from backend.src.db.db_core.exceptions import RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError
+from backend.src.db.db_core.exceptions import RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError, RepositorySessionError
 from backend.src.db.db_core.repository import BaseRepository
 from backend.test.base_test_case import BaseTestCase
 from backend.test.db.test_utils import TestModel, return_test_data
@@ -45,13 +45,12 @@ class TestBaseRepository(BaseTestCase):
         # Test that the primary key of the repository is correct
         self.assertEqual("id", self.repo.pkey)
         
-        # Test that the primary key of the repository is None when model is not specified
-        self.repo = BaseRepository(None, self.session)
-        self.assertEqual(None, self.repo.pkey)
+        # Test that an exception is raised when either session or model is not provided
+        with self.assertRaises(RepositoryInvalidArgumentError):
+            self.repo = BaseRepository(None, self.session)
         
-        # Test inspection error on invalid instance
-        self.repo = BaseRepository(int, self.session)
-        self.assertEqual(None, self.repo.pkey)
+        with self.assertRaises(RepositorySessionError):
+            self.repo = BaseRepository(TestModel, None)
             
         # Test if inspection doesn't find primary key
         with patch('backend.src.db.db_core.repository.inspect') as mock_inspect:

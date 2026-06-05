@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any
+import sys
 
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
@@ -66,9 +67,10 @@ class StationRepository(BaseRepository[Station]):
         
         if result is not None:
             raise RepositoryExistingRowError(
-                caller_name=self.__class__.__name__,
-                message=f"A station with the name {stat_name} already exists!",
-                show_error=True
+                self.__class__.__name__,
+                sys._getframe().f_code.co_name,
+                f"A station with the name {stat_name} already exists!",
+                True
             )
         
         # Add a new station instance to the session
@@ -101,9 +103,10 @@ class StationRepository(BaseRepository[Station]):
         """
         if not isinstance(station_id, int) or not isinstance(hashed_password, str):
             raise RepositoryInvalidArgumentError(
-                caller_name=self.__class__.__name__,
-                message="Either station_id or hashed_password are of the incorrect type!",
-                show_error=False
+                self.__class__.__name__,
+                sys._getframe().f_code.co_name,
+                "Either station_id or hashed_password are of the incorrect type!",
+                False
             )
         
         # Will raise a RepositoryNotFoundError if station does not exist
@@ -132,9 +135,10 @@ class StationRepository(BaseRepository[Station]):
             # If None, then a record was likely not found.
             if not result:
                 raise RepositoryNotFoundError(
-                    caller_name=self.__class__.__name__, 
-                    message=f"Could not find {stat_name}!",
-                    show_error=True
+                    self.__class__.__name__, 
+                    sys._getframe().f_code.co_name,
+                    f"Could not find {stat_name}!",
+                    True
                 )
             
             return result
@@ -142,7 +146,9 @@ class StationRepository(BaseRepository[Station]):
         # Handle any errors that may occur, including the station name in the error message.
         except Exception as e:
             raise repository_error_translator(
-                e, self.__class__.__name__, None,
+                e, 
+                self.__class__.__name__, 
+                sys._getframe().f_code.co_name,
                 f"Could not retrieve a station id for {stat_name}: {e}"
             )
         
@@ -167,9 +173,10 @@ class StationRepository(BaseRepository[Station]):
         # If result is None, it was likely not found
         if not result:
             raise RepositoryNotFoundError(
-                caller_name=self.__class__.__name__, 
-                message=f"Could not find {station_name}!",
-                show_error=True
+                self.__class__.__name__, 
+                sys._getframe().f_code.co_name,
+                f"Could not find {station_name}!",
+                True
             )
         
         # Format the seen date based on whether it was seen today    
@@ -204,9 +211,10 @@ class StationRepository(BaseRepository[Station]):
         # If None is returned, the station was likely not found
         if not result:
             raise RepositoryNotFoundError(
-                caller_name=self.__class__.__name__, 
-                message=f"Could not find station with id: {station_id}!",
-                show_error=True
+                self.__class__.__name__, 
+                sys._getframe().f_code.co_name,
+                f"Could not find station with id: {station_id}!",
+                True
             )
             
         return result
