@@ -70,10 +70,11 @@ This class includes two `TypeAlias` definitions to shorten the type-hinting in t
 ## ExceptionType
 A `TypeAlias` used to shorten type-hinting in function definitions.
 
-# `wrap_error_handler`
-Wraps a function with a general-purpose error-handling strategy. Catches exceptions and translates them into layer-specific errors via a provided error map. Any exception not covered by `error_map` or the `exclude` is caught and re-raised as the provided `base_exception` or itself, respectively. Preserves the original exception as the cause via `raise ... from e`. If `func` is an `__init__`, the function name displayed is renamed to *"intialization"*.
 
-### Arguments
+# `wrap_error_handler`
+Wraps a function with a general-purpose error-handling strategy. Catches exceptions and translates them into layer-specific errors via a provided error map. Any exception not covered by `error_map` or the `exclude` is caught and re-raised as the provided `base_exception` or itself, respectively. Preserves the original exception as the cause via `raise ... from e`. If `func` is an `__init__`, the function name displayed is renamed to *"intialization"*. This function is useful for when functions need to be wrapped during runtime.
+
+## Arguments
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `func` | `callable` | Yes | The function that is being wrapped with the error handling logic. |
@@ -82,10 +83,10 @@ Wraps a function with a general-purpose error-handling strategy. Catches excepti
 | `exclude` | [`ExceptionType`](#type-definitions-used) | No | An exception type or tuple of exception types that should be ignored in translation entirely. Useful for allowing certain exceptions to propagate without interference. Defaults to None. |
 | `message` | `str` | No | A custom message to attach to the translated exception. If None, the default message in [`LayerError`](#layererror) is used. Defaults to None. |
 
-### Returns
+## Returns
 *callable*: `func` wrapped with the error handling logic.
 
-### Example
+## Example
 ```python
 class CustomError1(LayerError):
     default_message = "Default message 1."
@@ -123,4 +124,103 @@ wrapped = wrap_error_handler(
     message="Error raised in some_func, this isn't good..."
 )
 wrapped(1)
+```
+
+
+# `layer_error_handler`
+Decorator to provide error translation for exceptions in backend layers. This decorator is applied to instance methods to automatically catch exceptions, translate them into layer-specific errors using an `error_map`, and re-raise them while preserving the original exception as the cause. Use this decorator when function variables aren't required to be shown in the error message. Uses the error handling logic in [`wrap_error_handler`](#wrap_error_handler).
+
+## Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `error_map` | [`ErrorMapping`](#type-definitions-used) | No | A dictionary mapping of exception translations. Both single exception types and tuples of exception types are valid as keys, allowing multiple exceptions to map to the same target. Broader exceptions should be placed lower in the map because translation works by selecting the first match. |
+| `base_exception` | `Type[LayerError]` | Yes | The fallback exception type raised when a caught exception has no matching entry in `error_map`. Ensures unhandled exceptions are still wrapped in a layer-appropriate error to prevent leaking lower-level implementation details. |
+| `exclude` | [`ExceptionType`](#type-definitions-used) | No | An exception type or tuple of exception types that should be ignored in translation entirely. Useful for allowing certain exceptions to propagate without interference. Defaults to None. |
+| `message` | `str` | No | A custom message to attach to the translated exception. If None, the default message in [`LayerError`](#layererror) is used. Defaults to None. |
+
+## Returns
+*callable*: The original function wrapped with exception handling logic, with its signature and metadata preserved.
+
+## Raises
+The returned function will raise one of two exception types:
+- `LayerError`: A translated exception determined by `error_map`, using `base_exception` as the fallback.
+- `Exception`: If the exception matches a type in `exclude`, it is re-raised immediately.
+
+## Examples
+
+**Default Parameters:**
+```python
+class CustomError1(LayerError):
+    default_message = "Default message 1."
+
+class CustomError2(LayerError):
+    default_message = "Default message 2."
+
+custom_map = {
+    IndexError: (CustomError1, True),
+    (KeyError, ValueError): (CustomError2, False)
+}
+
+@layer_error_handler(error_map=custom_map, base_exception=LayerError)
+def some_func(arg):
+    ...
+```
+
+**Custom Parameters:**
+```python
+@layer_error_handler(
+    error_map=custom_map
+    base_exception=LayerError,
+    exclude=LayerError,
+    message="An error occurred!"
+)
+def some_repository_method(self):
+    ...
+```
+
+# `translate_error`
+Translates a provided `Exception` instance using a map potential exception classes. Uses general-purpose logic to produce layer-specific errors. Any exception not covered by `error_map` is translated to a fallback exception provided in `base_exception`. All exceptions with a matching type in `exclude` is returned as-is. This function is useful for cases where function variables need to be included in error messages or when multiple points of failure may occur in a long function, each requiring different messages.
+
+## Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `exc` | `Exception` | Yes | The exception instance that will be translated. If its type does not correspond with a matching translation in `error_map`, or it has a matching type in `exclude`, the exception is returned as-is. |
+| `error_map` | [`ErrorMapping`](#type-definitions-used) | No | A dictionary mapping of exception translations. Both single exception types and tuples of exception types are valid as keys, allowing multiple exceptions to map to the same target. Broader exceptions should be placed lower in the map because translation works by selecting the first match. |
+| `base_exception` | `Type[LayerError]` | Yes | The fallback exception type raised when a caught exception has no matching entry in `error_map`. Ensures unhandled exceptions are still wrapped in a layer-appropriate error to prevent leaking lower-level implementation details. |
+| `caller_name` | `str` | No | Name of the caller (typically a class) used as a prefix for the error message, e.g., the name of the service or repository raising the exception. Defaults to None. |
+| `point_of_error` | `str` | No | Point of error that identifies where in the code the exception was raised, e.g., a function or method name. Only included in the message when debugging is enabled. Defaults to None. |
+| `message` | `str` | No | A custom message to attach to the translated exception. If None, the default message in [`LayerError`](#layererror) is used. Defaults to None. |
+| `exclude` | [`ExceptionType`](#type-definitions-used) | No | An exception type or tuple of exception types that should be ignored in translation entirely. Useful for allowing certain exceptions to propagate without interference. Defaults to None. |
+
+## Returns
+*LayerError **or** Exception*: If a matching translation is found in `error_map`, a [`LayerError`](#layererror) instance is returned. In the case a match is not found, the class provided in `base_exception` is instantiated and returned as a fallback, preventing lower-level implementation details from propagating upwards. If the provided exception `e` is an instance with a matching type in `exclude`, it is returned as-is.
+
+## Example
+```python
+import sys
+
+class CustomError1(LayerError):
+    default_message = "Default message 1."
+
+class CustomError2(LayerError):
+    default_message = "Default message 2."
+
+custom_map = {
+    IndexError: (CustomError1, True),
+    (KeyError, ValueError): (CustomError2, False)
+}
+
+class CustomClass:
+    def some_function(self, arg):
+        try:
+            ...
+        except Exception as e:
+            raise translate_error(
+                exc=e,
+                error_map=custom_map,
+                caller_name=self.__class__.__name__,
+                point_of_error=sys._getframe().f_code.co_name,
+                message=f"Error occurred doing something with {arg}!",
+                exclude=LayerError
+            )
 ```

@@ -139,7 +139,7 @@ def wrap_error_handler(
                 and assumes `args[0]` is the instance of the class (`self`). This is
                 intended for instance methods.
 
-    Examples:
+    Example Error Map:
         ```
         ```python
         error_map = {
@@ -254,7 +254,7 @@ def layer_error_handler(
 
 
 def translate_error(
-    e: Exception,
+    exc: Exception,
     error_map: ErrorMapping,
     base_exception: Type[LayerError],
     caller_name: Optional[str] = None,
@@ -270,35 +270,44 @@ def translate_error(
     as-is.
 
     Args:
-        e (Exception): See `layer_error_handler` for details.
-        error_map (ErrorMapping): See `ErrorMapping` for details.
-        base_exception (Type[LayerError]): See `layer_error_handler` for details.
-        caller_name (str, optional): Defaults to None. See `layer_error_handler` for
-            details.
-        point_of_error (str, optional): Specifies the exception's origin location. The
-            point of error will be displayed in the error's message to be used for
-            debugging purposes, providing error context. Defaults to None.
-        message (str, optional): See `layer_error_handler` for details. Defaults to
-            None.
-        exclude (ExceptionType, optional): See `ExceptionType` for details. Defaults to
-            None.
+        exc (Exception): The exception instance that will be translated. If its type does 
+            not correspond with a matching translation in `error_map`, or it has a matching 
+            type in `exclude`, the exception is returned as-is.
+        error_map (ErrorMapping): A dictionary mapping of exception translations. Both single 
+            exception types and tuples of exception types are valid as keys, allowing multiple 
+            exceptions to map to the same target. Broader exceptions should be placed lower in 
+            the map because translation works by selecting the first match.
+        base_exception (Type[LayerError]): The fallback exception type raised when a caught 
+            exception has no matching entry in `error_map`. Ensures unhandled exceptions are 
+            still wrapped in a layer-appropriate error to prevent leaking lower-level 
+            implementation details.
+        caller_name (str, optional): Name of the caller (typically a class) used as a prefix for 
+            the error message, e.g., the name of the service or repository raising the exception. 
+            Defaults to None.
+        point_of_error (str, optional): Point of error that identifies where in the code the 
+            exception was raised, e.g., a function or method name. Only included in the message 
+            when debugging is enabled. Defaults to None.
+        message (str, optional): A custom message to attach to the translated exception. If None, 
+            the default message in the `LayerError` is used. Defaults to None.
+        exclude (ExceptionType, optional): An exception type or tuple of exception types that 
+            should be ignored in translation entirely. Useful for allowing certain exceptions to 
+            propagate without interference. Defaults to None.
 
     Returns:
-        LayerError | Exception: If a matching translation is found in `error_map`, a
-            subclass instance of `LayerError` is returned. In the case a match is not
-            found, the class provided in `base_exception` is instantiated and returned
-            as a fallback, preventing lower-level implementation details from
-            propagating upwards. If the provided exception `e` is an instance with a
-            matching type in `exclude`, it is returned as-is.
+        LayerError | Exception: If a matching translation is found in `error_map`, a `LayerError` 
+            instance is returned. In the case a match is not found, the class provided in 
+            `base_exception` is instantiated and returned as a fallback, preventing lower-level 
+            implementation details from propagating upwards. If the provided exception `e` is an 
+            instance with a matching type in `exclude`, it is returned as-is.
     """
     # Return the exception if its type exists in exclusion list
-    if exclude and isinstance(e, exclude):
-        return e
+    if exclude and isinstance(exc, exclude):
+        return exc
 
     # Find the first matching type in the error map. Returns a tuple containing an exception class,
     # and a boolean that determines whether previous exception details should be propogated.
     # If a match is not found, None is returned.
-    error_class = next((error_map[cls] for cls in error_map if isinstance(e, cls)), None)
+    error_class = next((error_map[cls] for cls in error_map if isinstance(exc, cls)), None)
 
     if error_class:
         layer_exception, show_error = error_class
@@ -309,10 +318,10 @@ def translate_error(
             poe=point_of_error,
             message=message,
             show_error=show_error,
-            cause=e,
+            cause=exc,
         )
 
     # Match not found, instantiate and return the fallback exception
     return base_exception(
-        caller_name, poe=point_of_error, message=message, show_error=False, cause=e
+        caller_name, poe=point_of_error, message=message, show_error=False, cause=exc
     )
