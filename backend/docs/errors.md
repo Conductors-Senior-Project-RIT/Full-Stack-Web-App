@@ -6,8 +6,11 @@ To achieve this, we incorporate Python’s function decorators to wrap class met
 
 The code for the error handling is located in the `db_core.exceptions` module, and can be used in any of the layers. The [**API**](api.md) layer uses the error handlers provided by *Flask*, but the [**Service**](service.md) and [**Repository**](repository.md) layers utilize the error handling logic described here.
 
+**Error Handling Class/Module Diagram**
+![Error-Handling-Diagram](./diagrams/errors.png)
+
+**Request Sequence Diagram**
 ![Request-Flow-With-Error-Path](./diagrams/request_seq.png)
-**The sequence diagram above showcases sequence of a successful and unsuccessful client request. Exceptions are travel and are translated at each layer.**
 
 # LayerError
 This is the parent class for all the exceptions in the different layers. Both [`ServiceError`](service.md#error_types) and [`RepositoryError`](repository.md#error-types) inherit this class. A `default_message` is included in every `LayerError` to be used when details should be abstracted from the client, and a child exception should specify a unique message in their class definition.

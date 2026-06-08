@@ -64,7 +64,7 @@ def wrap_repository_error_handler(func):
 
 
 def repository_error_translator(
-    e: Exception,
+    exc: Exception,
     caller_name: Optional[str] = None,
     point_of_error: Optional[str] = None,
     message: Optional[str] = None,
@@ -74,7 +74,7 @@ def repository_error_translator(
     for more details.
 
     Args:
-        e (Exception): An exception that is to be translated.
+        exc (Exception): An exception that is to be translated.
         caller_name (str, optional): The class that called this function. Defaults to
             None.
         point_of_error (str, optional): The location/function the error occurred in.
@@ -89,11 +89,11 @@ def repository_error_translator(
             instance of `RepositoryError` is returned. In the case a match is not found,
             a `RepositoryInternalError` is instantiated and returned as a fallback,
             preventing lower-level implementation details from propagating upwards. If
-            the provided exception `e` is an instance with a matching type in `exclude`,
+            the provided exception `exc` is an instance with a matching type in `exclude`,
             it is returned as-is.
     """
     return translate_error(
-        e,
+        exc,
         REPOSITORY_ERROR_MAP,
         RepositoryInternalError,
         caller_name,
