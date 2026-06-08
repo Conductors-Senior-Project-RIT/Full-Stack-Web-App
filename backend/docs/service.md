@@ -28,6 +28,7 @@ This layer employs the standardized functionality from `global_core.exceptions` 
 | `ServiceParsingError` | Value parsing or indexing issues. |
 | `ServiceResourceNotFound` | Resource is not found such as a non-existing database row. |
 | `ServiceExistingResourceError` | New resource requests to be created but conflicts with an existing one. |
+| `ServiceEmailError` | Error occurs when sending an email in [`EmailService`](#emailservice). |
 | `ServiceInvalidArgument` | Invalid argument is provided. |
 
 ## Repository to Service Mapping

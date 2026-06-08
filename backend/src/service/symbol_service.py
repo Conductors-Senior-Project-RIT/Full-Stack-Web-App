@@ -15,7 +15,7 @@ class SymbolService(BaseService):
             session (Session): The SQLAlchemy session to be used for database
                 transactions in the service's repository.
         """
-        self._symbol_repo = SymbolRepository(session)
+        self.symbol_repo = SymbolRepository(session)
         
     def get_symbol(self, symbol_name: str | None) -> list[str] | int:
         """If a symbol name is provided, the ID corresponding to that symbol is returned;
@@ -29,9 +29,9 @@ class SymbolService(BaseService):
             list[str] | int: A list of symbol names or the ID of a specific symbol.
         """
         if symbol_name is None:
-            return self._symbol_repo.get_symbol_names()
+            return self.symbol_repo.get_symbol_names()
         else:
-            return self._symbol_repo.get_symbol_id(symbol_name)
+            return self.symbol_repo.get_symbol_id(symbol_name)
         
     def create_symbol(self, symbol_name: str) -> int:
         """Creates a new symbol in the database with the provided name.
@@ -45,5 +45,5 @@ class SymbolService(BaseService):
         Returns:
             int: The ID of the newly created symbol.
         """
-        return self._symbol_repo.insert_new_symbol(symbol_name)
+        return self.symbol_repo.insert_new_symbol(symbol_name)
         

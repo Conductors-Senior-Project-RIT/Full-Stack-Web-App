@@ -54,6 +54,10 @@ class ServiceExistingResourceError(ServiceError):
 
 class ServiceInvalidArgument(ServiceError):
     default_message = "Invalid argument provided!"
+    
+    
+class ServiceEmailError(ServiceError):
+    default_message = "Error sending email!"
 
 
 # Maps a Repository layer error to a corresponding Service layer error, and whether the lower layer message should be shown

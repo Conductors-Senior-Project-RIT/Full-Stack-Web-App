@@ -25,17 +25,17 @@ class RecordService(BaseService):
             record_type (int | None): An integer corresponding to a record type, or None if repositories for all record types should be initialized. 
                 The integer values corresponding to each record type are defined in `db.record_types`.
         """
-        self._record_repo = (
+        self.record_repo = (
             [record_types.get_record_repository(session, record_type)] 
             if record_type is not None else 
             record_types.get_all_repositories(session)
         )
-        self._session = session
+        self.session = session
         
     
     def get_first_repository(self) -> RecordRepository:
         try:
-            return self._record_repo[0]
+            return self.record_repo[0]
         except IndexError:
             raise ServiceInternalError("Could not access record repository!")
 
@@ -243,7 +243,7 @@ class RecordService(BaseService):
         from ..db.station_repo import StationRepository
     
         # Instantiate a station repository to get the station ID if only the station name is provided.
-        station_repo = StationRepository(self._session)
+        station_repo = StationRepository(self.session)
     
         # The time range is provided as a string in the format "HH:MM:SS"
         # Construct a timedelta object to calculate the time range relative to the current time
@@ -267,12 +267,12 @@ class RecordService(BaseService):
                 )
             
         # Should never occur, but to be safe..
-        if len(self._record_repo) < 1:
+        if len(self.record_repo) < 1:
             raise ServiceInternalError("Could not find valid record access!")
 
         # Query each repository for records at a station within the time frame
         results = []
-        for repo in self._record_repo:
+        for repo in self.record_repo:
             repo_resp = repo.get_records_at_station(station_id, timeframe, recent)
             results.extend(repo_resp)
         

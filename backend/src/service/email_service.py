@@ -1,11 +1,12 @@
 import os
+import sys
 from threading import Thread
 from brevo import Brevo, SendTransacEmailRequestSender, SendTransacEmailRequestToItem
 from brevo.core.api_error import ApiError
 
-from .service_core import ServiceInternalError
+from .service_core import BaseService, ServiceEmailError
 
-class EmailService:
+class EmailService(BaseService):
     """ 
     currently using brevo: https://developers.brevo.com/docs/api-clients/python 
 
@@ -51,9 +52,12 @@ class EmailService:
                 msg = f"Unexpected error sending email: {e}"
             
             # Hide the error details from the user, but keep the message for debugging purposes.
-            raise ServiceInternalError(
-                self.__class__.__name__,
-                message=msg, show_error=False
+            raise ServiceEmailError(
+                caller_name=self.__class__.__name__,
+                poe=sys._getframe().f_code.co_name,
+                message=msg,
+                show_error=True,
+                cause=e
             )
 
 

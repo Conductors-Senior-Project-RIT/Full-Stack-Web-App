@@ -18,7 +18,7 @@ class StationService(BaseService):
             session (Session): The SQLAlchemy session to be used for database
                 transactions in the service's repositories.
         """
-        self._station_repo = StationRepository(session)
+        self.station_repo = StationRepository(session)
 
     # -- Station Auth -- #
     def get_stations(self) -> list[dict]:
@@ -27,7 +27,7 @@ class StationService(BaseService):
         Returns:
             list[dict]: A list of dictionaries containing station IDs and names.
         """
-        return self._station_repo.get_stations()
+        return self.station_repo.get_stations()
 
     def create_station(self, station_name: str) -> str:
         """Creates a new station in the database with the provided name.
@@ -42,7 +42,7 @@ class StationService(BaseService):
             str: The new randomly generated password for the new station.
         """
         unhashed_pw, hashed_pw = self.generate_password_string()
-        self._station_repo.create_new_station(station_name, hashed_pw)
+        self.station_repo.create_new_station(station_name, hashed_pw)
         return unhashed_pw
 
     def update_station_password(self, station_id: int) -> str:
@@ -57,7 +57,7 @@ class StationService(BaseService):
             str: The newly generated password for the station.
         """
         unhashed_pw, hashed_pw = self.generate_password_string()
-        self._station_repo.update_station_password(station_id, hashed_pw)
+        self.station_repo.update_station_password(station_id, hashed_pw)
         return unhashed_pw
 
     ## Password Generation
@@ -94,7 +94,7 @@ class StationService(BaseService):
                 date is today, it is formatted as `HH:MM AM/PM`; otherwise, it is
                 formatted as `MON DD, YYYY at HH:MM AM/PM`.
         """
-        dt = self._station_repo.get_last_seen(station_name)
+        dt = self.station_repo.get_last_seen(station_name)
         return self.format_date(dt)
 
     def update_last_seen(self, station_id: int) -> str:
@@ -108,7 +108,7 @@ class StationService(BaseService):
             str: A formatted string containing the time of the ping, formatted as `HH:MM
                 AM/PM`.
         """
-        dt = self._station_repo.update_last_seen(station_id)
+        dt = self.station_repo.update_last_seen(station_id)
         return self.format_date(dt)
 
     def format_date(self, dt: datetime) -> str:

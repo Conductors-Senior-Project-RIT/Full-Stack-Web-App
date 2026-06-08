@@ -24,8 +24,8 @@ class UserService(BaseService):
         BaseService: Inherits the base service interface
     """
     def __init__(self, session):
-        self._user_repo = UserRepository(session)
-        self._station_repo = StationRepository(session)
+        self.user_repo = UserRepository(session)
+        self.station_repo = StationRepository(session)
     
     def _normalize_email(self, email: str) -> str | None:
         try:
@@ -53,12 +53,12 @@ class UserService(BaseService):
         if not email:
             raise BadRequest("Invalid email format")
 
-        if self._user_repo.email_exists(email): 
+        if self.user_repo.email_exists(email): 
             raise BadRequest("Email already registered")
         
         print("Email does not exist")
 
-        user_id = self._user_repo.create_new_user(email, hashed_password)
+        user_id = self.user_repo.create_new_user(email, hashed_password)
 
         self.initialize_user_preferences(user_id) #default user settings
         
@@ -83,7 +83,7 @@ class UserService(BaseService):
             return None
 
         try:
-            user = self._user_repo.get_user_info(email) 
+            user = self.user_repo.get_user_info(email) 
         except RepositoryNotFoundError:
             return None
 
@@ -107,9 +107,9 @@ class UserService(BaseService):
             RepositoryNotFoundError: If no user exists for the provided email.
         """
 
-        self._user_repo.get_user_id(email) # 
+        self.user_repo.get_user_id(email) # 
             
-        self._user_repo.update_account_status(email, int(new_role)) # cast role to int as "additional_claims" from JWT only accepts that or something else that was funky and i don't remember
+        self.user_repo.update_account_status(email, int(new_role)) # cast role to int as "additional_claims" from JWT only accepts that or something else that was funky and i don't remember
 
     def create_user_password_reset_token(self, email):
         """Generates and stores a password reset token, then emails it to the user.
@@ -125,14 +125,14 @@ class UserService(BaseService):
             return
         
         try:
-            user_id = self._user_repo.get_user_id(email)
+            user_id = self.user_repo.get_user_id(email)
         except RepositoryNotFoundError:
             return # route will always respond with 200 to not let someone know if an email is registered up or not
 
         reset_token = secrets.token_urlsafe(32) # why 32 lol
         hashed_token = hashlib.sha256(reset_token.encode()).hexdigest() # copy pasted the previous group's old functionality
 
-        self._user_repo.create_user_reset_token(user_id, hashed_token)
+        self.user_repo.create_user_reset_token(user_id, hashed_token)
 
         email_service.send_forgot_password_email(email, reset_token)
 
@@ -147,7 +147,7 @@ class UserService(BaseService):
         """
         token_hash = hashlib.sha256(token.encode()).hexdigest()
 
-        return self._user_repo.get_user_id_from_valid_reset_request_token(token_hash) is not None # if no password reset token found, then None rows are returned; otherwise, id is returned
+        return self.user_repo.get_user_id_from_valid_reset_request_token(token_hash) is not None # if no password reset token found, then None rows are returned; otherwise, id is returned
 
     def reset_user_password(self, reset_token, password):
         """Resets a user's password using a valid password reset token.
@@ -164,7 +164,7 @@ class UserService(BaseService):
         """
         token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
 
-        user_id = self._user_repo.get_user_id_from_valid_reset_request_token(token_hash)
+        user_id = self.user_repo.get_user_id_from_valid_reset_request_token(token_hash)
 
         if user_id is None: # user doesn't exist
             # log that user cannot be found for a password reset
@@ -174,9 +174,9 @@ class UserService(BaseService):
 
         # hashed_password = generate_password_hash(password) reverting back to old hashing algorithm
 
-        self._user_repo.update_user_password(user_id, hashed_password)
+        self.user_repo.update_user_password(user_id, hashed_password)
 
-        self._user_repo.delete_user_id_from_reset_requests(user_id) #after resetting password, delete the user id from the reset requests table
+        self.user_repo.delete_user_id_from_reset_requests(user_id) #after resetting password, delete the user id from the reset requests table
 
         return True
 
@@ -188,7 +188,7 @@ class UserService(BaseService):
             start_time (str): The new notification start time
             end_time (str): The new notification end time
         """
-        self._user_repo.update_user_times(user_id, start_time, end_time)
+        self.user_repo.update_user_times(user_id, start_time, end_time)
 
     def initialize_user_preferences(self, user_id: int):
         """Subscribes a new user to all existing stations by default.
@@ -201,14 +201,14 @@ class UserService(BaseService):
         Raises:
             RuntimeError: If no stations exist in the database
         """
-        stations = self._station_repo.get_stations() # returns list of dictionaries
+        stations = self.station_repo.get_stations() # returns list of dictionaries
 
         if not stations: # if empty, etc
             raise RuntimeError("No train stations available")
 
         for station in stations:
             station_id = station.get("id")
-            self._user_repo.create_user_station_preference(user_id, station_id)
+            self.user_repo.create_user_station_preference(user_id, station_id)
 
     def get_user_preferences(self, user_id: int):
         """Returns all stations in a user's preference list and ataches their notifcation window times for each selected station entry
@@ -220,11 +220,11 @@ class UserService(BaseService):
             list[dict]: Each dict contains 'station_id', 'station_name', 'selected',
                 'start_time', and 'end_time'
         """
-        station_preferences = self._user_repo.get_station_id_from_user_preferences(user_id)
+        station_preferences = self.user_repo.get_station_id_from_user_preferences(user_id)
 
-        all_stations = self._station_repo.get_stations()
+        all_stations = self.station_repo.get_stations()
 
-        starting_time, ending_time = self._user_repo.get_user_start_and_end_times(user_id) #unpack tuple
+        starting_time, ending_time = self.user_repo.get_user_start_and_end_times(user_id) #unpack tuple
 
         # Format the response
         preferences_set = {pref[0] for pref in station_preferences}
@@ -250,7 +250,7 @@ class UserService(BaseService):
             user_id (int): The primary key of the user to update.
             new_station_preferences (list[int]): The new station IDs to subscribe to.
         """
-        self._user_repo.delete_user_preferences(user_id)
+        self.user_repo.delete_user_preferences(user_id)
 
         for station_id in new_station_preferences:
-            self._user_repo.create_user_station_preference(user_id, station_id)
+            self.user_repo.create_user_station_preference(user_id, station_id)
