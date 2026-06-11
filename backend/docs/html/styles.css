@@ -1,0 +1,226 @@
+:root {
+    color-scheme: light;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    color: #111827;
+  }
+
+  body {
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei",
+      "Segoe UI", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.72;
+    padding: 28px 24px;
+    word-break: break-word;
+  }
+
+  main.markdown-export {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 1.3em 0 0.55em;
+    color: #0f172a;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  h1:first-child,
+  h2:first-child,
+  h3:first-child,
+  h4:first-child,
+  h5:first-child,
+  h6:first-child,
+  p:first-child,
+  ul:first-child,
+  ol:first-child,
+  blockquote:first-child,
+  pre:first-child,
+  .table-wrapper:first-child {
+    margin-top: 0;
+  }
+
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.65rem; }
+  h3 { font-size: 1.35rem; }
+  h4 { font-size: 1.15rem; }
+  h5 { font-size: 1rem; }
+  h6 { font-size: 0.95rem; }
+
+  p,
+  ul,
+  ol,
+  blockquote,
+  pre,
+  hr,
+  figure,
+  .table-wrapper,
+  .katex-display,
+  .math-display-image {
+    margin: 0 0 1rem;
+  }
+
+  a {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
+
+  strong,
+  b {
+    font-weight: 700;
+  }
+
+  em,
+  i {
+    font-style: italic;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid #dbe2ea;
+  }
+
+  ul,
+  ol {
+    padding-left: 1.45rem;
+  }
+
+  li {
+    margin: 0.28rem 0;
+  }
+
+  li > p {
+    margin: 0 0 0.4rem;
+  }
+
+  li > ul,
+  li > ol {
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .contains-task-list,
+  .task-list-item {
+    list-style: none;
+  }
+
+  .task-list-item input[type="checkbox"] {
+    margin-right: 0.35rem;
+  }
+
+  blockquote {
+    border-left: 4px solid #2563eb;
+    background: #f8fafc;
+    color: #334155;
+    padding: 0.8rem 1rem;
+  }
+
+  code {
+    font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+    background: #f3f4f6;
+    border-radius: 4px;
+    padding: 0.15em 0.35em;
+    font-size: 0.94em;
+  }
+
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+
+  pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 0.96em;
+  }
+
+  th,
+  td {
+    border: 1px solid #d1d5db;
+    padding: 8px 10px;
+    vertical-align: top;
+    text-align: left;
+  }
+
+  thead th,
+  th {
+    background: #f8fafc;
+    font-weight: 700;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #fbfdff;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.25rem 0;
+  }
+
+  .mermaid {
+    margin: 1rem 0;
+    text-align: center;
+  }
+
+  .mermaid > svg,
+  .mermaid svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .math-inline-image {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  .math-display-image {
+    text-align: center;
+  }
+
+  .math-display-image img {
+    display: inline-block;
+  }
+
+  svg {
+    max-width: 100%;
+  }

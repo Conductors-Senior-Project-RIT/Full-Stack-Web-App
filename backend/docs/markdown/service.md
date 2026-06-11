@@ -7,7 +7,7 @@ A service may need to process different kinds of database records that require t
 
 Currently, *five* services exist in the application, four of which extend [`BaseService`](#base-service) in [`service.service_core`](#service-core). The [`EmailService`](#emailservice) class does not require error handling functionality, as it is does not interact with any other layers.
 
-![Service Diagram](./diagrams/service.png)
+![Service Diagram](../diagrams/service.png)
 **The class diagram above provides a somewhat simplified overview for the connected components in this layer.**
 
 # Service Core
@@ -198,7 +198,7 @@ Only pulls from all repositories if this service has been instantiated with a `r
 Handles business logic for station related data processing. Inherits [`BaseService`](#base-service).
 
 ## `__init__`
-Initializes a `StationRepository` with a provided **SQLAlchemy** session.
+Initializes a [`StationRepository`](repository.md#stationrepository) with a provided **SQLAlchemy** session.
 
 ### Arguments
 | Name | Type | Required | Description |
@@ -267,7 +267,7 @@ Formats a datetime object into a string. If the date is today, it is formatted a
 ### Arguments
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `dt` | daatetime | Yes | The datetime instance to format. |
+| `dt` | datetime | Yes | The datetime instance to format. |
 
 ### Returns
 *str*: The formatted date string.
@@ -277,7 +277,7 @@ Formats a datetime object into a string. If the date is today, it is formatted a
 Handles business logic for symbol related data processing. There isn't much currently, but might be very useful in the future for symbol operations.
 
 ## `__init__`
-Initializes a `SymbolRepository` with a provided **SQLAlchemy** session.
+Initializes a [`SymbolRepository`](repository.md#symbolrepository) with a provided **SQLAlchemy** session.
 
 ### Arguments
 | Name | Type | Required | Description |

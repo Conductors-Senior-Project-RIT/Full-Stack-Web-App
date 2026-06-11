@@ -1,14 +1,14 @@
 # Repository Overview
 This layer aims to provide an interface for direct database access. This layer utilizes SQLAlchemy’s Object Relational Mapping (ORM) library to provide a robust system for mapping Python model objects to database tables (see [ORM Models](#orm-models)). We utilize SQLAlchemy’s query construction interface to perform operations on pre-defined models that track the changes made in a database session. Another benefit of ORMs is that they reduce the refactoring effort required when switching database technologies by abstracting query construction, generating and executing service-specific SQL from model definitions at runtime. 
 
-As previously mentioned, changes can either be committed to the database if successful or rolled back in the case of an error, offering an effective way to properly manage client-server transactions. However, this layer should only responsible for flushing its changes to the session; the [**API**](api.md) layer should be the final decider on whether changes should be reverted or persisted to the database. When a repository method is successful and that method's query returns a model or `Row`, that data is converted to a dictionary representation for consistency, abstracting away model details from the layer above. 
+As previously mentioned, changes can either be committed to the database if successful or rolled back in the case of an error, offering an effective way to properly manage client-server transactions. However, this layer should only be responsible for flushing its changes to the session; the [**API**](api.md) layer should be the final decider on whether changes should be reverted or persisted to the database. When a repository method is successful and that method's query returns a model or `Row`, that data is converted to a dictionary representation for consistency, abstracting away model details from the layer above. 
 
 
-![Repository-Diagram](./diagrams/repository.png)
+![Repository-Diagram](../diagrams/repository.png)
 **The class diagram above provides a somewhat simplified overview for the connected components in this layer. `RecordRepository` uses the `Station` and `Symbol` models for the [`get_train_history`](#get_train_history) and [`get_records_at_station`](#get_records_at_station) queries, which isn't shown in the diagram.**
 
 # ORM Models
-All of the models are defined in `db.db_core.models`. All models inherit [`Base`](#base), an abstract class that provides useful methods and contains SQLAlchemy metadata of the database. Some models contain `relationship` attributes that define how tables are related to one another. Most models are simply Python ORM mappings of the existing tables, so only the `Base` and `Record` models will be covered here.
+All of the models are defined in `db.db_core.models`. All models inherit [`Base`](#base), an abstract class that provides useful methods and contains SQLAlchemy metadata of the database. Some models contain `relationship` attributes that define how tables are related to one another. Most models are simply Python ORM mappings of the existing tables, so only the [`Base`](#base) and [`Record`](#records) models will be covered here.
 
 ## Base
 Defines the abstract ORM base in which all models extend. All classes that extend this class will contain useful functions such as `_asdict` and `copy`.
@@ -36,14 +36,22 @@ An abstract model that defines the mapped attributes and relationships shared by
 Provides the mapped columns shared by `EOTCollation`, `HOTCollation`, and the future `DPUCollation`. This mixin provides mappings for the results from the collation views.
 
 ### EOTMixin & HOTMixin
-Provides the mapped columns for type-specifc columns. Used in both the respective EOT & HOT record and collation models.
+Provides the mapped columns for type-specific columns. Used in both the respective EOT & HOT record and collation models.
 
 # Error Handling
 
 This layer defines three function definitions that override the standard error handling functionality defined in `global_core.exceptions`, which work specifically for the **Repository** layer. Each function is defined within `db_core.exceptions`, and all utilize the same error map: [`REPOSITORY_ERROR_MAP`](#repository-error-mapping), which is also defined in the same file.
 
 ## `wrap_repository_error_handler`
-Used to wrap a function with repository-specific erorr handling logic.
+Used to wrap a function with repository-specific error handling logic.
+
+### Arguments
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `func` | `callable` | Yes | The function to wrap. |
+
+### Returns
+*callable*: The wrapped function with error handling specific to the repository layer.
 
 ### Example
 ```python
@@ -55,7 +63,7 @@ wrapped = wrap_repository_error_handler(some_method)
 wrapped(5)  # Translates exceptions
 ```
 
-## `repository_error_handler`
+## `repository_error_translator`
 Translates a provided exception into a [`RepositoryError`](#error-types). Optional arguments can be provided for additional functionality or details. Useful for when variables need to be logged in the exception.
 
 ### Arguments
@@ -64,8 +72,10 @@ Translates a provided exception into a [`RepositoryError`](#error-types). Option
 | `e` | `Exception` | Yes | An exception that is to be translated. |
 | `caller_name` | `str` | No | The class that called this function. |
 | `point_of_error` | `str` | No | The location/function the error occurred in. |
-| `message` | `str` | No | An custom message to provide in a the exception. |
-| `exclude` | `tuple[Type[Exception]]` *or* `Type[Exception]` | No | A single or collection of exception types to exclude from translation. Any exceptions defined here will pass through untouched. Defaults to `RepositoryError`. |
+| `message` | `str` | No | A custom message to provide in a the exception. |
+
+### Returns
+*RepositoryError*: If a matching translation is found in `error_map`, a subclass instance of [`RepositoryError`](#error-types) is returned. In the case a match is not found, a [`RepositoryInternalError`](#error-types) is instantiated and returned as a fallback, preventing lower-level implementation details from propagating upwards. If the provided exception `exc` is an instance with a matching type in `exclude`, it is returned as-is.
 
 ### Example
 ```python
@@ -95,7 +105,7 @@ Decorator used to provide error translation for exceptions thrown in this layer.
 ### Arguments
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `message` | `str` | No | An custom message to provide in a the exception. |
+| `message` | `str` | No | A custom message to provide in the exception. |
 | `exclude` | `tuple[Type[Exception]]` *or* `Type[Exception]` | No | A single or collection of exception types to exclude from translation. Any exceptions defined here will pass through untouched. Defaults to `RepositoryError`. |
 
 ### Example
@@ -134,7 +144,7 @@ All *SQLAlchemy*, *psycopg2*, and *Python* exceptions are caught by the error ha
 | `SQLAlchemyError` | `RepositoryInternalError` |
 
 # BaseRepository
-Base class for a repository, supporting CRUD functionality for SQLAlchemy ORMs. This class uses a generic, `ModelType`, which is bounded to the [`Base`](#base) model, defining the model to operate on. Methods in this class return `ModelType`, but conversion to a `dict` as a return type is supported.
+Base class for a repository, supporting CRUD functionality for SQLAlchemy ORMs. This class uses a generic, `ModelType`, which is bound to the [`Base`](#base) model, defining the model to operate on. Methods in this class return `ModelType`, but conversion to a `dict` as a return type is supported.
 
 Found within `db_core.repository`.
 
@@ -144,17 +154,17 @@ Constructor for a repository. Defines the model and SQLAlchemy `Session` that th
 ### Arguments
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `model` | ModelType | Yes | The SQLAlchemy ORM model which extends `Base` that the repository will operate on. The model provided defines which table to manipulate in a provided `Session`. |
+| `model` | ModelType | Yes | The SQLAlchemy ORM model that extends `Base` in which the repository will operate on. The model provided defines which table to manipulate in a provided `Session`. |
 | `session` | Session | Yes | The SQLAlchemy session to use for database operations. |
 
 ## `get`
-Retrieves an ORM instance from the session's current state. By default, this method returns a dictionary representation of the result, which can be turned off by setting `to_dict` to `False`. A `RepositoryNotFoundError` will is thrown if the primary key cannot be found in the current session.
+Retrieves an ORM instance from the session's current state. By default, this method returns a dictionary representation of the result, which can be turned off by setting `to_dict` to `False`. A `RepositoryNotFoundError` will be thrown if the primary key cannot be found in the current session.
 
 ### Arguments
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `pkey` | Any | Yes | Primary key value to search for in the current session, typically an `int` or `str`. |
-| `to_dict` | bool | No | Specifies whether retrieved instance should be returned as the `ModelType` or `dict`. Setting this field to `True` returns the results as a `dict`; otherwise, a `ModelType`. Default value is True. |
+| `to_dict` | bool | No | Specifies whether a retrieved instance should be returned as the `ModelType` or `dict`. Setting this field to `True` returns the results as a `dict`; otherwise, a `ModelType`. Default value is True. |
 
 ### Raises
 [*RepositoryNotFoundError*](#error-types): Thrown if the instance cannot be found in the current session with the provided `pkey`.
@@ -179,7 +189,7 @@ Updates the provided objects with the provided new values. The `objs` parameter 
 Other [*RepositoryError*](#error-types) exceptions may be thrown depending on errors raised when performing database operations, such as connection errors or internal errors.
 
 ### Returns
-CollectionResult: A list of `ModelType` or `dict` instance containing the updated results, depending on the value of `to_dict`. If the provided `objs` is empty, an empty list is returned. Additionally, if no updates are made to the provided objects, an empty list is returned.
+CollectionResult: A list of `ModelType` or `dict` instances containing the updated results, depending on the value of `to_dict`. If the provided `objs` is empty, an empty list is returned. Additionally, if no updates are made to the provided objects, an empty list is returned.
 
 ## `update_with_pk`
 Updates a single ORM instance in the current session. If an instance can be found in the session from a provided primary key (`pkey`), its values will be updated to those present in `new_values`. Similar to other functions, the updated instance can be returned as a `ModelType` or dictionary representation depending on the value of `to_dict`. If no updates are made, this function will return `None`.
@@ -188,7 +198,7 @@ Updates a single ORM instance in the current session. If an instance can be foun
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `pkey` | int *or* str | Yes | The primary key value corresponding to the instance to update. This value is used to retrieve the instance from the current session, and an error is thrown if an instance with a matching primary key cannot be found. |
-| `new_values` | dict[str, Any] | Yes | A dictionary mapping column names to new values to update the instance with. The keys in this dictionary should correspond to column names in the table, and the values should be the new values to update those columns with.
+| `new_values` | dict[str, Any] | Yes | A dictionary mapping column names to new values to update the instance with. The keys in this dictionary should correspond to column names in the table, and the values should be the new values to update those columns with. |
 | `to_dict` | bool | Yes | Specifies whether the updated instance should be returned as a `ModelType` or `dict`. Setting this field to `True` returns the results as a `dict`; otherwise, a `ModelType`. Default value is True. |
 
 ### Raises
@@ -296,7 +306,7 @@ Constructor for a repository that interacts with various kinds of train records.
 | `collation` | Type of [`CollationMixin`](#collationmixin) | Yes | An ORM model that defines the attributes of the results returned by [`get_record_collation`](#collationmixin). Only models that extend `CollationMixin` are permitted. |
 | `session` | Session | Yes | Specifies the database session the repository operates in. All functions in this class flushes all changes to the session. It is the job of higher layers to commit or rollback any changes. |
 | `record_name` | str | No | Attributes a name to the records in the repository. Primarily for error logging purposes. Defaults to "Unknown". |
-| `record_identifier` | str | No | Attributes a unique identifer for records in the repository. Particularly useful when parsing data. Defaults to "Unknown". |
+| `record_identifier` | str | No | Attributes a unique identifier for records in the repository. Particularly useful when parsing data. Defaults to "Unknown". |
 
 ## `get_total_record_count`
 Retrieves total number of records present in the table during a given session.
@@ -596,7 +606,7 @@ Returns the ID of a station with a matching station name.
 ### Raises
 [*RepositoryNotFoundError*](#error-types): Raised if a station with `stat_name` does not exist.
 
-### Return
+### Returns
 *str*: The ID of the station.
 
 
@@ -608,7 +618,7 @@ Returns a datetime instance of the station's last seen timestamp.
 |------|------|----------|-------------|
 | `stat_name` | str | Yes | The name of the station. |
 
-Raises:
+### Raises
 [*RepositoryNotFoundError*](#error-types): Raised if a station is not found.
 
 ### Returns
@@ -626,7 +636,7 @@ Updates a station's last seen timestamp to the current time during execution.
 ### Raises
 [*RepositoryNotFoundError*](#error-types): Raised if a station is not found.
 
-### Return
+### Returns
 *datetime*: A datetime instance representing the updated timestamp.
 
 
@@ -654,10 +664,10 @@ Returns the name of a symbol when provided with its corresponding ID.
 |------|------|----------|-------------|
 | `id` | int | Yes | ID of a symbol. |
 
-Returns:
+### Returns
 *str*: A corresponding symbol name.
     
-Raises:
+### Raises
 [*RepositoryNotFoundError*](#error-types): Raised if a symbol row is not found with the provided ID.
 
 ## `get_symbol_names`
@@ -670,7 +680,7 @@ Retrieves all symbol names stored in the database.
 ## `get_symbol_id`
 Retrieves a symbol ID given the name of a symbol from the database.
 
-### Arguments:
+### Arguments
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `symbol_name` | str | Yes | The name of the symbol in the database. |
@@ -685,7 +695,7 @@ Retrieves a symbol ID given the name of a symbol from the database.
 ## `insert_new_symbol`
 Creates a new symbol in the database.
 
-### Arguments:
+### Arguments
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `symbol_name` | str | Yes | The name of the symbol to create in the database. |

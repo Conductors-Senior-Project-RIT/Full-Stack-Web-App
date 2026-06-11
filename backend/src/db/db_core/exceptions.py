@@ -67,8 +67,7 @@ def repository_error_translator(
     exc: Exception,
     caller_name: Optional[str] = None,
     point_of_error: Optional[str] = None,
-    message: Optional[str] = None,
-    exclude: Optional[tuple[Type[Exception]] | Type[Exception]] = None
+    message: Optional[str] = None
 ) -> RepositoryError:
     """Translates a provided exception into a `RepositoryError`. See `layer_error_handler`
     for more details.
@@ -81,8 +80,6 @@ def repository_error_translator(
             Defaults to None.
         message (str, optional): An optional message to provide in a `RepositoryError`.
             Defaults to None.
-        exclude (tuple[Type[Exception]] | Type[Exception], optional): A single or
-            collection of exception types to exclude from translation. Defaults to None.
 
     Returns:
         RepositoryError: If a matching translation is found in `error_map`, a subclass
@@ -99,7 +96,7 @@ def repository_error_translator(
         caller_name,
         point_of_error,
         message,
-        RepositoryError if not exclude else exclude
+        RepositoryError
     )
     
 def repository_error_handler(

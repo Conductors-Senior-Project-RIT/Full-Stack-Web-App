@@ -2,15 +2,15 @@
 
 One of our goals for the refactoring process was to construct a standardized error handling system that would propagate exceptions through the chain of layers. Such a system will allow future developers to easily attach error handling to new features, expose only necessary details of lower-level exceptions in production environments, permit full error traceability in development environments, and group similar errors into generalized layer exceptions. 
 
-To achieve this, we incorporate Python’s function decorators to wrap class methods across the layers with an error translation mechanism. Any exceptions raised in a decorated function would immediately be mapped to a layer-specific error through translation. When an exception moves from the Service layer to the API, the response receives a status code and an error message that is either generalized or specific, depending on the exception provided and the Flask environment that was created.
+To achieve this, we incorporate Python’s function decorators to wrap class methods across the layers with an error translation mechanism. Any exceptions raised in a decorated function would immediately be mapped to a layer-specific error through translation. When an exception moves from the [**Service**](service.md) layer to the [**API**](service.md), the response receives a status code and an error message that is either generalized or specific, depending on the exception provided and the Flask environment that was created.
 
 The code for the error handling is located in the `db_core.exceptions` module, and can be used in any of the layers. The [**API**](api.md) layer uses the error handlers provided by *Flask*, but the [**Service**](service.md) and [**Repository**](repository.md) layers utilize the error handling logic described here.
 
 **Error Handling Class/Module Diagram**
-![Error-Handling-Diagram](./diagrams/errors.png)
+![Error-Handling-Diagram](../diagrams/errors.png)
 
 **Request Sequence Diagram**
-![Request-Flow-With-Error-Path](./diagrams/request_seq.png)
+![Request-Flow-With-Error-Path](../diagrams/request_seq.png)
 
 # LayerError
 This is the parent class for all the exceptions in the different layers. Both [`ServiceError`](service.md#error_types) and [`RepositoryError`](repository.md#error-types) inherit this class. A `default_message` is included in every `LayerError` to be used when details should be abstracted from the client, and a child exception should specify a unique message in their class definition.
@@ -48,7 +48,7 @@ In this message, a developer would still be able to determine the service the ex
 ### Example
 An example of how a `LayerError` is instantiated. 
 - The name of the class is provided by accessing an instance's name attribute. 
-- A function name can be retrieved and passed in by accessing its name in the current frame using the `sys` module. The performance overhead is negligble using this method; however, the name of a function can be passed in as a simple string, at the cost of needing to manually change it every time. 
+- A function name can be retrieved and passed in by accessing its name in the current frame using the `sys` module. The performance overhead is negligible using this method; however, the name of a function can be passed in as a simple string, at the cost of needing to manually change it every time. 
 - A custom message is provided and shown in the error message with details on what caused the error.
 
 ```python
@@ -69,10 +69,6 @@ class SomeLayerClass:
 This class includes two `TypeAlias` definitions to shorten the type-hinting in the function signatures: 
 - `ExceptionType`: Accepts either a single or tuple of `Exception` class(es).
 - `ErrorMapping`: A dictionary in which a key, represented by an `ExceptionType`, is mapped to an `Exception` class along with a boolean value indicating whether an error message should be displayed.
-
-## ExceptionType
-A `TypeAlias` used to shorten type-hinting in function definitions.
-
 
 # `wrap_error_handler`
 Wraps a function with a general-purpose error-handling strategy. Catches exceptions and translates them into layer-specific errors via a provided error map. Any exception not covered by `error_map` or the `exclude` is caught and re-raised as the provided `base_exception` or itself, respectively. Preserves the original exception as the cause via `raise ... from e`. If `func` is an `__init__`, the function name displayed is renamed to *"intialization"*. This function is useful for when functions need to be wrapped during runtime.
@@ -182,7 +178,7 @@ def some_repository_method(self):
 ```
 
 # `translate_error`
-Translates a provided `Exception` instance using a map potential exception classes. Uses general-purpose logic to produce layer-specific errors. Any exception not covered by `error_map` is translated to a fallback exception provided in `base_exception`. All exceptions with a matching type in `exclude` is returned as-is. This function is useful for cases where function variables need to be included in error messages or when multiple points of failure may occur in a long function, each requiring different messages.
+Translates a provided `Exception` instance using a map of potential exception classes. Uses general-purpose logic to produce layer-specific errors. Any exception not covered by `error_map` is translated to a fallback exception provided in `base_exception`. All exceptions with a matching type in `exclude` are returned as-is. This function is useful for cases where function variables need to be included in error messages or when multiple points of failure may occur in a long function, each requiring different messages.
 
 ## Arguments
 | Name | Type | Required | Description |
@@ -196,7 +192,7 @@ Translates a provided `Exception` instance using a map potential exception class
 | `exclude` | [`ExceptionType`](#type-definitions-used) | No | An exception type or tuple of exception types that should be ignored in translation entirely. Useful for allowing certain exceptions to propagate without interference. Defaults to None. |
 
 ## Returns
-*LayerError **or** Exception*: If a matching translation is found in `error_map`, a [`LayerError`](#layererror) instance is returned. In the case a match is not found, the class provided in `base_exception` is instantiated and returned as a fallback, preventing lower-level implementation details from propagating upwards. If the provided exception `e` is an instance with a matching type in `exclude`, it is returned as-is.
+*[LayerError](#layererror) **or** Exception*: If a matching translation is found in `error_map`, a `LayerError` instance is returned. In the case a match is not found, the class provided in `base_exception` is instantiated and returned as a fallback, preventing lower-level implementation details from propagating upwards. If the provided exception `e` is an instance with a matching type in `exclude`, it is returned as-is.
 
 ## Example
 ```python

@@ -1,25 +1,27 @@
 # API Overview
 
-Our application leverages **Flask** and **SQLAlchemy**, which are the two key libraries to handle HTTP request and define when database transactions begin and end. The API layer defines the various endpoints, contains the Flask route handlers responsible for parsing requests and responses, and creates request-specific databases session to be used by the layers below.
+Our application leverages **Flask** and **SQLAlchemy**, which are the two key libraries to handle HTTP requests and define when database transactions begin and end. The API layer defines the various endpoints, contains the Flask route handlers responsible for parsing requests and responses, and creates request-specific database sessions to be used by the layers below.
 
-A request starts when the API layer receives and validates client request parameters in an endpoint handler. If the parameters are valid, a *scoped session* is instantiated through a `sessionmaker`, which can be accessed by `db.session` in the `backend.database` module after a Flask application context is created.
+A request starts when the API layer receives and validates client request parameters in an endpoint handler. If the parameters are valid, a [*scoped session*](https://flask-sqlalchemy.readthedocs.io/en/stable/api/#flask_sqlalchemy.SQLAlchemy.session) is instantiated, which can be accessed by `db.session` in the `backend.database` module after a Flask application context is created.
 
 Promptly after a session is created, it is provided with additional necessary data to an appropriate Service Layer module to process the request. If an error does not occur in any of the layers below, all changes in the session are then persisted in the database and the resulting data is sent back to the client in a response payload. Errors that propagate to the API layer are processed by a corresponding error handler in `api_core.exceptions`, which revert any changes made in the database session, returning a proper error response to the client.
 
 *Notes*:
-- All API endpoints start with the `/api` prefix.*
+
+- All API endpoints start with the `/api` prefix.
 - All request and response bodies are in JSON format.
 
-![Request_Sequence](./diagrams/request_seq.png)
+![Request_Sequence](../diagrams/request_seq.png)
 **The sequence diagram above illustrates the processes involved in both successful and failed client requests.**
 
 ## Error Responses
 
-Various errors raised in the **API** or **Service** layers are caught by their appropriate error handlers in `api_core.exceptions`, which then construct a response payload depending on the exception raised. The API layer employs a **WSGI** library, **Werkzeug**, for raising exceptions that occur directly within the layer, such as in cases of invalid arguments or permissions. Every `HTTPException` maps directly its appropriate status code through the `handle_api_errors` error hanndler.
+Various errors raised in the **API** or **Service** layers are caught by their appropriate error handlers in `api_core.exceptions`, which then construct a response payload depending on the exception raised. The API layer employs a **WSGI** library, **Werkzeug**, for raising exceptions that occur directly within the layer, such as in cases of invalid arguments or permissions. Every `HTTPException` maps directly its appropriate status code through the `handle_api_errors` error handler.
 
-Every derivation of a `ServiceError` is mapped to a different HTTP status code, defined by a dictionary `SERVICE_ERROR_CODES` in `api_core.exceptions`. When one of these exceptions arrive to the API layer, the `handle_service_errors` handler constructs the appropriate payload.
+Every derivation of a [`ServiceError`](service.md#error-types) is mapped to a different HTTP status code, defined by a dictionary `SERVICE_ERROR_CODES` in `api_core.exceptions`. When one of these exceptions arrive at the API layer, the `handle_service_errors` handler constructs the appropriate payload.
 
-All error reponses include the same payload structure:
+All error responses include the same payload structure:
+
 ```json
 {
     "error": string
@@ -52,7 +54,7 @@ class Example(Resource):
 
 Retrieves a symbol ID by name, or a list of all symbol names if no name is provided.
 
-Uses `SymbolService`.
+Uses [`SymbolService`](service#symbolservice).
 
 ### Query Parameters
 
@@ -63,6 +65,7 @@ Uses `SymbolService`.
 ### Response `200`
 
 **With `symbol_name` provided:**
+
 | Field Name | Type | Description |
 |------|------ | -------------|
 | `results` | integer | The ID for a symbol with a matching name.  |
@@ -70,6 +73,7 @@ Uses `SymbolService`.
 &nbsp;
 
 **Without `symbol_name`:**
+
 | Field Name | Type | Description |
 |------|------ | -------------|
 | `results` | array (integer) | A list of all symbol names in the database.  |
@@ -100,19 +104,17 @@ GET https://followthatfred.com/api/symbols
 }
 ```
 
-
-
 ## POST `/symbols`
+
 Creates a new symbol with the provided name.
 
-Uses `SymbolService`.
+Uses [`SymbolService`](service#symbolservice).
 
 ### Body Parameters
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `name` | string | Yes | The name of the new symbol. |
-
 
 ### Response `200`
 
@@ -143,9 +145,10 @@ POST https://followthatfred.com/api/symbols
 ```
 
 ## GET `/record_verifier`
+
 Retrieves a paginated list of unverified records for a given record type.
 
-Uses `RecordService`.
+Uses [`RecordService`](service.md#recordservice).
 
 ### Query Parameters
 
@@ -156,13 +159,10 @@ Uses `RecordService`.
 
 ### Response `200`
 
-
 | Name | Type | Description |
 |------|------ | -------------|
 | `results` | array | An array containing up to 250 train records for the provided page.  |
 | `type` | int | A number specifying the total number of pages available. |
-
-
 
 ### Examples
 
@@ -202,9 +202,10 @@ GET https://followthatfred.com/api/record_verifier?page=1&type=2
 ```
 
 ## PUT `/record_verifier`
+
 Verifies a train record by assigning a symbol and locomotive number.
 
-Uses `RecordService`.
+Uses [`RecordService`](service.md#recordservice).
 
 ### Body Parameters
 
@@ -215,12 +216,9 @@ Uses `RecordService`.
 | `symbol` | integer | No | The ID of the symbol being assigned to a record. This column is not updated if a value is not provided, or the value is less than `1`. |
 | `locomotive` | string | No | The locomotive number being assigned to a record. This column is not updated if a value is not provided. |
 
-
-
 ### Response `200`
 
 Returns an empty JSON object on success.
-
 
 ### Example
 
@@ -247,15 +245,15 @@ GET https://followthatfred.com/api/record_verifier
 
 # User Endpoints
 
-
 # Station Endpoints
 
 Most of the endpoints relating to Stations were unused but have been kept in the repository if needed in the future. Only the used endpoints are documented here.
 
 ## GET `/station_online`
+
 Retrieves the time and/or date that the server received a ping notification from a station.
 
-Uses `StationService`.
+Uses [`StationService`](service.md#stationservice).
 
 ### Query Parameters
 
@@ -265,12 +263,9 @@ Uses `StationService`.
 
 ### Response `200`
 
-
 | Name | Type | Description |
 |------|------ | -------------|
 | `last_seen` | string | A datetime string. If the date is within today, it is formatted as `HH:MM AM/PM`; otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`. |
-
-
 
 ### Examples
 
@@ -287,6 +282,7 @@ GET https://followthatfred.com/api/station_online?station_name=Solvay
 ```
 
 **Last Seen Longer Than a Day**
+
 ```json
 {
     "last_seen": "03 25, 2026 at 03:55AM"
@@ -298,7 +294,7 @@ GET https://followthatfred.com/api/station_online?station_name=Solvay
 Updates the time and date a station pinged the server. This endpoint serves as the point a station can ping the server. Should be a PUT
 request, but last year's team used a POST.
 
-Uses `StationService`.
+Uses [`StationService`](service.md#stationservice).
 
 ### Body Parameters
 
@@ -311,7 +307,6 @@ Uses `StationService`.
 | Name | Type | Description |
 |------|------|-------------|
 | `last_seen` | string | The time and/or date as a formatted datetime string added to the database. Same formatting rules as a `GET` request. |
-
 
 ### Example
 
@@ -334,7 +329,9 @@ GET https://followthatfred.com/api/station_online
     "last_seen": "03:55 AM"
 }
 ```
+
 ***or***
+
 ```json
 {
     "last_seen": "03 25, 2026 at 03:55AM"
@@ -346,9 +343,10 @@ GET https://followthatfred.com/api/station_online
 These endpoints deal mostly with retrieving EOT and HOT records. The creation of these records lies in the stations receiving the radio data. The users then access the data stored in the database.
 
 ## GET `/history`
+
 Returns a singular record depending on the signal type and ID provided.
 
-Uses `RecordService`.
+Uses [`RecordService`](service.md/#recordservice).
 
 ### Query Parameters
 
@@ -371,6 +369,7 @@ Uses `RecordService`.
 &nbsp;
 
 ***Specific Fields for EOT***
+
 | Name | Type |
 |------|------|
 | `brake_pressure` | string |
@@ -385,6 +384,7 @@ Uses `RecordService`.
 &nbsp;
 
 ***Specific Fields for HOT***
+
 | Name | Type |
 |------|------|
 | `frame_sync` | string |
@@ -442,7 +442,7 @@ GET https://followthatfred.com/api/history?type=2&id=20000
 
 Adds new record to the database. Additionally, handles logic for updating the map pins to know which signals are the most recently detected with that unit address. The notification system was broken when we received the project; however, the request should also determine whether input data warrants sending a notification, and then make the appropriate calls to notify users about the new train data.
 
-Uses `RecordService`.
+Uses [`RecordService`](service.md/#recordservice).
 
 ### Body Parameters for EOT & HOT
 
@@ -479,7 +479,7 @@ Uses `RecordService`.
 | `checkbits` | string | No |
 | `parity` | string | No |
 
-### Example EOT:
+### Example EOT
 
 ```
 POST https://followthatfred.com/api/history
@@ -502,7 +502,8 @@ POST https://followthatfred.com/api/history
 }
 ```
 
-### Example HOT:
+### Example HOT
+
 ```json
 {
     "type": 2,
@@ -520,9 +521,10 @@ POST https://followthatfred.com/api/history
 # Recent Activities Endpoint
 
 ## GET `/recent_activities`
+
 Returns records at a provided station within a specified timeframe. The specified time range serves as a lower bound, while the time the request was received serves as an upper bound.
 
-Uses `RecordService`.
+Uses [`RecordService`](service.md/#recordservice).
 
 ### Query Parameters
 
@@ -533,7 +535,6 @@ Uses `RecordService`.
 | `timerange` | string | Yes | Delta time that defines the range records should be pulled from. Format: `HH:MM:SS` |
 | `most_recent` | boolean | No | A boolean that determines if the most recent records should be retrieved (where `most_recent` is True in database). Default: True |
 | `station_name` | string | No | If `station_id` is not provided, the name of the station can be used to retrieve records; however, in that case, this field is required. |
-
 
 ### Response `200`
 
@@ -546,11 +547,10 @@ Returns a sorted array of train records by the date they were received in descen
 | `id` | integer |
 | `date_rec` | string |
 | `station_name` | string |
-| `symb_name` | string | 
+| `symb_name` | string |
 | `unit_addr` | string |
 | `engine_num` | int |
 | `locomotive_num` | string |
-
 
 ### Example
 
@@ -589,7 +589,7 @@ GET https://followthatfred.com/api/recent_activities?station_name=Macedon&timera
 
 Retrieves a paginated collation of train records grouped by unit address and station. Groups are formed when either the station changes or a duration of more than 2 hours elapses between records. Returns the most recent record per group along with aggregate information such as `first_seen`, `last_seen`, `occurrence_count`, and `duration`.
 
-Uses `RecordService`.
+Uses [`RecordService`](service.md/#recordservice).
 
 ### Query Parameters
 
@@ -597,7 +597,6 @@ Uses `RecordService`.
 |------|------|----------|-------------|
 | `type` | integer | No | The type of the records that are being retrieved. EOT: 1, HOT: 2, DPU: 3. Currently, DPU is not supported. Default: 1 |
 | `page` | integer | No | The page corresponding to a collection of records to return. Currently, the number of records per page is 250. Must be greater than 1. Default: 1 |
-
 
 ### Response Fields
 
@@ -628,6 +627,7 @@ Uses `RecordService`.
 &nbsp;
 
 ***Specific Fields for EOT***
+
 | Name | Type |
 |------|------|
 | `brake_pressure` | string |
@@ -641,13 +641,13 @@ Uses `RecordService`.
 &nbsp;
 
 ***Specific Fields for HOT***
+
 | Name | Type |
 |------|------|
 | `frame_sync` | string |
 | `command` | string |
 | `checkbits` | string |
 | `parity` | string |
-
 
 ### Example EOT
 
