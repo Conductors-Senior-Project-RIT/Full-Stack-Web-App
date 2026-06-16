@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 
-from .service_core import BaseService
+from .service_core import ServiceErrorWrapper
 from ..db.symbol_repo import SymbolRepository
 
 
-class SymbolService(BaseService):
+class SymbolService(ServiceErrorWrapper):
     """Handles business logic for symbol related data processing. There isn't much
     currently, but might be very useful in the future for symbol operations.
     """

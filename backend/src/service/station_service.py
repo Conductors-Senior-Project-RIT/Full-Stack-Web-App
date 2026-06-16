@@ -6,10 +6,10 @@ import string
 from sqlalchemy.orm import Session
 
 from ..db.station_repo import StationRepository
-from .service_core import BaseService
+from .service_core import ServiceErrorWrapper
 
 
-class StationService(BaseService):
+class StationService(ServiceErrorWrapper):
     """Handles business logic for station related data processing."""
     def __init__(self, session: Session):
         """Initializes a `StationRepository` with a provided **SQLAlchemy** session.
@@ -95,7 +95,7 @@ class StationService(BaseService):
                 formatted as `MON DD, YYYY at HH:MM AM/PM`.
         """
         dt = self.station_repo.get_last_seen(station_name)
-        return self.format_date(dt)
+        return self._format_date(dt)
 
     def update_last_seen(self, station_id: int) -> str:
         """Updates a station's ping timestamp to the date and time at which this method is
@@ -109,9 +109,9 @@ class StationService(BaseService):
                 AM/PM`.
         """
         dt = self.station_repo.update_last_seen(station_id)
-        return self.format_date(dt)
+        return self._format_date(dt)
 
-    def format_date(self, dt: datetime) -> str:
+    def _format_date(self, dt: datetime) -> str:
         """Formats a datetime object into a string. If the date is today, it is formatted
         as `HH:MM AM/PM`; otherwise, it is formatted as `MON DD, YYYY at HH:MM AM/PM`.
 

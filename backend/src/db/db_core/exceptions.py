@@ -106,7 +106,7 @@ def repository_error_handler(
     """Decorator used to provide error translation for exceptions thrown in the Repository
     layer. See `layer_error_handler` for more implementation and argument details.
 
-    Examples:
+    Example:
         ```
         @repository_error_translator()
             def some_repository_method(self):

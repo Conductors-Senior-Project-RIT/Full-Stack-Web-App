@@ -11,19 +11,23 @@ from ..service.service_core import *
 # Constant for number of results per page during collation
 RESULTS_NUM = 250
 
-class RecordService(BaseService):
+class RecordService(ServiceErrorWrapper):
     def __init__(self, session: Session, record_type: int | None):
-        """A `RecordRepository` is instantiated using the provided `record_type`. 
-        Uses `get_record_repository` or `get_all_repositories` (if `record_type` is `None`), 
-        which are factory functions in `db.record_types` designed for `RecordRepository` 
-        initialization. Repositories are always stored in a list; use `get_first_repository` 
-        to access the repository passed in through the constructor. The service instance is 
-        initialized with a SQLAlchemy session to be shared across all repository instances.
+        """A `RecordRepository` is instantiated using the provided `record_type`. Uses
+        `get_record_repository` or `get_all_repositories` (if `record_type` is `None`),
+        which are factory functions in `db.record_types` designed for `RecordRepository`
+        initialization. Repositories are always stored in a list; use
+        `get_first_repository` to access the repository passed in through the
+        constructor. The service instance is initialized with a SQLAlchemy session to be
+        shared across all repository instances.
 
         Args:
-            session (Session): The SQLAlchemy session to be used for database transactions in the service's repositories.
-            record_type (int | None): An integer corresponding to a record type, or None if repositories for all record types should be initialized. 
-                The integer values corresponding to each record type are defined in `db.record_types`.
+            session (Session): The SQLAlchemy session to be used for database
+                transactions in the service's repositories.
+            record_type (int | None): An integer corresponding to a record type, or None
+                if repositories for all record types should be initialized. The integer
+                values corresponding to each record type are defined in
+                `db.record_types`.
         """
         self.record_repo = (
             [record_types.get_record_repository(session, record_type)] 
@@ -33,7 +37,7 @@ class RecordService(BaseService):
         self.session = session
         
     
-    def get_first_repository(self) -> RecordRepository:
+    def _get_first_repository(self) -> RecordRepository:
         try:
             return self.record_repo[0]
         except IndexError:
@@ -53,7 +57,7 @@ class RecordService(BaseService):
                 information on the columns returned for each record type, check
                 `docs/service.md`.
         """
-        return self.get_first_repository().get_train_history(record_id)
+        return self._get_first_repository().get_train_history(record_id)
         
     def create_train_record(self, args: dict) -> int:
         """Creates a new record in the database.
@@ -66,7 +70,7 @@ class RecordService(BaseService):
         - Check to see if a notification needs to be sent: `check_recent_notification`.
         - Send a notification to subscribed users using a notification service (future
         implementation).
-        
+
         Creates a record using the repository created during initialization.
 
         Args:
@@ -79,7 +83,7 @@ class RecordService(BaseService):
             int: ID of the newly created record.
         """
         # Get a single repository instantiated repository
-        repository = self.get_first_repository()
+        repository = self._get_first_repository()
         
         # Get the current time in EST that a record was created
         dt = self.get_current_time_est()
@@ -103,7 +107,7 @@ class RecordService(BaseService):
         """Checks if any train records with the specified unit address have been detected
         at a station within the last 10 minutes. If records exist, then this method
         indicates that a notification should be sent.
-        
+
         Checks for records using the repository created during initialization.
 
         Args:
@@ -114,20 +118,21 @@ class RecordService(BaseService):
             bool: True if a notification should be sent out for a new record; otherwise,
                 false.
         """
-        results = self.get_first_repository().get_recent_trains(unit_addr, station_id)
+        results = self._get_first_repository().get_recent_trains(unit_addr, station_id)
         return results is not None and len(results) > 0
         
         
     def add_new_pin(self, unit_addr: str):
-        """Updates the most recent record with the provided unit address using the repository created during initialization.
+        """Updates the most recent record with the provided unit address using the
+        repository created during initialization.
 
         Args:
             unit_addr (str): The unit address shared by multiple records  to be updated.
-            
+
         Returns:
             None
         """
-        repo = self.get_first_repository()
+        repo = self._get_first_repository()
         
         # Get most recent record (the one just created)
         resp_id = repo.get_unit_record_ids(unit_addr, True)
@@ -137,17 +142,18 @@ class RecordService(BaseService):
         
         
     def attempt_auto_fill(self, unit_addr: str):
-        """Updates a record with the symbol id and engine num of the previous most recent record with the same unit address.
-        
+        """Updates a record with the symbol id and engine num of the previous most recent
+        record with the same unit address.
+
         Updates the record table using the repository created during initialization.
-        
+
         Args:
             unit_addr (str): The unit address of a record to update.
-            
+
         Returns:
             None
         """
-        repo = self.get_first_repository()
+        repo = self._get_first_repository()
         
         # Try to get the most recent symbol and engine values from records with the same unit address
         symb = repo.get_record_column_by_unit_addr(unit_addr, "symbol_id", most_recent=True)
@@ -164,7 +170,8 @@ class RecordService(BaseService):
     
     # Signal Update
     def signal_update(self, record_id: int, symbol_id: int, engine_num: int) -> int | None:
-        """Updates the symbol ID and engine number of a record using the repository created during initialization.
+        """Updates the symbol ID and engine number of a record using the repository created
+        during initialization.
 
         Args:
             record_id (int): The ID of the record to update.
@@ -174,7 +181,7 @@ class RecordService(BaseService):
         Returns:
             int | None: _description_
         """
-        result = self.get_first_repository().update_signal_values(record_id, symbol_id, engine_num)
+        result = self._get_first_repository().update_signal_values(record_id, symbol_id, engine_num)
         return result["id"] if result else None
 
 
@@ -182,62 +189,70 @@ class RecordService(BaseService):
     def get_collated_records(self, page: int, verified: Optional[bool] = None) -> dict[str, list | int]:
         """Retrieves a paginated collation of train records grouped by unit address and
         station.
-        
-        The number of records returned is defined by `NUM_RESULTS`, and the total number of pages is calculated based on the total number of results. Can return records that are verified, unverified, or both depending on the value of the `verified` parameter.
+
+        The number of records returned is defined by `NUM_RESULTS`, and the total number
+        of pages is calculated based on the total number of results. Can return records
+        that are verified, unverified, or both depending on the value of the `verified`
+        parameter.
 
         Args:
             page (int): The page number of records to retrieve, 1-indexed.
-            verified (Optional[bool], optional): If True or False, filters records by their
-                `verified` status. If None, no filter is applied. Defaults to None.
+            verified (Optional[bool], optional): If True or False, filters records by
+                their `verified` status. If None, no filter is applied. Defaults to
+                None.
 
         Returns:
-            dict[str, list | int]: Returns a dictionary with two keys:
-                - `results`: A list of records, where each record is a dictionary with keys
-                    corresponding to database columns. The columns returned vary for each
-                    record type, for more information on the columns returned for each
-                    record type, check `docs/api.md`.
-                - `totalPages`: The total number of pages available based on the number of
-                    results and `NUM_RESULTS`.
-        """                                                                             
-        results, pages = self.get_first_repository().get_record_collation(page, RESULTS_NUM, verified)
+            dict[str, list | int]: Returns a dictionary with two keys: - `results`: A
+                list of records, where each record is a dictionary with keys
+                corresponding to database columns. The columns returned vary for each
+                record type, for more information on the columns returned for each
+                record type, check `docs/api.md`. - `totalPages`: The total number of
+                pages available based on the number of results and `NUM_RESULTS`.
+        """
+        results, pages = self._get_first_repository().get_record_collation(page, RESULTS_NUM, verified)
         return {"results": results, "totalPages": pages}
 
 
     def verify_record(self, record_id: int, symbol_id: int, locomotive_num: str | None) -> None:
-        """Verifies a record by updating its symbol ID, locomotive number, and setting its `verified` flag to true.
+        """Verifies a record by updating its symbol ID, locomotive number, and setting its
+        `verified` flag to true.
 
         Args:
             record_id (int): The ID of the record to update.
             symbol_id (int): The ID of a symbol to add to a record.
             locomotive_num (str | None): The locomotive number to add to a record.
-        
+
         Returns:
             None
         """
-        self.get_first_repository().verify_record(record_id, symbol_id, locomotive_num)
+        self._get_first_repository().verify_record(record_id, symbol_id, locomotive_num)
         
         
     # Time frame pull
     def time_frame_pull(
         self, time_range: str, station_id: int, station_name: str, recent: Optional[bool] = None
     ) -> list[dict[str, Any]]:
-        """Pulls all records that have been recorded at a station within a provided timerange 
-        from the current time. 
-        
-        The resulting records will be sorted in descending order by the date they were received. 
-        This method queries record repositories for each record type, and will query a `StationRepository` 
-        if the station ID is not provided.
+        """Pulls all records that have been recorded at a station within a provided
+        timerange from the current time.
+
+        The resulting records will be sorted in descending order by the date they were
+        received. This method queries record repositories for each record type, and will
+        query a `StationRepository` if the station ID is not provided.
 
         Args:
-            time_range (str): A string in the format "HH:MM:SS" representing the time range to pull records 
-                from relative to the current time.
-            recent (bool): If True or False, only returns records based on their `most_recent` flag; otherwise, 
-                returns all records within the time frame.
-            station_id (int): The ID of the station to pull records from. If not provided, `station_name` must be provided.
-            station_name (str): The name of the station to pull records from. If not provided, `station_id` must be provided.
+            time_range (str): A string in the format "HH:MM:SS" representing the time
+                range to pull records from relative to the current time.
+            recent (bool): If True or False, only returns records based on their
+                `most_recent` flag; otherwise, returns all records within the time
+                frame.
+            station_id (int): The ID of the station to pull records from. If not
+                provided, `station_name` must be provided.
+            station_name (str): The name of the station to pull records from. If not
+                provided, `station_id` must be provided.
 
         Returns:
-            list[dict[str, Any]]: A list of dictionaries, each representing a record within the specified time frame.
+            list[dict[str, Any]]: A list of dictionaries, each representing a record
+                within the specified time frame.
         """
         # This is the only method that needs to access StationRepository.
         from ..db.station_repo import StationRepository

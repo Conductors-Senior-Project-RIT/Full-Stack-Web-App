@@ -1,5 +1,6 @@
 from functools import wraps
 from typing import Optional, Type, TypeAlias, Union
+import inspect
 
 ExceptionType: TypeAlias = Union[Type[Exception], tuple[Type[Exception], ...]]
 ErrorMapping: TypeAlias = dict[ExceptionType, tuple[Type[Exception], bool]]
@@ -85,6 +86,7 @@ class LayerError(Exception):
 
         # Otherwise, display everything and show the cause.
         # Append cause details if it's not already a LayerError
+        
         if cause and not isinstance(cause, LayerError):
             message += f" | {type(cause).__name__}: {cause}"
         return message
@@ -325,3 +327,35 @@ def translate_error(
     return base_exception(
         caller_name, poe=point_of_error, message=message, show_error=False, cause=exc
     )
+
+
+class LayerErrorWrapper:
+    """A superclass for wrapping class methods with layer error handling."""
+    
+    error_map: dict = {}  # Default ignores translation
+    base_exception: Type[LayerError] = LayerError  # Default translates all exceptions to LayerError
+    exclude: ExceptionType = LayerError  # Any LayerErrors raised will be ignored
+    
+    def __init_subclass__(cls, **kwargs) -> None:
+        """Wraps the methods in a subclass with the error handling."""
+        super().__init_subclass__(**kwargs)
+        cls._wrap_class()
+        
+    @classmethod
+    def _wrap_class(cls):
+        """`cls` should be a subclass extending `LayerErrorWrapper`."""
+        for attr, value in cls.__dict__.items():
+            # Ensure that the attribute is a function; otherwise, attributes will be wrapped
+            if not inspect.isfunction(value):
+                continue
+            
+            # Wrap the current method (value) if it hasn't already been wrapped
+            if not getattr(value, "_is_wrapped", False):             
+                wrapped = wrap_error_handler(
+                    value, 
+                    cls.error_map, 
+                    cls.base_exception, 
+                    cls.exclude
+                )
+                wrapped._is_wrapped = True
+                setattr(cls, attr, wrapped)

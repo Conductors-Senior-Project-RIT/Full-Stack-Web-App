@@ -6,26 +6,10 @@ from ..db.db_core.exceptions import (
     RepositoryNotFoundError,
     RepositoryParsingError,
     RepositorySessionError,
-    wrap_error_handler,
     LayerError,
 )
+from ..global_core.exceptions import LayerErrorWrapper
 from ..db.record_types import RepositoryRecordInvalid
-
-
-class BaseService:
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        for attr, value in cls.__dict__.items():
-            # If the value is a function, then wrap
-            if callable(value) and not getattr(value, "_is_wrapped", False):                
-                # Register class funtion from name (attr), with the error handler decorator wrapping function (value)
-                wrapped = wrap_error_handler(
-                    func=value,
-                    error_map=SERIVCE_ERROR_MAP,
-                    base_exception=ServiceInternalError,
-                )
-                wrapped._is_wrapped = True
-                setattr(cls, attr, wrapped)
 
 
 class ServiceError(LayerError):
@@ -61,7 +45,7 @@ class ServiceEmailError(ServiceError):
 
 
 # Maps a Repository layer error to a corresponding Service layer error, and whether the lower layer message should be shown
-SERIVCE_ERROR_MAP = {
+SERVICE_ERROR_MAP = {
     RepositorySessionError: (ServiceInternalError, True),
     RepositoryExistingRowError: (ServiceExistingResourceError, True),
     RepositoryParsingError: (ServiceParsingError, False),
@@ -71,3 +55,8 @@ SERIVCE_ERROR_MAP = {
     RepositoryInvalidArgumentError: (ServiceInvalidArgument, True),
     RepositoryInternalError: (ServiceInternalError, False),
 }
+
+class ServiceErrorWrapper(LayerErrorWrapper):
+    error_map = SERVICE_ERROR_MAP
+    base_exception = ServiceInternalError
+    exclude = ServiceError

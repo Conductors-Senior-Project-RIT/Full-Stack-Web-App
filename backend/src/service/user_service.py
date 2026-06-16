@@ -8,20 +8,17 @@ from werkzeug.exceptions import BadRequest
 # from werkzeug.security import check_password_hash, generate_password_hash
 
 from ... import bcrypt
-from .service_core import BaseService
+from .service_core import ServiceErrorWrapper
 from ..db.station_repo import StationRepository
 from ..db.user_repo import UserRepository
 from ..service.email_service import email_service #instantiated 
 
-class UserService(BaseService):
+class UserService(ServiceErrorWrapper):
     """Service layer for user account and preference managemennt
 
     Coordinates between 'UserRepository' and 'StationRepository' to implement
     registration, authentication, password reset, role management, and
     station preference operations.
-
-    Args:
-        BaseService: Inherits the base service interface
     """
     def __init__(self, session):
         self.user_repo = UserRepository(session)

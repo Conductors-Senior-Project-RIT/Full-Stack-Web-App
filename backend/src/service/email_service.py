@@ -4,9 +4,9 @@ from threading import Thread
 from brevo import Brevo, SendTransacEmailRequestSender, SendTransacEmailRequestToItem
 from brevo.core.api_error import ApiError
 
-from .service_core import BaseService, ServiceEmailError
+from .service_core import ServiceErrorWrapper, ServiceEmailError
 
-class EmailService(BaseService):
+class EmailService(ServiceErrorWrapper):
     """ 
     currently using brevo: https://developers.brevo.com/docs/api-clients/python 
 
