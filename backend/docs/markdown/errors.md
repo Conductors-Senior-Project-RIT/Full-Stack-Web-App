@@ -42,7 +42,7 @@ In this message, a developer would still be able to determine the service the ex
 | `caller_name` | `str` | No | Name of the caller (typically a class) used as a prefix for the error message, e.g., the name of the service or repository raising the exception. Defaults to None. |
 | `point_of_error` | `str` | No | Point of error that identifies where in the code the exception was raised, e.g., a function or method name. Only included in the message when debugging is enabled. Defaults to None. |
 | `message` | `str` | No | A detailed error message with specifics about the failure. Only added to the public message when debugging is enabled (via `error_debugging` in app creation) or `show_error`. Defaults to None. |
-| `exclude` | `tuple[Type[Exception]]` *or* `Type[Exception]` | No | If True, forces the detailed error message and point of error to be shown regardless of the global `error_debugging` flag. Defaults to False. |
+| `exclude` | [`ExceptionType`](#type-definitions-used) | No | If True, forces the detailed error message and point of error to be shown regardless of the global `error_debugging` flag. Defaults to False. |
 | `cause` | `Exception` | No | The exception that is the cause of the error being instantiated. If provided, this exception is attached to the `LayerError` instance. Defaults to None. |
 
 ### Example
@@ -78,7 +78,7 @@ Wraps a function with a general-purpose error-handling strategy. Catches excepti
 |------|------|----------|-------------|
 | `func` | `callable` | Yes | The function that is being wrapped with the error handling logic. |
 | `error_map` | [`ErrorMapping`](#type-definitions-used) | No | A dictionary mapping of exception translations. Both single exception types and tuples of exception types are valid as keys, allowing multiple exceptions to map to the same target. Broader exceptions should be placed lower in the map because translation works by selecting the first match. |
-| `base_exception` | `Type[LayerError]` | Yes | The fallback exception type raised when a caught exception has no matching entry in `error_map`. Ensures unhandled exceptions are still wrapped in a layer-appropriate error to prevent leaking lower-level implementation details. |
+| `base_exception` | Type of [`LayerError`](#layererror) | Yes | The fallback exception type raised when a caught exception has no matching entry in `error_map`. Ensures unhandled exceptions are still wrapped in a layer-appropriate error to prevent leaking lower-level implementation details. |
 | `exclude` | [`ExceptionType`](#type-definitions-used) | No | An exception type or tuple of exception types that should be ignored in translation entirely. Useful for allowing certain exceptions to propagate without interference. Defaults to None. |
 | `message` | `str` | No | A custom message to attach to the translated exception. If None, the default message in [`LayerError`](#layererror) is used. Defaults to None. |
 
@@ -133,7 +133,7 @@ Decorator to provide error translation for exceptions in backend layers. This de
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `error_map` | [`ErrorMapping`](#type-definitions-used) | No | A dictionary mapping of exception translations. Both single exception types and tuples of exception types are valid as keys, allowing multiple exceptions to map to the same target. Broader exceptions should be placed lower in the map because translation works by selecting the first match. |
-| `base_exception` | `Type[LayerError]` | Yes | The fallback exception type raised when a caught exception has no matching entry in `error_map`. Ensures unhandled exceptions are still wrapped in a layer-appropriate error to prevent leaking lower-level implementation details. |
+| `base_exception` | Type of [`LayerError`](#layererror) | Yes | The fallback exception type raised when a caught exception has no matching entry in `error_map`. Ensures unhandled exceptions are still wrapped in a layer-appropriate error to prevent leaking lower-level implementation details. |
 | `exclude` | [`ExceptionType`](#type-definitions-used) | No | An exception type or tuple of exception types that should be ignored in translation entirely. Useful for allowing certain exceptions to propagate without interference. Defaults to None. |
 | `message` | `str` | No | A custom message to attach to the translated exception. If None, the default message in [`LayerError`](#layererror) is used. Defaults to None. |
 
@@ -185,7 +185,7 @@ Translates a provided `Exception` instance using a map of potential exception cl
 |------|------|----------|-------------|
 | `exc` | `Exception` | Yes | The exception instance that will be translated. If its type does not correspond with a matching translation in `error_map`, or it has a matching type in `exclude`, the exception is returned as-is. |
 | `error_map` | [`ErrorMapping`](#type-definitions-used) | No | A dictionary mapping of exception translations. Both single exception types and tuples of exception types are valid as keys, allowing multiple exceptions to map to the same target. Broader exceptions should be placed lower in the map because translation works by selecting the first match. |
-| `base_exception` | `Type[LayerError]` | Yes | The fallback exception type raised when a caught exception has no matching entry in `error_map`. Ensures unhandled exceptions are still wrapped in a layer-appropriate error to prevent leaking lower-level implementation details. |
+| `base_exception` | Type of [`LayerError`](#layererror) | Yes | The fallback exception type raised when a caught exception has no matching entry in `error_map`. Ensures unhandled exceptions are still wrapped in a layer-appropriate error to prevent leaking lower-level implementation details. |
 | `caller_name` | `str` | No | Name of the caller (typically a class) used as a prefix for the error message, e.g., the name of the service or repository raising the exception. Defaults to None. |
 | `point_of_error` | `str` | No | Point of error that identifies where in the code the exception was raised, e.g., a function or method name. Only included in the message when debugging is enabled. Defaults to None. |
 | `message` | `str` | No | A custom message to attach to the translated exception. If None, the default message in [`LayerError`](#layererror) is used. Defaults to None. |
@@ -222,4 +222,70 @@ class CustomClass:
                 message=f"Error occurred doing something with {arg}!",
                 exclude=LayerError
             )
+```
+
+# `LayerErrorWrapper`
+
+A superclass that wraps all subclass methods with the error handling logic in [`wrap_error_handler`](#wrap_error_handler) and [`translate_error`](#translate_error). Methods are wrapped at class definition time, not when a class is instantiated.
+
+## Default Attributes
+This class specifies three class attributes that define how certain exceptions are translated. By default, all exceptions but [`LayerError`](#layererror) instances are translated into a [`LayerError`](#layererror). This behavior can be changed by adjusting the attributes below:
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `error_map` | dict | `{}` | A dictionary mapping of exception translations. Both single exception types and tuples of exception types are valid as keys, allowing multiple exceptions to map to the same target. Broader exceptions should be placed lower in the map because translation works by selecting the first match. |
+| `base_exception` | Type of [`LayerError`](#layererror) | [`LayerError`](#layererror) | The fallback exception type raised when a caught exception has no matching entry in `error_map`. Ensures unhandled exceptions are still wrapped in a layer-appropriate error to prevent leaking lower-level implementation details. |
+| `exclude` | [`ExceptionType`](#type-definitions-used) | [`LayerError`](#layererror) | An exception type or tuple of exception types that should be ignored in translation entirely. Useful for allowing certain exceptions to propagate without interference. |
+
+## Example
+
+The example below defines a small set of exceptions for a layer. `ExampleClass` inherits from `LayerErrorWrapper` and specifies the translation mappings for any exceptions that occur within the underlying layer (in this case, `LowerClass`) as well as other built-in Python exceptions. Any unhandled exceptions are translated to an `ExampleInternalError`, and all errors raised within this layer propagate through, as they are subclasses of `ExampleLayerError`.
+
+```python
+from ..layer_below import LowerClass
+
+class ExampleLayerError(LayerError):
+    pass
+
+class ExampleInternalError(ExampleLayerError):
+    default_message = "An internal error occurred!"
+
+class ExampleArgumentError(ExampleLayerError):
+    default_message = "Bad argument provided!"
+
+class ExamplePermissionError(ExampleLayerError):
+    default_message = "Invalid permission provided!"
+
+class ExampleClass(LayerErrorWrapper):
+    # Assume exceptions from lower layer and Python are mapped
+    error_map = {...}  
+    base_exception = ExampleInternalError
+    exclude = ExampleLayerError
+
+    def __init__():
+        self.lower_class = LowerClass()
+
+    def higher_method(
+        permission: int, 
+        number_one: int, 
+        number_two: int
+    ):
+        if self.permission < 3:
+            raise HigherPermissionError(
+                self.__class__.__name__,
+                sys._getframe().f_code.co_name,
+                f"Invalid permission level: {permission}",
+                True
+            )
+
+        if number_two == 0:
+            raise HigherArgumentError(
+                self.__class__.__name__,
+                sys._getframe().f_code.co_name,
+                f"The second number provided is 0!",
+                True
+            )
+
+        result = self.lower_class.lower_method(permission, number_one)
+        return result / number_two
 ```
