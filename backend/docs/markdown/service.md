@@ -16,7 +16,11 @@ Currently, *five* services exist in the application, four of which extend [`Base
 The purpose of `BaseService` is to provide a sublcass constructor for services that should be wrapped with the application's error handling logic using `wrap_error_handler` (see [Error Handling](errors.md)). Extending this class removes the need to manually integrate layer-specific exception handling for each method.
 
 ## Service Error Handling
-This layer employs the standardized functionality from `global_core.exceptions` to translate [`RepositoryError`](repository.md#error-types) exceptions into [`ServiceError`](#error-types) exceptions. Additionally, this layer should specify the set of exceptions allowed to display their error messages to the **API** layer and client. To achieve this, the [`SERVICE_ERROR_MAP`](#repository-to-service-mapping) is used, where the key specifies the exception being translated, and the tuple contains the new exception along with a boolean indicating whether the error message should be shown in the response. If the *Flask* instance is in either testing or debugging mode, all error messages will be displayed, regardless of the current settings in the error map.
+This layer uses the standardized functionality from `global_core.exceptions` to translate [`RepositoryError`](repository.md#error-types) exceptions into [`ServiceError`](#error-types) exceptions. Additionally, this layer should specify the set of exceptions allowed to display their error messages to the **API** layer, and eventually the client. 
+
+To achieve this, the [`SERVICE_ERROR_MAP`](#repository-to-service-mapping) is used, where the key specifies the exception being translated, and the tuple contains the new exception along with a boolean indicating whether the error message should be shown in the response. If the *Flask* instance is in either testing or debugging mode, all error messages will be displayed, regardless of the current settings in the error map. 
+
+Every class in this layer uses a subclass named `ServiceErrorWrapper` (found in `service.service_core`), which inherits the method wrapping logic from [`LayerErrorWrapper`](errors.md#layererrorwrapper), and redefines the translation behavior to align with the Service layer. The `ServiceErrorWrapper` uses the [`SERVICE_ERROR_MAP`](#repository-to-service-mapping) for translation purposes, with any unmapped exception defaulting to a [`ServiceInternalError`](#error-types). Additionally, all [`ServiceError`](#error-types) types are allowed to pass through unchanged.
 
 ## Error Types
 

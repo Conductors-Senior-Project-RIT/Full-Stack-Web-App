@@ -14,17 +14,17 @@ from sqlalchemy.exc import SQLAlchemyError
 from .db_core.models import User
 from .db_core.repository import BaseRepository
 from .db_core.exceptions import (
-    wrap_repository_error_handler,
-    REPOSITORY_ERROR_MAP,
+    RepositoryErrorWrapper,
     RepositoryInternalError,
-    RepositoryError,
     RepositoryNotFoundError,
 )
 
 
-class UserRepository(BaseRepository):
+class UserRepository(RepositoryErrorWrapper, BaseRepository):
     """A database interface for User and UserPreferences record operations
 
+    All methods are wrapped with the RepositoryErrorWrapper to provide error handling.
+    
     Raw SQL queries are wrapped for the 'Users', 'UserPreferences', and 'reset_requests' tables.
 
     Args:
@@ -32,13 +32,6 @@ class UserRepository(BaseRepository):
     """
     def __init__(self, session):
         super().__init__(User, session)
-        # UserRepository methods are wrapped with the wrap_repository_error_handler decorator when the class is instantiatied
-        for attr, value in self.__dict__.items():
-            if callable(value):
-                if attr == "session" or attr.startswith("_") or not callable(value):
-                    continue  # don't override session attribute; causes AttributeError when doing self.session.execute(): 'function' object has no attribute 'execute'
-                wrapped = wrap_repository_error_handler(value)
-                setattr(self, attr, wrapped)
 
     def _construct_email_not_found(self, email: str) -> RepositoryNotFoundError:
         return RepositoryNotFoundError(

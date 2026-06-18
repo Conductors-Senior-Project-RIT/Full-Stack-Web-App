@@ -224,9 +224,9 @@ class CustomClass:
             )
 ```
 
-# `LayerErrorWrapper`
+# LayerErrorWrapper
 
-A superclass that wraps all subclass methods with the error handling logic in [`wrap_error_handler`](#wrap_error_handler) and [`translate_error`](#translate_error). Methods are wrapped at class definition time, not when a class is instantiated.
+A superclass that wraps all subclass methods with the error handling logic in [`wrap_error_handler`](#wrap_error_handler) and [`translate_error`](#translate_error). Methods are wrapped at subclass definition time, not when a subclass is instantiated.
 
 ## Default Attributes
 This class specifies three class attributes that define how certain exceptions are translated. By default, all exceptions but [`LayerError`](#layererror) instances are translated into a [`LayerError`](#layererror). This behavior can be changed by adjusting the attributes below:
@@ -265,11 +265,13 @@ class ExampleClass(LayerErrorWrapper):
     def __init__():
         self.lower_class = LowerClass()
 
-    def higher_method(
+    # This method is wrapped
+    def higher_method_one(
         permission: int, 
         number_one: int, 
         number_two: int
     ):
+        # Both of the exceptions below are ignored by LayerErrorWrapper
         if self.permission < 3:
             raise HigherPermissionError(
                 self.__class__.__name__,
@@ -286,6 +288,11 @@ class ExampleClass(LayerErrorWrapper):
                 True
             )
 
+        # Exceptions that occur here are caught by LayerErrorWrapper
         result = self.lower_class.lower_method(permission, number_one)
         return result / number_two
+    
+    # This method is also wrapped
+    def higher_method_two(...):
+        ...
 ```

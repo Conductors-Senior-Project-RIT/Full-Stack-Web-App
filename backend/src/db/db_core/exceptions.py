@@ -2,7 +2,7 @@ from typing import Optional, Type
 
 from sqlalchemy.exc import DataError, IntegrityError, MultipleResultsFound, NoResultFound, ProgrammingError, SQLAlchemyError, UnboundExecutionError,InterfaceError, NoSuchModuleError
 
-from ...global_core.exceptions import LayerError, layer_error_handler, translate_error, wrap_error_handler
+from ...global_core.exceptions import LayerError, LayerErrorWrapper, layer_error_handler, translate_error, wrap_error_handler
 
 #################################################
 ##  REPOSITORY EXCEPTION HANDLING DEFINITIONS  ##
@@ -130,3 +130,10 @@ def repository_error_handler(
         exclude=RepositoryError if not exclude else exclude,
         message=message
     )
+    
+    
+class RepositoryErrorWrapper(LayerErrorWrapper):
+    """A wrapper for adding error handling to repository class methods."""
+    error_map = REPOSITORY_ERROR_MAP
+    base_exception = RepositoryInternalError
+    exclude = RepositoryError

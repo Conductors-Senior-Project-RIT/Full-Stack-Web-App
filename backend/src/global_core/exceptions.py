@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Optional, Type, TypeAlias, Union
+from typing import Callable, Optional, Type, TypeAlias, Union
 import inspect
 
 ExceptionType: TypeAlias = Union[Type[Exception], tuple[Type[Exception], ...]]
@@ -344,8 +344,8 @@ class LayerErrorWrapper:
     @classmethod
     def _wrap_class(cls):
         """`cls` should be a subclass extending `LayerErrorWrapper`."""
-        for attr, value in cls.__dict__.items():
-            # Ensure that the attribute is a function; otherwise, attributes will be wrapped
+        for name, value in cls.__dict__.items():
+            # Ensure that the value is a function; otherwise, attributes and other things will be ignored
             if not inspect.isfunction(value):
                 continue
             
@@ -358,4 +358,4 @@ class LayerErrorWrapper:
                     cls.exclude
                 )
                 wrapped._is_wrapped = True
-                setattr(cls, attr, wrapped)
+                setattr(cls, name, wrapped)
