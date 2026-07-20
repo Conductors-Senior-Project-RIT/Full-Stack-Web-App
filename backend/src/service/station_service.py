@@ -28,6 +28,17 @@ class StationService(ServiceErrorWrapper):
             list[dict]: A list of dictionaries containing station IDs and names.
         """
         return self.station_repo.get_stations()
+    
+    def get_station_id(self, station_name: str) -> int:
+        """Returns the ID of a station given its name.
+
+        Args:
+            station_name (str): The name of the station.
+
+        Returns:
+            int: The ID of the station.
+        """
+        return self.station_repo.get_station_id(station_name)
 
     def create_station(self, station_name: str) -> str:
         """Creates a new station in the database with the provided name.

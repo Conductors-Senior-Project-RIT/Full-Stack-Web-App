@@ -3,17 +3,15 @@ import secrets
 
 from email_validator import validate_email, EmailNotValidError
 
-from backend.src.db.db_core.exceptions import RepositoryNotFoundError
-from werkzeug.exceptions import BadRequest
 # from werkzeug.security import check_password_hash, generate_password_hash
 
 from ... import bcrypt
-from .service_core import ServiceErrorWrapper
+from .service_core import SError, ServiceErrorWrapper, ServiceErrorInvoker
 from ..db.station_repo import StationRepository
 from ..db.user_repo import UserRepository
 from ..service.email_service import email_service #instantiated 
 
-class UserService(ServiceErrorWrapper):
+class UserService(ServiceErrorWrapper, ServiceErrorInvoker):
     """Service layer for user account and preference managemennt
 
     Coordinates between 'UserRepository' and 'StationRepository' to implement
@@ -28,7 +26,7 @@ class UserService(ServiceErrorWrapper):
         try:
             return validate_email(email, check_deliverability=False).normalized
         except EmailNotValidError:
-            return None
+            self._raise(SError.INVALID_ARG, f"Invalid email provided: {email}", True)
 
     def register_user(self, email: str, password: str):
         """Registers a new user, initializes the default preferences and sends a confirmation email.
@@ -47,11 +45,9 @@ class UserService(ServiceErrorWrapper):
         hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
 
         email = self._normalize_email(email)
-        if not email:
-            raise BadRequest("Invalid email format")
 
         if self.user_repo.email_exists(email): 
-            raise BadRequest("Email already registered")
+            self._raise(SError.EXISTING, "Email already registered!", True)
         
         print("Email does not exist")
 
@@ -76,14 +72,7 @@ class UserService(ServiceErrorWrapper):
         """
 
         email = self._normalize_email(email)
-        if not email:
-            return None
-
-        try:
-            user = self.user_repo.get_user_info(email) 
-        except RepositoryNotFoundError:
-            return None
-
+        user = self.user_repo.get_user_info(email) 
         user_hashed_password = user.get("passwd")
 
         if bcrypt.check_password_hash(user_hashed_password, password):
@@ -117,13 +106,15 @@ class UserService(ServiceErrorWrapper):
         Args:
             email (str): The email address of the password reset requester.
         """
+        from .service_core import RError
+        
         email = self._normalize_email(email)
         if not email:
-            return
+            self._raise(SError.INVALID_ARG, f"Invalid email provided: {email}", True)
         
         try:
             user_id = self.user_repo.get_user_id(email)
-        except RepositoryNotFoundError:
+        except RError.NOT_FOUND:
             return # route will always respond with 200 to not let someone know if an email is registered up or not
 
         reset_token = secrets.token_urlsafe(32) # why 32 lol
@@ -201,7 +192,8 @@ class UserService(ServiceErrorWrapper):
         stations = self.station_repo.get_stations() # returns list of dictionaries
 
         if not stations: # if empty, etc
-            raise RuntimeError("No train stations available")
+            print("No stations available!")
+            return
 
         for station in stations:
             station_id = station.get("id")

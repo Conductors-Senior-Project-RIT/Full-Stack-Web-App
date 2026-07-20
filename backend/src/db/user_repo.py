@@ -7,17 +7,12 @@ This includes (but is not limited to): account creation, preference management, 
 
 from typing import Any
 
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, ScalarResult
-from sqlalchemy.exc import SQLAlchemyError
 
 from .db_core.models import User
 from .db_core.repository import BaseRepository
-from .db_core.exceptions import (
-    RepositoryErrorWrapper,
-    RepositoryInternalError,
-    RepositoryNotFoundError,
-)
+from .db_core.exceptions import RError as E
+from .db_core.exceptions import RepositoryErrorWrapper
 
 
 class UserRepository(RepositoryErrorWrapper, BaseRepository):
@@ -33,15 +28,15 @@ class UserRepository(RepositoryErrorWrapper, BaseRepository):
     def __init__(self, session):
         super().__init__(User, session)
 
-    def _construct_email_not_found(self, email: str) -> RepositoryNotFoundError:
-        return RepositoryNotFoundError(
+    def _construct_email_not_found(self, email: str) -> E.NOT_FOUND:
+        return E.NOT_FOUND(
             caller_name=self.__class__.__name__,
             message=f"Could not find a user with an email = {email}",
             show_error=False,
         )
 
-    def _construct_id_not_found(self, user_id: int) -> RepositoryNotFoundError:
-        return RepositoryNotFoundError(
+    def _construct_id_not_found(self, user_id: int) -> E.NOT_FOUND:
+        return E.NOT_FOUND(
             caller_name=self.__class__.__name__,
             message=f"Could not find a user with an ID = {user_id}",
             show_error=False,
@@ -71,13 +66,11 @@ class UserRepository(RepositoryErrorWrapper, BaseRepository):
             result = self.session.execute(
                 text(sql), args
             ).scalar_one()  # error comes from unqiue constraint on emails
+            
             return result
-        except SQLAlchemyError as e:
-            raise RepositoryInternalError(
-                caller_name=self.__class__.__name__,
-                message="An error occurred creating a new user!",
-                show_error=True,
-            ) from e
+        except Exception as e:
+            self._translate_and_raise(e, "An error occurred creating a new user!")
+
 
     def unique_email_exists(self, email: str):
         """Raises an error if no user with the provided email exists
@@ -180,11 +173,7 @@ class UserRepository(RepositoryErrorWrapper, BaseRepository):
             text(sql), {"role": new_role, "email": email}
         ).scalar_one_or_none()
         if result is None:
-            raise RepositoryInternalError(
-                self.__class__.__name__,
-                message="An error occurred updating account status, 0 changes made!",
-                show_error=True,
-            )
+            self._raise(E.INTERNAL_ERROR, "An error occurred updating account status, 0 changes made!", True)
 
         return result
 
@@ -218,11 +207,7 @@ class UserRepository(RepositoryErrorWrapper, BaseRepository):
         ).scalar_one_or_none()
 
         if not result:
-            raise RepositoryInternalError(
-                self.__class__.__name__,
-                message="An error occurred updating password, 0 changes made!",
-                show_error=True,
-            )
+            self._raise(E.INTERNAL_ERROR, "An error occurred updating password, 0 changes made!", True)
 
         return result
 
@@ -260,11 +245,7 @@ class UserRepository(RepositoryErrorWrapper, BaseRepository):
 
         result = self.session.execute(text(sql), args).one_or_none()
         if result is None:
-            raise RepositoryInternalError(
-                self.__class__.__name__,
-                message="An error occurred updating user times, 0 changes made!",
-                show_error=True,
-            )
+            self._raise(E.INTERNAL_ERROR, "An error occurred updating user times, 0 changes made!", True)
 
         return result.starting_time, result.ending_time
 
@@ -352,11 +333,7 @@ class UserRepository(RepositoryErrorWrapper, BaseRepository):
 
         result = self.session.execute(text(sql), args).scalar_one_or_none()
         if not result:
-            raise RepositoryInternalError(
-                self.__class__.__name__,
-                message="An error occurred creating new user preference, 0 additions made!",
-                show_error=True,
-            )
+            self._raise(E.INTERNAL_ERROR, "An error occurred creating new user preference, 0 additions made!", True)
 
     def create_user_reset_token(self, user_id, hashed_token):
         """Stores a hashed password reset token with a 1 hour expiration.
@@ -378,11 +355,7 @@ class UserRepository(RepositoryErrorWrapper, BaseRepository):
 
         result = self.session.execute(text(sql), args).scalar_one_or_none()
         if not result:
-            raise RepositoryInternalError(
-                self.__class__.__name__,
-                message="An error occurred creating new reset token, no token created!",
-                show_error=False,
-            )
+            self._raise(E.INTERNAL_ERROR, "An error occurred creating new reset token, no token created!", False)
 
     def get_user_id_from_valid_reset_request_token(self, token_hash) -> int | None:
         """Returns the user ID associated with a valid, unexpired reset token

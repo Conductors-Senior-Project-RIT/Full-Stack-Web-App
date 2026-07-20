@@ -4,7 +4,7 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from .record_repo import RecordRepository
-from .db_core.exceptions import RepositoryError
+from .db_core.exceptions import RError as E
 from .db_core.models import EOTRecord, EOTCollation, HOTRecord, HOTCollation
 
 
@@ -18,13 +18,11 @@ class RecordTypes(Enum):
     EOT = 1
     HOT = 2
     DPU = 3
-
-
-class RepositoryRecordInvalid(RepositoryError):
-    """Raised when a invalid record type is provided to `get_record_repository`."""
-
-    valid_types = list(RecordTypes._value2member_map_)
-    default_message = f"Invalid record type provided! Value must be between {valid_types[0]} and {valid_types[-1]}."
+    
+    @classmethod
+    def error(cls) -> str:
+        mapping = list(cls._value2member_map_)
+        return f"Invalid record type provided! Value must be between {mapping[0]} and {mapping[-1]}."
 
 
 def has_value(value: int):
@@ -41,7 +39,7 @@ def has_value(value: int):
         bool: True if the value aligns with a valid record type; otherwise, false.
     """
     if not isinstance(value, int):
-        raise RepositoryRecordInvalid(f"Expected int, got {type(value).__name__}")
+        raise E.INVALID_RECORD(RecordTypes.error())
     return any(value == item.value for item in RecordTypes)
 
 
@@ -67,7 +65,7 @@ def get_record_repository(session: Session, value: int | RecordTypes) -> RecordR
             records. None if a record type should exist, but is not implemented yet.
     """
     if not isinstance(value, (int, RecordTypes)):
-        raise RepositoryRecordInvalid(value)
+        raise E.INVALID_RECORD(message="Invalid record type provided! Value must be an int or enum value.")
 
     match value:
         case RecordTypes.EOT | RecordTypes.EOT.value:
@@ -81,7 +79,7 @@ def get_record_repository(session: Session, value: int | RecordTypes) -> RecordR
         case RecordTypes.DPU | RecordTypes.DPU.value:
             return None  # Not completed yet
 
-    raise RepositoryRecordInvalid(str(value))
+    raise E.INVALID_RECORD(message=RecordTypes.error())
 
 
 def get_all_repositories(session: Session) -> list[RecordRepository]:

@@ -5,13 +5,9 @@ from sqlalchemy import Row, Sequence, inspect
 from sqlalchemy.orm.session import Session
 from sqlalchemy.exc import NoInspectionAvailable
 
-from .exceptions import (
-    RepositoryInvalidArgumentError, 
-    RepositoryNotFoundError, 
-    RepositoryParsingError, 
-    RepositorySessionError,
-    repository_error_handler
-)
+from .exceptions import RepositoryErrorInvoker
+from .exceptions import RepositoryErrorHandler as RHandler
+from .exceptions import RError as E
 from .models import Base
 
 
@@ -34,7 +30,7 @@ SingleResult = ModelType | dict[str, Any]
 CollectionResult = list[ModelType] | list[dict[str, Any]]
 
 
-class BaseRepository(Generic[ModelType]): 
+class BaseRepository(Generic[ModelType], RepositoryErrorInvoker): 
     """Base class for a repository, supporting CRUD functionality for SQLAlchemy ORMs. This
     class uses a generic, `ModelType`, which is bounded to the `Base` class from
     `models`, defining the model to operate on. Methods in this class return
@@ -64,20 +60,10 @@ class BaseRepository(Generic[ModelType]):
             session (Session): The SQLAlchemy session to use for database operations.
         """
         
-        if not model:
-            raise RepositoryInvalidArgumentError(
-                self.__class__.__name__,
-                message="A valid model must be provided to a repository!", 
-                show_error=False
-            )
+        self._validate(model, E.INVALID_ARG, "A valid model must be provided to a repository!")
+        self._validate(session, E.SESSION, "A valid SQLAlchemy session must be provided to a repository!")
+
         self.model = model
-        
-        if not session:
-            raise RepositorySessionError(
-                self.__class__.__name__,
-                message="A valid SQLAlchemy session must be provided to a repository!",
-                show_error=False
-            )
         self.session = session
         
         # Extract the primary key by inspecting the model's attributes
@@ -88,9 +74,8 @@ class BaseRepository(Generic[ModelType]):
                 self.pkey = pkeys[0].name if pkeys else None
             except NoInspectionAvailable:
                 pass
-        
-        
-    @repository_error_handler()
+
+    @RHandler.layer_error_decorator()
     def get(self, pkey: Any, to_dict=True) -> SingleResult:
         """Retrieves an ORM instance from the session's current state. By default, this 
         method returns a dictionary representation of the result, which can be turned off 
@@ -115,17 +100,12 @@ class BaseRepository(Generic[ModelType]):
         obj = self.session.get(self.model, pkey)
         
         # If an object cannot be found with the provided primary key, raise an error
-        if not obj:
-            raise RepositoryNotFoundError(
-                self.__class__.__name__, "get",
-                f"Could not {self.model.__name__.lower()} with a pkey = {pkey}", True  
-            )
+        self._validate(obj, E.NOT_FOUND, f"Could not {self.model.__name__.lower()} with a pkey = {pkey}", True)
         
         # Return the retrieved instannce, either as its original ModelType or dictionary representation.
         return self.objs_to_dicts(obj) if to_dict else obj
     
-    
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def update(self, objs: list[tuple[ModelType, dict[str, Any]]], to_dict=True) -> CollectionResult:  
         """Updates the provided objects with the provided new values.
 
@@ -179,11 +159,7 @@ class BaseRepository(Generic[ModelType]):
         updated = []
         for obj, updates in objs:
             # Raise an error if the provided object is not an instance of the model
-            if not issubclass(obj.__class__, Base):
-                raise RepositoryInvalidArgumentError(
-                    self.__class__.__name__, "update",
-                    "Object must be a valid model instance!", True
-                )
+            self._validate(issubclass(obj.__class__, Base), E.INVALID_ARG, "Object must be a valid model instance!", True)
             
             # Maintain a boolean to track whether an update was made to the current object.
             has_updated = False
@@ -193,12 +169,12 @@ class BaseRepository(Generic[ModelType]):
                     continue
                 
                 # If the object does not have the specified attribute to update, raise an error
-                if not hasattr(obj, key):
-                    raise RepositoryInvalidArgumentError(
-                        self.__class__.__name__, "update",
-                        f"Column name '{key}' not found in {obj}!", True
-                    )
-                
+                self._validate(hasattr(obj, key), E.INVALID_ARG, f"Column name '{key}' not found in {obj}!", True)
+                    
+                column = getattr(self.model.__table__.c, key)
+                column_type = column.type.python_type
+                self._validate(isinstance(new_value, column_type), E.INVALID_ARG, f"Value for column '{key}' is not of type {column_type}!", True)
+
                 # Retrieve the current value of the object provided, and check to see if an update is necessary.
                 # If the values differ, then set the new value for the object and update the boolean to reflect that an update was made.
                 current_value = getattr(obj, key)
@@ -217,7 +193,7 @@ class BaseRepository(Generic[ModelType]):
         return self.objs_to_dicts(updated) if to_dict else updated
     
     
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def update_with_pk(self, pkey: int | str, new_values: dict[str, Any], to_dict=True) -> SingleResult | None:
         """Updates a single ORM instance in the current session.
 
@@ -263,7 +239,7 @@ class BaseRepository(Generic[ModelType]):
         return result[0] if len(result) == 1 else None
         
         
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def create(self, new_data: list[dict[str, Any]] | dict[str, Any], to_dict=True) -> CollectionResult:
         """Creates one or more new records in the database from the provided data.
 
@@ -317,7 +293,7 @@ class BaseRepository(Generic[ModelType]):
         return self.objs_to_dicts(instances) if to_dict else instances
         
         
-    @repository_error_handler()    
+    @RHandler.layer_error_decorator()    
     def delete(self, value: int | str | ModelType) -> None:  
         """Deletes an instance from the database that matches the provided value, which can
         be a primary key or an instance of `ModelType`.
@@ -343,7 +319,7 @@ class BaseRepository(Generic[ModelType]):
         
             
     @classmethod
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def objs_to_dicts(cls, values: AsDictConvertible | Sequence[AsDictConvertible], convert_to_string: set[str] = {}) -> (
         dict[str, Any] | list[dict[str, Any]]):
         """Converts one or more instances to their dictionary representations. The provided
@@ -394,12 +370,14 @@ class BaseRepository(Generic[ModelType]):
                     results.append(dict(row))
                 # Raise an exception if the row cannot be converted
                 except Exception:
-                    raise RepositoryParsingError(
-                        cls.__name__,
-                        "objs_to_dicts",
-                        "A provided instance does not contain functionality for dictionary conversion!",
-                        show_error=False
-                    )
+                    cls._raise(E.PARSING, "A provided instance does not contain functionality for dictionary conversion!", False)
+                    
+                    # raise RepositoryParsingError(
+                    #     cls.__name__,
+                    #     "objs_to_dicts",
+                    #     "A provided instance does not contain functionality for dictionary conversion!",
+                    #     show_error=False
+                    # )
         
         # Convert any values if corresponding keys should be converted to a string
         if len(convert_to_string) > 0:
@@ -408,4 +386,4 @@ class BaseRepository(Generic[ModelType]):
         
         # Return a single dictionary if the input was not a collection, otherwise return a list of dictionaries
         return results if is_collection else results[0]
-        
+

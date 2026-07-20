@@ -1,12 +1,12 @@
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 import unittest
 
 from sqlalchemy import text
 
 from backend.database import db
-from backend.src.db.db_core.exceptions import RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError, RepositorySessionError
+from backend.src.db.db_core.exceptions import RepositoryExistingRowError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError, RepositorySessionError
 from backend.src.db.db_core.repository import BaseRepository
 from backend.test.base_test_case import BaseTestCase
 from backend.test.db.test_utils import TestModel, return_test_data
@@ -189,7 +189,7 @@ class TestBaseRepository(BaseTestCase):
         self.repo.session.flush()
         
         # Test that if a primary key collision occurs, then error is raised
-        with self.assertRaises(RepositoryParsingError) as exc:
+        with self.assertRaises(RepositoryExistingRowError) as exc:
             sp = self.repo.session.begin_nested()
             self.repo.create({"id": 999, "date_rec": datetime.now(), "station_recorded": 2}, False) 
         # The exception should contain the root cause (IntegrityError) if primary key collision occurs

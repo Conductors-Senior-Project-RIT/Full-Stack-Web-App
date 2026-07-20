@@ -1,13 +1,12 @@
 from datetime import datetime
 from typing import Any
-import sys
 
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from .db_core.models import Station
-from .db_core.exceptions import RepositoryNotFoundError, RepositoryInternalError, RepositoryInvalidArgumentError, \
-    RepositoryExistingRowError, repository_error_handler, repository_error_translator
+from .db_core.exceptions import RError as E
+from .db_core.exceptions import RepositoryErrorHandler as RHandler
 from .db_core.repository import BaseRepository
 
 class StationRepository(BaseRepository[Station]):
@@ -29,7 +28,7 @@ class StationRepository(BaseRepository[Station]):
         super().__init__(Station, session)
         
 
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def get_stations(self) -> list[dict[str, Any]]:
         """Returns a collection of ID and station name pairs from the `Stations` table.
 
@@ -45,7 +44,7 @@ class StationRepository(BaseRepository[Station]):
         return self.objs_to_dicts(results)
     
             
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def create_new_station(self, stat_name: str, hashed_password: str) -> int:
         """Creates a new station from `stat_name` and a `hashed_password` in the `Stations`
         table.
@@ -65,13 +64,12 @@ class StationRepository(BaseRepository[Station]):
         stmt = select(self.model.id).where(self.model.station_name == stat_name)
         result = self.session.execute(stmt).scalar_one_or_none()
         
-        if result is not None:
-            raise RepositoryExistingRowError(
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"A station with the name {stat_name} already exists!",
-                True
-            )
+        self._validate(
+            result is None, 
+            E.EXISTING, 
+            f"A station with the name {stat_name} already exists!", 
+            True
+        )
         
         # Add a new station instance to the session
         new_station = self.model(
@@ -84,7 +82,7 @@ class StationRepository(BaseRepository[Station]):
 
 
 
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def update_station_password(self, station_id: int, hashed_password: str) -> str:
         """Updates a station's password with `hashed_password` if a matching `station_id`
         exists.
@@ -101,18 +99,53 @@ class StationRepository(BaseRepository[Station]):
         Returns:
             str: The newly updated password from the database session.
         """
-        if not isinstance(station_id, int) or not isinstance(hashed_password, str):
-            raise RepositoryInvalidArgumentError(
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                "Either station_id or hashed_password are of the incorrect type!",
-                False
-            )
-        
+        return self._update_station_value(station_id, "passwd", hashed_password)
+    
+    
+    def update_station_name(self, station_id: int, new_name: str) -> str:
+        """Updates a station's name with `new_name` if a matching `station_id` exists.
+
+        Args:
+            station_id (int): The ID of the station to update.
+            new_name (str): The new name for the station.
+
+        Raises:
+            `RepositoryNotFoundError`: Raised if a station with `station_id` does not exist.
+            `RepositoryInvalidArgumentError`: Raised if either argument is of the incorrect
+                type.
+
+        Returns:
+            str: The newly updated name from the database session.
+        """
+        return self._update_station_value(station_id, "station_name", new_name)
+    
+    
+    def _update_station_value(self, station_id: int, station_field: str, new_value: Any) -> float:
+        """Updates a station's column with a new value if a matching `station_id` exists.
+
+        Args:
+            station_id (int): The ID of the station to update.
+            station_field (str): The name of the column to update.
+            new_value (Any): The new value for the station's respective column.
+
+        Raises:
+            `RepositoryNotFoundError`: Raised if a station with `station_id` does not exist.
+            `RepositoryInvalidArgumentError`: Raised if either argument is of the incorrect
+                type.
+
+        Returns:
+            float: The newly updated value from the database session.
+        """
+        self._validate(
+            isinstance(station_id, int) and isinstance(station_field, str), 
+            E.INVALID_ARG, 
+            f"Invalid argument types provided when updating: {station_field}!"
+        )
+
         # Will raise a RepositoryNotFoundError if station does not exist
-        result = self.update_with_pk(station_id, {"passwd": hashed_password}, to_dict=False)  
-        return result.passwd
-            
+        result = self.update_with_pk(station_id, {station_field: new_value}, to_dict=False)
+        return getattr(result, station_field)
+
 
     def get_station_id(self, stat_name: str) -> int:
         """Returns the ID of a station with a matching station name.
@@ -133,27 +166,16 @@ class StationRepository(BaseRepository[Station]):
             result = self.session.execute(stmt).scalar_one_or_none()
             
             # If None, then a record was likely not found.
-            if not result:
-                raise RepositoryNotFoundError(
-                    self.__class__.__name__, 
-                    sys._getframe().f_code.co_name,
-                    f"Could not find {stat_name}!",
-                    True
-                )
+            self._validate(result is not None, E.NOT_FOUND, f"Could not find {stat_name}!", True)
             
             return result
         
         # Handle any errors that may occur, including the station name in the error message.
         except Exception as e:
-            raise repository_error_translator(
-                e, 
-                self.__class__.__name__, 
-                sys._getframe().f_code.co_name,
-                f"Could not retrieve a station id for {stat_name}: {e}"
-            )
+            raise self._translate_and_raise(e, f"Could not retrieve a station id for {stat_name}: {e}")
         
 
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def get_last_seen(self, station_name: str) -> datetime:
         """Returns a datetime instance of the station's last seen timestamp.
 
@@ -171,19 +193,13 @@ class StationRepository(BaseRepository[Station]):
         result = self.session.execute(stmt).scalar_one_or_none()
         
         # If result is None, it was likely not found
-        if not result:
-            raise RepositoryNotFoundError(
-                self.__class__.__name__, 
-                sys._getframe().f_code.co_name,
-                f"Could not find {station_name}!",
-                True
-            )
+        self._validate(result is not None, E.NOT_FOUND, f"Could not find {station_name}!", True)
         
         # Format the seen date based on whether it was seen today    
         return result
 
         
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def update_last_seen(self, station_id: int) -> datetime:
         """Updates a station's last seen timestamp to the current time 
         during execution.
@@ -209,12 +225,13 @@ class StationRepository(BaseRepository[Station]):
         result = self.session.execute(stmt).scalar_one_or_none()
 
         # If None is returned, the station was likely not found
-        if not result:
-            raise RepositoryNotFoundError(
-                self.__class__.__name__, 
-                sys._getframe().f_code.co_name,
-                f"Could not find station with id: {station_id}!",
-                True
-            )
+        self._validate(result is not None, E.NOT_FOUND, f"Could not find station with id: {station_id}!", True)
+        # if not result:
+        #     raise RepositoryNotFoundError(
+        #         self.__class__.__name__, 
+        #         sys._getframe().f_code.co_name,
+        #         f"Could not find station with id: {station_id}!",
+        #         True
+        #     )
             
         return result

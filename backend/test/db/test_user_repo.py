@@ -2,7 +2,7 @@ from datetime import time
 import unittest
 
 from backend.database import db
-from backend.src.db.db_core.exceptions import RepositoryInternalError, RepositoryNotFoundError
+from backend.src.db.db_core.exceptions import RepositoryExistingRowError, RepositoryInternalError, RepositoryNotFoundError, RepositoryParsingError
 from backend.src.db.db_core.models import User
 from backend.src.db.user_repo import UserRepository
 from backend.test.base_test_case import BaseTestCase
@@ -17,6 +17,7 @@ class TestUserRepository(BaseTestCase): # testing user model
         """
         Creating a fake User so certain attributes are easier to test (like getting the right user id)
         """
+        super().setUp()
         self.repo = UserRepository(db.session) 
         self.test_user = User(id=67,
                               email="faker@gmail.com",
@@ -26,7 +27,7 @@ class TestUserRepository(BaseTestCase): # testing user model
                               starting_time=time(8, 0),
                               ending_time=time(16, 0),
                               pushover_id=None, # doesn't matter cuz we not gona use pushover lol
-                              ) # transient/ 'initial' state
+                            ) # transient/ 'initial' state
         db.session.add(self.test_user) # transient -> pending state (flush() to emit sql command to db)
         db.session.flush() # pending -> persistent (but transaction still opened swag, session will close/ release resources after last test method runs for this test suite)
 
@@ -60,7 +61,7 @@ class TestUserRepository(BaseTestCase): # testing user model
     def test_create_new_user_failure(self):
         """ verifying a new user doesn't get created/added to db if email used already exists in db """
 
-        with self.assertRaises(RepositoryInternalError):
+        with self.assertRaises(RepositoryExistingRowError):
             self.repo.create_new_user(self.test_user.email, "6769420password")
 
      # future tests (?): password is X characters long, valid email checker?

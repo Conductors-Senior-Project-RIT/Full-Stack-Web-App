@@ -1,27 +1,18 @@
 from datetime import datetime
 from math import ceil
 from typing import Any, Generic, Optional, Type, TypeVar
-import sys
 
 from sqlalchemy import func, inspect, select, text, update
 from sqlalchemy.orm.session import Session
 
 from .db_core.models import BaseRecord, CollationMixin
+from .db_core.exceptions import RError, RepositoryErrorHandler
 from .db_core.repository import BaseRepository
-from .db_core.exceptions import (
-    RepositoryError,
-    RepositoryInternalError,
-    RepositoryNotFoundError,
-    RepositoryInvalidArgumentError,
-    repository_error_handler,
-    repository_error_translator,
-)
 
 
 # Define the type of models accepted by this class
 RecordType = TypeVar("RecordType", bound=BaseRecord)
 CollationType = TypeVar("CollationType", bound=CollationMixin)
-
 
 class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     """A database interface for train record querying.
@@ -72,7 +63,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         self.record_name = record_name
         self.record_identifier = record_identifier
 
-    @repository_error_handler()
+    @RepositoryErrorHandler.layer_error_decorator()
     def get_total_record_count(self) -> int:
         """Retrieves total number of records present in the table during a given session.
 
@@ -106,7 +97,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 Station.station_name,
                 Symbol.symb_name,
                 self.model.unit_addr,
-                self.model.verified,
+                self.model.verified
             ]
 
             # Extend to get model specific records columns
@@ -123,13 +114,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             return self.objs_to_dicts(results)
         
         except Exception as e:
-            raise repository_error_translator(
-                e, self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"Could not get record with ID = {record_id}!"
-            )
+            self._translate_and_raise(e, f"Could not get record with ID = {record_id}!")
 
-    @repository_error_handler()
+    @RepositoryErrorHandler.layer_error_decorator()
     def create_train_record(
         self, args: dict[str, Any], datetime_received: datetime
     ) -> tuple[int, bool]:
@@ -165,13 +152,14 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         # If the datetime a record was received is not passed in 'args', add 'datetime_string' into the dictionary.
         if sql_args["date_rec"] is None:
-            if datetime_received is None:
-                raise RepositoryInvalidArgumentError(
-                    self.__class__.__name__,
-                    sys._getframe().f_code.co_name,
-                    "Record timestamp must be provided!",
-                    True
-                )
+            self._validate(datetime_received is not None, RError.INVALID_ARG, "Record timestamp must be provided!", True)
+            # if datetime_received is None:
+            #     raise RepositoryInvalidArgumentError(
+            #         self.__class__.__name__,
+            #         sys._getframe().f_code.co_name,
+            #         "Record timestamp must be provided!",
+            #         True
+            #     )
 
             sql_args["date_rec"] = datetime_received
             # Indicate that a recovery request was not initiated
@@ -182,18 +170,19 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         result = self.create(sql_args, False)  # Already flushes
 
         # Should not happen if args contains items
-        if not result:
-            raise RepositoryInternalError(
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                "Could not create new train record, 0 rows created!",
-                True
-            )
+        self._validate(result is not None, RError.INTERNAL, "Could not create new train record, 0 rows created!", True)
+        # if not result:
+        #     raise RepositoryInternalError(
+        #         self.__class__.__name__,
+        #         sys._getframe().f_code.co_name,
+        #         "Could not create new train record, 0 rows created!",
+        #         True
+        #     )
 
         # The 'create' function returns a list of ORM instances, access the first index since only one record is created
         return result[0].id, recovery_request
 
-    @repository_error_handler()
+    @RepositoryErrorHandler.layer_error_decorator()
     def get_unit_record_ids(self, unit_addr: str, recent=False) -> int | list[int]:
         """Queries the database session and the model defined in the constructor
         for all record IDs matching the specified unit address, ordered ascending by ID. 
@@ -220,18 +209,23 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         )
         result = self.session.execute(stmt).scalars().all()
 
-        if not result:
-            raise RepositoryNotFoundError(
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"Could not get record ID where the unit address = {unit_addr}",
-                True
-            )
+        self._validate(
+            result is not None and len(result) > 0, 
+            RError.NOT_FOUND, 
+            f"Could not get record ID where the unit address = {unit_addr}", True
+        )
+        # if not result:
+        #     raise RepositoryNotFoundError(
+        #         self.__class__.__name__,
+        #         sys._getframe().f_code.co_name,
+        #         f"Could not get record ID where the unit address = {unit_addr}",
+        #         True
+        #     )
 
         # Since we are ordering by ascending order, the most recent record is at the end.
         return result[-1] if recent else result
 
-    @repository_error_handler()
+    @RepositoryErrorHandler.layer_error_decorator()
     def get_recent_trains(self, unit_addr: str, station_id: int, id_only: bool = True) -> list[dict]:
         """Queries the database session and the model defined in the constructor 
         for all records matching the specified unit address and station ID where the recorded date 
@@ -259,7 +253,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         results = self.session.execute(stmt).scalars().all()
         return list(results) if id_only else self.objs_to_dicts(results)
 
-    @repository_error_handler()
+    @RepositoryErrorHandler.layer_error_decorator()
     def add_new_pin(self, record_id: int, unit_addr: str) -> list[int]:
         """Sets the most recent column for a group of records with matching unit addresses.
 
@@ -293,7 +287,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         return result
 
-    @repository_error_handler()
+    @RepositoryErrorHandler.layer_error_decorator()
     def get_record_column_by_unit_addr(
         self, unit_addr: str, field_type: str, most_recent: Optional[bool] = None
     ) -> list[Any]:
@@ -313,13 +307,14 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             list[Any]: Returns a list of values from records.
         """
         # Check if the provided column actually exists in the model
-        if not hasattr(self.model, field_type):
-            raise RepositoryInvalidArgumentError(
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"Column '{field_type}' not found in {self.model.__name__}!",
-                True,
-            )
+        self._validate(hasattr(self.model, field_type), RError.INVALID_ARG, f"Column '{field_type}' not found in {self.model.__name__}!", True)
+        # if not hasattr(self.model, field_type):
+        #     raise RepositoryInvalidArgumentError(
+        #         self.__class__.__name__,
+        #         sys._getframe().f_code.co_name,
+        #         f"Column '{field_type}' not found in {self.model.__name__}!",
+        #         True,
+        #     )
 
         stmt = (
             select(getattr(self.model, field_type))
@@ -333,7 +328,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         return self.session.execute(stmt).scalars().all()
 
-    @repository_error_handler()
+    @RepositoryErrorHandler.layer_error_decorator()
     def update_signal_values(
         self, record_id: int, symbol_id: int, engine_num: int
     ) -> dict[str, Any] | None:
@@ -420,12 +415,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             return records, total_pages
 
         except Exception as e:
-            raise repository_error_translator(
-                e,
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"Error collating {self.record_identifier.upper()} records: {e}"
-            )
+            self._translate_and_raise(e, f"Error collating {self.record_identifier.upper()} records!")
 
     def verify_record(
         self, record_id: int, symbol_id: int, locomotive_num: str | None
@@ -460,12 +450,14 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             return self.update_with_pk(record_id, values)  # Already flushes
 
         except Exception as e:
-            raise repository_error_translator(
-                e,
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"Could not verify {self.record_name} {record_id}: {e}"
-            )
+            self._translate_and_raise(e, f"Could not verify {self.record_name} {record_id}")
+            
+            # raise repository_error_translator(
+            #     e,
+            #     self.__class__.__name__,
+            #     sys._getframe().f_code.co_name,
+            #     f"Could not verify {self.record_name} {record_id}: {e}"
+            # )
 
     # Time frame
     def get_records_at_station(
@@ -556,9 +548,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 .order_by(self.model.date_rec.desc())
             )
 
-            # Convert `date_rec` to a string
-            to_str = {"date_rec"} if all_cols else {}
-            results = self.objs_to_dicts(self.session.execute(stmt).all(), to_str)
+            results = self.objs_to_dicts(self.session.execute(stmt).all())
 
             # Add data type to result (used for front-end purposes)
             for result in results:
@@ -567,9 +557,11 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             return results
 
         except Exception as e:
-            raise repository_error_translator(
-                e,
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"Could not retrieve {self.record_name}s at station{f' {station_id}' if station_id != -1 else 's'}: {e}",
-            )
+            self._translate_and_raise(e, f"Could not retrieve {self.record_name}s at station{f' {station_id}' if station_id != -1 else 's'}!")
+            
+            # raise repository_error_translator(
+            #     e,
+            #     self.__class__.__name__,
+            #     sys._getframe().f_code.co_name,
+            #     f"Could not retrieve {self.record_name}s at station{f' {station_id}' if station_id != -1 else 's'}!",
+            # )

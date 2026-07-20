@@ -11,6 +11,7 @@ from backend.test.base_test_case import BaseTestCase
 
 class TestStationRepository(BaseTestCase):
     def setUp(self):
+        super().setUp()
         self.session = db.session
         self.repo = StationRepository(self.session)
         

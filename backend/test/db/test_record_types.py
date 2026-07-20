@@ -2,7 +2,6 @@ import unittest
 
 from backend.database import db
 from backend.src.db.record_types import (
-    RepositoryRecordInvalid,
     get_record_repository,
     get_all_repositories,
     has_value,
@@ -12,6 +11,7 @@ from backend.src.db.record_types import (
     EOTRecord,
     EOTCollation,
 )
+from backend.src.db.db_core.exceptions import RepositoryRecordInvalid
 from backend.test.base_test_case import BaseTestCase
 
 

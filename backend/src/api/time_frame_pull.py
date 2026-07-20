@@ -38,8 +38,8 @@ class RecentActivities(Resource):
                 match the query, an empty array is returned.
         """
         typ = request.args.get("type", default=None, type=int)
-        stat_id = request.args.get("station_id", default=-1, type=int)
-        time_range = request.args.get("timerange", default=None, type=str)
+        stat_id = request.args.get("station_id", default=None, type=int)
+        time_range = request.args.get("timerange", default="12:00:00", type=str)
         recent = request.args.get("most_recent", default=True, type=bool)
         station = request.args.get("station_name", default=None, type=str)
 

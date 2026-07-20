@@ -1,14 +1,9 @@
-import sys
 from sqlalchemy import select
 
 from .db_core.models import Symbol
 from .db_core.repository import BaseRepository
-from .db_core.exceptions import (
-    RepositoryExistingRowError,
-    RepositoryNotFoundError,
-    repository_error_translator,
-    repository_error_handler,
-)
+from .db_core.exceptions import RError as E
+from .db_core.exceptions import RepositoryErrorHandler as RHandler
 
 
 class SymbolRepository(BaseRepository):
@@ -50,24 +45,15 @@ class SymbolRepository(BaseRepository):
             result = self.session.execute(stmt).scalar_one_or_none()
 
             if not result:
-                raise RepositoryNotFoundError(
-                    self.__class__.__name__,
-                    sys._getframe().f_code.co_name,
-                    f"Symbol with ID = {id}, could not be found!",
-                    False,
-                )
+                self._raise(E.NOT_FOUND, f"Symbol with ID = {id}, could not be found!")
 
             return result
 
         except Exception as e:
-            raise repository_error_translator(
-                e,
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"Could not retrieve symbol name for ({id}): {e}",
-            )
+            self._translate_and_raise(e, f"Could not retrieve symbol name for ({id})")
+            
 
-    @repository_error_handler()
+    @RHandler.layer_error_decorator()
     def get_symbol_names(self) -> list[str]:
         """Retrieves all symbol names stored in the database.
 
@@ -101,23 +87,14 @@ class SymbolRepository(BaseRepository):
             symbol_id = self.session.execute(sql).scalar_one_or_none()
 
             if symbol_id is None:
-                raise RepositoryNotFoundError(
-                    self.__class__.__name__,
-                    sys._getframe().f_code.co_name,
-                    f"Could not find symbol with name = {symbol_name}",
-                    False,
-                )
+                self._raise(E.NOT_FOUND, f"Could not find symbol with name = {symbol_name}", False)
 
             return symbol_id
 
         # Encountered an error while retrieving
         except Exception as e:
-            raise repository_error_translator(
-                e,
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"Could not retrieve symbol ID for {symbol_name}: {e}",
-            )
+            self._translate_and_raise(e, f"Could not retrieve symbol ID for {symbol_name}")
+
 
     def insert_new_symbol(self, symbol_name: str) -> int:
         """Creates a new symbol in the database.
@@ -138,12 +115,7 @@ class SymbolRepository(BaseRepository):
             result = self.session.execute(stmt).scalar_one_or_none()
 
             if result is not None:
-                raise RepositoryExistingRowError(
-                    self.__class__.__name__,
-                    sys._getframe().f_code.co_name,
-                    f"A symbol with the name {symbol_name} already exists!",
-                    True,
-                )
+                self._raise(E.EXISTING, f"A symbol with the name {symbol_name} already exists!", True)
 
             # Attempt to insert the new symbol into the Symbols table
             new_symbol = self.model(symb_name=symbol_name)
@@ -153,9 +125,4 @@ class SymbolRepository(BaseRepository):
 
         # If an exception occurs, raise a repository layer exception
         except Exception as e:
-            raise repository_error_translator(
-                e,
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"Could not create new symbol '{symbol_name}': {e}",
-            )
+            self._translate_and_raise(e, f"Could not create new symbol '{symbol_name}'")

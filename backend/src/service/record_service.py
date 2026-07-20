@@ -1,4 +1,5 @@
 import datetime
+import sys
 from typing import Any, Optional
 import zoneinfo
 
@@ -6,12 +7,12 @@ from sqlalchemy.orm.session import Session
 
 import backend.src.db.record_types as record_types
 from ..db.record_repo import RecordRepository
-from ..service.service_core import *
+from ..service.service_core import ServiceErrorWrapper, ServiceErrorInvoker, SError
 
 # Constant for number of results per page during collation
-RESULTS_NUM = 250
+RESULTS_NUM = 100
 
-class RecordService(ServiceErrorWrapper):
+class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
     def __init__(self, session: Session, record_type: int | None):
         """A `RecordRepository` is instantiated using the provided `record_type`. Uses
         `get_record_repository` or `get_all_repositories` (if `record_type` is `None`),
@@ -40,8 +41,8 @@ class RecordService(ServiceErrorWrapper):
     def _get_first_repository(self) -> RecordRepository:
         try:
             return self.record_repo[0]
-        except IndexError:
-            raise ServiceInternalError("Could not access record repository!")
+        except IndexError as e:
+            self._raise(SError.INTERNAL, "Could not access record repository!", False, e)
 
 
     def get_train_record(self, record_id: int) -> dict[str, Any]:
@@ -157,12 +158,13 @@ class RecordService(ServiceErrorWrapper):
         
         # Try to get the most recent symbol and engine values from records with the same unit address
         symb = repo.get_record_column_by_unit_addr(unit_addr, "symbol_id", most_recent=True)
+        print(symb)
         symb = symb[-1] if len(symb) > 0 else None
             
-        engi = repo.get_record_column_by_unit_addr(unit_addr, "engine_num", most_recent=True)[-1]
-        engi = engi if len(engi) > 0 else None
+        engi = repo.get_record_column_by_unit_addr(unit_addr, "engine_num", most_recent=True)
+        engi = engi[-1] if len(engi) > 0 else None
         
-        record_id = repo.get_unit_record_ids(unit_addr, most_recent=True)
+        record_id = repo.get_unit_record_ids(unit_addr, True)
         
         # Update the record with the retrieved symbol and engine values if they exist
         repo.update_signal_values(record_id, symb, engi)
@@ -245,21 +247,20 @@ class RecordService(ServiceErrorWrapper):
             recent (bool): If True or False, only returns records based on their
                 `most_recent` flag; otherwise, returns all records within the time
                 frame.
-            station_id (int): The ID of the station to pull records from. If not
+            station_id (int): The ID of the station to pull records from. If `None` is
                 provided, `station_name` must be provided.
-            station_name (str): The name of the station to pull records from. If not
-                provided, `station_id` must be provided.
+            station_name (str): The name of the station to pull records from. If `None`
+                is provided, `station_id` must be provided.
 
         Returns:
             list[dict[str, Any]]: A list of dictionaries, each representing a record
                 within the specified time frame.
         """
-        # This is the only method that needs to access StationRepository.
-        from ..db.station_repo import StationRepository
-    
-        # Instantiate a station repository to get the station ID if only the station name is provided.
-        station_repo = StationRepository(self.session)
-    
+        # This is the only method that needs to access a StationService instance.
+        # Used to get the station ID if only the station name is provided.
+        from .station_service import StationService
+        station_service = StationService(self.session)
+
         # The time range is provided as a string in the format "HH:MM:SS"
         # Construct a timedelta object to calculate the time range relative to the current time
         time_increments = time_range.split(":")
@@ -271,30 +272,75 @@ class RecordService(ServiceErrorWrapper):
         timeframe = self.get_current_time_est() - delta
         
         # If the station ID is not provided, attempt to get the station ID from its station name.
-        if station_id < 1:
-            if station_name:
-                station_id = station_repo.get_station_id(station_name)
+        if station_id is None:
+            if station_name is not None:
+                retrieved_id = station_service.get_station_id(station_name)
             else:
-                raise ServiceInvalidArgument(
-                    self.__class__.__name__,
-                    message="Did not provide station name or ID!",
-                    show_error=True
-                )
-            
-        # Should never occur, but to be safe..
-        if len(self.record_repo) < 1:
-            raise ServiceInternalError("Could not find valid record access!")
+                self._raise(SError.INVALID_ARG, "Did not provide station name or ID!", True)
+                
+        # Otherwise, ensure that the station ID is a positive integer.
+        else:
+            if station_id < 1:
+                self._raise(SError.INVALID_ARG, f"Station ID must be a positive integer, provided: {station_id}", True)
+            retrieved_id = station_id
 
         # Query each repository for records at a station within the time frame
-        results = []
+        return self.get_records_from_station(retrieved_id, recent, timeframe)
+    
+    
+    def get_records_from_station(
+        self, 
+        station_id: int, 
+        recent: Optional[bool] = None, 
+        timeframe: datetime = None,
+        all_cols: bool = False,
+        separate_results: bool = False
+    ) -> list[dict[str, Any]]:
+        """Pulls all records that have been recorded at a station.
+
+        The resulting records will be sorted in descending order by the date they were
+        received. This method queries record repositories for each record type, and will
+        query a `StationService` if the station ID is not provided.
+
+        Args:
+            station_id (int): The ID of the station to pull records from.
+            recent (bool): If True or False, only returns records based on their
+                `most_recent` flag; otherwise, returns all records within the time
+                frame.
+            all_cols (bool): If True, returns all columns for each record; otherwise, 
+                returns only the specified columns (defined in db.record_repo.get_records_at_station).
+        """
+        # Should never occur, but to be safe..
+        if len(self.record_repo) < 1:
+            self._raise(SError.INTERNAL, "Could not find valid record access!", False)
+
+        # Query each repository for records at a station within the time frame
+        results = {}
         for repo in self.record_repo:
-            repo_resp = repo.get_records_at_station(station_id, timeframe, recent)
-            results.extend(repo_resp)
+            results[repo.record_identifier] = repo.get_records_at_station(station_id, timeframe, recent, all_cols)
+    
+        # If results should be combined, merge all results into a single list and sort by date received
+        if not separate_results:
+            # Combine all results into a single list
+            combined_results = []
+            for repo_results in results.values():
+                combined_results.extend(repo_results)
+            
+            # Sort the results in descending order by the date they were received
+            combined_results.sort(key=lambda x: x["date_rec"], reverse=True)
+            
+            # Convert `date_rec` to a string for JSON serialization
+            for row in combined_results:
+                row["date_rec"] = str(row["date_rec"])
         
-        # Sort the results in descending order by the date they were received
-        results.sort(key=lambda x: x["date_rec"], reverse=True)
-        for row in results:
-            row["date_rec"] = str(row["date_rec"])
+            return combined_results
+        
+        # Otherwise, return the results as a dictionary with separate lists for each record type
+        for repo_results in results.values():
+            # Convert `date_rec` to a string for JSON serialization
+            for row in repo_results:
+                row["date_rec"] = str(row["date_rec"])
+                
         return results
 
     
