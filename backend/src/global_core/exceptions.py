@@ -97,7 +97,7 @@ class LayerError(Exception):
 
 class ErrorHandlingConfig:
     """Configuration class for layer error handling."""
-    error_map: dict = {}  # Default ignores translation
+    error_map: ErrorMapping = {}  # Default ignores translation
     base_exception: Type[LayerError] = LayerError  # Default translates all exceptions to LayerError
     exclude: ExceptionType = LayerError  # Any LayerErrors raised will be ignored
 

@@ -24,18 +24,17 @@ class Base(db.Model):
     """Defines the ORM base in which all models extend.
 
     All classes that extend this class will contain useful functions such as `_asdict`
-    and `copy` (see function docs for further information).
-    
-    This model is abstract and cannot be instantiated.
-
-    Args:
-        db (Model): Inherits a declarative base, which is created by SQLAlchemy after a
-            Flask app has been created and connected to the database.
+    and `copy` (see method docs for further information). It is important to note that
+    this class inherits a declarative base, which is created by SQLAlchemy after a Flask 
+    app has been created and connected to the database.
+            
+    *Note:*
+        This model is abstract and cannot be instantiated.
     """
     __abstract__ = True
 
     def __init__(self, **kwargs):
-        """A `Model` instance can be constructed by passing in a set of `kwargs`."""
+        """An instance can be constructed by passing in a set of `kwargs`."""
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -43,7 +42,7 @@ class Base(db.Model):
         """Returns a model instance as a dictionary representation.
         
         Returns:
-            dict: Dictionary of column and value pairs.
+            (dict): Dictionary of column and value pairs.
         """
         mapper = inspect(self.__class__)
         return {col.key: getattr(self, col.key) for col in mapper.columns}
@@ -52,7 +51,7 @@ class Base(db.Model):
         """Calculates the hash of an instance.
 
         Returns:
-            int: This instance's hash.
+            (int): This instance's hash.
         """
         return hash(tuple(sorted(self._asdict().items())))
 
@@ -63,7 +62,7 @@ class Base(db.Model):
             other (Any): An instance to compare with.
 
         Returns:
-            bool: True if this instance is equal to another; otherwise, false.
+            (bool): True if this instance is equal to another; otherwise, false.
         """
         if self is other:
             return True
@@ -80,12 +79,15 @@ class Base(db.Model):
         """Creates a copy of an instance as a new instance.
 
         Returns:
-            Self: A copy of this instance.
+            (Self): A copy of this instance.
         """
         return self.__class__(**self._asdict())
 
 
 class Station(Base):
+    """Defines the model for the `stations` table, which contains the stations that send signal
+    data to the server."""
+    
     __tablename__ = "stations"
     __table_args__ = {"extend_existing": True}
 
@@ -104,6 +106,8 @@ class Station(Base):
 
 
 class User(Base):
+    """Defines the model for the `users` table, which contains the users of the application."""
+    
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -131,6 +135,9 @@ class User(Base):
 
 
 class ResetRequest(Base):
+    """Defines the model for the `reset_requests` table, which contains the password reset requests 
+    for users."""
+    
     __tablename__ = "reset_requests"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -142,6 +149,8 @@ class ResetRequest(Base):
 
 
 class Symbol(Base):
+    """Defines the model for the `symbols` table, which contains the symbols of trains."""
+    
     __tablename__ = "symbols"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -149,6 +158,7 @@ class Symbol(Base):
 
 
 class EngineNumber(Base):
+    """Defines the model for the `engine_numbers` table, which contains the engine numbers of trains."""
     __tablename__ = "engine_numbers"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -156,6 +166,11 @@ class EngineNumber(Base):
 
 
 class BaseRecord(AbstractConcreteBase, Base):
+    """An abstract model that defines the mapped attributes and relationships shared 
+    by `EOTRecord`, `HOTRecord`, and the future `DPURecord`. This model is used to represent 
+    the rows in each of the record tables.
+    """
+    
     id: Mapped[int] = mapped_column(primary_key=True)
     date_rec: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
     unit_addr: Mapped[str] = mapped_column(String(240), default="unknown", server_default="unknown")
@@ -202,6 +217,9 @@ class BaseRecord(AbstractConcreteBase, Base):
         raise NotImplementedError()
 
 class CollationMixin:
+    """Provides the mapped columns shared by `EOTCollation`, `HOTCollation`, and the future 
+    `DPUCollation`. This mixin provides mappings for the results from the collation views."""
+    
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     date_rec: Mapped[datetime] = mapped_column(TIMESTAMP)
     station_name: Mapped[str] = mapped_column(String)
@@ -217,6 +235,8 @@ class CollationMixin:
 
 
 class EOTMixin:
+    """Provides mappings for any EOT-specific columns."""
+    
     brake_pressure: Mapped[str] = mapped_column(String(240), default="unknown", server_default="unknown")
     motion: Mapped[str] = mapped_column(String(240), default="unknown", server_default="unknown")
     marker_light: Mapped[str] = mapped_column(String(240), default="unknown", server_default="unknown")
@@ -227,6 +247,9 @@ class EOTMixin:
 
 
 class EOTRecord(EOTMixin, BaseRecord):
+    """Defines the model for the `eotrecords` table, which contains the EOT records received 
+    from the stations."""
+    
     __tablename__ = "eotrecords"
     __table_args__ = {"extend_existing": True}
     __mapper_args__ = {"polymorphic_identity": "eot", "concrete": True}
@@ -254,13 +277,16 @@ class EOTRecord(EOTMixin, BaseRecord):
 
 
 class EOTCollation(EOTMixin, CollationMixin, Base):
-    __tablename__ = "eotcollation"
+    """Defines the mapped columns for the results of a collation of EOT records from the 
+    `eotcollation` view."""
     __table_args__ = {"info": {"is_view": True}}
     
     total_count: Mapped[int] = mapped_column(Integer)
 
 
 class HOTMixin:
+    """Provides mappings for any HOT-specific columns."""
+    
     frame_sync: Mapped[str] = mapped_column(String(240), default="unknown", server_default="unknown")
     command: Mapped[str] = mapped_column(String(240), default="unknown", server_default="unknown")
     checkbits: Mapped[str] = mapped_column(String(240), default="unknown", server_default="unknown")
@@ -268,6 +294,8 @@ class HOTMixin:
 
 
 class HOTCollation(HOTMixin, CollationMixin, Base):
+    """Defines the mapped columns for the results of a collation of HOT records from the 
+    `hotcollation` view."""
     __tablename__ = "hotcollation"
     __table_args__ = {"info": {"is_view": True}}
     
@@ -275,6 +303,9 @@ class HOTCollation(HOTMixin, CollationMixin, Base):
 
 
 class HOTRecord(HOTMixin, BaseRecord):
+    """Defines the model for the `hotrecords` table, which contains the HOT records received 
+    from the stations."""
+    
     __tablename__ = "hotrecords"
     __table_args__ = {"extend_existing": True}
     __mapper_args__ = {"polymorphic_identity": "hot", "concrete": True}
@@ -293,6 +324,10 @@ class HOTRecord(HOTMixin, BaseRecord):
 
 
 class NotificationConfig(Base):
+    """Defines the model for the `notificationconfig` table, which contains the notification
+    configuration for each station. This table is used to determine which users should be
+    notified of events at each station."""
+    
     __tablename__ = "notificationconfig"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -303,6 +338,8 @@ class NotificationConfig(Base):
 
 
 class Pin(Base):
+    """Defines the model for the `pins` table."""
+    
     __tablename__ = "pins"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -318,6 +355,10 @@ class Pin(Base):
 
 
 class UserPreference(Base):
+    """Defines the model for the `userpreferences` table, which contains the user preferences for
+    each user. This table is used to determine which stations a user is interested in receiving 
+    notifications for."""
+    
     __tablename__ = "userpreferences"
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)

@@ -1,7 +1,7 @@
 # Repository Overview
 This layer aims to provide an interface for direct database access. This layer utilizes SQLAlchemy’s Object Relational Mapping (ORM) library to provide a robust system for mapping Python model objects to database tables (see [ORM Models](#orm-models)). We utilize SQLAlchemy’s query construction interface to perform operations on pre-defined models that track the changes made in a database session. Another benefit of ORMs is that they reduce the refactoring effort required when switching database technologies by abstracting query construction, generating and executing service-specific SQL from model definitions at runtime. 
 
-As previously mentioned, changes can either be committed to the database if successful or rolled back in the case of an error, offering an effective way to properly manage client-server transactions. However, this layer should only be responsible for flushing its changes to the session; the [**API**](api.md) layer should be the final decider on whether changes should be reverted or persisted to the database. When a repository method is successful and that method's query returns a model or `Row`, that data is converted to a dictionary representation for consistency, abstracting away model details from the layer above. 
+As previously mentioned, changes can either be committed to the database if successful or rolled back in the case of an error, offering an effective way to properly manage client-server transactions. However, this layer should only be responsible for flushing its changes to the session; the [**API**](api.md) layer should be the final decider on whether changes should be reverted or persisted to the database. When a repository method is successful and that method's query returns a model or `Row`, that data is converted to a dictionary representation for consistency, removing additional coupling with the layer above. 
 
 
 ![Repository-Diagram](../diagrams/repository.png)
@@ -40,7 +40,30 @@ Provides the mapped columns for type-specific columns. Used in both the respecti
 
 # Error Handling
 
-This layer defines three function definitions that override the standard error handling functionality defined in `global_core.exceptions`, which work specifically for the **Repository** layer. Each function is defined within `db_core.exceptions`, and all utilize the same error map: [`REPOSITORY_ERROR_MAP`](#repository-error-mapping), which is also defined in the same file.
+This layer defines a collection of [`RepositoryError`](#error-types) exceptions that should be used when handling errors raised by *SQLAlchemy* and *psycopg2*. Each class is stored as a reference in [`RError`](#error-types), enabling faster and more flexible development. Exceptions within this layer are handled by the [`RepositoryErrorHandler`](#repository_error_handler)—an extension of `LayerErrorHandler`—which utilizes the error map defined in this layer: [`REPOSITORY_ERROR_MAP`](#repository-error-mapping).
+
+## `RepositoryErrorHandler`
+
+**Module**:
+`db.db_core.exceptions`
+
+### Properties
+| Name | Type | Default |
+|------|------|-------------|
+| *error_map* | [`ErrorMapping`](errors.md#type-definitions-used) | [`REPOSITORY_ERROR_MAP`](#repository-error-mapping) |
+| *base_exception* |[`LayerError`](#layererror) (*class*) | [`RepositoryInternalError`](#error-types) |
+| *exclude* | [`ExceptionType`](errors.md#type-definitions-used) | [`RepositoryError`](#error-types) |
+
+### Location
+
+
+### Extends
+`LayerErrorHandler`
+
+
+
+
+
 
 ## `wrap_repository_error_handler`
 Used to wrap a function with repository-specific error handling logic.
@@ -120,17 +143,17 @@ Decorator used to provide error translation for exceptions thrown in this layer.
 ## Error Types
 Below are the following exceptions that can be raised by any of the methods in this layer.
 
-| Name | Description |
-|------|-------------|
-| `RepositoryError` | Parent class for all errors in this layer. |
-| `RepositorySessionError` | An error occurs with a session in the repository, or is not provided during the instantiation of a repository. |
-| `RepositoryConnectionError` | Connection interruptions, timeouts, etc. |
-| `RepositoryParsingError` | Value parsing, indexing issues, or problem constructing a valid query. |
-| `RepositoryNotFoundError` | Resource is not found such as a non-existing database row. |
-| `RepositoryExistingRowError` | New resource requests to be created but conflicts with an existing one. |
-| `RepositoryInvalidArgumentError` | Invalid argument is provided. |
-| `RepositoryRecordInvalid` | Invalid record type is provided to [`get_record_repository`](#get_record_repository). |
-| `RepositoryInternalError` | An unknown exception raised in the layer. |
+| Name | Description | `RError` |
+|------|-------------|----------|
+| `RepositoryError` | Parent class for all errors in this layer. | N/A |
+| `RepositorySessionError` | An error occurs with a session in the repository, or is not provided during the instantiation of a repository. | `SESSION` |
+| `RepositoryConnectionError` | Connection interruptions, timeouts, etc. | `CONNECTION` |
+| `RepositoryParsingError` | Value parsing, indexing issues, or problem constructing a valid query. | `PARSING` |
+| `RepositoryNotFoundError` | Resource is not found such as a non-existing database row. | `NOT_FOUND` |
+| `RepositoryExistingRowError` | New resource requests to be created but conflicts with an existing one. | `EXISTING` |
+| `RepositoryInvalidArgumentError` | Invalid argument is provided. | `INVALID_ARG` |
+| `RepositoryRecordInvalid` | Invalid record type is provided to [`get_record_repository`](#get_record_repository). | `INVALID_RECORD` |
+| `RepositoryInternalError` | An unknown exception raised in the layer. | `INTERNAL` |
 
 ## Repository Error Mapping
 All *SQLAlchemy*, *psycopg2*, and *Python* exceptions are caught by the error handling logic in `db_core.exceptions`. All error messages are set to be shown, it is the responsibility of the layers above to hide the messages or not. Below are the current mappings present in the application, which can be extended or changed in the future.

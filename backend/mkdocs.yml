@@ -1,0 +1,20 @@
+site_name: Tracksense Backend Documentation
+theme:
+  name: "material"
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            relative_crossrefs: true
+  - autorefs
+markdown_extensions:
+  - attr_list
+nav:
+  - Home: index.md
+  - Repository:
+    - Overview: repository/overview.md
+    - Core:
+      - Exceptions: repository/core/exceptions.md
+      - Models: repository/core/models.md
+      - Repository: repository/core/repository.md
