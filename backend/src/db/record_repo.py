@@ -1,14 +1,13 @@
 from datetime import datetime
 from math import ceil
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 from sqlalchemy import func, inspect, select, text, update
 from sqlalchemy.orm.session import Session
 
+from .db_core.exceptions import RepositoryErrorHandler, RError
 from .db_core.models import BaseRecord, CollationMixin
-from .db_core.exceptions import RError, RepositoryErrorHandler
 from .db_core.repository import BaseRepository
-
 
 # Define the type of models accepted by this class
 RecordType = TypeVar("RecordType", bound=BaseRecord)
@@ -17,38 +16,47 @@ CollationType = TypeVar("CollationType", bound=CollationMixin)
 class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     """A database interface for train record querying.
 
-    This class inherits the generic CRUD functionality defined in `BaseRepository` that
-    may be useful for simple operations. This class contains concrete methods which
-    execute standardized functionality using the model defined in an instance,
-    restricted only to models that extend `BaseRecord`. The results are
-    defined by the `BaseRecord` and `CollationMixin` models.
+    This class inherits the generic CRUD functionality defined in 
+    [`BaseRepository`][...db_core.repository.BaseRepository], which is 
+    useful for simple operations. It contains concrete methods which execute 
+    standardized functionality using the model defined in an instance, 
+    restricted only to models that extend [`BaseRecord`][...db_core.models.BaseRecord].
 
-    Args:
-        BaseRepository (RecordType): Inherits the methods present in `BaseRepository`
-            which operate on `BaseRecord` models.
-        Generic (RecordType): Defines a generic type in which the repository instance
-            uses. Bound to models that extend `BaseRecord`.
+    This class is generic over [`RecordType`][types-record], which must be bound to models 
+    that extend [`BaseRecord`][...db_core.models.BaseRecord].
     """
 
     def __init__(
         self,
-        model: Type[BaseRecord],
-        collation: Type[CollationMixin],
+        model: type[BaseRecord],
+        collation: type[CollationMixin],
         session: Session,
         record_name: str = "Unknown",
         record_identifier: str = "Unknown",
     ):
         """Constructor for a repository that interacts with various kinds of train records.
 
-        See `record_types` for factory method implementations.
+        Both the `model` and `collation` parameters must be assigned to classes that extend 
+        [`BaseRecord`][....db_core.models.BaseRecord] and [`CollationMixin`][....db_core.models.CollationMixin], 
+        respectively. It is also important to note that the `session` passed in is typically a 
+        `scoped_session` (see SQLAlchemy docs) created by *Flask*. All methods that make changes 
+        to the database are flushed in the session. It is the responsibility of the higher layers 
+        to commit these changes upon success.
+        
+        Additionally, both the `record_name` and `record_identifier` are used in some of
+        the queries. To get an idea of what they are used for, see 
+        [`get_records_at_station`][..get_records_at_station].
+
+        See [`record_types`][....record_types] for factory method implementations.
 
         Args:
             model (BaseRecord): An ORM class that defines what database table to
                 perform queries on and map results to. Only models that extend
-                `BaseRecord` are permitted.
+                [`BaseRecord`][....db_core.models.BaseRecord] are permitted.
             collation (CollationMixin): An ORM model that defines the attributes
-                of the results returned by `get_record_collation`. Only models that
-                extend `CollationMixin` are permitted.
+                of the results returned by [`get_record_collation`][..get_record_collation].
+                Only models that extend [`CollationMixin`][....db_core.models.CollationMixin] 
+                are permitted.
             session (Session): Specifies the database session the repository operates
                 in. All functions in this class flushes all changes to the session. It
                 is the job of higher layers to commit or rollback any changes.
@@ -65,10 +73,10 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
     @RepositoryErrorHandler.layer_error_decorator()
     def get_total_record_count(self) -> int:
-        """Retrieves total number of records present in the table during a given session.
+        """Retrieves total number of records present in the table for a given session.
 
         Returns:
-            int: Number of records present in the provided table defined by `model`.
+            (int): Number of records present in the provided table defined by `model`.
         """
         return self.session.query(func.count(self.model.id)).scalar()
 
@@ -76,13 +84,13 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     def get_train_history(self, record_id: int) -> dict[str, Any]:
         """Returns a train record with the following columns: `id, date_rec, station_name,
         symb_name, unit_addr, verified` and the columns defined in a concrete model's
-        `get_unique_fields` method.
+        [`get_unique_fields`][src.db.db_core.models.BaseRecord.get_unique_fields] method.
 
         Args:
             record_id (int): A value corresponding to a record's primary key.
 
         Returns:
-            dict[str, Any]: Returns a dictionary containing the fields and corresponding
+            (dict[str, Any]): Returns a dictionary containing the fields and corresponding
                 values for a train record.
         """
         from .db_core.models import Station, Symbol
@@ -124,11 +132,11 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         When an error occurs during the initial creation of a record, a recovery request
         can be sent. When a recovery request is sent, the datetime must be passed as a
-        parameter; otherwise, a `RepositoryInvalidArgumentError` is raised. In order to
-        successfully create a new train record, the keys and values in the dictionary
-        must include all non-nullable columns and correct value types with that of the
-        model to prevent an `IntegrityError` occurring. Keys not present in the model
-        are ignored.
+        parameter; otherwise, a [`RepositoryInvalidArgumentError`][error-types] 
+        is raised. In order to successfully create a new train record, the keys and values 
+        in the dictionary must include all non-nullable columns and correct value types with 
+        that of the model to prevent an `IntegrityError` occurring. Keys not present in the 
+        model are ignored.
 
         Args:
             args (dict[str, Any]): A dictionary containing values to insert into a new
@@ -136,7 +144,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             datetime_received (datetime): The datetime when the record was received.
 
         Returns:
-            tuple[int, bool]: The id of the newly created record, and whether a recovery
+            (tuple[int, bool]): The id of the newly created record, and whether a recovery
                 request was initiated.
         """
         recovery_request = True
@@ -152,14 +160,12 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         # If the datetime a record was received is not passed in 'args', add 'datetime_string' into the dictionary.
         if sql_args["date_rec"] is None:
-            self._validate(datetime_received is not None, RError.INVALID_ARG, "Record timestamp must be provided!", True)
-            # if datetime_received is None:
-            #     raise RepositoryInvalidArgumentError(
-            #         self.__class__.__name__,
-            #         sys._getframe().f_code.co_name,
-            #         "Record timestamp must be provided!",
-            #         True
-            #     )
+            self._validate(
+                condition=datetime_received is not None, 
+                error_class=RError.INVALID_ARG, 
+                message="Record timestamp must be provided!", 
+                show_error=True
+            )
 
             sql_args["date_rec"] = datetime_received
             # Indicate that a recovery request was not initiated
@@ -170,14 +176,12 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         result = self.create(sql_args, False)  # Already flushes
 
         # Should not happen if args contains items
-        self._validate(result is not None, RError.INTERNAL, "Could not create new train record, 0 rows created!", True)
-        # if not result:
-        #     raise RepositoryInternalError(
-        #         self.__class__.__name__,
-        #         sys._getframe().f_code.co_name,
-        #         "Could not create new train record, 0 rows created!",
-        #         True
-        #     )
+        self._validate(
+            condition=result is not None, 
+            error_class=RError.INTERNAL, 
+            message="Could not create new train record, 0 rows created!", 
+            show_error=True
+        )
 
         # The 'create' function returns a list of ORM instances, access the first index since only one record is created
         return result[0].id, recovery_request
@@ -186,7 +190,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     def get_unit_record_ids(self, unit_addr: str, recent=False) -> int | list[int]:
         """Queries the database session and the model defined in the constructor
         for all record IDs matching the specified unit address, ordered ascending by ID. 
-        Optionally returns only the most recent (highest) ID.
+        Optionally returns only the most recent (greatest) ID.
 
         Args:
             unit_addr (str): The unit address used to filter records.
@@ -194,11 +198,11 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 False.
 
         Returns:
-            int | list[int]: A single integer ID if `recent=True`, or a list of all
+            (int | list[int]): A single integer ID if `recent=True`, or a list of all
                 matching integer IDs if `recent=False`.
 
         Raises:
-            `RepositoryNotFoundError`: If no records are found for the given
+            RepositoryNotFoundError: If no records are found for the given
                     `unit_addr`.
         """
 
@@ -210,20 +214,15 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         result = self.session.execute(stmt).scalars().all()
 
         self._validate(
-            result is not None and len(result) > 0, 
-            RError.NOT_FOUND, 
-            f"Could not get record ID where the unit address = {unit_addr}", True
+            condition=result is not None and len(result) > 0, 
+            error_class=RError.NOT_FOUND, 
+            message=f"Failed to get record ID where the unit address = {unit_addr}", 
+            show_error=True
         )
-        # if not result:
-        #     raise RepositoryNotFoundError(
-        #         self.__class__.__name__,
-        #         sys._getframe().f_code.co_name,
-        #         f"Could not get record ID where the unit address = {unit_addr}",
-        #         True
-        #     )
 
         # Since we are ordering by ascending order, the most recent record is at the end.
         return result[-1] if recent else result
+
 
     @RepositoryErrorHandler.layer_error_decorator()
     def get_recent_trains(self, unit_addr: str, station_id: int, id_only: bool = True) -> list[dict]:
@@ -237,7 +236,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             id_only (bool): If True, returns only the IDs of the matching records. Defaults to False.
 
         Returns:
-            list[dict]: A list of matching train records as dictionaries. Returns an
+            (list[dict]): A list of matching train records as dictionaries. Returns an
                 empty list if no records are found.
         """
         # Select only IDs if specified, otherwise select all columns to return as dictionaries
@@ -253,12 +252,11 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         results = self.session.execute(stmt).scalars().all()
         return list(results) if id_only else self.objs_to_dicts(results)
 
+
     @RepositoryErrorHandler.layer_error_decorator()
     def add_new_pin(self, record_id: int, unit_addr: str) -> list[int]:
-        """Sets the most recent column for a group of records with matching unit addresses.
-
-        Sets `most_recent` to false for all most recent records with matching unit
-        addresses with distinct IDs.
+        """Sets `most_recent` to false for all most recent records with matching unit
+        addresses and IDs not matching `record_id`.
 
         Args:
             record_id (int): The record ID that is excluded from update.
@@ -291,7 +289,8 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     def get_record_column_by_unit_addr(
         self, unit_addr: str, field_type: str, most_recent: Optional[bool] = None
     ) -> list[Any]:
-        """Gets the values for each record with matching unit addresses for a given field.
+        """Gets the values for each record with matching unit addresses for a given 
+        column name.
 
         Args:
             unit_addr (str): The unit address used to filter records.
@@ -300,21 +299,19 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 None, all records will be scanned. Defaults to None.
 
         Raises:
-            `RepositoryInvalidArgumentError`: Raised if the model does not contain the
+            RepositoryInvalidArgumentError: Raised if the model does not contain the
                     provided field.
 
         Returns:
-            list[Any]: Returns a list of values from records.
+            (list[Any]): Returns a list of values from records.
         """
         # Check if the provided column actually exists in the model
-        self._validate(hasattr(self.model, field_type), RError.INVALID_ARG, f"Column '{field_type}' not found in {self.model.__name__}!", True)
-        # if not hasattr(self.model, field_type):
-        #     raise RepositoryInvalidArgumentError(
-        #         self.__class__.__name__,
-        #         sys._getframe().f_code.co_name,
-        #         f"Column '{field_type}' not found in {self.model.__name__}!",
-        #         True,
-        #     )
+        self._validate(
+            condition=hasattr(self.model, field_type), 
+            error_class=RError.INVALID_ARG, 
+            message=f"Column '{field_type}' not found in {self.model.__name__}!", 
+            show_error=True
+        )
 
         stmt = (
             select(getattr(self.model, field_type))
@@ -322,7 +319,6 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             .order_by(self.model.id.asc())
         )
 
-        # Add the "where" component if looking for specific value
         if most_recent is not None:
             stmt = stmt.where(self.model.most_recent == most_recent)
 
@@ -343,7 +339,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             engine_num (int): The new engine number value.
 
         Returns:
-            dict[str, Any] | None: Returns a dictionary containing the newly updated
+            (dict[str, Any] | None): Returns a dictionary containing the newly updated
                 values. Returns None if no updates were made in the session.
         """
 
@@ -354,6 +350,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             values["engine_num"] = engine_num
 
         return self.update_with_pk(record_id, values)  # Already flushes
+
 
     def get_record_collation(
         self, page: int, num_results: int, verified: Optional[bool] = None
@@ -367,12 +364,12 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         record per group along with aggregate information such as `first_seen`,
         `last_seen`, `occurrence_count`, and `duration`. The total count of grouped
         records for pagination is appended to each collation result and can be accessed
-        via `total_count` (see the collation ORMs in `db_core.models` for more details).
-        Optionally filters results by verification status if provided.
+        via `total_count` (see the collation ORMs in [`db_core.models`][....db_core.models.CollationMixin] 
+        for more details). Optionally filters results by verification status if provided.
 
         This function uses collation views to query results which should already be
         added to the Tracksense PostgreSQL database server. However, it can be found in
-        `backend/table.sql` if it is removed for any reason.
+        `backend/test/table.sql` if it is removed for any reason.
 
         Args:
             page (int): The page number (offset) to retrieve, 1-indexed.
@@ -381,12 +378,13 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 `verified` status. If None, no filter is applied. Defaults to None.
 
         Returns:
-            tuple[list[dict], int]: A tuple containing: 
-                - list: The paginated and collated train records as dictionaries. 
-                - int: The total number of pages based on `num_results`.
+            [tuple[list[dict], int]]: A tuple containing: 
+                
+                - `list`: The paginated and collated train records as dictionaries. 
+                - `int`: The total number of pages based on `num_results`.
 
         Raises:
-            `RepositoryError`: If any stage of the query, count, or result parsing
+            RepositoryError: If any stage of the query, count, or result parsing
                     fails.
         """
         try:
@@ -417,6 +415,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         except Exception as e:
             self._translate_and_raise(e, f"Error collating {self.record_identifier.upper()} records!")
 
+
     def verify_record(
         self, record_id: int, symbol_id: int, locomotive_num: str | None
     ) -> dict[str, Any] | None:
@@ -424,8 +423,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         status.
 
         Sets `verified` to True on the specified record along with the provided
-        `symbol_id` and `locomotive_num` values. Uses `update_with_pk` in
-        `BaseRepository` to flush changes to the session.
+        `symbol_id` and `locomotive_num` values. Uses 
+        [`update_with_pk`][src.db.db_core.repository.BaseRepository.update_with_pk] to flush 
+        changes to the session.
 
         Args:
             record_id (int): The ID of the record to verify.
@@ -433,11 +433,11 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
             locomotive_num (str | None): The updated locomotive number of the record.
 
         Returns:
-            dict[str, Any]: The updated record as a dictionary representation. None, if
+            (dict[str, Any]): The updated record as a dictionary representation. None, if
                 no updates were made in the session.
 
         Raises:
-            `RepositoryError`: If an exception occurs for any reason.
+            RepositoryError: If an exception occurs for any reason.
         """
         try:
             values = {"verified": True}
@@ -451,13 +451,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         except Exception as e:
             self._translate_and_raise(e, f"Could not verify {self.record_name} {record_id}")
-            
-            # raise repository_error_translator(
-            #     e,
-            #     self.__class__.__name__,
-            #     sys._getframe().f_code.co_name,
-            #     f"Could not verify {self.record_name} {record_id}: {e}"
-            # )
+
 
     # Time frame
     def get_records_at_station(
@@ -481,9 +475,9 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         otherwise, every column in a record is retrieved, including the corresponding
         `symb_name` and `station_name`.
 
-        Joins with `Station` and `Symbol` to include the station and symbol name references 
-        in the returned records. A record's `Data_type` field, which is derived from a 
-        repository's `record_identifier`, is appended to each result.
+        Joins with [`Station`][....db_core.models.Station] and [`Symbol`][....db_core.models.Symbol] 
+        to include the station and symbol name references in the returned records. A record's `Data_type` 
+        field, which is derived from a repository's `record_identifier`, is appended to each result.
 
         Args:
             station_id (int, optional): The station ID to filter records by. Pass -1 to
@@ -496,17 +490,17 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
                 otherwise, only a portion are returned. Defaults to False.
 
         Returns:
-            list[dict[str, Any]]: A list of matching records as dictionaries, each
+            (list[dict[str, Any]]): A list of matching records as dictionaries, each
                 containing `id`, `unit_addr`, `date_rec`, `station_name`, `symb_name`,
                 `engine_num`, `locomotive_num`, and `Data_type`. Returns an empty list
                 if no records are found.
 
         Raises:
-            `RepositoryError`: If an exception is raised for any reason.
+            RepositoryError: If an exception is raised for any reason.
         """
         # We need to query from two different tables, so import them in the function
         # to prevent unecessarily flooding the namespace or circular imports.
-        from .db_core.models import Symbol, Station
+        from .db_core.models import Station, Symbol
 
         try:
             # Station name and symbol name always included
@@ -558,10 +552,3 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
 
         except Exception as e:
             self._translate_and_raise(e, f"Could not retrieve {self.record_name}s at station{f' {station_id}' if station_id != -1 else 's'}!")
-            
-            # raise repository_error_translator(
-            #     e,
-            #     self.__class__.__name__,
-            #     sys._getframe().f_code.co_name,
-            #     f"Could not retrieve {self.record_name}s at station{f' {station_id}' if station_id != -1 else 's'}!",
-            # )

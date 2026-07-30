@@ -18,3 +18,9 @@ nav:
       - Exceptions: repository/core/exceptions.md
       - Models: repository/core/models.md
       - Repository: repository/core/repository.md
+    - Record Repository: repository/record_repo.md
+    - Record Types: repository/record_types.md
+    - Station Repository: repository/station_repo.md
+    - Symbol Repository: repository/symbol_repo.md
+    - User Repository: repository/user_repo.md
+  - Error Handling: error/docs.md

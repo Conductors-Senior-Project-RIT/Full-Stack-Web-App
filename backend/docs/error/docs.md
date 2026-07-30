@@ -1,0 +1,7 @@
+One of our goals for the refactoring process was to construct a standardized error handling system that would propagate exceptions through the chain of layers. Such a system will allow future developers to easily attach error handling to new features, expose only necessary details of lower-level exceptions in production environments, permit full error traceability in development environments, and group similar errors into generalized layer exceptions. 
+
+To achieve this, we incorporate Python’s function decorators to wrap class methods across the layers with an error translation mechanism. Any exceptions raised in a decorated function would immediately be mapped to a layer-specific error through translation. When an exception moves from the [**Service**](../service/overview.md) layer to the [**API**](../api/overview.md), the response receives a status code and an error message that is either generalized or specific, depending on the exception provided and the Flask environment that was created.
+
+The code for the error handling is located in the `db_core.exceptions` module, and can be used in any of the layers. The [**API**](api.md) layer uses the error handlers provided by *Flask*, but the [**Service**](../service/exceptions.md) and [**Repository**](../repository/core/exceptions.md) layers utilize the error handling logic described here.
+
+::: src.global_core

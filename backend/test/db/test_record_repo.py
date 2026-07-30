@@ -7,7 +7,7 @@ import zoneinfo
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from backend.src.db.record_types import get_record_repository
+from backend.src.db.record_types import RecordFactory
 from backend.src.db.record_repo import RecordRepository
 from backend.src.db.db_core.exceptions import (
     RepositoryError,
@@ -375,7 +375,7 @@ class TestEOTRepository(BaseTestCase, RecordRepositoryTestMixin):
 
     def setUp(self):
         super().setUp()
-        self.repo = get_record_repository(self.session, 1)
+        self.repo = RecordFactory().get_record_repository(self.session, 1)
         self.test_data = [self.repo.get(i) for i in range(1, TEST_RECORD_COUNT + 1)]
 
 
@@ -384,7 +384,7 @@ class TestHOTRepository(BaseTestCase, RecordRepositoryTestMixin):
 
     def setUp(self):
         super().setUp()
-        self.repo = get_record_repository(self.session, 2)
+        self.repo = RecordFactory().get_record_repository(self.session, 2)
         self.test_data = [self.repo.get(i) for i in range(1, TEST_RECORD_COUNT + 1)]
 
 

@@ -14,7 +14,7 @@ Below are the following exceptions that can be raised by any of the methods in t
 | `RepositoryInternalError` | An unknown exception raised in the layer. | `INTERNAL` |
 
 ## Repository Error Mapping {#error-mapping}
-All *SQLAlchemy*, *psycopg2*, and *Python* exceptions are caught by the error handling logic in [`RepositoryErrorHandler`][src.db.db_core.exceptions.RepositoryErrorHandler]. All error messages are set to be shown, it is the responsibility of the layers above to hide the messages or not. Below are the current mappings present in the application, which can be extended or changed in the future.
+All *SQLAlchemy*, *psycopg2*, and *Python* exceptions are caught by the error handling logic in [`RepositoryErrorHandler`][src.db.db_core.exceptions.RepositoryErrorHandler]. All error messages are set to be shown by default, it is the responsibility of the layers above to hide any messages from the client. Below are the current mappings present in the application, which can be extended or changed in the future.
 
 | Original | Translation |
 |----------|-------------|

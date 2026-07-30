@@ -1,17 +1,22 @@
+from psycopg2.errors import UniqueViolation
 from sqlalchemy.exc import (
-    DataError, 
-    IntegrityError, 
-    MultipleResultsFound, 
-    NoResultFound, 
+    DataError,
+    IntegrityError,
+    InterfaceError,
+    MultipleResultsFound,
+    NoResultFound,
+    NoSuchModuleError,
     ProgrammingError,
     SQLAlchemyError,
     UnboundExecutionError,
-    InterfaceError,
-    NoSuchModuleError
 )
-from psycopg2.errors import UniqueViolation
 
-from ...global_core.exceptions import LayerError, LayerErrorHandler, LayerErrorWrapper, LayerErrorInvoker
+from ...global_core.exceptions import (
+    LayerError,
+    LayerErrorHandler,
+    LayerErrorInvoker,
+    LayerErrorWrapper,
+)
 
 #################################################
 ##  REPOSITORY EXCEPTION HANDLING DEFINITIONS  ##
@@ -72,7 +77,7 @@ class RepositoryErrorHandler(LayerErrorHandler):
     """A class used to provide exception translation for the Repository layer.
 
     All exceptions raised in the Repository layer (excluding [`RepositoryError`][error-types]
-    subclasses) are be caught and translated to a [`RepositoryError`][error-types] 
+    subclasses) are caught and translated into a [`RepositoryError`][error-types] 
     using this class. Any exceptions will be translated to a [`RepositoryInternalError`][error-types] 
     if they are not explicitly mapped in the [`REPOSITORY_ERROR_MAP`][error-mapping]. 
     Exceptions in *SQLAlchemy* also contain a reference to the original *psycopg2* exception 
@@ -95,10 +100,13 @@ class RepositoryErrorHandler(LayerErrorHandler):
     error_origin_name = "orig"
     
 class RepositoryErrorWrapper(LayerErrorWrapper):
-    """A mixin that wraps class methods with Repository layer exception handling
-    when initializing a subclass."""
+    """A mixin that encapsulates class methods with Repository layer exception handling during 
+    subclass initialization. Further information on the implementation and methods can be found in
+    [LayerErrorWrapper][src.global_core.exceptions.LayerErrorWrapper]."""
     error_handler = RepositoryErrorHandler
     
 class RepositoryErrorInvoker(LayerErrorInvoker):
-    """A mixin that provides methods for validating arguments, raising and/or translating exceptions."""
+    """A mixin that encapsulates methods for validating arguments, raising, and/or translating 
+    exceptions within the Repository layer. Further information on the implementation and methods can be found in
+    [LayerErrorInvoker][src.global_core.exceptions.LayerErrorWrapper]."""
     error_handler = RepositoryErrorHandler

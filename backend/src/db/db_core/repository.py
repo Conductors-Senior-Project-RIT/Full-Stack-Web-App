@@ -2,11 +2,11 @@ from collections.abc import Iterable
 from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
 
 from sqlalchemy import Row, Sequence, inspect
-from sqlalchemy.orm.session import Session
 from sqlalchemy.exc import NoInspectionAvailable
+from sqlalchemy.orm.session import Session
 
-from .exceptions import RepositoryErrorInvoker
 from .exceptions import RepositoryErrorHandler as RHandler
+from .exceptions import RepositoryErrorInvoker
 from .exceptions import RError as E
 from .models import Base
 
@@ -30,16 +30,14 @@ SingleResult = ModelType | dict[str, Any]
 CollectionResult = list[ModelType] | list[dict[str, Any]]
 
 
-class BaseRepository(Generic[ModelType], RepositoryErrorInvoker): 
+class BaseRepository(RepositoryErrorInvoker, Generic[ModelType]): 
     """Base class for a repository, supporting CRUD functionality for SQLAlchemy ORMs. This
     class uses a generic, [`ModelType`][types], which is bound [`Base`][...models.Base], defining the 
     model to operate on. Methods in this class return [`ModelType`][types], but conversion to a 
     `dict` as a return type is supported if the provided model extends [`Base`][...models.Base].
 
-    Args:
-        Generic (ModelType): A type variable representing an SQLAlchemy ORM model which
-            extends [`Base`][...models.Base]. The model provdided defines which table to 
-            manipulate in a provided `Session`. 
+    Uses a generic type variable that defines the ORM model this instance will query in the provided
+    `Session`. Only models that extend [`Base`][...models.Base] are permitted.
             
     Example:
         ```python

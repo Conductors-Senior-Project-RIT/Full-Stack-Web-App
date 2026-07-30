@@ -344,7 +344,7 @@ class LayerErrorHandler(ErrorHandlingConfig):
 
 class LayerErrorWrapper:
     """A superclass for wrapping class methods with layer error handling."""
-    error_handler: Type[LayerErrorHandler] = LayerErrorHandler
+    error_handler: type[LayerErrorHandler] = LayerErrorHandler
     
     def __init_subclass__(cls, **kwargs) -> None:
         """Wraps the methods in a subclass with the error handling."""
@@ -367,7 +367,7 @@ class LayerErrorWrapper:
                 
                 
 class LayerErrorInvoker:
-    error_handler: Type[LayerErrorHandler] = LayerErrorHandler
+    error_handler: type[LayerErrorHandler] = LayerErrorHandler
     
     def _raise(self, error_class: type[LayerError], message, show_error=False, cause=None, depth=1):
         raise error_class(

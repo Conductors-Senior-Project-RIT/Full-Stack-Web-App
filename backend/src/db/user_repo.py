@@ -7,15 +7,15 @@ This includes (but is not limited to): account creation, preference management, 
 
 from typing import Any
 
-from sqlalchemy import text, ScalarResult
+from sqlalchemy import ScalarResult, text
 
+from .db_core.exceptions import RepositoryErrorWrapper
+from .db_core.exceptions import RError as E
 from .db_core.models import User
 from .db_core.repository import BaseRepository
-from .db_core.exceptions import RError as E
-from .db_core.exceptions import RepositoryErrorWrapper
 
 
-class UserRepository(RepositoryErrorWrapper, BaseRepository):
+class UserRepository(RepositoryErrorWrapper, BaseRepository[User]):
     """A database interface for User and UserPreferences record operations
 
     All methods are wrapped with the RepositoryErrorWrapper to provide error handling.

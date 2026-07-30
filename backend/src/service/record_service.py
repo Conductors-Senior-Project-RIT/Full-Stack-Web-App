@@ -5,7 +5,7 @@ import zoneinfo
 
 from sqlalchemy.orm.session import Session
 
-import backend.src.db.record_types as record_types
+from backend.src.db.record_types import RecordFactory
 from ..db.record_repo import RecordRepository
 from ..service.service_core import ServiceErrorWrapper, ServiceErrorInvoker, SError
 
@@ -16,7 +16,7 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
     def __init__(self, session: Session, record_type: int | None):
         """A `RecordRepository` is instantiated using the provided `record_type`. Uses
         `get_record_repository` or `get_all_repositories` (if `record_type` is `None`),
-        which are factory functions in `db.record_types` designed for `RecordRepository`
+        which are factory functions in `db.record_types.RecordFactory` designed for `RecordRepository`
         initialization. Repositories are always stored in a list; use
         `get_first_repository` to access the repository passed in through the
         constructor. The service instance is initialized with a SQLAlchemy session to be
@@ -31,9 +31,9 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
                 `db.record_types`.
         """
         self.record_repo = (
-            [record_types.get_record_repository(session, record_type)] 
+            [RecordFactory().get_record_repository(session, record_type)] 
             if record_type is not None else 
-            record_types.get_all_repositories(session)
+            RecordFactory().get_all_repositories(session)
         )
         self.session = session
         

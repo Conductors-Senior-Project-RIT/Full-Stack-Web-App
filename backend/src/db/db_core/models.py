@@ -1,21 +1,22 @@
+from datetime import datetime, time, timedelta
+from typing import Optional, Self
+
 from sqlalchemy import (
+    TIMESTAMP,
     Boolean,
     Float,
+    ForeignKey,
+    Integer,
     Interval,
     String,
-    Integer,
-    ForeignKey,
-    TIMESTAMP,
     Time,
     func,
     inspect,
     text,
 )
-from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
-from sqlalchemy.ext.declarative import AbstractConcreteBase
 from sqlalchemy.dialects.postgresql import ARRAY
-from datetime import datetime, time, timedelta
-from typing import List, Optional, Self
+from sqlalchemy.ext.declarative import AbstractConcreteBase
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 
 from ....database import db
 
@@ -212,7 +213,7 @@ class BaseRecord(AbstractConcreteBase, Base):
         return relationship("User")
     
     @classmethod
-    def get_unique_fields(cls) -> List[str]:
+    def get_unique_fields(cls) -> list[str]:
         """Provides a list of fields that are unique to a record type."""
         raise NotImplementedError()
 
@@ -263,7 +264,7 @@ class EOTRecord(EOTMixin, BaseRecord):
         return relationship("User", back_populates="verified_eot")
 
     @classmethod
-    def get_unique_fields(cls) -> List[str]:
+    def get_unique_fields(cls) -> list[str]:
         return [
             cls.brake_pressure,
             cls.motion,
@@ -279,6 +280,7 @@ class EOTRecord(EOTMixin, BaseRecord):
 class EOTCollation(EOTMixin, CollationMixin, Base):
     """Defines the mapped columns for the results of a collation of EOT records from the 
     `eotcollation` view."""
+    __tablename__ = "eotcollation"
     __table_args__ = {"info": {"is_view": True}}
     
     total_count: Mapped[int] = mapped_column(Integer)
@@ -319,7 +321,7 @@ class HOTRecord(HOTMixin, BaseRecord):
         return relationship("User", back_populates="verified_hot")
 
     @classmethod
-    def get_unique_fields(cls) -> List[str]:
+    def get_unique_fields(cls) -> list[str]:
         return [cls.frame_sync, cls.command, cls.checkbits, cls.parity]
 
 
@@ -332,7 +334,7 @@ class NotificationConfig(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     station_id: Mapped[int] = mapped_column(ForeignKey("stations.id"), nullable=False)
-    notification_user_ids: Mapped[List[int]] = mapped_column(ARRAY(Integer))
+    notification_user_ids: Mapped[list[int]] = mapped_column(ARRAY(Integer))
 
     station = relationship("Station", back_populates="notifications")
 

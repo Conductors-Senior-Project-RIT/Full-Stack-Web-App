@@ -4,21 +4,24 @@ from typing import Any
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
-from .db_core.models import Station
-from .db_core.exceptions import RError as E
 from .db_core.exceptions import RepositoryErrorHandler as RHandler
+from .db_core.exceptions import RError as E
+from .db_core.models import Station
 from .db_core.repository import BaseRepository
+
 
 class StationRepository(BaseRepository[Station]):
     """A database interface for querying station records.
 
-    This class inherits the generic CRUD functionality defined in `BaseRepository` that
-    may be useful for simple operations. This class contains concrete methods which
-    execute functionality using the `Station` model.
+    This class inherits the generic CRUD functionality defined in 
+    [`BaseRepository`][...db_core.repository.BaseRepository] that may be useful for simple 
+    operations. This class contains concrete methods which execute queries beyond simple CRUD 
+    operations using the [`Station`][...db_core.models.Station] model.
     """
     
     def __init__(self, session: Session):
-        """Constructor for a repository that interacts with station records.
+        """Constructor for a repository that interacts with the 
+        [`Station`][....db_core.models.Station] model.
 
         Args:
             session (Session): Specifies the database session the repository operates
@@ -30,7 +33,7 @@ class StationRepository(BaseRepository[Station]):
 
     @RHandler.layer_error_decorator()
     def get_stations(self) -> list[dict[str, Any]]:
-        """Returns a collection of ID and station name pairs from the `Stations` table.
+        """Returns a collection of ID and station name pairs.
 
         Returns:
             (list[dict[str, Any]]): A list of dictionaries containing `id` and `station_name`
@@ -50,25 +53,25 @@ class StationRepository(BaseRepository[Station]):
         table.
 
         Args:
-            station_name (str): The name of a new station.
+            stat_name (str): The name of a new station.
             hashed_password (str): A hashed password for the new station.
 
         Raises:
-            `RepositoryExistingRowError`: Raised if a station with the same name already
+            RepositoryExistingRowError: Raised if a station with the same name already
                 exists.
 
         Returns:
-            int: Returns the id of the new station created
+            (int): Returns the id of the new station created
         """
         # Check to see if station name exists
         stmt = select(self.model.id).where(self.model.station_name == stat_name)
         result = self.session.execute(stmt).scalar_one_or_none()
         
         self._validate(
-            result is None, 
-            E.EXISTING, 
-            f"A station with the name {stat_name} already exists!", 
-            True
+            condition=result is None, 
+            error_class=E.EXISTING, 
+            message=f"A station with the name {stat_name} already exists!", 
+            show_error=True
         )
         
         # Add a new station instance to the session
@@ -88,16 +91,16 @@ class StationRepository(BaseRepository[Station]):
         exists.
 
         Args:
-            station_name (int): The ID of the station to update.
+            station_id (int): The ID of the station to update.
             hashed_password (str): The new hashed password for the station.
 
         Raises:
-            `RepositoryNotFoundError`: Raised if a station with `station_id` does not exist.
-            `RepositoryInvalidArgumentError`: Raised if either argument is of the incorrect
+            RepositoryNotFoundError: Raised if a station with `station_id` does not exist.
+            RepositoryInvalidArgumentError: Raised if either argument is of the incorrect
                 type.
 
         Returns:
-            str: The newly updated password from the database session.
+            (str): The newly updated password from the database session.
         """
         return self._update_station_value(station_id, "passwd", hashed_password)
     
@@ -110,12 +113,12 @@ class StationRepository(BaseRepository[Station]):
             new_name (str): The new name for the station.
 
         Raises:
-            `RepositoryNotFoundError`: Raised if a station with `station_id` does not exist.
-            `RepositoryInvalidArgumentError`: Raised if either argument is of the incorrect
+            RepositoryNotFoundError: Raised if a station with `station_id` does not exist.
+            RepositoryInvalidArgumentError: Raised if either argument is of the incorrect
                 type.
 
         Returns:
-            str: The newly updated name from the database session.
+            (str): The newly updated name from the database session.
         """
         return self._update_station_value(station_id, "station_name", new_name)
     
@@ -129,17 +132,17 @@ class StationRepository(BaseRepository[Station]):
             new_value (Any): The new value for the station's respective column.
 
         Raises:
-            `RepositoryNotFoundError`: Raised if a station with `station_id` does not exist.
-            `RepositoryInvalidArgumentError`: Raised if either argument is of the incorrect
+            RepositoryNotFoundError: Raised if a station with `station_id` does not exist.
+            RepositoryInvalidArgumentError: Raised if either argument is of the incorrect
                 type.
 
         Returns:
-            float: The newly updated value from the database session.
+            (float): The newly updated value from the database session.
         """
         self._validate(
-            isinstance(station_id, int) and isinstance(station_field, str), 
-            E.INVALID_ARG, 
-            f"Invalid argument types provided when updating: {station_field}!"
+            condition=isinstance(station_id, int) and isinstance(station_field, str), 
+            error_class=E.INVALID_ARG, 
+            message=f"Invalid argument types provided when updating: {station_field}!"
         )
 
         # Will raise a RepositoryNotFoundError if station does not exist
@@ -154,11 +157,11 @@ class StationRepository(BaseRepository[Station]):
             stat_name (str): The name of the station.
 
         Raises:
-            `RepositoryNotFoundError`: Raised if a station with `stat_name` 
+            RepositoryNotFoundError: Raised if a station with `stat_name` 
                 does not exist.
 
         Returns:
-            str: The ID of the station.
+            (str): The ID of the station.
         """
         try:
             # Select the station ID where the station name matches the provided name.
@@ -166,13 +169,18 @@ class StationRepository(BaseRepository[Station]):
             result = self.session.execute(stmt).scalar_one_or_none()
             
             # If None, then a record was likely not found.
-            self._validate(result is not None, E.NOT_FOUND, f"Could not find {stat_name}!", True)
+            self._validate(
+                condition=result is not None, 
+                error_class=E.NOT_FOUND, 
+                message=f"Could not find {stat_name}!", 
+                show_error=True
+            )
             
             return result
         
         # Handle any errors that may occur, including the station name in the error message.
         except Exception as e:
-            raise self._translate_and_raise(e, f"Could not retrieve a station id for {stat_name}: {e}")
+            raise self._translate_and_raise(e, f"Could not retrieve a station id for {stat_name}!")
         
 
     @RHandler.layer_error_decorator()
@@ -183,10 +191,10 @@ class StationRepository(BaseRepository[Station]):
             station_name (str): The name of the station to retrieve from.
 
         Raises:
-            `RepositoryNotFoundError`: Raised if a station is not found.
+            RepositoryNotFoundError: Raised if a station is not found.
 
         Returns:
-            datetime: A datetime instance of a station's last seen timestamp.
+            (datetime): A datetime instance of a station's last seen timestamp.
         """
         # Get the last seen field from a station's corresponding name
         stmt = select(self.model.last_seen).where(self.model.station_name == station_name)
@@ -208,10 +216,10 @@ class StationRepository(BaseRepository[Station]):
             station_id (int): The ID of the station to update.
 
         Raises:
-            `RepositoryNotFoundError`: Raised if a station is not found.
+            RepositoryNotFoundError: Raised if a station is not found.
 
         Returns:
-            datetime: A timestamp of the result.
+            (datetime): A timestamp of the result.
         """
         # Update a station's last seen to the current timestamp, returning the new value
         # Probably can use ORM-style like update_station_password, but func.now() matches timezone in db
@@ -225,13 +233,11 @@ class StationRepository(BaseRepository[Station]):
         result = self.session.execute(stmt).scalar_one_or_none()
 
         # If None is returned, the station was likely not found
-        self._validate(result is not None, E.NOT_FOUND, f"Could not find station with id: {station_id}!", True)
-        # if not result:
-        #     raise RepositoryNotFoundError(
-        #         self.__class__.__name__, 
-        #         sys._getframe().f_code.co_name,
-        #         f"Could not find station with id: {station_id}!",
-        #         True
-        #     )
+        self._validate(
+            condition=result is not None, 
+            error_class=E.NOT_FOUND, 
+            message=f"Could not find station with id: {station_id}!", 
+            show_error=True
+        )
             
         return result
