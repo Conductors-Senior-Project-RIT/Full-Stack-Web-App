@@ -1,4 +1,4 @@
-## Error Types {#error-types}
+## Error Types {#r-error-types}
 Below are the following exceptions that can be raised by any of the methods in this layer.
 
 | Name | Description | `RError` |
@@ -13,15 +13,15 @@ Below are the following exceptions that can be raised by any of the methods in t
 | `RepositoryRecordInvalid` | Invalid record train type is provided. | `INVALID_RECORD` |
 | `RepositoryInternalError` | An unknown exception raised in the layer. | `INTERNAL` |
 
-## Repository Error Mapping {#error-mapping}
+## Repository Error Mapping {#r-error-mapping}
 All *SQLAlchemy*, *psycopg2*, and *Python* exceptions are caught by the error handling logic in [`RepositoryErrorHandler`][src.db.db_core.exceptions.RepositoryErrorHandler]. All error messages are set to be shown by default, it is the responsibility of the layers above to hide any messages from the client. Below are the current mappings present in the application, which can be extended or changed in the future.
 
 | Original | Translation |
 |----------|-------------|
-| `TimeoutError`, `UnboundExecutionError`, `InterfaceError`, `NoSuchModuleError` | [`RepositoryConnectionError`](#error-types) |
-| `NoResultFound` | [`RepositoryNotFoundError`](#error-types) |
-| `MultipleResultsFound`, `UniqueViolation` | [`RepositoryExistingRowError`](#error-types) |
-| `TypeError`, `KeyError`, `ValueError`, `IndexError`, `ZeroDivisionError`, `DataError`, `ProgrammingError`, `IntegrityError` | [`RepositoryParsingError`](#error-types) |
-| `SQLAlchemyError` | [`RepositoryInternalError`](#error-types) |
+| `TimeoutError`, `UnboundExecutionError`, `InterfaceError`, `NoSuchModuleError` | [`RepositoryConnectionError`][r-error-types] |
+| `NoResultFound` | [`RepositoryNotFoundError`][r-error-types] |
+| `MultipleResultsFound`, `UniqueViolation` | [`RepositoryExistingRowError`][r-error-types] |
+| `TypeError`, `KeyError`, `ValueError`, `IndexError`, `ZeroDivisionError`, `DataError`, `ProgrammingError`, `IntegrityError` | [`RepositoryParsingError`][r-error-types] |
+| `SQLAlchemyError` | [`RepositoryInternalError`][r-error-types] |
 
 ::: src.db.db_core.exceptions

@@ -8,11 +8,13 @@ class SymbolService(ServiceErrorWrapper):
     """Handles business logic for symbol related data processing. There isn't much
     currently, but might be very useful in the future for symbol operations.
     """
+    
     def __init__(self, session: Session):
-        """Initializes a `SymbolRepository` with a provided **SQLAlchemy** session.
+        """Initializes a [`SymbolRepository`][src.db.symbol_repo.SymbolRepository] 
+        with a provided **SQLAlchemy** session.
 
         Args:
-            session (Session): The SQLAlchemy session to be used for database
+            session (Session): The *SQLAlchemy* session to be used for database
                 transactions in the service's repository.
         """
         self.symbol_repo = SymbolRepository(session)
@@ -26,7 +28,7 @@ class SymbolService(ServiceErrorWrapper):
                 retrieve all symbol names.
 
         Returns:
-            list[str] | int: A list of symbol names or the ID of a specific symbol.
+            (list[str] | int): A list of symbol names or the ID of a specific symbol.
         """
         if symbol_name is None:
             return self.symbol_repo.get_symbol_names()
@@ -43,7 +45,7 @@ class SymbolService(ServiceErrorWrapper):
             symbol_name (str): The name of the new symbol to be created.
 
         Returns:
-            int: The ID of the newly created symbol.
+            (int): The ID of the newly created symbol.
         """
         return self.symbol_repo.insert_new_symbol(symbol_name)
         

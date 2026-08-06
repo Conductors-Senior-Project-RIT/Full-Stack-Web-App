@@ -92,6 +92,39 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         Returns:
             (dict[str, Any]): Returns a dictionary containing the fields and corresponding
                 values for a train record.
+                
+        ***All Records Return the Following Columns:***
+                
+        | Name | Type |
+        |------|------|
+        | `id` | int |
+        | `date_rec` | str |
+        | `station_name` | str |
+        | `symb_name` | str |
+        | `unit_addr` | str |
+        | `verified` | bool |
+
+        ***EOT Records Return the Following Additional Columns:***
+        
+        | Name | Type |
+        |------|------|
+        | `brake_pressure` | str |
+        | `motion` | str |
+        | `marker_light` | str |
+        | `turbine` | str |
+        | `batter_cond` | str |
+        | `battery_charge` | str |
+        | `arm_status` | str |
+        | `signal_strength` | str |
+
+        ***HOT Records Return the Following Additional Columns:***
+        
+        | Name | Type |
+        |------|------|
+        | `frame_sync` | str |
+        | `command` | str |
+        | `checkbits` | str |
+        | `parity` | str |
         """
         from .db_core.models import Station, Symbol
         
@@ -128,20 +161,56 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
     def create_train_record(
         self, args: dict[str, Any], datetime_received: datetime
     ) -> tuple[int, bool]:
-        """Creates a new train record with the provided values in `args`.
-
-        When an error occurs during the initial creation of a record, a recovery request
-        can be sent. When a recovery request is sent, the datetime must be passed as a
-        parameter; otherwise, a [`RepositoryInvalidArgumentError`][error-types] 
-        is raised. In order to successfully create a new train record, the keys and values 
-        in the dictionary must include all non-nullable columns and correct value types with 
-        that of the model to prevent an `IntegrityError` occurring. Keys not present in the 
-        model are ignored.
-
+        """Creates a new train record with the provided values in `args`. 
+        
+        When an error occurs during the initial creation of a record, a recovery request 
+        can be sent. When a recovery request is sent, the datetime must be passed as a 
+        parameter; otherwise, a [`RepositoryInvalidArgumentError`][r-error-types] is raised. 
+        In order to successfully create a new train record, the keys and values in the dictionary 
+        must include **all non-nullable columns** and **correct value types** with that 
+        of the model to prevent an `IntegrityError` occurring. Keys not present as columns 
+        in the model are ignored.
+        
         Args:
             args (dict[str, Any]): A dictionary containing values to insert into a new
                 record.
             datetime_received (datetime): The datetime when the record was received.
+            
+        **EOT & HOT Fields in `args`**
+        
+        | Name | Type | Nullable | Default |
+        |------|------|----------|---------|
+        | `date_rec` | str | No | *N/A* |
+        | `station_recorded` | int | No | *N/A* |
+        | `symbol_id` | int | Yes | `None` |
+        | `engine_num` | int | Yes | `None` |
+        | `unit_addr` | str | Yes | `"unknown"` |
+        | `verified` | bool | Yes | `False` |
+        | `verifier_id` | int | Yes | `None` |
+        | `most_recent` | bool | Yes | `True` |
+        | `locomotive_num` | str | Yes | `"unknown"` |
+        | `signal_strength` | float | Yes | `0.0` |
+
+        **EOT Fields in `args`**
+        
+        | Name | Type | Nullable | Default |
+        |------|------|----------|---------|
+        | `brake_pressure` | str | Yes | `"unknown"` |
+        | `motion` | str | Yes | `"unknown"` |
+        | `marker_light` | str | Yes | `"unknown"` |
+        | `turbine` | str | Yes | `"unknown"` |
+        | `battery_cond` | str | Yes | `"unknown"` |
+        | `battery_charge` | str | Yes | `"unknown"` |
+        | `arm_status` | str | Yes | `"unknown"` |
+
+        **HOT Fields in `args`**
+        
+        | Name | Type | Nullable | Default |
+        |------|------|----------|---------|
+        | `frame_sync` | str | Yes | `"unknown"` |
+        | `command` | str | Yes | `"unknown"` |
+        | `checkbits` | str | Yes | `"unknown"` |
+        | `parity` | str | Yes | `"unknown"` |
 
         Returns:
             (tuple[int, bool]): The id of the newly created record, and whether a recovery
@@ -368,7 +437,7 @@ class RecordRepository(BaseRepository[RecordType], Generic[RecordType]):
         for more details). Optionally filters results by verification status if provided.
 
         This function uses collation views to query results which should already be
-        added to the Tracksense PostgreSQL database server. However, it can be found in
+        added to the *Tracksense PostgreSQL* database server. However, it can be found in
         `backend/test/table.sql` if it is removed for any reason.
 
         Args:

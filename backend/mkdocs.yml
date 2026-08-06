@@ -10,8 +10,19 @@ plugins:
   - autorefs
 markdown_extensions:
   - attr_list
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - tables
 nav:
   - Home: index.md
+  - Service:
+    - Overview: service/overview.md
+    - Service Core: service/service_core.md
+    - Record Service: service/record_service.md
+    - Station Service: service/station_service.md
+    - Symbol Serivce: service/symbol_service.md
+    - User Service: service/user_service.md
+    - Email Service: service/email_service.md
   - Repository:
     - Overview: repository/overview.md
     - Core:

@@ -11,11 +11,13 @@ from .service_core import ServiceErrorWrapper
 
 class StationService(ServiceErrorWrapper):
     """Handles business logic for station related data processing."""
+    
     def __init__(self, session: Session):
-        """Initializes a `StationRepository` with a provided **SQLAlchemy** session.
+        """Initializes a [`StationRepository`][src.db.station_repo.StationRepository] 
+        with a provided **SQLAlchemy** session.
 
         Args:
-            session (Session): The SQLAlchemy session to be used for database
+            session (Session): The *SQLAlchemy* session to be used for database
                 transactions in the service's repositories.
         """
         self.station_repo = StationRepository(session)
@@ -25,7 +27,7 @@ class StationService(ServiceErrorWrapper):
         """Returns a list of station ID and name pairs from the database as dictionaries.
 
         Returns:
-            list[dict]: A list of dictionaries containing station IDs and names.
+            (list[dict]): A list of dictionaries containing station IDs and names.
         """
         return self.station_repo.get_stations()
     
@@ -36,21 +38,22 @@ class StationService(ServiceErrorWrapper):
             station_name (str): The name of the station.
 
         Returns:
-            int: The ID of the station.
+            (int): The ID of the station.
         """
         return self.station_repo.get_station_id(station_name)
 
     def create_station(self, station_name: str) -> str:
         """Creates a new station in the database with the provided name.
 
-        Additionally, a random password is generated using generate_password_string`,
+        Additionally, a random password is generated using 
+        [`generate_password_string`][..generate_password_string],
         and associated with the new station.
 
         Args:
             station_name (str): The name of the new station.
 
         Returns:
-            str: The new randomly generated password for the new station.
+            (str): The new randomly generated password for the new station.
         """
         unhashed_pw, hashed_pw = self.generate_password_string()
         self.station_repo.create_new_station(station_name, hashed_pw)
@@ -59,13 +62,14 @@ class StationService(ServiceErrorWrapper):
     def update_station_password(self, station_id: int) -> str:
         """Generates and updates the password of a specified station.
 
-        The password is generated using `generate_password_string`.
+        The password is generated using 
+        [`generate_password_string`][..generate_password_string].
 
         Args:
             station_id (int): The ID corresponding to the station to update.
 
         Returns:
-            str: The newly generated password for the station.
+            (str): The newly generated password for the station.
         """
         unhashed_pw, hashed_pw = self.generate_password_string()
         self.station_repo.update_station_password(station_id, hashed_pw)
@@ -77,7 +81,7 @@ class StationService(ServiceErrorWrapper):
         characters. Additionally, the password is hashed using SHA256.
 
         Returns:
-            tuple[str, str]: Returns two strings in which the first is the unhashed
+            (tuple[str, str]): Returns two strings in which the first is the unhashed
                 password and the second is the hashed password.
         """
 
@@ -101,7 +105,7 @@ class StationService(ServiceErrorWrapper):
             station_name (str): The name of the station.
 
         Returns:
-            str: A formatted string containing the time and/or date of the ping. If the
+            (str): A formatted string containing the time and/or date of the ping. If the
                 date is today, it is formatted as `HH:MM AM/PM`; otherwise, it is
                 formatted as `MON DD, YYYY at HH:MM AM/PM`.
         """
@@ -116,8 +120,8 @@ class StationService(ServiceErrorWrapper):
             station_id (int): The ID of the station to update.
 
         Returns:
-            str: A formatted string containing the time of the ping, formatted as `HH:MM
-                AM/PM`.
+            (str): A formatted string containing the time of the ping, formatted as 
+                `HH:MM AM/PM`.
         """
         dt = self.station_repo.update_last_seen(station_id)
         return self._format_date(dt)
@@ -130,7 +134,7 @@ class StationService(ServiceErrorWrapper):
             dt (datetime): The datetime object to format.
 
         Returns:
-            str: The formatted date string.
+            (str): The formatted date string.
         """
         return (
             dt.strftime("%I:%M %p")

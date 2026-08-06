@@ -40,9 +40,8 @@ class RecordFactory(RepositoryErrorInvoker):
     
     Example:
         ```python
-        >>> repo = RecordFactory().get_record_repository(1)
-        >>> repo
-        <__main__.RecordRepository object at 0x0000000000FFFFFF>
+        repo = RecordFactory().get_record_repository(1)
+        print(type(repo))  # <class '__main__.RecordRepository'>
         ```
     """
     

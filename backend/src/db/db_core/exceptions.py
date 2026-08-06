@@ -74,23 +74,24 @@ REPOSITORY_ERROR_MAP = {
     
     
 class RepositoryErrorHandler(LayerErrorHandler):
-    """A class used to provide exception translation for the Repository layer.
+    """
+    A class used to provide exception translation for the Repository layer.
 
-    All exceptions raised in the Repository layer (excluding [`RepositoryError`][error-types]
-    subclasses) are caught and translated into a [`RepositoryError`][error-types] 
-    using this class. Any exceptions will be translated to a [`RepositoryInternalError`][error-types] 
-    if they are not explicitly mapped in the [`REPOSITORY_ERROR_MAP`][error-mapping]. 
+    All exceptions raised in the Repository layer (excluding [`RepositoryError`][r-error-types]
+    subclasses) are caught and translated into a [`RepositoryError`][r-error-types] 
+    using this class. Any exceptions will be translated to a [`RepositoryInternalError`][r-error-types] 
+    if they are not explicitly mapped in the [`REPOSITORY_ERROR_MAP`][r-error-mapping]. 
     Exceptions in *SQLAlchemy* also contain a reference to the original *psycopg2* exception 
     in the `orig` attribute, which is used to determine the error type.
 
     Attributes:
         error_map (dict): A mapping of exception types to their corresponding
-            [`RepositoryError`][error-types] subclass and a boolean indicating whether the error should
-            be publicly shown. Defaults to [`REPOSITORY_ERROR_MAP`][error-mapping].
+            [`RepositoryError`][r-error-types] subclass and a boolean indicating whether the error should
+            be publicly shown. Defaults to [`REPOSITORY_ERROR_MAP`][r-error-mapping].
         base_exception (Type[RepositoryError]): The fallback exception class for the
-            Repository layer. Defaults to [`RepositoryInternalError`][error-types].
+            Repository layer. Defaults to [`RepositoryInternalError`][r-error-types].
         exclude (Type[RepositoryError]): The exception class to exclude from
-            translation. Defaults to [`RepositoryError`][error-types].
+            translation. Defaults to [`RepositoryError`][r-error-types].
         error_origin_name (str): The attribute name that contains the original exception
             in SQLAlchemy. Defaults to `"orig"`.
     """
@@ -100,7 +101,7 @@ class RepositoryErrorHandler(LayerErrorHandler):
     error_origin_name = "orig"
     
 class RepositoryErrorWrapper(LayerErrorWrapper):
-    """A mixin that encapsulates class methods with Repository layer exception handling during 
+    """A mixin that wraps class methods with Repository layer exception handling during 
     subclass initialization. Further information on the implementation and methods can be found in
     [LayerErrorWrapper][src.global_core.exceptions.LayerErrorWrapper]."""
     error_handler = RepositoryErrorHandler
@@ -108,5 +109,5 @@ class RepositoryErrorWrapper(LayerErrorWrapper):
 class RepositoryErrorInvoker(LayerErrorInvoker):
     """A mixin that encapsulates methods for validating arguments, raising, and/or translating 
     exceptions within the Repository layer. Further information on the implementation and methods can be found in
-    [LayerErrorInvoker][src.global_core.exceptions.LayerErrorWrapper]."""
+    [LayerErrorInvoker][src.global_core.exceptions.LayerErrorInvoker]."""
     error_handler = RepositoryErrorHandler

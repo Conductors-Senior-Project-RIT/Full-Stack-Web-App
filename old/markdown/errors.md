@@ -45,25 +45,6 @@ In this message, a developer would still be able to determine the service the ex
 | `exclude` | [`ExceptionType`](#type-definitions-used) | No | If True, forces the detailed error message and point of error to be shown regardless of the global `error_debugging` flag. Defaults to False. |
 | `cause` | `Exception` | No | The exception that is the cause of the error being instantiated. If provided, this exception is attached to the `LayerError` instance. Defaults to None. |
 
-### Example
-An example of how a `LayerError` is instantiated. 
-- The name of the class is provided by accessing an instance's name attribute. 
-- A function name can be retrieved and passed in by accessing its name in the current frame using the `sys` module. The performance overhead is negligible using this method; however, the name of a function can be passed in as a simple string, at the cost of needing to manually change it every time. 
-- A custom message is provided and shown in the error message with details on what caused the error.
-
-```python
-import sys
-
-class SomeLayerClass:
-    def some_func(arg):
-        if arg < 1:
-            raise LayerError(
-                self.__class__.__name__,
-                sys._getframe().f_code.co_name,
-                f"The provided arg was less than 1, provided with: {arg}",
-                True
-            )
-```
 
 # Type Definitions Used
 This class includes two `TypeAlias` definitions to shorten the type-hinting in the function signatures: 

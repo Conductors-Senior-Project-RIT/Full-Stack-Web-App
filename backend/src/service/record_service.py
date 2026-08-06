@@ -10,17 +10,24 @@ from ..db.record_repo import RecordRepository
 from ..service.service_core import ServiceErrorWrapper, ServiceErrorInvoker, SError
 
 # Constant for number of results per page during collation
-RESULTS_NUM = 100
+RESULTS_NUM = 250
 
 class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
+    """Provides methods that perform the business logic for signal/train record
+    operations.
+    """
+    
     def __init__(self, session: Session, record_type: int | None):
-        """A `RecordRepository` is instantiated using the provided `record_type`. Uses
-        `get_record_repository` or `get_all_repositories` (if `record_type` is `None`),
-        which are factory functions in `db.record_types.RecordFactory` designed for `RecordRepository`
+        """A [`RecordRepository`][src.db.record_repo.RecordRepository] 
+        is instantiated using the provided `record_type`. Uses 
+        [`get_record_repository`][src.db.record_types.RecordFactory.get_record_repository] 
+        or [`get_all_repositories`][src.db.record_types.RecordFactory.get_all_repositories] 
+        (if `record_type` is `None`), which are factory functions in 
+        [`RecordFactory`][src.db.record_types.RecordFactory] designed for repository
         initialization. Repositories are always stored in a list; use
-        `get_first_repository` to access the repository passed in through the
-        constructor. The service instance is initialized with a SQLAlchemy session to be
-        shared across all repository instances.
+        `_get_first_repository` to access the repository corresponding to the type
+        specified by the value provided in the constructor. A service instance is initialized 
+        with an *SQLAlchemy* session to be shared across all repository instances.
 
         Args:
             session (Session): The SQLAlchemy session to be used for database
@@ -28,7 +35,7 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
             record_type (int | None): An integer corresponding to a record type, or None
                 if repositories for all record types should be initialized. The integer
                 values corresponding to each record type are defined in
-                `db.record_types`.
+                [`RecordTypes`][src.db.record_types.RecordTypes].
         """
         self.record_repo = (
             [RecordFactory().get_record_repository(session, record_type)] 
@@ -53,10 +60,10 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
             record_id (int): A value corresponding to a record's primary key.
 
         Returns:
-            dict[str, Any]: A dictionary with keys associated to predefined columns and
+            (dict[str, Any]): A dictionary with keys associated to predefined columns and
                 their values. The columns returned vary for each record type, for more
-                information on the columns returned for each record type, check
-                `docs/service.md`.
+                information on the columns returned for each record type, see
+                [`RecordRepository.get_train_history`][src.db.record_repo.RecordRepository.get_train_history].
         """
         return self._get_first_repository().get_train_history(record_id)
         
@@ -64,11 +71,13 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
         """Creates a new record in the database.
 
         After a record is created, the following logic occurs:
+        
         - Attempt to automatically update a new record's symbol ID and engine number
-        from the previous most recent record: `attempt_auto_fill`.
+        from the previous most recent record: [`attempt_auto_fill`][..attempt_auto_fill].
         - Update the recency status of the previous record so that the newly created
-        record is the most recent: `add_new_pin`.
-        - Check to see if a notification needs to be sent: `check_recent_notification`.
+        record is the most recent: [`add_new_pin`][..add_new_pin].
+        - Check to see if a notification needs to be sent: 
+        [`check_recent_notification`][..check_recent_notification].
         - Send a notification to subscribed users using a notification service (future
         implementation).
 
@@ -78,10 +87,10 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
             args (dict): A dictionary containing the values of the new record, where the
                 keys correspond to the database columns in a record's table. See the
                 additional documentation for details about the required values:
-                `create_train_record` in `db.record_repo.RecordRepository`.
+                [`RecordRepository.create_train_record`][src.db.record_repo.RecordRepository.create_train_record].
 
         Returns:
-            int: ID of the newly created record.
+            (int): ID of the newly created record.
         """
         # Get a single repository instantiated repository
         repository = self._get_first_repository()
@@ -116,7 +125,7 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
             station_id (int): The station ID a signal was detected at.
 
         Returns:
-            bool: True if a notification should be sent out for a new record; otherwise,
+            (bool): True if a notification should be sent out for a new record; otherwise,
                 false.
         """
         results = self._get_first_repository().get_recent_trains(unit_addr, station_id)
@@ -129,9 +138,6 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
 
         Args:
             unit_addr (str): The unit address shared by multiple records  to be updated.
-
-        Returns:
-            None
         """
         repo = self._get_first_repository()
         
@@ -150,9 +156,6 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
 
         Args:
             unit_addr (str): The unit address of a record to update.
-
-        Returns:
-            None
         """
         repo = self._get_first_repository()
         
@@ -179,9 +182,6 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
             record_id (int): The ID of the record to update.
             symbol_id (int): The ID of a symbol to add to a record
             engine_num (int): The engine number to add to a record.
-
-        Returns:
-            int | None: _description_
         """
         result = self._get_first_repository().update_signal_values(record_id, symbol_id, engine_num)
         return result["id"] if result else None
@@ -204,11 +204,15 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
                 None.
 
         Returns:
-            dict[str, list | int]: Returns a dictionary with two keys: - `results`: A
-                list of records, where each record is a dictionary with keys
-                corresponding to database columns. The columns returned vary for each
+            (dict[str, list | int]): Returns a dictionary with two keys: 
+            
+                - `results`: A list of records, where each record is a dictionary with 
+                keys corresponding to database columns. The columns returned vary for each
                 record type, for more information on the columns returned for each
-                record type, check `docs/api.md`. - `totalPages`: The total number of
+                record type, check the collation models in 
+                [db.db_core.models][src.db.db_core.models.CollationMixin].
+                
+                - `totalPages`: The total number of
                 pages available based on the number of results and `NUM_RESULTS`.
         """
         results, pages = self._get_first_repository().get_record_collation(page, RESULTS_NUM, verified)
@@ -223,9 +227,6 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
             record_id (int): The ID of the record to update.
             symbol_id (int): The ID of a symbol to add to a record.
             locomotive_num (str | None): The locomotive number to add to a record.
-
-        Returns:
-            None
         """
         self._get_first_repository().verify_record(record_id, symbol_id, locomotive_num)
         
@@ -239,7 +240,8 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
 
         The resulting records will be sorted in descending order by the date they were
         received. This method queries record repositories for each record type, and will
-        query a `StationRepository` if the station ID is not provided.
+        query [`get_station_id`][....station_service.StationService.get_station_id] if the station 
+        ID is not provided.
 
         Args:
             time_range (str): A string in the format "HH:MM:SS" representing the time
@@ -253,13 +255,9 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
                 is provided, `station_id` must be provided.
 
         Returns:
-            list[dict[str, Any]]: A list of dictionaries, each representing a record
+            (list[dict[str, Any]]): A list of dictionaries, each representing a record
                 within the specified time frame.
         """
-        # This is the only method that needs to access a StationService instance.
-        # Used to get the station ID if only the station name is provided.
-        from .station_service import StationService
-        station_service = StationService(self.session)
 
         # The time range is provided as a string in the format "HH:MM:SS"
         # Construct a timedelta object to calculate the time range relative to the current time
@@ -274,6 +272,11 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
         # If the station ID is not provided, attempt to get the station ID from its station name.
         if station_id is None:
             if station_name is not None:
+                # This is the only method that needs to access a StationService instance.
+                # Used to get the station ID if only the station name is provided.
+                from .station_service import StationService
+                station_service = StationService(self.session)
+                
                 retrieved_id = station_service.get_station_id(station_name)
             else:
                 self._raise(SError.INVALID_ARG, "Did not provide station name or ID!", True)
@@ -295,20 +298,30 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
         timeframe: datetime = None,
         all_cols: bool = False,
         separate_results: bool = False
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]] | dict[str, list[dict[str, Any]]]:
         """Pulls all records that have been recorded at a station.
 
         The resulting records will be sorted in descending order by the date they were
-        received. This method queries record repositories for each record type, and will
-        query a `StationService` if the station ID is not provided.
+        received. This method queries record repositories for each record type.
 
         Args:
             station_id (int): The ID of the station to pull records from.
-            recent (bool): If True or False, only returns records based on their
+            recent (bool, optional): If True or False, only returns records based on their
                 `most_recent` flag; otherwise, returns all records within the time
                 frame.
+            timeframe (datetime, optional): The datetime used to bound the query. If not
+                provided, records are pulled without a time specification.
             all_cols (bool): If True, returns all columns for each record; otherwise, 
-                returns only the specified columns (defined in db.record_repo.get_records_at_station).
+                returns only the specified columns (defined in 
+                [`get_records_at_station`][src.db.record_repo.RecordRepository.get_records_at_station]).
+            separate_results (bool): If True, returns a dictionary of results keyed by
+                record type instead of a single combined, sorted list.
+
+        Returns:
+            (list[dict[str, Any]] | dict[str, list[dict[str, Any]]]): If `separate_results`
+                is False, a single list of records sorted in descending order by `date_rec`. 
+                If `separate_results` is True, a dictionary mapping each record type's identifier 
+                to its own list of record dictionaries.
         """
         # Should never occur, but to be safe..
         if len(self.record_repo) < 1:
@@ -319,6 +332,12 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
         for repo in self.record_repo:
             results[repo.record_identifier] = repo.get_records_at_station(station_id, timeframe, recent, all_cols)
     
+        def sort_and_convert_str(records: list[dict[str, Any]], key: str) -> list[dict[str, Any]]:
+            records.sort(key=lambda x: x[key], reverse=True)
+            for row in records:
+                row[key] = str(row[key])
+            return records
+    
         # If results should be combined, merge all results into a single list and sort by date received
         if not separate_results:
             # Combine all results into a single list
@@ -326,20 +345,12 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
             for repo_results in results.values():
                 combined_results.extend(repo_results)
             
-            # Sort the results in descending order by the date they were received
-            combined_results.sort(key=lambda x: x["date_rec"], reverse=True)
-            
             # Convert `date_rec` to a string for JSON serialization
-            for row in combined_results:
-                row["date_rec"] = str(row["date_rec"])
-        
-            return combined_results
+            return sort_and_convert_str(combined_results, "date_rec")
         
         # Otherwise, return the results as a dictionary with separate lists for each record type
         for repo_results in results.values():
-            # Convert `date_rec` to a string for JSON serialization
-            for row in repo_results:
-                row["date_rec"] = str(row["date_rec"])
+            sort_and_convert_str(repo_results, "date_rec")
                 
         return results
 
@@ -348,7 +359,7 @@ class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
         """Returns a datetime object of the current time and date in EST.
 
         Returns:
-            datetime: The datetime in EST.
+            (datetime): The datetime in EST.
         """
         est = zoneinfo.ZoneInfo("America/New_York")
         return datetime.datetime.now(tz=est).replace(tzinfo=None)
