@@ -9,7 +9,8 @@ class RecordCollation(Resource):
     """Flask `Resource` that registers the endpoints for record collation operations."""
     
     def get(self):
-        """GET endpoint used to retrieve a paginated collation of train records grouped by
+        """
+        GET endpoint used to retrieve a paginated collation of train records grouped by
         unit address and station. Groups are formed when either the station changes or a
         duration of more than 2 hours elapses between records. Returns the most recent
         record per group along with aggregate information such as `first_seen`,

@@ -28,7 +28,7 @@ class LayerError(Exception):
         debugging is enabled, the location and details of the error.
         
         The example below showcases an example of an error message returned by a 
-        [GET /history](api.md#get-history) request when debugging mode is enabled:
+        [GET /history](../api/history.md) request when debugging mode is enabled:
         ```
         "[RecordService] Exception raised in get_train_record! RepositoryNotFoundError: 
         [RecordRepository] Exception raised in get_train_history! Could not get record 

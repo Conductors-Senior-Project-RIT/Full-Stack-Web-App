@@ -1,1 +1,1 @@
-::: src.service.email_service
+::: src.service.symbol_service
