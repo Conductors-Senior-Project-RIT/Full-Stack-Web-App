@@ -14,7 +14,7 @@ Two kinds of tests live here:
 
 ## What's Missing
  
-The Service, API, and Repository layers all lack testing. Testing `UserService` and `UserRepo` would be a great start to get familiar with the codebase.
+The Service, API, and some of the Repository layer all lack testing. Testing `UserService` and `UserRepo` would be a great start to get familiar with the codebase.
  
 Service Layer: `UserService` (possibly others too)
  

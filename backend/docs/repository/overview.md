@@ -2,6 +2,8 @@ This layer aims to provide an interface for database access. It utilizes SQLAlch
 
 As previously mentioned, changes can either be committed to the database if successful or rolled back in the case of an error, offering an effective way to properly manage client-server transactions. However, this layer should only be responsible for flushing its changes to the session; the **API** layer should be the final decider on whether changes should be reverted or persisted to the database. When a repository method is successful and that method's query returns a model or `Row`, that data is converted to a dictionary representation for consistency, removing additional coupling with the layer above. 
 
+![Repository-Diagram](../diagrams/repository.png)
+
 ## Table of Contents
 - Core
     - [Models](core/models.md)

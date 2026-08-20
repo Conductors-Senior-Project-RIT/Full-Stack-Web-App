@@ -4,6 +4,8 @@ A request starts when the API layer receives and validates client request parame
 
 Promptly after a session is created, it is provided with additional necessary data to an appropriate *Service* layer module to process the request. If an error does not occur in any of the layers below, all changes in the session are then persisted in the database (via a `commit`) and the resulting data is sent back to the client in a response payload. Errors that propagate to the API layer are processed by a corresponding error handler in [`api_core.exceptions`](./core/exceptions.md), which revert any changes made in the database session, returning a proper error response to the client.
 
+![Request-Sequence](../diagrams/request.png)
+
 *Notes*:
 
 - All API endpoints start with the `/api` prefix.

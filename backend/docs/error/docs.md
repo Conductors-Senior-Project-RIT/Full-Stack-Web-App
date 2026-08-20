@@ -4,6 +4,8 @@ To achieve this, we incorporate Python’s function decorators to wrap class met
 
 The code for the error handling is located in the `global_core.exceptions` module, and can be used in any of the layers. The [**API**](../api/core/exceptions.md) layer uses the error handlers provided by *Flask*, but the [**Service**](../service/service_core.md) and [**Repository**](../repository/core/exceptions.md) layers utilize the error handling logic described here.
 
+![Error-Handling](../diagrams/errors.png)
+
 ## Type Aliases {#eh-alias}
 
 ### `ExceptionType`

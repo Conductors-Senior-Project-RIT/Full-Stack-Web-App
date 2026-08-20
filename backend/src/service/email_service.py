@@ -7,7 +7,7 @@ from .service_core import ServiceErrorInvoker, SError
 
 class EmailService(ServiceErrorInvoker):
     """ 
-    currently using brevo: https://developers.brevo.com/docs/api-clients/python 
+    Currently using [Brevo](https://developers.brevo.com/docs/api-clients/python) 
 
     TODO: Send emails from a custom domain then authenticate your domain with DKIM and DMARC
     """
@@ -56,9 +56,9 @@ class EmailService(ServiceErrorInvoker):
 
     def send_email(self, subject: str, email_body: str, send_to_email: str, send_to_name: str | None=None, sync=False):
         """
-        sync argument determines if email is sent asynchronously 
+        Sync argument determines if email is sent asynchronously 
 
-        send_to_name argument has placeholder value atm as users don't have usernames (no biggie)
+        `send_to_name` argument has placeholder value atm as users don't have usernames (no biggie)
         """
         if sync:
             self._send(subject, email_body, send_to_email, send_to_name)

@@ -3,6 +3,8 @@ To interact with the database, this service instantiates both a *User* and *Stat
 
 A service may need to process different kinds of database records that require the same processing strategies, such as signal/train records. In the domain of this application, these records exist in one of several forms: EOT, HOT, and DPU, which contain shared and distinct attributes. To facilitate this, the [`RecordService`](record_service.md) instantiates a [`RecordRepository`](../repository/record_repo.md) with the appropriate record and collation ORM models, specified by the client. Furthermore, some cases require this service to access all repositories in a single method. To accomplish this all repositories are created during instantiation and can be iterated over.
 
+![Service-Diagram](../diagrams/service.png)
+
 ## Table of Contents
 
 - [Service Core](service_core.md)
