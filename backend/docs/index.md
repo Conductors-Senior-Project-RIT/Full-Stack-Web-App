@@ -30,6 +30,7 @@ We use `mkdocs` to generate Markdown and HTML files for our backend documentatio
 
 * `mkdocs serve` - Start the live-reloading docs server.
 * `mkdocs build` - Build the documentation site.
+* `mkdocs gh-deploy` - Create a GitHub branch to serve documentation.
 * `mkdocs -h` - Print help message and exit.
 
 ### Documentation layout
