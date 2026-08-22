@@ -23,7 +23,7 @@ nav:
       - Decorators: api/core/decorators.md
       - Exceptions: api/core/exceptions.md
     - User: api/user.md
-    - User_Preferences: api/user_preferences.md
+    - User Preferences: api/user_preferences.md
     - Volunteer: api/volunteer.md
     - Station: api/station.md
     - Train History: api/history.md
