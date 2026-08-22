@@ -106,4 +106,9 @@ def create_app(config_name=None):
 
     exceptions.register_error_handlers(app) 
 
+    # let flask know it is behind uwsgi proxy
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
+
     return app
