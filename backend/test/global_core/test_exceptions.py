@@ -1,21 +1,16 @@
-from collections.abc import Iterable
-from typing import Type
 import unittest
-from datetime import datetime
 from unittest.mock import patch
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm.session import Session
 
-import backend.src.global_core.exceptions as exc
+from backend.src.global_core.exceptions import *
 
 
-class TestError1(exc.LayerError):
+class TestError1(LayerError):
     default_message = "Test Error 1 Raised!"
     
-class TestError2(exc.LayerError):
+class TestError2(LayerError):
     default_message = "Test Error 2 Raised!"
     
-class DefaultError(exc.LayerError):
+class DefaultError(LayerError):
     default_message = "Default Error Raised!"
     
 class TestClass:
@@ -55,7 +50,7 @@ class TestClass:
         """
         # Return a function that invokes 'exception_method' wrapped with the error handling decorator signature
         if func == "decorator":
-            @exc.layer_error_handler(
+            @LayerErrorHandler.layer_error_handler(
                 error_map=self.test_map,
                 base_exception=DefaultError,
                 exclude=exclude,
@@ -72,7 +67,7 @@ class TestClass:
                 try:
                     self.exception_method()
                 except Exception as e:
-                    raise exc.translate_error(
+                    raise LayerErrorHandler.translate_error(
                         e,
                         self.test_map,
                         DefaultError,
@@ -85,7 +80,7 @@ class TestClass:
         
         # Return a function that invokes 'exception_method' using the error handling wrapper
         elif func == "wrapper":
-            wrapped = exc.wrap_error_handler(
+            wrapped = LayerErrorHandler.wrap_error_handler(
                 self.exception_method,
                 self.test_map,
                 DefaultError,

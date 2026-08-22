@@ -8,7 +8,7 @@ We use `mkdocs` to generate Markdown and HTML files for our backend documentatio
 * `mkdocs build` - Build the documentation site.
 * `mkdocs -h` - Print help message and exit.
 
-## Project layout
+## Documentation layout
 
     backend
         mkdocs.yml    # The configuration file.

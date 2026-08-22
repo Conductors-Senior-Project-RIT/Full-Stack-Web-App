@@ -1,14 +1,11 @@
-from datetime import datetime
-from pprint import pprint
 import unittest
-from unittest.mock import patch
 import zoneinfo
+from datetime import datetime
+from unittest.mock import patch
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from backend.src.db.record_types import RecordFactory
-from backend.src.db.record_repo import RecordRepository
 from backend.src.db.db_core.exceptions import (
     RepositoryError,
     RepositoryInternalError,
@@ -16,8 +13,10 @@ from backend.src.db.db_core.exceptions import (
     RepositoryNotFoundError,
     RepositoryParsingError,
 )
+from backend.src.db.record_repo import RecordRepository
+from backend.src.db.record_types import RecordFactory
 from backend.test.base_test_case import BaseTestCase
-from backend.test.db.test_utils import compare_results_ordered, collation_valid
+from backend.test.db.test_utils import collation_valid, compare_results_ordered
 
 # Current test data has 8 records
 TEST_RECORD_COUNT = 8
