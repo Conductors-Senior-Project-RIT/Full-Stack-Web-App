@@ -1,0 +1,4630 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../symbol_repo/">
+      
+      
+        <link rel="next" href="../../error/docs/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>User Repository - Tracksense Backend Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#src.db.user_repo" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Tracksense Backend Documentation" class="md-header__button md-logo" aria-label="Tracksense Backend Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Tracksense Backend Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              User Repository
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Tracksense Backend Documentation" class="md-nav__button md-logo" aria-label="Tracksense Backend Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Tracksense Backend Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/decorators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decorators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/user/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/user_preferences/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Preferences
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/volunteer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Volunteer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/station/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/history/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Train History
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/recent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recent Activities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/collation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Collation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Service
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/service_core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/record_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/station_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/symbol_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Symbol Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/user_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/email_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Email Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Repository
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/repository/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../record_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../record_types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../station_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../symbol_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Symbol Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Repository
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.user_repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        user_repo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UserRepository
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="UserRepository">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.create_new_user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_new_user
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.create_user_reset_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_user_reset_token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.create_user_station_preference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_user_station_preference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.delete_user_id_from_reset_requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete_user_id_from_reset_requests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.delete_user_preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete_user_preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.email_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        email_exists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_station_id_from_user_preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_station_id_from_user_preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_user_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_user_id
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_user_id_from_valid_reset_request_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_user_id_from_valid_reset_request_token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_user_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_user_info
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_user_start_and_end_times" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_user_start_and_end_times
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.unique_email_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unique_email_exists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.unique_id_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unique_id_exists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.update_account_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update_account_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.update_user_password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update_user_password
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.update_user_times" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update_user_times
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../error/docs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.user_repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        user_repo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UserRepository
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="UserRepository">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.create_new_user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_new_user
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.create_user_reset_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_user_reset_token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.create_user_station_preference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_user_station_preference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.delete_user_id_from_reset_requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete_user_id_from_reset_requests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.delete_user_preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete_user_preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.email_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        email_exists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_station_id_from_user_preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_station_id_from_user_preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_user_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_user_id
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_user_id_from_valid_reset_request_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_user_id_from_valid_reset_request_token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_user_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_user_info
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.get_user_start_and_end_times" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_user_start_and_end_times
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.unique_email_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unique_email_exists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.unique_id_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unique_id_exists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.update_account_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update_account_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.update_user_password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update_user_password
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.user_repo.UserRepository.update_user_times" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update_user_times
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>User Repository</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="src.db.user_repo"></a>
+    <div class="doc doc-contents first">
+
+        <p>User database layer</p>
+<p>This module handles all database CRUD operations for User and UserPreferences records.
+This includes (but is not limited to): account creation, preference management, and the password reset token lifecycle</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="src.db.user_repo.UserRepository" class="doc doc-heading">
+            <code>UserRepository</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="RepositoryErrorWrapper (src.db.db_core.exceptions.RepositoryErrorWrapper)" href="../core/exceptions/#src.db.db_core.exceptions.RepositoryErrorWrapper">RepositoryErrorWrapper</a></code>, <code><a class="autorefs autorefs-internal" title="BaseRepository (src.db.db_core.repository.BaseRepository)" href="../core/repository/#src.db.db_core.repository.BaseRepository">BaseRepository</a>[<a class="autorefs autorefs-internal" title="User (src.db.db_core.models.User)" href="../core/models/#src.db.db_core.models.User">User</a>]</code></p>
+
+
+
+        <p>A database interface for User and UserPreferences record operations</p>
+<p>All methods are wrapped with the RepositoryErrorWrapper to provide error handling.</p>
+<p>Raw SQL queries are wrapped for the 'Users', 'UserPreferences', and 'reset_requests' tables.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>BaseRepository</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Inherits generic CRUD helpers that 'User' can leverage and extend upon.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src\db\user_repo.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">UserRepository</span><span class="p">(</span><span class="n">RepositoryErrorWrapper</span><span class="p">,</span> <span class="n">BaseRepository</span><span class="p">[</span><span class="n">User</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A database interface for User and UserPreferences record operations</span>
+
+<span class="sd">    All methods are wrapped with the RepositoryErrorWrapper to provide error handling.</span>
+
+<span class="sd">    Raw SQL queries are wrapped for the &#39;Users&#39;, &#39;UserPreferences&#39;, and &#39;reset_requests&#39; tables.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        BaseRepository: Inherits generic CRUD helpers that &#39;User&#39; can leverage and extend upon.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_construct_email_not_found</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">E</span><span class="o">.</span><span class="n">NOT_FOUND</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">E</span><span class="o">.</span><span class="n">NOT_FOUND</span><span class="p">(</span>
+            <span class="n">caller_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Could not find a user with an email = </span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">show_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_construct_id_not_found</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">E</span><span class="o">.</span><span class="n">NOT_FOUND</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">E</span><span class="o">.</span><span class="n">NOT_FOUND</span><span class="p">(</span>
+            <span class="n">caller_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Could not find a user with an ID = </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">show_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_new_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inserts a new user record and returns the generated primary key</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            email (str): user&#39;s normalized email address</span>
+<span class="sd">            password (str): user&#39;s bcrypt hashed password</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: the newly created user primary key</span>
+
+<span class="sd">        Raises RepositoryInternalError: if the INSERT fails then there was a constraint violation on the &#39;email&#39; field.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            INSERT INTO Users (email, passwd) </span>
+<span class="s2">            VALUES (:email, :password)</span>
+<span class="s2">            RETURNING id</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="n">password</span><span class="p">}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">scalar_one</span><span class="p">()</span>  <span class="c1"># error comes from unqiue constraint on emails</span>
+
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_translate_and_raise</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s2">&quot;An error occurred creating a new user!&quot;</span><span class="p">)</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">unique_email_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Raises an error if no user with the provided email exists</span>
+
+<span class="sd">        Method acts as a guard before operations that require an existing user.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: if no matching email is found</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(1) FROM Users WHERE email = :email&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">})</span><span class="o">.</span><span class="n">scalar_one</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_email_not_found</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">email_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if an account/user with the provided email exists, False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(1) FROM Users WHERE email = :email&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">})</span><span class="o">.</span><span class="n">scalar_one</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">result</span> <span class="o">&gt;</span> <span class="mi">0</span>  <span class="c1"># &gt;0 because returning count</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">unique_id_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Raises an error if no user with the provided ID exists.</span>
+
+<span class="sd">        Method acts as a guard before operations that require an existing user.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            user_id(int): user primary key to check</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: if no user with the given &#39;user_id&#39; is found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(1) FROM Users WHERE id = :user_id&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">})</span><span class="o">.</span><span class="n">scalar_one</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_id_not_found</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the primary key of the user with the given email</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT id FROM Users WHERE email = :email&quot;</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">})</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_email_not_found</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">user</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_user_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns all columns for the user with the given email as a dictionary</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            email (str): email address to look up.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: column names mapped to values for the matching row</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: if no user with provided email exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM Users WHERE email = :email&quot;</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">})</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_email_not_found</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span>  <span class="c1"># leftoff here; finish user_service that uses this lol; im at login() part now</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_account_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_role</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the &#39;acc_status&#39; (role) of a user with the provided email</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            email (str): The email address of the user to update.</span>
+<span class="sd">            new_role (int): The new role value to assign.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The updated &#39;acc_status&#39; value.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: if no user with &#39;email&#39; exists.</span>
+<span class="sd">            RepositoryInternalError: if the UPDATE produces no changes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if user exists, will raise exception otherwise</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_email_exists</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            UPDATE Users </span>
+<span class="s2">            SET acc_status = :role </span>
+<span class="s2">            WHERE email = :email</span>
+<span class="s2">            RETURNING acc_status</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">new_role</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">}</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred updating account status, 0 changes made!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_user_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">hashed_password</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A user&#39;s password is replaced with a new one.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            user_id (int): the primary key of the user to update.</span>
+<span class="sd">            hashed_password (str): the new hashed password to use now.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The updated user&#39;s primary key</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: If no user with &#39;user_id&#39; exists.</span>
+<span class="sd">            RepositoryInternalError: if an UPDATE produces no changes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if user exists, will raise exception otherwise.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_exists</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            UPDATE Users </span>
+<span class="s2">            SET passwd = :passwd_hash </span>
+<span class="s2">            WHERE id = :user_id</span>
+<span class="s2">            RETURNING id</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;passwd_hash&quot;</span><span class="p">:</span> <span class="n">hashed_password</span><span class="p">,</span> <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred updating password, 0 changes made!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_user_times</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_time</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_time</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the notification start and end times for a user</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            user_id (int): The primary key of the user to update</span>
+<span class="sd">            start_time (str): The new notification start time</span>
+<span class="sd">            end_time (str): The new notification end time</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[str, str]: The updated (starting_time, ending_time) values</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: If no user with the provided &#39;user_id&#39; exists</span>
+<span class="sd">            RepositoryInternalError: If the UPDATE produces no changes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if user exists, will raise exception otherwise.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_exists</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            UPDATE Users</span>
+<span class="s2">            SET starting_time = :start_time, ending_time = :ending_time</span>
+<span class="s2">            WHERE id = :uid</span>
+<span class="s2">            RETURNING starting_time, ending_time</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="n">start_time</span><span class="p">,</span>
+            <span class="s2">&quot;ending_time&quot;</span><span class="p">:</span> <span class="n">end_time</span><span class="p">,</span>
+            <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred updating user times, 0 changes made!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">starting_time</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">ending_time</span>
+
+    <span class="c1"># below is related to userpreferencesapi.py, they get user_id many different ways lol</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_user_start_and_end_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the notification window (start and end) times for a given user (user_id)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            user_id (int): The primary key of the user to query.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[int, int]: The (starting_time, ending_time) values</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: If no user with &#39;user_id&#39; exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT starting_time, ending_time FROM Users WHERE id = :user_id&quot;</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+
+        <span class="n">user_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">user_times</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Incorrectly sized results</span>
+            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_id_not_found</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">user_times</span><span class="o">.</span><span class="n">starting_time</span><span class="p">,</span> <span class="n">user_times</span><span class="o">.</span><span class="n">ending_time</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_station_id_from_user_preferences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns all station IDs in a user&#39;s preference list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            user_id (int): The primary key of the user to query</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Row objects each containing a &#39;station_id&#39;</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: If no user with &#39;user_id&#39; exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if a single user with provided id exists, otherwise raise exception</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_exists</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT station_id FROM UserPreferences WHERE user_id = :user_id&quot;</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete_user_preferences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScalarResult</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deletes all preference rows for a given user and returns the removed station IDs</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            user_id (int): The primary key of the user whose preferences will be deleted.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ScalarResult[Any]: The &#39;station_id&#39; values that were deleted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            DELETE FROM UserPreferences</span>
+<span class="s2">            WHERE user_id = :user_id</span>
+<span class="s2">            RETURNING station_id</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">scalars</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_user_station_preference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">station_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inserts a single station preference row in a user&#39;s preference list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            user_id (int): The primary key of the user.</span>
+<span class="sd">            station_id (int): The station ID to add to the user&#39;s preference list</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryInternalError: If the INSERT produces no result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            INSERT INTO UserPreferences (user_id, station_id) </span>
+<span class="s2">            VALUES (:user_id, :station_id)</span>
+<span class="s2">            RETURNING station_id</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">&quot;station_id&quot;</span><span class="p">:</span> <span class="n">station_id</span><span class="p">}</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred creating new user preference, 0 additions made!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_user_reset_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">hashed_token</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stores a hashed password reset token with a 1 hour expiration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            user_id (int): The primary key of the user requesting a password reset token </span>
+<span class="sd">            hashed_token (str): The hex digest of the raw password reset token</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryInternalError: If the INSERT produces no result.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            INSERT INTO reset_requests (uid, token, expiration) </span>
+<span class="s2">            VALUES (:user_id, :token_hash, NOW() + INTERVAL &#39;1 hour&#39;)</span>
+<span class="s2">            RETURNING id</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">&quot;token_hash&quot;</span><span class="p">:</span> <span class="n">hashed_token</span><span class="p">}</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred creating new reset token, no token created!&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_user_id_from_valid_reset_request_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_hash</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the user ID associated with a valid, unexpired reset token</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            token_hash (str): The hex digest of the raw password reset token</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int | None: The matching user&#39;s ID, or None if the token is invalid or expired</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            SELECT u.id FROM reset_requests as r</span>
+<span class="s2">            INNER JOIN Users AS u ON r.uid = u.id</span>
+<span class="s2">            WHERE r.token = :token_hash AND r.expiration &gt;= NOW();</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;token_hash&quot;</span><span class="p">:</span> <span class="n">token_hash</span><span class="p">}</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete_user_id_from_reset_requests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes all password reset request rows for a given user.</span>
+
+<span class="sd">        Called after a successful password reset to invalidate used tokens.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            user_id (int): The primary key of the user whose password reset token(s) we wish to delete.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;DELETE FROM reset_requests WHERE uid = :user_id RETURNING id;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">})</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.create_new_user" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">create_new_user</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Inserts a new user record and returns the generated primary key</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>email</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>user's normalized email address</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>password</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>user's bcrypt hashed password</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>int</code></td>            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>the newly created user primary key</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Raises RepositoryInternalError: if the INSERT fails then there was a constraint violation on the 'email' field.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_new_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inserts a new user record and returns the generated primary key</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        email (str): user&#39;s normalized email address</span>
+<span class="sd">        password (str): user&#39;s bcrypt hashed password</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: the newly created user primary key</span>
+
+<span class="sd">    Raises RepositoryInternalError: if the INSERT fails then there was a constraint violation on the &#39;email&#39; field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        INSERT INTO Users (email, passwd) </span>
+<span class="s2">        VALUES (:email, :password)</span>
+<span class="s2">        RETURNING id</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="n">password</span><span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">scalar_one</span><span class="p">()</span>  <span class="c1"># error comes from unqiue constraint on emails</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_translate_and_raise</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s2">&quot;An error occurred creating a new user!&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.create_user_reset_token" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">create_user_reset_token</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">hashed_token</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Stores a hashed password reset token with a 1 hour expiration.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The primary key of the user requesting a password reset token </p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hashed_token</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The hex digest of the raw password reset token</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryInternalError">RepositoryInternalError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the INSERT produces no result.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_user_reset_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">hashed_token</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stores a hashed password reset token with a 1 hour expiration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): The primary key of the user requesting a password reset token </span>
+<span class="sd">        hashed_token (str): The hex digest of the raw password reset token</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryInternalError: If the INSERT produces no result.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        INSERT INTO reset_requests (uid, token, expiration) </span>
+<span class="s2">        VALUES (:user_id, :token_hash, NOW() + INTERVAL &#39;1 hour&#39;)</span>
+<span class="s2">        RETURNING id</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">&quot;token_hash&quot;</span><span class="p">:</span> <span class="n">hashed_token</span><span class="p">}</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred creating new reset token, no token created!&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.create_user_station_preference" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">create_user_station_preference</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">station_id</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Inserts a single station preference row in a user's preference list.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The primary key of the user.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>station_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The station ID to add to the user's preference list</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryInternalError">RepositoryInternalError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the INSERT produces no result</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_user_station_preference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">station_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inserts a single station preference row in a user&#39;s preference list.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): The primary key of the user.</span>
+<span class="sd">        station_id (int): The station ID to add to the user&#39;s preference list</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryInternalError: If the INSERT produces no result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        INSERT INTO UserPreferences (user_id, station_id) </span>
+<span class="s2">        VALUES (:user_id, :station_id)</span>
+<span class="s2">        RETURNING station_id</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">&quot;station_id&quot;</span><span class="p">:</span> <span class="n">station_id</span><span class="p">}</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred creating new user preference, 0 additions made!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.delete_user_id_from_reset_requests" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">delete_user_id_from_reset_requests</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Removes all password reset request rows for a given user.</p>
+<p>Called after a successful password reset to invalidate used tokens.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The primary key of the user whose password reset token(s) we wish to delete.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_user_id_from_reset_requests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes all password reset request rows for a given user.</span>
+
+<span class="sd">    Called after a successful password reset to invalidate used tokens.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): The primary key of the user whose password reset token(s) we wish to delete.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;DELETE FROM reset_requests WHERE uid = :user_id RETURNING id;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">})</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.delete_user_preferences" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">delete_user_preferences</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Deletes all preference rows for a given user and returns the removed station IDs</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The primary key of the user whose preferences will be deleted.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="sqlalchemy.ScalarResult">ScalarResult</span>[<span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>ScalarResult[Any]: The 'station_id' values that were deleted.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">delete_user_preferences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScalarResult</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deletes all preference rows for a given user and returns the removed station IDs</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): The primary key of the user whose preferences will be deleted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ScalarResult[Any]: The &#39;station_id&#39; values that were deleted.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        DELETE FROM UserPreferences</span>
+<span class="s2">        WHERE user_id = :user_id</span>
+<span class="s2">        RETURNING station_id</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">scalars</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.email_exists" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">email_exists</span><span class="p">(</span><span class="n">email</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns True if an account/user with the provided email exists, False otherwise</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">email_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns True if an account/user with the provided email exists, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(1) FROM Users WHERE email = :email&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">})</span><span class="o">.</span><span class="n">scalar_one</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">result</span> <span class="o">&gt;</span> <span class="mi">0</span>  <span class="c1"># &gt;0 because returning count</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.get_station_id_from_user_preferences" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_station_id_from_user_preferences</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns all station IDs in a user's preference list.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The primary key of the user to query</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>list</code></td>            <td>
+                  <code><span title="list">list</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Row objects each containing a 'station_id'</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If no user with 'user_id' exists.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_station_id_from_user_preferences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns all station IDs in a user&#39;s preference list.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): The primary key of the user to query</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: Row objects each containing a &#39;station_id&#39;</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: If no user with &#39;user_id&#39; exists.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check if a single user with provided id exists, otherwise raise exception</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_exists</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT station_id FROM UserPreferences WHERE user_id = :user_id&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.get_user_id" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_user_id</span><span class="p">(</span><span class="n">email</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns the primary key of the user with the given email</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_user_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the primary key of the user with the given email</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT id FROM Users WHERE email = :email&quot;</span><span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">})</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_email_not_found</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">user</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.get_user_id_from_valid_reset_request_token" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_user_id_from_valid_reset_request_token</span><span class="p">(</span><span class="n">token_hash</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns the user ID associated with a valid, unexpired reset token</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>token_hash</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The hex digest of the raw password reset token</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>int | None: The matching user's ID, or None if the token is invalid or expired</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_user_id_from_valid_reset_request_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_hash</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the user ID associated with a valid, unexpired reset token</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        token_hash (str): The hex digest of the raw password reset token</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int | None: The matching user&#39;s ID, or None if the token is invalid or expired</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT u.id FROM reset_requests as r</span>
+<span class="s2">        INNER JOIN Users AS u ON r.uid = u.id</span>
+<span class="s2">        WHERE r.token = :token_hash AND r.expiration &gt;= NOW();</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;token_hash&quot;</span><span class="p">:</span> <span class="n">token_hash</span><span class="p">}</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.get_user_info" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_user_info</span><span class="p">(</span><span class="n">email</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns all columns for the user with the given email as a dictionary</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>email</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>email address to look up.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>dict</code></td>            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>column names mapped to values for the matching row</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>if no user with provided email exists.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_user_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns all columns for the user with the given email as a dictionary</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        email (str): email address to look up.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: column names mapped to values for the matching row</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: if no user with provided email exists.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM Users WHERE email = :email&quot;</span><span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">})</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_email_not_found</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span>  <span class="c1"># leftoff here; finish user_service that uses this lol; im at login() part now</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.get_user_start_and_end_times" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_user_start_and_end_times</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns the notification window (start and end) times for a given user (user_id)</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The primary key of the user to query.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="tuple">tuple</span>[<span title="int">int</span>, <span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>tuple[int, int]: The (starting_time, ending_time) values</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If no user with 'user_id' exists.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_user_start_and_end_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the notification window (start and end) times for a given user (user_id)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): The primary key of the user to query.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple[int, int]: The (starting_time, ending_time) values</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: If no user with &#39;user_id&#39; exists.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT starting_time, ending_time FROM Users WHERE id = :user_id&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+
+    <span class="n">user_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">user_times</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Incorrectly sized results</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_id_not_found</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">user_times</span><span class="o">.</span><span class="n">starting_time</span><span class="p">,</span> <span class="n">user_times</span><span class="o">.</span><span class="n">ending_time</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.unique_email_exists" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">unique_email_exists</span><span class="p">(</span><span class="n">email</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Raises an error if no user with the provided email exists</p>
+<p>Method acts as a guard before operations that require an existing user.</p>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>if no matching email is found</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">unique_email_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raises an error if no user with the provided email exists</span>
+
+<span class="sd">    Method acts as a guard before operations that require an existing user.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: if no matching email is found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(1) FROM Users WHERE email = :email&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">})</span><span class="o">.</span><span class="n">scalar_one</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_email_not_found</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.unique_id_exists" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">unique_id_exists</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Raises an error if no user with the provided ID exists.</p>
+<p>Method acts as a guard before operations that require an existing user.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>user primary key to check</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>if no user with the given 'user_id' is found.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">unique_id_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raises an error if no user with the provided ID exists.</span>
+
+<span class="sd">    Method acts as a guard before operations that require an existing user.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id(int): user primary key to check</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: if no user with the given &#39;user_id&#39; is found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(1) FROM Users WHERE id = :user_id&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">})</span><span class="o">.</span><span class="n">scalar_one</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_id_not_found</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.update_account_status" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">update_account_status</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">new_role</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Updates the 'acc_status' (role) of a user with the provided email</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>email</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The email address of the user to update.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>new_role</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new role value to assign.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>int</code></td>            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The updated 'acc_status' value.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>if no user with 'email' exists.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryInternalError">RepositoryInternalError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>if the UPDATE produces no changes.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_account_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_role</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the &#39;acc_status&#39; (role) of a user with the provided email</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        email (str): The email address of the user to update.</span>
+<span class="sd">        new_role (int): The new role value to assign.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: The updated &#39;acc_status&#39; value.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: if no user with &#39;email&#39; exists.</span>
+<span class="sd">        RepositoryInternalError: if the UPDATE produces no changes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check if user exists, will raise exception otherwise</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">unique_email_exists</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        UPDATE Users </span>
+<span class="s2">        SET acc_status = :role </span>
+<span class="s2">        WHERE email = :email</span>
+<span class="s2">        RETURNING acc_status</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">new_role</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">}</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred updating account status, 0 changes made!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.update_user_password" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">update_user_password</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">hashed_password</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A user's password is replaced with a new one.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>the primary key of the user to update.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hashed_password</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>the new hashed password to use now.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>int</code></td>            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The updated user's primary key</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If no user with 'user_id' exists.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryInternalError">RepositoryInternalError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>if an UPDATE produces no changes.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_user_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">hashed_password</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A user&#39;s password is replaced with a new one.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): the primary key of the user to update.</span>
+<span class="sd">        hashed_password (str): the new hashed password to use now.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: The updated user&#39;s primary key</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: If no user with &#39;user_id&#39; exists.</span>
+<span class="sd">        RepositoryInternalError: if an UPDATE produces no changes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check if user exists, will raise exception otherwise.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_exists</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        UPDATE Users </span>
+<span class="s2">        SET passwd = :passwd_hash </span>
+<span class="s2">        WHERE id = :user_id</span>
+<span class="s2">        RETURNING id</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;passwd_hash&quot;</span><span class="p">:</span> <span class="n">hashed_password</span><span class="p">,</span> <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">scalar_one_or_none</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred updating password, 0 changes made!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.user_repo.UserRepository.update_user_times" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">update_user_times</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Updates the notification start and end times for a user</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_id</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The primary key of the user to update</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>start_time</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new notification start time</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>end_time</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The new notification end time</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="tuple">tuple</span>[<span title="str">str</span>, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>tuple[str, str]: The updated (starting_time, ending_time) values</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If no user with the provided 'user_id' exists</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryInternalError">RepositoryInternalError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the UPDATE produces no changes</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\user_repo.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_user_times</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_time</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_time</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the notification start and end times for a user</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user_id (int): The primary key of the user to update</span>
+<span class="sd">        start_time (str): The new notification start time</span>
+<span class="sd">        end_time (str): The new notification end time</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple[str, str]: The updated (starting_time, ending_time) values</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: If no user with the provided &#39;user_id&#39; exists</span>
+<span class="sd">        RepositoryInternalError: If the UPDATE produces no changes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check if user exists, will raise exception otherwise.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">unique_id_exists</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        UPDATE Users</span>
+<span class="s2">        SET starting_time = :start_time, ending_time = :ending_time</span>
+<span class="s2">        WHERE id = :uid</span>
+<span class="s2">        RETURNING starting_time, ending_time</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="n">start_time</span><span class="p">,</span>
+        <span class="s2">&quot;ending_time&quot;</span><span class="p">:</span> <span class="n">end_time</span><span class="p">,</span>
+        <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">text</span><span class="p">(</span><span class="n">sql</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">INTERNAL_ERROR</span><span class="p">,</span> <span class="s2">&quot;An error occurred updating user times, 0 changes made!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">starting_time</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">ending_time</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1939 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../station/">
+      
+      
+        <link rel="next" href="../recent/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Train History - Tracksense Backend Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#train-history-endpoints" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Tracksense Backend Documentation" class="md-header__button md-logo" aria-label="Tracksense Backend Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Tracksense Backend Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Train History
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Tracksense Backend Documentation" class="md-nav__button md-logo" aria-label="Tracksense Backend Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Tracksense Backend Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/decorators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decorators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_preferences/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Preferences
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../volunteer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Volunteer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../station/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Train History
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Train History
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#get-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /history
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GET /history">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-fields-for-eot-hot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Response Fields for EOT &amp; HOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-eot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example EOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-hot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example HOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /history
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="POST /history">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#body-parameters-for-eot-hot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Body Parameters for EOT &amp; HOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-eot_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example EOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-hot_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example HOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recent Activities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../collation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Collation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Service
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/service_core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/record_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/station_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/symbol_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Symbol Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/user_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/email_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Email Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Repository
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/core/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/core/models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/core/repository/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/record_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/record_types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/station_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/symbol_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Symbol Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/user_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../error/docs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#get-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GET /history
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GET /history">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-fields-for-eot-hot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Response Fields for EOT &amp; HOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-eot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example EOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-hot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example HOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST /history
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="POST /history">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#body-parameters-for-eot-hot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Body Parameters for EOT &amp; HOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-eot_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example EOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-hot_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example HOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="train-history-endpoints">Train History Endpoints</h1>
+<p>These endpoints deal mostly with retrieving and creating EOT and HOT records. The creation of these records lies in the stations receiving the radio data. The users then access the data stored in the database.</p>
+<h2 id="get-history">GET <code>/history</code></h2>
+<p>Returns a singular record depending on the signal type and ID provided.</p>
+<p>Uses <a class="autorefs autorefs-internal" href="../../service/record_service/#src.service.record_service.RecordService"><code>RecordService</code></a>.</p>
+<h3 id="query-parameters">Query Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>integer</td>
+<td>Yes</td>
+<td>The type of the train record that is being retrieved. EOT: <code>1</code>, HOT: <code>2</code>, DPU: <code>3</code>. Currently, DPU is not supported.</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>integer</td>
+<td>Yes</td>
+<td>The ID of the record to retrieve.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="response-fields-for-eot-hot">Response Fields for EOT &amp; HOT</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>integer</td>
+<td>The ID of the record.</td>
+</tr>
+<tr>
+<td><code>date_rec</code></td>
+<td>string</td>
+<td>The date the record data was received by a station (or server).</td>
+</tr>
+<tr>
+<td><code>station_name</code></td>
+<td>integer</td>
+<td>The ID of a station that the data was recorded at.</td>
+</tr>
+<tr>
+<td><code>symb_name</code></td>
+<td>string</td>
+<td>The name of the symbol assigned to a record.</td>
+</tr>
+<tr>
+<td><code>unit_addr</code></td>
+<td>string</td>
+<td>The unit address assigned to a record. This was never described to our team, but it might be the address of the unit sending the signal?</td>
+</tr>
+<tr>
+<td><code>verified</code></td>
+<td>boolean</td>
+<td>Whether a record was verified by a Volunteer or Admin.</td>
+</tr>
+</tbody>
+</table>
+<p><strong><em>Specific Fields for EOT</em></strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>brake_pressure</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>motion</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>marker_light</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>turbine</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>batter_cond</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>battery_charge</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>arm_status</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>signal_strength</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong><em>Specific Fields for HOT</em></strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frame_sync</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>command</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>checkbits</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>parity</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-eot">Example EOT</h3>
+<div class="highlight"><pre><span></span><code>GET https://followthatfred.com/api/history?type=1&amp;id=720000
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">720000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;date_rec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-04-26 00:09:32&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;station_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Silver Springs&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;symbol_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;unit_addr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;76315&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;brake_pressure&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;62&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;motion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;marker_light&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;turbine&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battery_cond&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Good&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battery_charge&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;arm_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Unarmed&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;signal_strength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">85.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;verified&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="example-hot">Example HOT</h3>
+<div class="highlight"><pre><span></span><code>GET https://followthatfred.com/api/history?type=2&amp;id=20000
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;date_rec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-28 18:41:41.947820&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;station_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fairport&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;symbol_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;unit_addr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5354&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;frame_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Status request&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;checkbits&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;parity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;verified&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="post-history">POST <code>/history</code></h2>
+<p>Adds new record to the database. Additionally, handles logic for updating the map pins to know which signals are the most recently detected with that unit address. The notification system was broken when we received the project; however, the request should also determine whether input data warrants sending a notification, and then make the appropriate calls to notify users about the new train data.</p>
+<p>Uses <a class="autorefs autorefs-internal" href="../../service/record_service/#src.service.record_service.RecordService"><code>RecordService</code></a>.</p>
+<h3 id="body-parameters-for-eot-hot">Body Parameters for EOT &amp; HOT</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>integer</td>
+<td>Yes</td>
+<td>The type of record that is being created. EOT: <code>1</code>, HOT: <code>2</code>, DPU: <code>3</code>. Currently, DPU is not supported.</td>
+</tr>
+<tr>
+<td><code>date_rec</code></td>
+<td>string</td>
+<td>No</td>
+<td>The date and time the signal was received. This should be included if the station failed to create a record on the server. When excluded, the server assumes no recovery request was made after a failed creation attempt, and timestamps the record using the time the request arrived. Format: <code>%Y-%m-%d %H:%M:%S</code></td>
+</tr>
+<tr>
+<td><code>station_id</code></td>
+<td>integer</td>
+<td>Yes</td>
+<td>The station ID where the signal data was recorded at.</td>
+</tr>
+<tr>
+<td><code>unit_addr</code></td>
+<td>string</td>
+<td>No</td>
+<td>The unit address assigned to a record. This was never described to our team, but it might be the address of the unit sending the signal?</td>
+</tr>
+<tr>
+<td><code>signal_strength</code></td>
+<td>float</td>
+<td>No</td>
+<td>Strength of the recorded signal. Default: 0.0</td>
+</tr>
+</tbody>
+</table>
+<p><strong><em>Specific Fields for EOT</em></strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>brake_pressure</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>motion</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>marker_light</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>turbine</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>batter_cond</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>battery_charge</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>arm_status</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p><strong><em>Specific Fields for HOT</em></strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frame_sync</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>command</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>checkbits</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>parity</code></td>
+<td>string</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-eot_1">Example EOT</h3>
+<div class="highlight"><pre><span></span><code>POST https://followthatfred.com/api/history
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;date_rec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-25 03:55:55&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;station_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;unit_addr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5544&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;signal_strength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">80.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;brake_pressure&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;62&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;motion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;marker_light&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;turbine&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battery_cond&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Good&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battery_charge&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;arm_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Unarmed&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="example-hot_1">Example HOT</h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;date_rec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-28 18:41:41&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;station_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;unit_addr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5354&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;signal_strength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">60.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;frame_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;something&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Status request&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;checkbits&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;something&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;parity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;something&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

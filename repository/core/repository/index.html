@@ -1,0 +1,4125 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../models/">
+      
+      
+        <link rel="next" href="../../record_repo/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Repository - Tracksense Backend Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#types" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Tracksense Backend Documentation" class="md-header__button md-logo" aria-label="Tracksense Backend Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Tracksense Backend Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Repository
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Tracksense Backend Documentation" class="md-nav__button md-logo" aria-label="Tracksense Backend Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Tracksense Backend Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/core/decorators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decorators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/core/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/user/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/user_preferences/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Preferences
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/volunteer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Volunteer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/station/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/history/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Train History
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/recent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recent Activities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/collation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Collation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Service
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../service/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../service/service_core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../service/record_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../service/station_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../service/symbol_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Symbol Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../service/user_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../service/email_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Email Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Repository
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type Definitions Used
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Type Definitions Used">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modeltype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ModelType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#singleresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SingleResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#collectionresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CollectionResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.db_core.repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        repository
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.AsDictConvertible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AsDictConvertible
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BaseRepository
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BaseRepository">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.objs_to_dicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        objs_to_dicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.update_with_pk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update_with_pk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../record_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../record_types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../station_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../symbol_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Symbol Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../error/docs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../testing/tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type Definitions Used
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Type Definitions Used">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modeltype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ModelType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#singleresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SingleResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#collectionresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CollectionResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.db_core.repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        repository
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.AsDictConvertible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AsDictConvertible
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BaseRepository
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BaseRepository">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.objs_to_dicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        objs_to_dicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.db.db_core.repository.BaseRepository.update_with_pk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update_with_pk
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Repository</h1>
+
+<h2 id="types">Type Definitions Used</h2>
+<h3 id="modeltype"><code>ModelType</code></h3>
+<p>A generic type variable that is constrained to only accept types that are subclasses of <a class="autorefs autorefs-internal" href="../models/#src.db.db_core.models.Base"><code>Base</code></a>. Provides type safety by rejecting incompatible types at runtime.</p>
+<p><strong>Bound To</strong>: <a class="autorefs autorefs-internal" href="../models/#src.db.db_core.models.Base"><code>Base</code></a></p>
+<h3 id="singleresult"><code>SingleResult</code></h3>
+<p>A return type that can either be a <code>ModelType</code> or <code>dict</code> instance.</p>
+<p><strong>Bound To:</strong> <code>dict</code> <em>or</em> <code>ModelType</code></p>
+<h3 id="collectionresult"><code>CollectionResult</code></h3>
+<p>A return type that can be a list of <code>ModelType</code> or <code>dict</code> instances.</p>
+<p><strong>Bound To:</strong> <code>list[ModelType]</code> <em>or</em> <code>list[dict]</code></p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="src.db.db_core.repository"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="src.db.db_core.repository.AsDictConvertible" class="doc doc-heading">
+            <code>AsDictConvertible</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="typing.Protocol">Protocol</span></code></p>
+
+
+
+        <p>This protocol can be passed into a class to specify dictionary conversion
+capabilities.</p>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src\db\db_core\repository.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@runtime_checkable</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AsDictConvertible</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This protocol can be passed into a class to specify dictionary conversion</span>
+<span class="sd">    capabilities.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span> <span class="o">...</span>  <span class="c1"># pragma: no cover</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span> <span class="o">...</span>  <span class="c1"># pragma: no cover</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="src.db.db_core.repository.BaseRepository" class="doc doc-heading">
+            <code>BaseRepository</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="RepositoryErrorInvoker (src.db.db_core.exceptions.RepositoryErrorInvoker)" href="../exceptions/#src.db.db_core.exceptions.RepositoryErrorInvoker">RepositoryErrorInvoker</a></code>, <code><span title="typing.Generic">Generic</span>[<span title="src.db.db_core.repository.ModelType">ModelType</span>]</code></p>
+
+
+
+        <p>Base class for a repository, supporting CRUD functionality for SQLAlchemy ORMs. This
+class uses a generic, <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a>, which is bound <a class="autorefs autorefs-internal" href="../models/#src.db.db_core.models.Base"><code>Base</code></a>, defining the 
+model to operate on. Methods in this class return <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a>, but conversion to a 
+<code>dict</code> as a return type is supported if the provided model extends <a class="autorefs autorefs-internal" href="../models/#src.db.db_core.models.Base"><code>Base</code></a>.</p>
+<p>Uses a generic type variable that defines the ORM model this instance will query in the provided
+<code>Session</code>. Only models that extend <a class="autorefs autorefs-internal" href="../models/#src.db.db_core.models.Base"><code>Base</code></a> are permitted.</p>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">db_core.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Station</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">db_core.repository</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRepository</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">StationRepository</span><span class="p">(</span><span class="n">BaseRepository</span><span class="p">[</span><span class="n">Station</span><span class="p">]):</span>
+     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">):</span>
+         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">Station</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+</code></pre></div>
+</details>        <p><em>Note:</em> All methods in this class <code>flush</code> model changes
+        in the session; however, these changes are not reflected in the database
+        until a higher layer commits them.</p>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src\db\db_core\repository.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseRepository</span><span class="p">(</span><span class="n">RepositoryErrorInvoker</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">ModelType</span><span class="p">]):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for a repository, supporting CRUD functionality for SQLAlchemy ORMs. This</span>
+<span class="sd">    class uses a generic, [`ModelType`][types], which is bound [`Base`][...models.Base], defining the </span>
+<span class="sd">    model to operate on. Methods in this class return [`ModelType`][types], but conversion to a </span>
+<span class="sd">    `dict` as a return type is supported if the provided model extends [`Base`][...models.Base].</span>
+
+<span class="sd">    Uses a generic type variable that defines the ORM model this instance will query in the provided</span>
+<span class="sd">    `Session`. Only models that extend [`Base`][...models.Base] are permitted.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        ```python</span>
+<span class="sd">        from db_core.models import Station</span>
+<span class="sd">        from db_core.repository import BaseRepository</span>
+
+<span class="sd">        class StationRepository(BaseRepository[Station]):</span>
+<span class="sd">             def __init__(self, session: Session):</span>
+<span class="sd">                 super().__init__(Station, session)</span>
+<span class="sd">        ```</span>
+
+<span class="sd">    *Note:* All methods in this class `flush` model changes</span>
+<span class="sd">            in the session; however, these changes are not reflected in the database</span>
+<span class="sd">            until a higher layer commits them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelType</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a repository.</span>
+
+<span class="sd">        Defines the model and `Session` that the repository operates on. If the model</span>
+<span class="sd">        and session are valid, this instance maintains a reference to the model&#39;s</span>
+<span class="sd">        primary key through its `pkey` attribute.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (ModelType): The [ModelType][types] which extends [`Base`][....models.Base] </span>
+<span class="sd">                that the repository will operate on. The model provided defines which table to</span>
+<span class="sd">                manipulate in a provided `Session`.</span>
+<span class="sd">            session (Session): The SQLAlchemy session to use for database operations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">E</span><span class="o">.</span><span class="n">INVALID_ARG</span><span class="p">,</span> <span class="s2">&quot;A valid model must be provided to a repository!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">E</span><span class="o">.</span><span class="n">SESSION</span><span class="p">,</span> <span class="s2">&quot;A valid SQLAlchemy session must be provided to a repository!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+
+        <span class="c1"># Extract the primary key by inspecting the model&#39;s attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pkey</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">pkeys</span> <span class="o">=</span> <span class="n">inspect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">primary_key</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pkey</span> <span class="o">=</span> <span class="n">pkeys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">pkeys</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">except</span> <span class="n">NoInspectionAvailable</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkey</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SingleResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieves an ORM instance from the session&#39;s current state. By default, this</span>
+<span class="sd">        method returns a dictionary representation of the result, which can be turned</span>
+<span class="sd">        off by setting `to_dict` to `False`. A `RepositoryNotFoundError` is thrown if</span>
+<span class="sd">        the primary key cannot be found in the current session.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pkey (Any): Primary key value to search for in the current session,</span>
+<span class="sd">                typically an `int` or `str`.</span>
+<span class="sd">            to_dict (bool, optional): Specifies whether retrieved instance should be</span>
+<span class="sd">                returned as the [`ModelType`][types] or `dict`. Setting this field to `True`</span>
+<span class="sd">                returns the results as a `dict`; otherwise, a [`ModelType`][types]. Default value</span>
+<span class="sd">                is True.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: Thrown if an instance cannot be found in the</span>
+<span class="sd">                    current session with the provided `pkey`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (SingleResult): A [`ModelType`][types] or `dict` instance of the result.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">pkey</span><span class="p">)</span>
+
+        <span class="c1"># If an object cannot be found with the provided primary key, raise an error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">E</span><span class="o">.</span><span class="n">NOT_FOUND</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Could not </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2"> with a pkey = </span><span class="si">{</span><span class="n">pkey</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Return the retrieved instannce, either as its original ModelType or dictionary representation.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs_to_dicts</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="n">obj</span>
+
+
+    <span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">ModelType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]],</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CollectionResult</span><span class="p">:</span>  
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the provided objects with the provided new values.</span>
+
+<span class="sd">        The `objs` parameter is a list of tuples, where each tuple contains an</span>
+<span class="sd">        [`ModelType`][types] instance to update and a dictionary of new values to update that</span>
+<span class="sd">        instance with. By default, this method returns a list of dictionary</span>
+<span class="sd">        representations of the updated results, which can be turned off by setting</span>
+<span class="sd">        `to_dict` to `False` to instead return a list of [`ModelType`][types] instances.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            objs (list[tuple[ModelType, dict[str, Any]]]): A list of tuples, where each</span>
+<span class="sd">                tuple contains a [`ModelType`][types] instance (index 0) to update and a</span>
+<span class="sd">                dictionary of new values to update that instance with (index 1). The</span>
+<span class="sd">                keys in the dictionary should correspond to column names in the table,</span>
+<span class="sd">                and the values should be the new values to update those columns with. To</span>
+<span class="sd">                prevent updates to the primary key, any keys in the update dictionaries</span>
+<span class="sd">                that match the primary key column (`self.pkey`) are ignored. An error</span>
+<span class="sd">                will be thrown if any of the update dictionaries contain keys or values</span>
+<span class="sd">                that are incompatible with the model&#39;s attributes or corresponding</span>
+<span class="sd">                column types.</span>
+<span class="sd">            to_dict (bool, optional): Specifies whether updated instances should be</span>
+<span class="sd">                returned as a [`ModelType`][types] or `dict`. Setting this field to `True`</span>
+<span class="sd">                returns the results as a `dict`; otherwise, a [`ModelType`][types]. Default value</span>
+<span class="sd">                is True.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryInvalidArgumentError: Thrown if any of the provided objects are</span>
+<span class="sd">                    not instances of [`ModelType`][types] or if any of the provided update keys</span>
+<span class="sd">                    are not attributes of the table.</span>
+<span class="sd">            RepositoryParsingError: Thrown if any of the provided update values are</span>
+<span class="sd">                    incompatible with the corresponding column types in the model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (CollectionResult): A list of [`ModelType`][types] or `dict` instance containing the</span>
+<span class="sd">                updated results, depending on the value of `to_dict`. If the provided</span>
+<span class="sd">                `objs` is empty, an empty list is returned. Additionally, if no updates</span>
+<span class="sd">                are made to the provided objects, an empty list is returned. </span>
+
+<span class="sd">        *Note:*</span>
+<span class="sd">            Other `RepositoryError` exceptions may be thrown depending on errors</span>
+<span class="sd">            raised when performing database operations, such as connection errors or</span>
+<span class="sd">            internal errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Return an empty list if the provided values to update is empty</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="c1"># Maintain a list of the objects that were updated to return at the end.</span>
+        <span class="c1"># This prevents returning objects that were not actually updated, such as when new values are the same as current ones.</span>
+        <span class="n">updated</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">obj</span><span class="p">,</span> <span class="n">updates</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
+            <span class="c1"># Raise an error if the provided object is not an instance of the model</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">Base</span><span class="p">),</span> <span class="n">E</span><span class="o">.</span><span class="n">INVALID_ARG</span><span class="p">,</span> <span class="s2">&quot;Object must be a valid model instance!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># Maintain a boolean to track whether an update was made to the current object.</span>
+            <span class="n">has_updated</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">new_value</span> <span class="ow">in</span> <span class="n">updates</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># Ignore any updates to the primary key to prevent complications</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkey</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># If the object does not have the specified attribute to update, raise an error</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="n">E</span><span class="o">.</span><span class="n">INVALID_ARG</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Column name &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; not found in </span><span class="si">{</span><span class="n">obj</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+                <span class="n">column</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">__table__</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">column_type</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">python_type</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="n">column_type</span><span class="p">),</span> <span class="n">E</span><span class="o">.</span><span class="n">INVALID_ARG</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Value for column &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; is not of type </span><span class="si">{</span><span class="n">column_type</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+                <span class="c1"># Retrieve the current value of the object provided, and check to see if an update is necessary.</span>
+                <span class="c1"># If the values differ, then set the new value for the object and update the boolean to reflect that an update was made.</span>
+                <span class="n">current_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">current_value</span> <span class="o">!=</span> <span class="n">new_value</span><span class="p">:</span>
+                    <span class="n">has_updated</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+
+            <span class="c1"># If an update was made, then add it to the list of updated objects to return</span>
+            <span class="k">if</span> <span class="n">has_updated</span><span class="p">:</span>
+                <span class="n">updated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="c1"># Flush updates to reflect changes in the current session</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="c1"># Return the updated objects, either as their original ModelType or dictionary representation.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs_to_dicts</span><span class="p">(</span><span class="n">updated</span><span class="p">)</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="n">updated</span>
+
+
+    <span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_with_pk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkey</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SingleResult</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates a single ORM instance in the current session.</span>
+
+<span class="sd">        If an instance can be found in the session from a provided primary key (`pkey`),</span>
+<span class="sd">        its values will be updated to those present in `new_values`. Similar to other</span>
+<span class="sd">        functions, the updated instance can be returned as a [`ModelType`][types] or dictionary</span>
+<span class="sd">        representation depending on the value of `to_dict`. If no updates are made, this</span>
+<span class="sd">        function will return `None`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pkey (int | str): The primary key value corresponding to the instance to</span>
+<span class="sd">                update. This value is used to retrieve the instance from the current</span>
+<span class="sd">                session, and an error is thrown if an instance with a matching primary</span>
+<span class="sd">                key cannot be found.</span>
+<span class="sd">            new_values (dict[str, Any]): A dictionary mapping column names to new values</span>
+<span class="sd">                to update the instance with. The keys in this dictionary should</span>
+<span class="sd">                correspond to column names in the table, and the values should be the</span>
+<span class="sd">                new values to update those columns with.</span>
+<span class="sd">            to_dict (bool, optional): Specifies whether the updated instance should be</span>
+<span class="sd">                returned as a [`ModelType`][types] or `dict`. Setting this field to `True`</span>
+<span class="sd">                returns the results as a `dict`; otherwise, a [`ModelType`][types]. Default value</span>
+<span class="sd">                is True.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryInvalidArgumentError: Thrown if any of the provided update keys</span>
+<span class="sd">                    are not attributes of the table.</span>
+<span class="sd">            RepositoryParsingError: Thrown if any of the provided update values are</span>
+<span class="sd">                    incompatible with the corresponding column types in the model.</span>
+<span class="sd">            RepositoryNotFoundError: Thrown if an instance cannot be found in the</span>
+<span class="sd">                    current session with the provided `pkey`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (SingleResult | None): A [`ModelType`][types] or `dict` instance containing the updated</span>
+<span class="sd">                results, depending on the value of `to_dict`. If no updates are made,</span>
+<span class="sd">                None is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the instance to update with a matching primary key, and raise an error if it cannot be found</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkey</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Use the update function to perform an update on the retrieved instance with the provided new values</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">([(</span><span class="n">obj</span><span class="p">,</span> <span class="n">new_values</span><span class="p">)],</span> <span class="n">to_dict</span><span class="p">)</span>
+
+        <span class="c1"># If there is exactly one updated result, return that result; otherwise, return None to indicate that no updates were made</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+    <span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CollectionResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates one or more new records in the database from the provided data.</span>
+
+<span class="sd">        Instantiates model instance(s) from the given data, adds them to the session,</span>
+<span class="sd">        and flushes them to the session. The flush persists the records and generates</span>
+<span class="sd">        necessary values (e.g. primary keys). This method does not commit these changes,</span>
+<span class="sd">        thus, they are not reflected in the database until a higher layer commits them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_data (list[dict[str, Any]] | dict[str, Any]): A single dict or list of</span>
+<span class="sd">                dicts mapping column names to values used to instantiate the model(s).</span>
+<span class="sd">            to_dict (bool, optional): If True, returns the created records as a list of</span>
+<span class="sd">                dicts. If False, returns the raw model instances. Defaults to True.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (CollectionResult): By default, this method returns a list of dictionary</span>
+<span class="sd">                representations of the created records, which can be turned off by</span>
+<span class="sd">                setting `to_dict` to `False` to instead return a list of [`ModelType`][types]</span>
+<span class="sd">                instances. If the provided `new_data` is empty, an empty list is</span>
+<span class="sd">                returned.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryParsingError: This exception is thrown if any of of these</span>
+<span class="sd">                    conditions occur: </span>
+
+<span class="sd">                - If the provided data cannot be mapped to the model, such as invalid </span>
+<span class="sd">                types (ProgrammingError).</span>
+<span class="sd">                - Malformed `new_data` (eg. not a valid `dict`) (TypeError). </span>
+<span class="sd">                - If a database error occurs during the flush, such as a primary key </span>
+<span class="sd">                collision (IntegrityError).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="c1"># Create transient instances of the model with the provided data</span>
+        <span class="n">instances</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">new_data</span><span class="p">]</span> 
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">new_data</span><span class="p">)]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add the instances to the session, their state is now pending</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add_all</span><span class="p">(</span><span class="n">instances</span><span class="p">)</span>
+
+        <span class="c1"># Flushing the instances in the session will persist them as new rows in the db, </span>
+        <span class="c1"># auto-generating any values as necessary, such as primary keys.</span>
+        <span class="c1"># However, these changes are not committed until a higher layer commits them. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs_to_dicts</span><span class="p">(</span><span class="n">instances</span><span class="p">)</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="n">instances</span>
+
+
+    <span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>    
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ModelType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deletes an instance from the database that matches the provided value, which can</span>
+<span class="sd">        be a primary key or an instance of [`ModelType`][types].</span>
+
+<span class="sd">        If a primary key is provided, the instance with the matching primary key will be</span>
+<span class="sd">        retrieved and deleted. If an instance of [`ModelType`][types] is provided, that instance</span>
+<span class="sd">        will be deleted. In either case, the session is flushed to reflect the changes</span>
+<span class="sd">        in the current session, but these changes are not committed until a higher layer</span>
+<span class="sd">        commits them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (int | str | ModelType): A primary key value or an instance of</span>
+<span class="sd">                [`ModelType`][types] to delete from the database.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryNotFoundError: If the instance to delete cannot be found in the</span>
+<span class="sd">                    current session.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">Base</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">objs_to_dicts</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">AsDictConvertible</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AsDictConvertible</span><span class="p">],</span> <span class="n">convert_to_string</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="p">(</span>
+        <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts one or more instances to their dictionary representations. The provided</span>
+<span class="sd">        values should be instances of a type that supports dictionary conversion.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            values (AsDictConvertible | Sequence[AsDictConvertible]): A single instance</span>
+<span class="sd">                or sequence of instances that support dictionary conversion, such as</span>
+<span class="sd">                `Base` or SQLAlchemy `Row` objects.</span>
+<span class="sd">            convert_to_string (set[str], optional): A set of keys specifying which</span>
+<span class="sd">                fields in the resulting dictionaries should have their values converted</span>
+<span class="sd">                to strings. Default value is an empty set, meaning no fields will be</span>
+<span class="sd">                converted to strings.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RepositoryParsingError: Raised if a provided object is not compatible with</span>
+<span class="sd">                    dictionary conversion.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict[str, Any] | list[dict[str, Any]]: A dictionary representation of the</span>
+<span class="sd">                provided values. If any keys are specified in `convert_to_string`, then</span>
+<span class="sd">                the corresponding values for those keys will be converted to strings in</span>
+<span class="sd">                the returned dictionaries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Determine if the values given is iterable</span>
+        <span class="n">is_collection</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">values</span> <span class="k">if</span> <span class="n">is_collection</span> <span class="k">else</span> <span class="p">[</span><span class="n">values</span><span class="p">]</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="c1"># If the row is an SQLAlchemy Row or Iterable and contains one instance, then retrieve the first index</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="p">(</span><span class="n">Row</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># Otherwise, convert the entire row</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">r</span>
+
+            <span class="c1"># Check to see if the row can be converted into a dictionary</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s2">&quot;_mapping&quot;</span><span class="p">):</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">_mapping</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s2">&quot;_asdict&quot;</span><span class="p">):</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+                <span class="c1"># Raise an exception if the row cannot be converted</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="bp">cls</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">PARSING</span><span class="p">,</span> <span class="s2">&quot;A provided instance does not contain functionality for dictionary conversion!&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Convert any values if corresponding keys should be converted to a string</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">convert_to_string</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">convert_to_string</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d</span><span class="p">})</span>
+
+        <span class="c1"># Return a single dictionary if the input was not a collection, otherwise return a list of dictionaries</span>
+        <span class="k">return</span> <span class="n">results</span> <span class="k">if</span> <span class="n">is_collection</span> <span class="k">else</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.db_core.repository.BaseRepository.__init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Constructor for a repository.</p>
+<p>Defines the model and <code>Session</code> that the repository operates on. If the model
+and session are valid, this instance maintains a reference to the model's
+primary key through its <code>pkey</code> attribute.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>model</code>
+            </td>
+            <td>
+                  <code><span title="src.db.db_core.repository.ModelType">ModelType</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types">ModelType</a> which extends <a class="autorefs autorefs-internal" href="../models/#src.db.db_core.models.Base"><code>Base</code></a> 
+that the repository will operate on. The model provided defines which table to
+manipulate in a provided <code>Session</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>session</code>
+            </td>
+            <td>
+                  <code><span title="sqlalchemy.orm.session.Session">Session</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The SQLAlchemy session to use for database operations.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\db_core\repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelType</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constructor for a repository.</span>
+
+<span class="sd">    Defines the model and `Session` that the repository operates on. If the model</span>
+<span class="sd">    and session are valid, this instance maintains a reference to the model&#39;s</span>
+<span class="sd">    primary key through its `pkey` attribute.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (ModelType): The [ModelType][types] which extends [`Base`][....models.Base] </span>
+<span class="sd">            that the repository will operate on. The model provided defines which table to</span>
+<span class="sd">            manipulate in a provided `Session`.</span>
+<span class="sd">        session (Session): The SQLAlchemy session to use for database operations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">E</span><span class="o">.</span><span class="n">INVALID_ARG</span><span class="p">,</span> <span class="s2">&quot;A valid model must be provided to a repository!&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">E</span><span class="o">.</span><span class="n">SESSION</span><span class="p">,</span> <span class="s2">&quot;A valid SQLAlchemy session must be provided to a repository!&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+
+    <span class="c1"># Extract the primary key by inspecting the model&#39;s attributes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pkey</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pkeys</span> <span class="o">=</span> <span class="n">inspect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">primary_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pkey</span> <span class="o">=</span> <span class="n">pkeys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">pkeys</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="n">NoInspectionAvailable</span><span class="p">:</span>
+            <span class="k">pass</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.db_core.repository.BaseRepository.create" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">create</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Creates one or more new records in the database from the provided data.</p>
+<p>Instantiates model instance(s) from the given data, adds them to the session,
+and flushes them to the session. The flush persists the records and generates
+necessary values (e.g. primary keys). This method does not commit these changes,
+thus, they are not reflected in the database until a higher layer commits them.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>new_data</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]] | <span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A single dict or list of
+dicts mapping column names to values used to instantiate the model(s).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>to_dict</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, returns the created records as a list of
+dicts. If False, returns the raw model instances. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="src.db.db_core.repository.CollectionResult">CollectionResult</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>By default, this method returns a list of dictionary
+representations of the created records, which can be turned off by
+setting <code>to_dict</code> to <code>False</code> to instead return a list of <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a>
+instances. If the provided <code>new_data</code> is empty, an empty list is
+returned.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryParsingError">RepositoryParsingError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>This exception is thrown if any of of these
+    conditions occur: </p>
+<ul>
+<li>If the provided data cannot be mapped to the model, such as invalid 
+types (ProgrammingError).</li>
+<li>Malformed <code>new_data</code> (eg. not a valid <code>dict</code>) (TypeError). </li>
+<li>If a database error occurs during the flush, such as a primary key 
+collision (IntegrityError).</li>
+</ul>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\db_core\repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CollectionResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates one or more new records in the database from the provided data.</span>
+
+<span class="sd">    Instantiates model instance(s) from the given data, adds them to the session,</span>
+<span class="sd">    and flushes them to the session. The flush persists the records and generates</span>
+<span class="sd">    necessary values (e.g. primary keys). This method does not commit these changes,</span>
+<span class="sd">    thus, they are not reflected in the database until a higher layer commits them.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        new_data (list[dict[str, Any]] | dict[str, Any]): A single dict or list of</span>
+<span class="sd">            dicts mapping column names to values used to instantiate the model(s).</span>
+<span class="sd">        to_dict (bool, optional): If True, returns the created records as a list of</span>
+<span class="sd">            dicts. If False, returns the raw model instances. Defaults to True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (CollectionResult): By default, this method returns a list of dictionary</span>
+<span class="sd">            representations of the created records, which can be turned off by</span>
+<span class="sd">            setting `to_dict` to `False` to instead return a list of [`ModelType`][types]</span>
+<span class="sd">            instances. If the provided `new_data` is empty, an empty list is</span>
+<span class="sd">            returned.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryParsingError: This exception is thrown if any of of these</span>
+<span class="sd">                conditions occur: </span>
+
+<span class="sd">            - If the provided data cannot be mapped to the model, such as invalid </span>
+<span class="sd">            types (ProgrammingError).</span>
+<span class="sd">            - Malformed `new_data` (eg. not a valid `dict`) (TypeError). </span>
+<span class="sd">            - If a database error occurs during the flush, such as a primary key </span>
+<span class="sd">            collision (IntegrityError).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">new_data</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="c1"># Create transient instances of the model with the provided data</span>
+    <span class="n">instances</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">new_data</span><span class="p">]</span> 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span>
+        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">new_data</span><span class="p">)]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add the instances to the session, their state is now pending</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add_all</span><span class="p">(</span><span class="n">instances</span><span class="p">)</span>
+
+    <span class="c1"># Flushing the instances in the session will persist them as new rows in the db, </span>
+    <span class="c1"># auto-generating any values as necessary, such as primary keys.</span>
+    <span class="c1"># However, these changes are not committed until a higher layer commits them. </span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs_to_dicts</span><span class="p">(</span><span class="n">instances</span><span class="p">)</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="n">instances</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.db_core.repository.BaseRepository.delete" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">delete</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Deletes an instance from the database that matches the provided value, which can
+be a primary key or an instance of <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a>.</p>
+<p>If a primary key is provided, the instance with the matching primary key will be
+retrieved and deleted. If an instance of <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> is provided, that instance
+will be deleted. In either case, the session is flushed to reflect the changes
+in the current session, but these changes are not committed until a higher layer
+commits them.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>value</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> | <span title="str">str</span> | <span title="src.db.db_core.repository.ModelType">ModelType</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A primary key value or an instance of
+<a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> to delete from the database.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the instance to delete cannot be found in the
+    current session.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\db_core\repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>    
+<span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ModelType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deletes an instance from the database that matches the provided value, which can</span>
+<span class="sd">    be a primary key or an instance of [`ModelType`][types].</span>
+
+<span class="sd">    If a primary key is provided, the instance with the matching primary key will be</span>
+<span class="sd">    retrieved and deleted. If an instance of [`ModelType`][types] is provided, that instance</span>
+<span class="sd">    will be deleted. In either case, the session is flushed to reflect the changes</span>
+<span class="sd">    in the current session, but these changes are not committed until a higher layer</span>
+<span class="sd">    commits them.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value (int | str | ModelType): A primary key value or an instance of</span>
+<span class="sd">            [`ModelType`][types] to delete from the database.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: If the instance to delete cannot be found in the</span>
+<span class="sd">                current session.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">Base</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.db_core.repository.BaseRepository.get" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get</span><span class="p">(</span><span class="n">pkey</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retrieves an ORM instance from the session's current state. By default, this
+method returns a dictionary representation of the result, which can be turned
+off by setting <code>to_dict</code> to <code>False</code>. A <code>RepositoryNotFoundError</code> is thrown if
+the primary key cannot be found in the current session.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>pkey</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Primary key value to search for in the current session,
+typically an <code>int</code> or <code>str</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>to_dict</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Specifies whether retrieved instance should be
+returned as the <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> or <code>dict</code>. Setting this field to <code>True</code>
+returns the results as a <code>dict</code>; otherwise, a <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a>. Default value
+is True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Thrown if an instance cannot be found in the
+    current session with the provided <code>pkey</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="src.db.db_core.repository.SingleResult">SingleResult</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> or <code>dict</code> instance of the result.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\db_core\repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkey</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SingleResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves an ORM instance from the session&#39;s current state. By default, this</span>
+<span class="sd">    method returns a dictionary representation of the result, which can be turned</span>
+<span class="sd">    off by setting `to_dict` to `False`. A `RepositoryNotFoundError` is thrown if</span>
+<span class="sd">    the primary key cannot be found in the current session.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkey (Any): Primary key value to search for in the current session,</span>
+<span class="sd">            typically an `int` or `str`.</span>
+<span class="sd">        to_dict (bool, optional): Specifies whether retrieved instance should be</span>
+<span class="sd">            returned as the [`ModelType`][types] or `dict`. Setting this field to `True`</span>
+<span class="sd">            returns the results as a `dict`; otherwise, a [`ModelType`][types]. Default value</span>
+<span class="sd">            is True.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryNotFoundError: Thrown if an instance cannot be found in the</span>
+<span class="sd">                current session with the provided `pkey`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (SingleResult): A [`ModelType`][types] or `dict` instance of the result.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">pkey</span><span class="p">)</span>
+
+    <span class="c1"># If an object cannot be found with the provided primary key, raise an error</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">E</span><span class="o">.</span><span class="n">NOT_FOUND</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Could not </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2"> with a pkey = </span><span class="si">{</span><span class="n">pkey</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Return the retrieved instannce, either as its original ModelType or dictionary representation.</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs_to_dicts</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="n">obj</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.db_core.repository.BaseRepository.objs_to_dicts" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">objs_to_dicts</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">convert_to_string</span><span class="o">=</span><span class="p">{})</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Converts one or more instances to their dictionary representations. The provided
+values should be instances of a type that supports dictionary conversion.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>values</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="AsDictConvertible (src.db.db_core.repository.AsDictConvertible)" href="#src.db.db_core.repository.AsDictConvertible">AsDictConvertible</a> | <span title="sqlalchemy.Sequence">Sequence</span>[<a class="autorefs autorefs-internal" title="AsDictConvertible (src.db.db_core.repository.AsDictConvertible)" href="#src.db.db_core.repository.AsDictConvertible">AsDictConvertible</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A single instance
+or sequence of instances that support dictionary conversion, such as
+<code>Base</code> or SQLAlchemy <code>Row</code> objects.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>convert_to_string</code>
+            </td>
+            <td>
+                  <code><span title="set">set</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A set of keys specifying which
+fields in the resulting dictionaries should have their values converted
+to strings. Default value is an empty set, meaning no fields will be
+converted to strings.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryParsingError">RepositoryParsingError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Raised if a provided object is not compatible with
+    dictionary conversion.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>] | <span title="list">list</span>[<span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>dict[str, Any] | list[dict[str, Any]]: A dictionary representation of the
+provided values. If any keys are specified in <code>convert_to_string</code>, then
+the corresponding values for those keys will be converted to strings in
+the returned dictionaries.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\db_core\repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">objs_to_dicts</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">AsDictConvertible</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">AsDictConvertible</span><span class="p">],</span> <span class="n">convert_to_string</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="p">(</span>
+    <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts one or more instances to their dictionary representations. The provided</span>
+<span class="sd">    values should be instances of a type that supports dictionary conversion.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values (AsDictConvertible | Sequence[AsDictConvertible]): A single instance</span>
+<span class="sd">            or sequence of instances that support dictionary conversion, such as</span>
+<span class="sd">            `Base` or SQLAlchemy `Row` objects.</span>
+<span class="sd">        convert_to_string (set[str], optional): A set of keys specifying which</span>
+<span class="sd">            fields in the resulting dictionaries should have their values converted</span>
+<span class="sd">            to strings. Default value is an empty set, meaning no fields will be</span>
+<span class="sd">            converted to strings.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryParsingError: Raised if a provided object is not compatible with</span>
+<span class="sd">                dictionary conversion.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict[str, Any] | list[dict[str, Any]]: A dictionary representation of the</span>
+<span class="sd">            provided values. If any keys are specified in `convert_to_string`, then</span>
+<span class="sd">            the corresponding values for those keys will be converted to strings in</span>
+<span class="sd">            the returned dictionaries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Determine if the values given is iterable</span>
+    <span class="n">is_collection</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">values</span> <span class="k">if</span> <span class="n">is_collection</span> <span class="k">else</span> <span class="p">[</span><span class="n">values</span><span class="p">]</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="c1"># If the row is an SQLAlchemy Row or Iterable and contains one instance, then retrieve the first index</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="p">(</span><span class="n">Row</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Otherwise, convert the entire row</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">r</span>
+
+        <span class="c1"># Check to see if the row can be converted into a dictionary</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s2">&quot;_mapping&quot;</span><span class="p">):</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">_mapping</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="s2">&quot;_asdict&quot;</span><span class="p">):</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+            <span class="c1"># Raise an exception if the row cannot be converted</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">PARSING</span><span class="p">,</span> <span class="s2">&quot;A provided instance does not contain functionality for dictionary conversion!&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Convert any values if corresponding keys should be converted to a string</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">convert_to_string</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">convert_to_string</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d</span><span class="p">})</span>
+
+    <span class="c1"># Return a single dictionary if the input was not a collection, otherwise return a list of dictionaries</span>
+    <span class="k">return</span> <span class="n">results</span> <span class="k">if</span> <span class="n">is_collection</span> <span class="k">else</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.db_core.repository.BaseRepository.update" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">update</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Updates the provided objects with the provided new values.</p>
+<p>The <code>objs</code> parameter is a list of tuples, where each tuple contains an
+<a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> instance to update and a dictionary of new values to update that
+instance with. By default, this method returns a list of dictionary
+representations of the updated results, which can be turned off by setting
+<code>to_dict</code> to <code>False</code> to instead return a list of <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> instances.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>objs</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="tuple">tuple</span>[<span title="src.db.db_core.repository.ModelType">ModelType</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of tuples, where each
+tuple contains a <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> instance (index 0) to update and a
+dictionary of new values to update that instance with (index 1). The
+keys in the dictionary should correspond to column names in the table,
+and the values should be the new values to update those columns with. To
+prevent updates to the primary key, any keys in the update dictionaries
+that match the primary key column (<code>self.pkey</code>) are ignored. An error
+will be thrown if any of the update dictionaries contain keys or values
+that are incompatible with the model's attributes or corresponding
+column types.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>to_dict</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Specifies whether updated instances should be
+returned as a <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> or <code>dict</code>. Setting this field to <code>True</code>
+returns the results as a <code>dict</code>; otherwise, a <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a>. Default value
+is True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryInvalidArgumentError">RepositoryInvalidArgumentError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Thrown if any of the provided objects are
+    not instances of <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> or if any of the provided update keys
+    are not attributes of the table.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryParsingError">RepositoryParsingError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Thrown if any of the provided update values are
+    incompatible with the corresponding column types in the model.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="src.db.db_core.repository.CollectionResult">CollectionResult</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> or <code>dict</code> instance containing the
+updated results, depending on the value of <code>to_dict</code>. If the provided
+<code>objs</code> is empty, an empty list is returned. Additionally, if no updates
+are made to the provided objects, an empty list is returned. </p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p><em>Note:</em>
+    Other <code>RepositoryError</code> exceptions may be thrown depending on errors
+    raised when performing database operations, such as connection errors or
+    internal errors.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\db_core\repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">ModelType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]],</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CollectionResult</span><span class="p">:</span>  
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the provided objects with the provided new values.</span>
+
+<span class="sd">    The `objs` parameter is a list of tuples, where each tuple contains an</span>
+<span class="sd">    [`ModelType`][types] instance to update and a dictionary of new values to update that</span>
+<span class="sd">    instance with. By default, this method returns a list of dictionary</span>
+<span class="sd">    representations of the updated results, which can be turned off by setting</span>
+<span class="sd">    `to_dict` to `False` to instead return a list of [`ModelType`][types] instances.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        objs (list[tuple[ModelType, dict[str, Any]]]): A list of tuples, where each</span>
+<span class="sd">            tuple contains a [`ModelType`][types] instance (index 0) to update and a</span>
+<span class="sd">            dictionary of new values to update that instance with (index 1). The</span>
+<span class="sd">            keys in the dictionary should correspond to column names in the table,</span>
+<span class="sd">            and the values should be the new values to update those columns with. To</span>
+<span class="sd">            prevent updates to the primary key, any keys in the update dictionaries</span>
+<span class="sd">            that match the primary key column (`self.pkey`) are ignored. An error</span>
+<span class="sd">            will be thrown if any of the update dictionaries contain keys or values</span>
+<span class="sd">            that are incompatible with the model&#39;s attributes or corresponding</span>
+<span class="sd">            column types.</span>
+<span class="sd">        to_dict (bool, optional): Specifies whether updated instances should be</span>
+<span class="sd">            returned as a [`ModelType`][types] or `dict`. Setting this field to `True`</span>
+<span class="sd">            returns the results as a `dict`; otherwise, a [`ModelType`][types]. Default value</span>
+<span class="sd">            is True.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryInvalidArgumentError: Thrown if any of the provided objects are</span>
+<span class="sd">                not instances of [`ModelType`][types] or if any of the provided update keys</span>
+<span class="sd">                are not attributes of the table.</span>
+<span class="sd">        RepositoryParsingError: Thrown if any of the provided update values are</span>
+<span class="sd">                incompatible with the corresponding column types in the model.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (CollectionResult): A list of [`ModelType`][types] or `dict` instance containing the</span>
+<span class="sd">            updated results, depending on the value of `to_dict`. If the provided</span>
+<span class="sd">            `objs` is empty, an empty list is returned. Additionally, if no updates</span>
+<span class="sd">            are made to the provided objects, an empty list is returned. </span>
+
+<span class="sd">    *Note:*</span>
+<span class="sd">        Other `RepositoryError` exceptions may be thrown depending on errors</span>
+<span class="sd">        raised when performing database operations, such as connection errors or</span>
+<span class="sd">        internal errors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Return an empty list if the provided values to update is empty</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">objs</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="c1"># Maintain a list of the objects that were updated to return at the end.</span>
+    <span class="c1"># This prevents returning objects that were not actually updated, such as when new values are the same as current ones.</span>
+    <span class="n">updated</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">obj</span><span class="p">,</span> <span class="n">updates</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
+        <span class="c1"># Raise an error if the provided object is not an instance of the model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">Base</span><span class="p">),</span> <span class="n">E</span><span class="o">.</span><span class="n">INVALID_ARG</span><span class="p">,</span> <span class="s2">&quot;Object must be a valid model instance!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Maintain a boolean to track whether an update was made to the current object.</span>
+        <span class="n">has_updated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">new_value</span> <span class="ow">in</span> <span class="n">updates</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Ignore any updates to the primary key to prevent complications</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pkey</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># If the object does not have the specified attribute to update, raise an error</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="n">E</span><span class="o">.</span><span class="n">INVALID_ARG</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Column name &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; not found in </span><span class="si">{</span><span class="n">obj</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">column</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">__table__</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="n">column_type</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">python_type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="n">column_type</span><span class="p">),</span> <span class="n">E</span><span class="o">.</span><span class="n">INVALID_ARG</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Value for column &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; is not of type </span><span class="si">{</span><span class="n">column_type</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># Retrieve the current value of the object provided, and check to see if an update is necessary.</span>
+            <span class="c1"># If the values differ, then set the new value for the object and update the boolean to reflect that an update was made.</span>
+            <span class="n">current_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">current_value</span> <span class="o">!=</span> <span class="n">new_value</span><span class="p">:</span>
+                <span class="n">has_updated</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+
+        <span class="c1"># If an update was made, then add it to the list of updated objects to return</span>
+        <span class="k">if</span> <span class="n">has_updated</span><span class="p">:</span>
+            <span class="n">updated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="c1"># Flush updates to reflect changes in the current session</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="c1"># Return the updated objects, either as their original ModelType or dictionary representation.</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs_to_dicts</span><span class="p">(</span><span class="n">updated</span><span class="p">)</span> <span class="k">if</span> <span class="n">to_dict</span> <span class="k">else</span> <span class="n">updated</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.db.db_core.repository.BaseRepository.update_with_pk" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">update_with_pk</span><span class="p">(</span><span class="n">pkey</span><span class="p">,</span> <span class="n">new_values</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Updates a single ORM instance in the current session.</p>
+<p>If an instance can be found in the session from a provided primary key (<code>pkey</code>),
+its values will be updated to those present in <code>new_values</code>. Similar to other
+functions, the updated instance can be returned as a <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> or dictionary
+representation depending on the value of <code>to_dict</code>. If no updates are made, this
+function will return <code>None</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>pkey</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> | <span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The primary key value corresponding to the instance to
+update. This value is used to retrieve the instance from the current
+session, and an error is thrown if an instance with a matching primary
+key cannot be found.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>new_values</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary mapping column names to new values
+to update the instance with. The keys in this dictionary should
+correspond to column names in the table, and the values should be the
+new values to update those columns with.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>to_dict</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Specifies whether the updated instance should be
+returned as a <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> or <code>dict</code>. Setting this field to <code>True</code>
+returns the results as a <code>dict</code>; otherwise, a <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a>. Default value
+is True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryInvalidArgumentError">RepositoryInvalidArgumentError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Thrown if any of the provided update keys
+    are not attributes of the table.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryParsingError">RepositoryParsingError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Thrown if any of the provided update values are
+    incompatible with the corresponding column types in the model.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RepositoryNotFoundError">RepositoryNotFoundError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Thrown if an instance cannot be found in the
+    current session with the provided <code>pkey</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="src.db.db_core.repository.SingleResult">SingleResult</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A <a class="autorefs autorefs-internal" title="Type Definitions Used" href="#types"><code>ModelType</code></a> or <code>dict</code> instance containing the updated
+results, depending on the value of <code>to_dict</code>. If no updates are made,
+None is returned.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\db\db_core\repository.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@RHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_with_pk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkey</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SingleResult</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates a single ORM instance in the current session.</span>
+
+<span class="sd">    If an instance can be found in the session from a provided primary key (`pkey`),</span>
+<span class="sd">    its values will be updated to those present in `new_values`. Similar to other</span>
+<span class="sd">    functions, the updated instance can be returned as a [`ModelType`][types] or dictionary</span>
+<span class="sd">    representation depending on the value of `to_dict`. If no updates are made, this</span>
+<span class="sd">    function will return `None`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkey (int | str): The primary key value corresponding to the instance to</span>
+<span class="sd">            update. This value is used to retrieve the instance from the current</span>
+<span class="sd">            session, and an error is thrown if an instance with a matching primary</span>
+<span class="sd">            key cannot be found.</span>
+<span class="sd">        new_values (dict[str, Any]): A dictionary mapping column names to new values</span>
+<span class="sd">            to update the instance with. The keys in this dictionary should</span>
+<span class="sd">            correspond to column names in the table, and the values should be the</span>
+<span class="sd">            new values to update those columns with.</span>
+<span class="sd">        to_dict (bool, optional): Specifies whether the updated instance should be</span>
+<span class="sd">            returned as a [`ModelType`][types] or `dict`. Setting this field to `True`</span>
+<span class="sd">            returns the results as a `dict`; otherwise, a [`ModelType`][types]. Default value</span>
+<span class="sd">            is True.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RepositoryInvalidArgumentError: Thrown if any of the provided update keys</span>
+<span class="sd">                are not attributes of the table.</span>
+<span class="sd">        RepositoryParsingError: Thrown if any of the provided update values are</span>
+<span class="sd">                incompatible with the corresponding column types in the model.</span>
+<span class="sd">        RepositoryNotFoundError: Thrown if an instance cannot be found in the</span>
+<span class="sd">                current session with the provided `pkey`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (SingleResult | None): A [`ModelType`][types] or `dict` instance containing the updated</span>
+<span class="sd">            results, depending on the value of `to_dict`. If no updates are made,</span>
+<span class="sd">            None is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the instance to update with a matching primary key, and raise an error if it cannot be found</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkey</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Use the update function to perform an update on the retrieved instance with the provided new values</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">([(</span><span class="n">obj</span><span class="p">,</span> <span class="n">new_values</span><span class="p">)],</span> <span class="n">to_dict</span><span class="p">)</span>
+
+    <span class="c1"># If there is exactly one updated result, return that result; otherwise, return None to indicate that no updates were made</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

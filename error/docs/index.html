@@ -1,0 +1,4041 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../../repository/user_repo/">
+      
+      
+        <link rel="next" href="../../testing/tests/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Error Handling - Tracksense Backend Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#eh-alias" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Tracksense Backend Documentation" class="md-header__button md-logo" aria-label="Tracksense Backend Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Tracksense Backend Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Error Handling
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Tracksense Backend Documentation" class="md-nav__button md-logo" aria-label="Tracksense Backend Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Tracksense Backend Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/decorators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decorators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/user/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/user_preferences/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Preferences
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/volunteer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Volunteer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/station/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/history/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Train History
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/recent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recent Activities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/collation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Collation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Service
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/service_core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Service Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/record_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/station_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/symbol_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Symbol Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/user_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../service/email_service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Email Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Repository
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/core/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/core/models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/core/repository/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/record_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/record_types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Record Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/station_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Station Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/symbol_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Symbol Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/user_repo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Handling
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eh-alias" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type Aliases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Type Aliases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exceptiontype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ExceptionType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errormapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ErrorMapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        exceptions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerError
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LayerError">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerError.__cause__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __cause__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerError.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorHandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerErrorHandler
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LayerErrorHandler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorHandler.layer_error_decorator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        layer_error_decorator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorHandler.translate_error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        translate_error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorHandler.wrap_error_handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wrap_error_handler
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorInvoker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerErrorInvoker
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorWrapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerErrorWrapper
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eh-alias" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type Aliases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Type Aliases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exceptiontype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ExceptionType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errormapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ErrorMapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        exceptions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerError
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LayerError">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerError.__cause__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __cause__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerError.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorHandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerErrorHandler
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LayerErrorHandler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorHandler.layer_error_decorator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        layer_error_decorator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorHandler.translate_error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        translate_error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorHandler.wrap_error_handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wrap_error_handler
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorInvoker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerErrorInvoker
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.global_core.exceptions.LayerErrorWrapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerErrorWrapper
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Error Handling</h1>
+
+<p>One of our goals for the refactoring process was to construct a standardized error handling system that would propagate exceptions through the chain of layers. Such a system will allow future developers to easily attach error handling to new features, expose only necessary details of lower-level exceptions in production environments, permit full error traceability in development environments, and group similar errors into generalized layer exceptions. </p>
+<p>To achieve this, we incorporate Python’s function decorators to wrap class methods across the layers with an error translation mechanism. Any exceptions raised in a decorated function would immediately be mapped to a layer-specific error through translation. When an exception moves from the <a href="../../service/overview/"><strong>Service</strong></a> layer to the <a href="../../api/overview/"><strong>API</strong></a>, the response receives a status code and an error message that is either generalized or specific, depending on the exception provided and the Flask environment that was created.</p>
+<p>The code for the error handling is located in the <code>global_core.exceptions</code> module, and can be used in any of the layers. The <a href="../../api/core/exceptions/"><strong>API</strong></a> layer uses the error handlers provided by <em>Flask</em>, but the <a href="../../service/service_core/"><strong>Service</strong></a> and <a href="../../repository/core/exceptions/"><strong>Repository</strong></a> layers utilize the error handling logic described here.</p>
+<p><img alt="Error-Handling" src="../../diagrams/errors.png" /></p>
+<h2 id="eh-alias">Type Aliases</h2>
+<h3 id="exceptiontype"><code>ExceptionType</code></h3>
+<p>Indicates that either a single <code>Exception</code> or a tuple of <code>Exception</code> classes is accepted.</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Both are valid</span>
+<span class="n">example1</span><span class="p">:</span> <span class="n">ExceptionType</span> <span class="o">=</span> <span class="ne">TypeError</span>
+<span class="n">example2</span><span class="p">:</span> <span class="n">ExceptionType</span> <span class="o">=</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="errormapping"><code>ErrorMapping</code></h3>
+<p>A dictionary in which a key, represented by an <code>ExceptionType</code>, is mapped to an <code>Exception</code> class along with a boolean value indicating whether an error message should be displayed.</p>
+<p>In the example below, a <code>NotImplementedError</code> should be mapped to an <code>ArgumentError</code>, with its error message displayed publicly. Conversely, <code>TypeError</code> and <code>ValueError</code> exceptions should be mapped to a <code>ParsingError</code>, which does not publicly display its error message.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ArgumentError</span><span class="p">(</span><span class="n">LayerError</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ParsingError</span><span class="p">(</span><span class="n">LayerError</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ne">NotImplementedError</span><span class="p">:</span> <span class="p">(</span><span class="n">ArgumentError</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span> <span class="p">(</span><span class="n">ParsingError</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="src.global_core.exceptions"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="src.global_core.exceptions.LayerError" class="doc doc-heading">
+            <code>LayerError</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="Exception">Exception</span></code></p>
+
+
+
+        <p>Parent class for exceptions that occur in any of the backend layers.</p>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src\global_core\exceptions.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parent class for exceptions that occur in any of the backend layers.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Default message of a layer error, can be changed by child exceptions.</span>
+    <span class="n">default_message</span> <span class="o">=</span> <span class="s2">&quot;Unknown error occurred!&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">caller_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">poe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">show_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">cause</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for a `LayerError` instance.</span>
+<span class="sd">        The contents of a message include the following:</span>
+
+<span class="sd">        - An optional caller prefix in the format `[caller_name]`</span>
+<span class="sd">        - A public-facing message, either the class&#39;s `default_message` or, if </span>
+<span class="sd">        debugging is enabled, the location and details of the error.</span>
+
+<span class="sd">        The example below showcases an example of an error message returned by a </span>
+<span class="sd">        [GET /history](../api/history.md) request when debugging mode is enabled:</span>
+<span class="sd">        ```</span>
+<span class="sd">        &quot;[RecordService] Exception raised in get_train_record! RepositoryNotFoundError: </span>
+<span class="sd">        [RecordRepository] Exception raised in get_train_history! Could not get record </span>
+<span class="sd">        with ID = 9999999! | NoResultFound: No row was found when one was required&quot;</span>
+<span class="sd">        ```</span>
+<span class="sd">        In this message, the trace shows that the functions that were called that </span>
+<span class="sd">        produced these errors: **get_train_record** &amp;rarr; **get_train_history** &amp;rarr; </span>
+<span class="sd">        **NoResultFound**. Additionally, the instances that were called are also shown: </span>
+<span class="sd">        **RecordService** &amp;rarr; **RecordRepository**.</span>
+
+<span class="sd">        When debugging mode is disabled, such as in a production environment, the exception </span>
+<span class="sd">        would look like this:</span>
+<span class="sd">        ```</span>
+<span class="sd">        &quot;[RecordService] Could not get record with ID = 9999999!&quot;</span>
+<span class="sd">        ```</span>
+<span class="sd">        In this message, a developer would still be able to determine the service the exception </span>
+<span class="sd">        occurred and view additional details.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            caller_name (str, optional): Name of the caller (typically a class) used as</span>
+<span class="sd">                a prefix for the error message, e.g., the name of the service or</span>
+<span class="sd">                component raising the exception. Defaults to None.</span>
+<span class="sd">            poe (str, optional): Point of error that identifies where in the code the</span>
+<span class="sd">                exception was raised, e.g., a function or method name. Only included in</span>
+<span class="sd">                the message when debugging is enabled. Defaults to None.</span>
+<span class="sd">            message (str, optional): A detailed error message with specifics about the</span>
+<span class="sd">                failure. Only added to the public message when debugging is enabled (via</span>
+<span class="sd">                `error_debugging` in app creation) or `show_error`. Defaults to None.</span>
+<span class="sd">            show_error (bool): If True, forces the detailed error message and point of</span>
+<span class="sd">                error to be shown regardless of the global `error_debugging` flag.</span>
+<span class="sd">                Defaults to False.</span>
+<span class="sd">            cause (Exception, optional): The exception that is the cause of this error.</span>
+<span class="sd">                If provided, this exception is attached to the LayerError instance.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Prevent circular import</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">error_debugging</span>
+
+        <span class="c1"># Attach the cause exception for later reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cause</span> <span class="o">=</span> <span class="n">cause</span>
+
+        <span class="c1"># Construct the body of the error message based on parameters provided</span>
+        <span class="n">public</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_public</span><span class="p">(</span><span class="n">poe</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">show_error</span><span class="p">,</span> <span class="n">cause</span><span class="p">,</span> <span class="n">error_debugging</span><span class="p">)</span>
+
+        <span class="c1"># Construct the final message</span>
+        <span class="n">final</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">caller_name</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">public</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">caller_name</span> <span class="k">else</span> <span class="n">public</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">final</span><span class="p">)</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_public</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">poe</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">show_error</span><span class="p">,</span> <span class="n">cause</span><span class="p">,</span> <span class="n">error_debugging</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1"># Set the initial message to the error&#39;s default message</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">error_debugging</span> <span class="ow">or</span> <span class="n">show_error</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">message</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_message</span>
+
+        <span class="c1"># If the app is in debugging mode or the error has been explicitly set to</span>
+        <span class="c1"># display, and a message has been provided, construct the error message accordingly.</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_body</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">error_debugging</span><span class="p">,</span> <span class="n">cause</span><span class="p">)</span>
+
+        <span class="c1"># Construct the caller prefix and point of error message if provided</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Exception raised in </span><span class="si">{</span><span class="n">poe</span><span class="si">}</span><span class="s2">! &quot;</span> <span class="k">if</span> <span class="n">poe</span> <span class="ow">and</span> <span class="n">error_debugging</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># Display the specific error message if provided, followed by the default message and additional error details.</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">body</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">error_debugging</span><span class="p">,</span> <span class="n">cause</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1"># If message is not a string, attempt to convert it to a string for display.</span>
+        <span class="c1"># If this fails, default to an empty message.</span>
+        <span class="n">new_message</span> <span class="o">=</span> <span class="n">message</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">error_debugging</span><span class="p">:</span>
+            <span class="c1"># This removes any existing &quot;[LayerError]: &quot; prefix from the original</span>
+            <span class="c1"># message to avoid exposing lower level details.</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">)</span>
+            <span class="n">new_message</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:]</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">new_message</span>
+
+        <span class="k">if</span> <span class="n">cause</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cause</span><span class="p">,</span> <span class="n">LayerError</span><span class="p">):</span>
+            <span class="n">new_message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; | </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">cause</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">cause</span><span class="si">}</span><span class="s2">&quot;</span> 
+
+
+        <span class="k">return</span> <span class="n">new_message</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__cause__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">Exception</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Override the default cause behavior to return exception if provided.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;cause&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.global_core.exceptions.LayerError.__cause__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">__cause__</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Override the default cause behavior to return exception if provided.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\global_core\exceptions.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__cause__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">Exception</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Override the default cause behavior to return exception if provided.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;cause&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.global_core.exceptions.LayerError.__init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">caller_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">poe</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">show_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cause</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Constructor for a <code>LayerError</code> instance.
+The contents of a message include the following:</p>
+<ul>
+<li>An optional caller prefix in the format <code>[caller_name]</code></li>
+<li>A public-facing message, either the class's <code>default_message</code> or, if 
+debugging is enabled, the location and details of the error.</li>
+</ul>
+<p>The example below showcases an example of an error message returned by a 
+<a href="../../api/history/">GET /history</a> request when debugging mode is enabled:
+<div class="highlight"><pre><span></span><code>&quot;[RecordService] Exception raised in get_train_record! RepositoryNotFoundError: 
+[RecordRepository] Exception raised in get_train_history! Could not get record 
+with ID = 9999999! | NoResultFound: No row was found when one was required&quot;
+</code></pre></div>
+In this message, the trace shows that the functions that were called that 
+produced these errors: <strong>get_train_record</strong> &rarr; <strong>get_train_history</strong> &rarr; 
+<strong>NoResultFound</strong>. Additionally, the instances that were called are also shown: 
+<strong>RecordService</strong> &rarr; <strong>RecordRepository</strong>.</p>
+<p>When debugging mode is disabled, such as in a production environment, the exception 
+would look like this:
+<div class="highlight"><pre><span></span><code>&quot;[RecordService] Could not get record with ID = 9999999!&quot;
+</code></pre></div>
+In this message, a developer would still be able to determine the service the exception 
+occurred and view additional details.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>caller_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the caller (typically a class) used as
+a prefix for the error message, e.g., the name of the service or
+component raising the exception. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>poe</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Point of error that identifies where in the code the
+exception was raised, e.g., a function or method name. Only included in
+the message when debugging is enabled. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>message</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A detailed error message with specifics about the
+failure. Only added to the public message when debugging is enabled (via
+<code>error_debugging</code> in app creation) or <code>show_error</code>. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>show_error</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, forces the detailed error message and point of
+error to be shown regardless of the global <code>error_debugging</code> flag.
+Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cause</code>
+            </td>
+            <td>
+                  <code><span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The exception that is the cause of this error.
+If provided, this exception is attached to the LayerError instance.
+Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\global_core\exceptions.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">caller_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">poe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">cause</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constructor for a `LayerError` instance.</span>
+<span class="sd">    The contents of a message include the following:</span>
+
+<span class="sd">    - An optional caller prefix in the format `[caller_name]`</span>
+<span class="sd">    - A public-facing message, either the class&#39;s `default_message` or, if </span>
+<span class="sd">    debugging is enabled, the location and details of the error.</span>
+
+<span class="sd">    The example below showcases an example of an error message returned by a </span>
+<span class="sd">    [GET /history](../api/history.md) request when debugging mode is enabled:</span>
+<span class="sd">    ```</span>
+<span class="sd">    &quot;[RecordService] Exception raised in get_train_record! RepositoryNotFoundError: </span>
+<span class="sd">    [RecordRepository] Exception raised in get_train_history! Could not get record </span>
+<span class="sd">    with ID = 9999999! | NoResultFound: No row was found when one was required&quot;</span>
+<span class="sd">    ```</span>
+<span class="sd">    In this message, the trace shows that the functions that were called that </span>
+<span class="sd">    produced these errors: **get_train_record** &amp;rarr; **get_train_history** &amp;rarr; </span>
+<span class="sd">    **NoResultFound**. Additionally, the instances that were called are also shown: </span>
+<span class="sd">    **RecordService** &amp;rarr; **RecordRepository**.</span>
+
+<span class="sd">    When debugging mode is disabled, such as in a production environment, the exception </span>
+<span class="sd">    would look like this:</span>
+<span class="sd">    ```</span>
+<span class="sd">    &quot;[RecordService] Could not get record with ID = 9999999!&quot;</span>
+<span class="sd">    ```</span>
+<span class="sd">    In this message, a developer would still be able to determine the service the exception </span>
+<span class="sd">    occurred and view additional details.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        caller_name (str, optional): Name of the caller (typically a class) used as</span>
+<span class="sd">            a prefix for the error message, e.g., the name of the service or</span>
+<span class="sd">            component raising the exception. Defaults to None.</span>
+<span class="sd">        poe (str, optional): Point of error that identifies where in the code the</span>
+<span class="sd">            exception was raised, e.g., a function or method name. Only included in</span>
+<span class="sd">            the message when debugging is enabled. Defaults to None.</span>
+<span class="sd">        message (str, optional): A detailed error message with specifics about the</span>
+<span class="sd">            failure. Only added to the public message when debugging is enabled (via</span>
+<span class="sd">            `error_debugging` in app creation) or `show_error`. Defaults to None.</span>
+<span class="sd">        show_error (bool): If True, forces the detailed error message and point of</span>
+<span class="sd">            error to be shown regardless of the global `error_debugging` flag.</span>
+<span class="sd">            Defaults to False.</span>
+<span class="sd">        cause (Exception, optional): The exception that is the cause of this error.</span>
+<span class="sd">            If provided, this exception is attached to the LayerError instance.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Prevent circular import</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">error_debugging</span>
+
+    <span class="c1"># Attach the cause exception for later reference</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cause</span> <span class="o">=</span> <span class="n">cause</span>
+
+    <span class="c1"># Construct the body of the error message based on parameters provided</span>
+    <span class="n">public</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_public</span><span class="p">(</span><span class="n">poe</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">show_error</span><span class="p">,</span> <span class="n">cause</span><span class="p">,</span> <span class="n">error_debugging</span><span class="p">)</span>
+
+    <span class="c1"># Construct the final message</span>
+    <span class="n">final</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">caller_name</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">public</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">caller_name</span> <span class="k">else</span> <span class="n">public</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">final</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="src.global_core.exceptions.LayerErrorHandler" class="doc doc-heading">
+            <code>LayerErrorHandler</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Provides various methods for translating exceptions that occur in any of the 
+backend layers. This class is intended to be extended and configured for each of the layers 
+so that exceptions in those respective layers are translated into the appropriate 
+<a class="autorefs autorefs-internal" href="#src.global_core.exceptions.LayerError"><code>LayerError</code></a> for that particular layer.</p>
+<p>The class attributes below should be configured to the suitable values for a given layer.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="src.global_core.exceptions.LayerErrorHandler.error_map">error_map</span></code></td>
+            <td>
+                  <code><span title="src.global_core.exceptions.ErrorMapping">ErrorMapping</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary mapping of exception translations. See 
+<a class="autorefs autorefs-internal" title="Type Aliases" href="#eh-alias"><code>ErrorMapping</code></a> for the appropriate structure. <em>Defaults to an empty 
+dictionary.</em></p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="src.global_core.exceptions.LayerErrorHandler.base_exception">base_exception</span></code></td>
+            <td>
+                  <code><span title="type">type</span>[<a class="autorefs autorefs-internal" title="LayerError (src.global_core.exceptions.LayerError)" href="#src.global_core.exceptions.LayerError">LayerError</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The fallback exception type raised when a
+caught exception has no matching entry in <code>error_map</code>. Ensures unhandled
+exceptions are still wrapped in a layer-appropriate error to prevent leaking
+lower-level implementation details. <em>Defaults to LayerError.</em></p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="src.global_core.exceptions.LayerErrorHandler.exclude">exclude</span></code></td>
+            <td>
+                  <code><span title="src.global_core.exceptions.ExceptionType">ExceptionType</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Exception type(s) that should be ignored in 
+translation entirely. Useful for allowing certain exceptions to propagate 
+without interference. See <a class="autorefs autorefs-internal" title="Type Aliases" href="#eh-alias"><code>ExceptionType</code></a> for allowed values. 
+<em>Defaults to LayerError.</em></p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="src.global_core.exceptions.LayerErrorHandler.error_origin_name">error_origin_name</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Some exceptions include the specific error type 
+or the exception origin within a particular attribute. If this parameter is set, 
+the methods in this class will first search for the specified attribute within the 
+exception that requires translation. <em>Defaults to None.</em></p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src\global_core\exceptions.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayerErrorHandler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides various methods for translating exceptions that occur in any of the </span>
+<span class="sd">    backend layers. This class is intended to be extended and configured for each of the layers </span>
+<span class="sd">    so that exceptions in those respective layers are translated into the appropriate </span>
+<span class="sd">    [`LayerError`][..LayerError] for that particular layer.</span>
+
+<span class="sd">    The class attributes below should be configured to the suitable values for a given layer.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        error_map (ErrorMapping): A dictionary mapping of exception translations. See </span>
+<span class="sd">            [`ErrorMapping`][eh-alias] for the appropriate structure. *Defaults to an empty </span>
+<span class="sd">            dictionary.*</span>
+<span class="sd">        base_exception (type[LayerError]): The fallback exception type raised when a</span>
+<span class="sd">            caught exception has no matching entry in `error_map`. Ensures unhandled</span>
+<span class="sd">            exceptions are still wrapped in a layer-appropriate error to prevent leaking</span>
+<span class="sd">            lower-level implementation details. *Defaults to LayerError.*</span>
+<span class="sd">        exclude (ExceptionType, optional): Exception type(s) that should be ignored in </span>
+<span class="sd">            translation entirely. Useful for allowing certain exceptions to propagate </span>
+<span class="sd">            without interference. See [`ExceptionType`][eh-alias] for allowed values. </span>
+<span class="sd">            *Defaults to LayerError.*</span>
+<span class="sd">        error_origin_name (str, optional): Some exceptions include the specific error type </span>
+<span class="sd">            or the exception origin within a particular attribute. If this parameter is set, </span>
+<span class="sd">            the methods in this class will first search for the specified attribute within the </span>
+<span class="sd">            exception that requires translation. *Defaults to None.*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">error_map</span><span class="p">:</span> <span class="n">ErrorMapping</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Default ignores translation</span>
+    <span class="n">base_exception</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">LayerError</span><span class="p">]</span> <span class="o">=</span> <span class="n">LayerError</span>  <span class="c1"># Default translates all exceptions to LayerError</span>
+    <span class="n">exclude</span><span class="p">:</span> <span class="n">ExceptionType</span> <span class="o">=</span> <span class="n">LayerError</span>  <span class="c1"># Any LayerErrors raised will be ignored</span>
+    <span class="n">error_origin_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>  <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrap_error_handler</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wraps a function with a general-purpose error-handling strategy.</span>
+
+<span class="sd">        Catches exceptions and translates them into layer-specific errors the specified </span>
+<span class="sd">        [`error_map`][..]. Any exception not covered by [`error_map`][..] or [`exclude`][..] </span>
+<span class="sd">        is caught and re-raised as the provided [`base_exception`][..] or itself, respectively. </span>
+<span class="sd">        Preserves the original exception as the cause via `raise ... from e`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            func (callable): The function being wrapped with the error handling logic. </span>
+<span class="sd">            message (str, optional): A custom message to attach to the translated exception.</span>
+<span class="sd">                If None, the message defaults to a string of the form `&quot;ExceptionType:</span>
+<span class="sd">                exception message&quot;`. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (callable): The original function wrapped with exception handling logic with its</span>
+<span class="sd">                signature and metadata preserved.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            LayerError: Raises a translated exception determined by [`error_map`][..], </span>
+<span class="sd">                using [`base_exception`][..] as the fallback if no mapping is found.</span>
+<span class="sd">            Exception: If the raised exception matches a type in [`exclude`][..], it is</span>
+<span class="sd">                    re-raised immediately without translation.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            ```python</span>
+<span class="sd">            def some_func(arg):</span>
+<span class="sd">                ...</span>
+
+<span class="sd">            # Does not translate exceptions</span>
+<span class="sd">            some_func(1)</span>
+
+<span class="sd">            wrapped = LayerErrorHandler.wrap_error_handler(</span>
+<span class="sd">                func=some_func,</span>
+<span class="sd">                message=&quot;Error raised, this isn&#39;t good...&quot;</span>
+<span class="sd">            )</span>
+
+<span class="sd">            # Does translate exceptions</span>
+<span class="sd">            wrapped(1)</span>
+<span class="sd">            ```</span>
+
+<span class="sd">        *Notes:* </span>
+
+<span class="sd">        - This is intended for instance methods.</span>
+<span class="sd">        - The caller&#39;s class name and function name are automatically captured</span>
+<span class="sd">            and passed to [`translate_error`][..translate_error]. </span>
+<span class="sd">        - The inner `decorator` uses `*args`and assumes `args[0]` is the instance of the </span>
+<span class="sd">            class in which the method being wrapped is associated with. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="c1"># Reference the instance calling the function</span>
+            <span class="n">func_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
+            <span class="c1"># Rename constructor function name</span>
+            <span class="n">func_name</span> <span class="o">=</span> <span class="s2">&quot;initialization&quot;</span> <span class="k">if</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s2">&quot;__init__&quot;</span> <span class="k">else</span> <span class="n">func_name</span>
+
+            <span class="c1"># Get the class that called the function</span>
+            <span class="n">caller_name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="n">args</span> <span class="k">else</span> <span class="kc">None</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Return the wrapped function in the try/except</span>
+                <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># Immediately raise the error if its type should be ignored during translation</span>
+                <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">exclude</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">exclude</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">e</span>
+
+                <span class="c1"># Translate the respective exception to the correct type.</span>
+                <span class="c1"># Any exception in &#39;exclude&#39; has been handled, so passing it into translation is unecessary</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">translate_error</span><span class="p">(</span>
+                    <span class="n">e</span><span class="p">,</span>
+                    <span class="n">caller_name</span><span class="p">,</span>
+                    <span class="n">func_name</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">message</span> <span class="k">else</span> <span class="n">message</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Raise the error using &#39;from&#39; to preserve traceback and root cause information</span>
+                <span class="k">raise</span> <span class="n">error</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+        <span class="k">return</span> <span class="n">decorator</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">layer_error_decorator</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Decorator to provide error translation for exceptions in backend layers.</span>
+
+<span class="sd">        See [`translate_error`][..translate_error] for details on the error-handling strategy. </span>
+<span class="sd">        This decorator is applied to instance methods to automatically catch exceptions, translate </span>
+<span class="sd">        them into layer-specific errors using an [`error_map`][..], and re-raise them while preserving </span>
+<span class="sd">        the original exception as the cause.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message (str, optional): A custom error message. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (callable): The original function wrapped with exception handling logic, with its</span>
+<span class="sd">                signature and metadata preserved.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            LayerError: A translated exception determined by [`error_map`][..], using</span>
+<span class="sd">                    [`base_exception`][..] as the fallback.</span>
+<span class="sd">            Exception: If the exception matches a type in [`exclude`][..], it is re-raised</span>
+<span class="sd">                    immediately.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            ```python</span>
+<span class="sd">            # The function below will automatically catch and translate any exceptions</span>
+<span class="sd">            @LayerErrorHandler.layer_error_decorator()</span>
+<span class="sd">            def some_func():</span>
+<span class="sd">                ....</span>
+<span class="sd">            ```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Python decorators implicitly pass the function to wrap as an argument to `wrapper`.</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">wrap_error_handler</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">translate_error</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">exc</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">,</span>
+        <span class="n">caller_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">point_of_error</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LayerError</span> <span class="o">|</span> <span class="ne">Exception</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Translates a provided `Exception` instance using a map potential exception classes.</span>
+
+<span class="sd">        Uses general-purpose error-handling logic to produce layer-specific errors. Any</span>
+<span class="sd">        exception not covered by [`error_map`][..] is translated to a fallback exception provided</span>
+<span class="sd">        in [`base_exception`][..]. All exceptions with a matching type in [`exclude`][..] is returned</span>
+<span class="sd">        as-is.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exc (Exception): The exception instance that will be translated. If its type does </span>
+<span class="sd">                not correspond with a matching translation in [`error_map`][..], or it has a matching </span>
+<span class="sd">                type in [`exclude`][..], the exception is returned as-is.</span>
+<span class="sd">            caller_name (str, optional): Name of the caller (typically a class) used as a prefix for </span>
+<span class="sd">                the error message, e.g., the name of the service or repository raising the exception. </span>
+<span class="sd">                Defaults to `None`.</span>
+<span class="sd">            point_of_error (str, optional): Point of error that identifies where in the code the </span>
+<span class="sd">                exception was raised, e.g., a function or method name. Only included in the message </span>
+<span class="sd">                when debugging is enabled. Defaults to `None`.</span>
+<span class="sd">            message (str, optional): A custom message to attach to the translated exception. If `None`, </span>
+<span class="sd">                the default message in the [`LayerError`][...LayerError] is used. Defaults to `None`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (LayerError | Exception): If a matching translation is found in [`error_map`][..], a </span>
+<span class="sd">                [`LayerError`][...LayerError] instance is returned. In the case a match is not found, </span>
+<span class="sd">                the class provided in [`base_exception`][..] is instantiated and returned as a fallback, </span>
+<span class="sd">                preventing lower-level implementation details from propagating upwards. If the provided </span>
+<span class="sd">                exception `e` is an instance with a matching type in [`exclude`][..], it is returned as-is.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Return the exception if its type exists in exclusion list</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">exclude</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">exclude</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">exc</span>
+
+        <span class="c1"># Find the first matching type in the error map. Returns a tuple containing an exception class,</span>
+        <span class="c1"># and a boolean that determines whether previous exception details should be propogated.</span>
+        <span class="c1"># If a match is not found, None is returned.</span>
+        <span class="n">error_class</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_map</span><span class="p">:</span>
+            <span class="c1"># If the provided exception has an origin attribute matching a key in the error map, then search that first</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_origin_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_origin_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">origin</span><span class="p">:</span>
+                <span class="n">error_class</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="bp">cls</span><span class="o">.</span><span class="n">error_map</span><span class="p">[</span><span class="n">sub_err</span><span class="p">]</span> <span class="k">for</span> <span class="n">sub_err</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_map</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">sub_err</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">error_class</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># If either the exception itself does not contain an origin attribute or it doesn&#39;t have a matching entry, search the error map directly</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">err</span><span class="p">):</span>
+                <span class="n">error_class</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_map</span><span class="p">[</span><span class="n">err</span><span class="p">]</span>
+                <span class="k">break</span>   
+
+        <span class="k">if</span> <span class="n">error_class</span><span class="p">:</span>
+            <span class="n">layer_exception</span><span class="p">,</span> <span class="n">show_error</span> <span class="o">=</span> <span class="n">error_class</span>
+
+            <span class="c1"># Return a new LayerError instance with the provided details</span>
+            <span class="k">return</span> <span class="n">layer_exception</span><span class="p">(</span>
+                <span class="n">caller_name</span><span class="o">=</span><span class="n">caller_name</span><span class="p">,</span>
+                <span class="n">poe</span><span class="o">=</span><span class="n">point_of_error</span><span class="p">,</span>
+                <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
+                <span class="n">show_error</span><span class="o">=</span><span class="n">show_error</span><span class="p">,</span>
+                <span class="n">cause</span><span class="o">=</span><span class="n">exc</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Match not found, instantiate and return the fallback exception</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">base_exception</span><span class="p">(</span>
+            <span class="n">caller_name</span><span class="p">,</span> <span class="n">poe</span><span class="o">=</span><span class="n">point_of_error</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span> <span class="n">show_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cause</span><span class="o">=</span><span class="n">exc</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.global_core.exceptions.LayerErrorHandler.layer_error_decorator" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">layer_error_decorator</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Decorator to provide error translation for exceptions in backend layers.</p>
+<p>See <a class="autorefs autorefs-internal" title="translate_error(exc, caller_name=None, point_of_error=None, message=None)
+
+  
+      classmethod
+  " href="#src.global_core.exceptions.LayerErrorHandler.translate_error"><code>translate_error</code></a> for details on the error-handling strategy. 
+This decorator is applied to instance methods to automatically catch exceptions, translate 
+them into layer-specific errors using an <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>error_map</code></a>, and re-raise them while preserving 
+the original exception as the cause.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>message</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A custom error message. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="callable">callable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The original function wrapped with exception handling logic, with its
+signature and metadata preserved.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="LayerError (src.global_core.exceptions.LayerError)" href="#src.global_core.exceptions.LayerError">LayerError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A translated exception determined by <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>error_map</code></a>, using
+    <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>base_exception</code></a> as the fallback.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the exception matches a type in <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>exclude</code></a>, it is re-raised
+    immediately.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="c1"># The function below will automatically catch and translate any exceptions</span>
+<span class="nd">@LayerErrorHandler</span><span class="o">.</span><span class="n">layer_error_decorator</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">some_func</span><span class="p">():</span>
+    <span class="o">....</span>
+</code></pre></div>
+</details>
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\global_core\exceptions.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">layer_error_decorator</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator to provide error translation for exceptions in backend layers.</span>
+
+<span class="sd">    See [`translate_error`][..translate_error] for details on the error-handling strategy. </span>
+<span class="sd">    This decorator is applied to instance methods to automatically catch exceptions, translate </span>
+<span class="sd">    them into layer-specific errors using an [`error_map`][..], and re-raise them while preserving </span>
+<span class="sd">    the original exception as the cause.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (str, optional): A custom error message. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (callable): The original function wrapped with exception handling logic, with its</span>
+<span class="sd">            signature and metadata preserved.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        LayerError: A translated exception determined by [`error_map`][..], using</span>
+<span class="sd">                [`base_exception`][..] as the fallback.</span>
+<span class="sd">        Exception: If the exception matches a type in [`exclude`][..], it is re-raised</span>
+<span class="sd">                immediately.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        ```python</span>
+<span class="sd">        # The function below will automatically catch and translate any exceptions</span>
+<span class="sd">        @LayerErrorHandler.layer_error_decorator()</span>
+<span class="sd">        def some_func():</span>
+<span class="sd">            ....</span>
+<span class="sd">        ```</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Python decorators implicitly pass the function to wrap as an argument to `wrapper`.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">wrap_error_handler</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.global_core.exceptions.LayerErrorHandler.translate_error" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">translate_error</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">caller_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">point_of_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Translates a provided <code>Exception</code> instance using a map potential exception classes.</p>
+<p>Uses general-purpose error-handling logic to produce layer-specific errors. Any
+exception not covered by <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>error_map</code></a> is translated to a fallback exception provided
+in <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>base_exception</code></a>. All exceptions with a matching type in <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>exclude</code></a> is returned
+as-is.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>exc</code>
+            </td>
+            <td>
+                  <code><span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The exception instance that will be translated. If its type does 
+not correspond with a matching translation in <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>error_map</code></a>, or it has a matching 
+type in <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>exclude</code></a>, the exception is returned as-is.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>caller_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the caller (typically a class) used as a prefix for 
+the error message, e.g., the name of the service or repository raising the exception. 
+Defaults to <code>None</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>point_of_error</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Point of error that identifies where in the code the 
+exception was raised, e.g., a function or method name. Only included in the message 
+when debugging is enabled. Defaults to <code>None</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>message</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A custom message to attach to the translated exception. If <code>None</code>, 
+the default message in the <a class="autorefs autorefs-internal" href="#src.global_core.exceptions.LayerError"><code>LayerError</code></a> is used. Defaults to <code>None</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="LayerError (src.global_core.exceptions.LayerError)" href="#src.global_core.exceptions.LayerError">LayerError</a> | <span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a matching translation is found in <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>error_map</code></a>, a 
+<a class="autorefs autorefs-internal" href="#src.global_core.exceptions.LayerError"><code>LayerError</code></a> instance is returned. In the case a match is not found, 
+the class provided in <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>base_exception</code></a> is instantiated and returned as a fallback, 
+preventing lower-level implementation details from propagating upwards. If the provided 
+exception <code>e</code> is an instance with a matching type in <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>exclude</code></a>, it is returned as-is.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\global_core\exceptions.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">translate_error</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">exc</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">,</span>
+    <span class="n">caller_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">point_of_error</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LayerError</span> <span class="o">|</span> <span class="ne">Exception</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Translates a provided `Exception` instance using a map potential exception classes.</span>
+
+<span class="sd">    Uses general-purpose error-handling logic to produce layer-specific errors. Any</span>
+<span class="sd">    exception not covered by [`error_map`][..] is translated to a fallback exception provided</span>
+<span class="sd">    in [`base_exception`][..]. All exceptions with a matching type in [`exclude`][..] is returned</span>
+<span class="sd">    as-is.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exc (Exception): The exception instance that will be translated. If its type does </span>
+<span class="sd">            not correspond with a matching translation in [`error_map`][..], or it has a matching </span>
+<span class="sd">            type in [`exclude`][..], the exception is returned as-is.</span>
+<span class="sd">        caller_name (str, optional): Name of the caller (typically a class) used as a prefix for </span>
+<span class="sd">            the error message, e.g., the name of the service or repository raising the exception. </span>
+<span class="sd">            Defaults to `None`.</span>
+<span class="sd">        point_of_error (str, optional): Point of error that identifies where in the code the </span>
+<span class="sd">            exception was raised, e.g., a function or method name. Only included in the message </span>
+<span class="sd">            when debugging is enabled. Defaults to `None`.</span>
+<span class="sd">        message (str, optional): A custom message to attach to the translated exception. If `None`, </span>
+<span class="sd">            the default message in the [`LayerError`][...LayerError] is used. Defaults to `None`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (LayerError | Exception): If a matching translation is found in [`error_map`][..], a </span>
+<span class="sd">            [`LayerError`][...LayerError] instance is returned. In the case a match is not found, </span>
+<span class="sd">            the class provided in [`base_exception`][..] is instantiated and returned as a fallback, </span>
+<span class="sd">            preventing lower-level implementation details from propagating upwards. If the provided </span>
+<span class="sd">            exception `e` is an instance with a matching type in [`exclude`][..], it is returned as-is.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Return the exception if its type exists in exclusion list</span>
+    <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">exclude</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">exclude</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">exc</span>
+
+    <span class="c1"># Find the first matching type in the error map. Returns a tuple containing an exception class,</span>
+    <span class="c1"># and a boolean that determines whether previous exception details should be propogated.</span>
+    <span class="c1"># If a match is not found, None is returned.</span>
+    <span class="n">error_class</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_map</span><span class="p">:</span>
+        <span class="c1"># If the provided exception has an origin attribute matching a key in the error map, then search that first</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_origin_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_origin_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">origin</span><span class="p">:</span>
+            <span class="n">error_class</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="bp">cls</span><span class="o">.</span><span class="n">error_map</span><span class="p">[</span><span class="n">sub_err</span><span class="p">]</span> <span class="k">for</span> <span class="n">sub_err</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_map</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">sub_err</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">error_class</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="c1"># If either the exception itself does not contain an origin attribute or it doesn&#39;t have a matching entry, search the error map directly</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">err</span><span class="p">):</span>
+            <span class="n">error_class</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_map</span><span class="p">[</span><span class="n">err</span><span class="p">]</span>
+            <span class="k">break</span>   
+
+    <span class="k">if</span> <span class="n">error_class</span><span class="p">:</span>
+        <span class="n">layer_exception</span><span class="p">,</span> <span class="n">show_error</span> <span class="o">=</span> <span class="n">error_class</span>
+
+        <span class="c1"># Return a new LayerError instance with the provided details</span>
+        <span class="k">return</span> <span class="n">layer_exception</span><span class="p">(</span>
+            <span class="n">caller_name</span><span class="o">=</span><span class="n">caller_name</span><span class="p">,</span>
+            <span class="n">poe</span><span class="o">=</span><span class="n">point_of_error</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
+            <span class="n">show_error</span><span class="o">=</span><span class="n">show_error</span><span class="p">,</span>
+            <span class="n">cause</span><span class="o">=</span><span class="n">exc</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Match not found, instantiate and return the fallback exception</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">base_exception</span><span class="p">(</span>
+        <span class="n">caller_name</span><span class="p">,</span> <span class="n">poe</span><span class="o">=</span><span class="n">point_of_error</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span> <span class="n">show_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cause</span><span class="o">=</span><span class="n">exc</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.global_core.exceptions.LayerErrorHandler.wrap_error_handler" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">wrap_error_handler</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Wraps a function with a general-purpose error-handling strategy.</p>
+<p>Catches exceptions and translates them into layer-specific errors the specified 
+<a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>error_map</code></a>. Any exception not covered by <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>error_map</code></a> or <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>exclude</code></a> 
+is caught and re-raised as the provided <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>base_exception</code></a> or itself, respectively. 
+Preserves the original exception as the cause via <code>raise ... from e</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>func</code>
+            </td>
+            <td>
+                  <code><span title="callable">callable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The function being wrapped with the error handling logic. </p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>message</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A custom message to attach to the translated exception.
+If None, the message defaults to a string of the form <code>"ExceptionType:
+exception message"</code>. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="callable">callable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The original function wrapped with exception handling logic with its
+signature and metadata preserved.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="LayerError (src.global_core.exceptions.LayerError)" href="#src.global_core.exceptions.LayerError">LayerError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Raises a translated exception determined by <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>error_map</code></a>, 
+using <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>base_exception</code></a> as the fallback if no mapping is found.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the raised exception matches a type in <a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>exclude</code></a>, it is
+    re-raised immediately without translation.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">some_func</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="o">...</span>
+
+<span class="c1"># Does not translate exceptions</span>
+<span class="n">some_func</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">wrapped</span> <span class="o">=</span> <span class="n">LayerErrorHandler</span><span class="o">.</span><span class="n">wrap_error_handler</span><span class="p">(</span>
+    <span class="n">func</span><span class="o">=</span><span class="n">some_func</span><span class="p">,</span>
+    <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Error raised, this isn&#39;t good...&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Does translate exceptions</span>
+<span class="n">wrapped</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+</details>        <p><em>Notes:</em> </p>
+<ul>
+<li>This is intended for instance methods.</li>
+<li>The caller's class name and function name are automatically captured
+    and passed to <a class="autorefs autorefs-internal" title="translate_error(exc, caller_name=None, point_of_error=None, message=None)
+
+  
+      classmethod
+  " href="#src.global_core.exceptions.LayerErrorHandler.translate_error"><code>translate_error</code></a>. </li>
+<li>The inner <code>decorator</code> uses <code>*args</code>and assumes <code>args[0]</code> is the instance of the 
+    class in which the method being wrapped is associated with.</li>
+</ul>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src\global_core\exceptions.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wrap_error_handler</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">func</span><span class="p">,</span>
+    <span class="n">message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wraps a function with a general-purpose error-handling strategy.</span>
+
+<span class="sd">    Catches exceptions and translates them into layer-specific errors the specified </span>
+<span class="sd">    [`error_map`][..]. Any exception not covered by [`error_map`][..] or [`exclude`][..] </span>
+<span class="sd">    is caught and re-raised as the provided [`base_exception`][..] or itself, respectively. </span>
+<span class="sd">    Preserves the original exception as the cause via `raise ... from e`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func (callable): The function being wrapped with the error handling logic. </span>
+<span class="sd">        message (str, optional): A custom message to attach to the translated exception.</span>
+<span class="sd">            If None, the message defaults to a string of the form `&quot;ExceptionType:</span>
+<span class="sd">            exception message&quot;`. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (callable): The original function wrapped with exception handling logic with its</span>
+<span class="sd">            signature and metadata preserved.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        LayerError: Raises a translated exception determined by [`error_map`][..], </span>
+<span class="sd">            using [`base_exception`][..] as the fallback if no mapping is found.</span>
+<span class="sd">        Exception: If the raised exception matches a type in [`exclude`][..], it is</span>
+<span class="sd">                re-raised immediately without translation.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        ```python</span>
+<span class="sd">        def some_func(arg):</span>
+<span class="sd">            ...</span>
+
+<span class="sd">        # Does not translate exceptions</span>
+<span class="sd">        some_func(1)</span>
+
+<span class="sd">        wrapped = LayerErrorHandler.wrap_error_handler(</span>
+<span class="sd">            func=some_func,</span>
+<span class="sd">            message=&quot;Error raised, this isn&#39;t good...&quot;</span>
+<span class="sd">        )</span>
+
+<span class="sd">        # Does translate exceptions</span>
+<span class="sd">        wrapped(1)</span>
+<span class="sd">        ```</span>
+
+<span class="sd">    *Notes:* </span>
+
+<span class="sd">    - This is intended for instance methods.</span>
+<span class="sd">    - The caller&#39;s class name and function name are automatically captured</span>
+<span class="sd">        and passed to [`translate_error`][..translate_error]. </span>
+<span class="sd">    - The inner `decorator` uses `*args`and assumes `args[0]` is the instance of the </span>
+<span class="sd">        class in which the method being wrapped is associated with. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># Reference the instance calling the function</span>
+        <span class="n">func_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
+        <span class="c1"># Rename constructor function name</span>
+        <span class="n">func_name</span> <span class="o">=</span> <span class="s2">&quot;initialization&quot;</span> <span class="k">if</span> <span class="n">func_name</span> <span class="o">==</span> <span class="s2">&quot;__init__&quot;</span> <span class="k">else</span> <span class="n">func_name</span>
+
+        <span class="c1"># Get the class that called the function</span>
+        <span class="n">caller_name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="n">args</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Return the wrapped function in the try/except</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Immediately raise the error if its type should be ignored during translation</span>
+            <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">exclude</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">exclude</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">e</span>
+
+            <span class="c1"># Translate the respective exception to the correct type.</span>
+            <span class="c1"># Any exception in &#39;exclude&#39; has been handled, so passing it into translation is unecessary</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">translate_error</span><span class="p">(</span>
+                <span class="n">e</span><span class="p">,</span>
+                <span class="n">caller_name</span><span class="p">,</span>
+                <span class="n">func_name</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">message</span> <span class="k">else</span> <span class="n">message</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Raise the error using &#39;from&#39; to preserve traceback and root cause information</span>
+            <span class="k">raise</span> <span class="n">error</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+    <span class="k">return</span> <span class="n">decorator</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="src.global_core.exceptions.LayerErrorInvoker" class="doc doc-heading">
+            <code>LayerErrorInvoker</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Provides instance methods used for raising exceptions.</p>
+<p>See source code for the available methods.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="src.global_core.exceptions.LayerErrorInvoker.error_handler">error_handler</span></code></td>
+            <td>
+                  <code><span title="type">type</span>[<a class="autorefs autorefs-internal" title="LayerErrorHandler (src.global_core.exceptions.LayerErrorHandler)" href="#src.global_core.exceptions.LayerErrorHandler">LayerErrorHandler</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Defines the type of 
+<a class="autorefs autorefs-internal" href="#src.global_core.exceptions.LayerErrorHandler"><code>LayerErrorHandler</code></a> used for translating exceptions. 
+Classes that extend <code>LayerErrorInvoker</code> should assign this variable to
+the correct <a class="autorefs autorefs-internal" href="#src.global_core.exceptions.LayerErrorHandler"><code>LayerErrorHandler</code></a> child class for its
+respective layer.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src\global_core\exceptions.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayerErrorInvoker</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provides instance methods used for raising exceptions.</span>
+
+<span class="sd">    See source code for the available methods.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        error_handler (type[LayerErrorHandler]): Defines the type of </span>
+<span class="sd">            [`LayerErrorHandler`][..LayerErrorHandler] used for translating exceptions. </span>
+<span class="sd">            Classes that extend `LayerErrorInvoker` should assign this variable to</span>
+<span class="sd">            the correct [`LayerErrorHandler`][..LayerErrorHandler] child class for its</span>
+<span class="sd">            respective layer.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">error_handler</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">LayerErrorHandler</span><span class="p">]</span> <span class="o">=</span> <span class="n">LayerErrorHandler</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">LayerError</span><span class="p">],</span> <span class="n">message</span><span class="p">,</span> <span class="n">show_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cause</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">error_class</span><span class="p">(</span>
+            <span class="n">caller_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">poe</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
+            <span class="n">show_error</span><span class="o">=</span><span class="n">show_error</span><span class="p">,</span>
+            <span class="n">cause</span><span class="o">=</span><span class="n">cause</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">,</span> <span class="n">error_class</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">show_error</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">condition</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise</span><span class="p">(</span><span class="n">error_class</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">show_error</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_translate_and_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">error_message</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_handler</span><span class="o">.</span><span class="n">translate_error</span><span class="p">(</span>
+            <span class="n">exc</span><span class="o">=</span><span class="n">e</span><span class="p">,</span> 
+            <span class="n">caller_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">point_of_error</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="n">error_message</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">err</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="src.global_core.exceptions.LayerErrorWrapper" class="doc doc-heading">
+            <code>LayerErrorWrapper</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>A superclass that wraps all subclass methods with the layer error handling logic in 
+<a class="autorefs autorefs-internal" title="LayerErrorHandler" href="#src.global_core.exceptions.LayerErrorHandler"><code>LayerErrorHandling</code></a>.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="src.global_core.exceptions.LayerErrorWrapper.error_handler">error_handler</span></code></td>
+            <td>
+                  <code><span title="type">type</span>[<a class="autorefs autorefs-internal" title="LayerErrorHandler (src.global_core.exceptions.LayerErrorHandler)" href="#src.global_core.exceptions.LayerErrorHandler">LayerErrorHandler</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Defines the type of 
+<a class="autorefs autorefs-internal" href="#src.global_core.exceptions.LayerErrorHandler"><code>LayerErrorHandler</code></a> used for translating exceptions. 
+Classes that extend <code>LayerErrorWrapper</code> should assign this variable to
+the correct <a class="autorefs autorefs-internal" href="#src.global_core.exceptions.LayerErrorHandler"><code>LayerErrorHandler</code></a> child class for its
+respective layer.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src\global_core\exceptions.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LayerErrorWrapper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A superclass that wraps all subclass methods with the layer error handling logic in </span>
+<span class="sd">    [`LayerErrorHandling`][..LayerErrorHandler].</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        error_handler (type[LayerErrorHandler]): Defines the type of </span>
+<span class="sd">            [`LayerErrorHandler`][..LayerErrorHandler] used for translating exceptions. </span>
+<span class="sd">            Classes that extend `LayerErrorWrapper` should assign this variable to</span>
+<span class="sd">            the correct [`LayerErrorHandler`][..LayerErrorHandler] child class for its</span>
+<span class="sd">            respective layer. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">error_handler</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">LayerErrorHandler</span><span class="p">]</span> <span class="o">=</span> <span class="n">LayerErrorHandler</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_wrap_class</span><span class="p">()</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_wrap_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;`cls` should be a subclass extending `LayerErrorWrapper`.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Ensure that the value is a function; otherwise, attributes and other things will be ignored</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isfunction</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Wrap the current method (value) if it hasn&#39;t already been wrapped</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;_is_wrapped&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>             
+                <span class="n">wrapped</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">error_handler</span><span class="o">.</span><span class="n">wrap_error_handler</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">wrapped</span><span class="o">.</span><span class="n">_is_wrapped</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">wrapped</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
