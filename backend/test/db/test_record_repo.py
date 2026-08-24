@@ -189,7 +189,7 @@ class RecordRepositoryTestMixin:
 
         with patch.object(RecordRepository, "update_with_pk") as mock:
             mock.side_effect = SQLAlchemyError
-            with self.assertRaises(RError.INVALID_ARG):
+            with self.assertRaises(RError.INTERNAL):
                 self.repo.verify_record(1, sym, loc)
 
     def test_get_records_at_station(self):
