@@ -10,7 +10,7 @@ from ..db.record_repo import RecordRepository
 from ..service.service_core import ServiceErrorWrapper, ServiceErrorInvoker, SError
 
 # Constant for number of results per page during collation
-RESULTS_NUM = 250
+RESULTS_NUM = 50
 
 class RecordService(ServiceErrorWrapper, ServiceErrorInvoker):
     """Provides methods that perform the business logic for signal/train record
