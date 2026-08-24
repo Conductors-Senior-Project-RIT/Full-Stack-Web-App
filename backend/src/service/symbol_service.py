@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
-from .service_core import ServiceErrorWrapper
 from ..db.symbol_repo import SymbolRepository
+from .service_core import ServiceErrorWrapper
 
 
 class SymbolService(ServiceErrorWrapper):

@@ -1,11 +1,12 @@
-from datetime import time
 import unittest
+from datetime import time
 
 from backend.database import db
-from backend.src.db.db_core.exceptions import RepositoryExistingRowError, RepositoryInternalError, RepositoryNotFoundError, RepositoryParsingError
+from backend.src.db.db_core.exceptions import RError
 from backend.src.db.db_core.models import User
 from backend.src.db.user_repo import UserRepository
 from backend.test.base_test_case import BaseTestCase
+
 
 class TestUserRepository(BaseTestCase): # testing user model
     """Unit tests for UserRepository database operations.
@@ -61,7 +62,7 @@ class TestUserRepository(BaseTestCase): # testing user model
     def test_create_new_user_failure(self):
         """ verifying a new user doesn't get created/added to db if email used already exists in db """
 
-        with self.assertRaises(RepositoryExistingRowError):
+        with self.assertRaises(RError.EXISTING):
             self.repo.create_new_user(self.test_user.email, "6769420password")
 
      # future tests (?): password is X characters long, valid email checker?
@@ -77,7 +78,7 @@ class TestUserRepository(BaseTestCase): # testing user model
 
     def test_get_user_id_invalid(self):
         """ edge case where an invalid email is given """        
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.get_user_id("nonexistentemail@gmail.com")
 
     ###########################
@@ -93,7 +94,7 @@ class TestUserRepository(BaseTestCase): # testing user model
         self.assertEqual(user_info.get("acc_status"), 2) #normal user
 
     def test_get_user_info_invalid_email(self):
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.get_user_info("not_a_real_email@gmail.com")
 
     ###########################

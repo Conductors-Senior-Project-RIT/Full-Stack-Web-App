@@ -1,13 +1,15 @@
 from datetime import datetime
 from unittest.mock import patch
+
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from backend.test.db.test_utils import compare_results_pkey
-from backend.src.db.db_core.exceptions import RepositoryExistingRowError, RepositoryInternalError, RepositoryInvalidArgumentError, RepositoryNotFoundError
 from backend.database import db
+from backend.src.db.db_core.exceptions import RError
 from backend.src.db.station_repo import StationRepository
 from backend.test.base_test_case import BaseTestCase
+from backend.test.db.test_utils import compare_results_pkey
+
 
 class TestStationRepository(BaseTestCase):
     def setUp(self):
@@ -43,7 +45,7 @@ class TestStationRepository(BaseTestCase):
         self.assertEqual(new_pass, resulting_row["passwd"])
                 
         # Test that error is raised when attempting to create a station with an already existing name
-        with self.assertRaises(RepositoryExistingRowError):
+        with self.assertRaises(RError.EXISTING):
             self.repo.create_new_station("test station1", "gg")
                 
     def testUpdateStationPassword(self):
@@ -53,13 +55,13 @@ class TestStationRepository(BaseTestCase):
         self.assertEqual(new_pass, resulting_password)
         
         # Test argument checking
-        with self.assertRaises(RepositoryInvalidArgumentError):
+        with self.assertRaises(RError.INVALID_ARG):
             self.repo.update_station_password("1", "aaaa")
             self.repo.update_station_password(1, 3333)
             self.repo.update_station_password(None, None)
         
         # Test when a station is not found, an exception is raised
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.update_station_password(10, "cccc")
             
             
@@ -69,13 +71,13 @@ class TestStationRepository(BaseTestCase):
         self.assertEqual(1, result_id)
         
         # Test not finding id
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.get_station_id("kinda hungry rn")
         
         # Test handling exceptions
         with patch.object(Session, "execute") as mock_session:
             mock_session.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
+            with self.assertRaises(RError.INTERNAL):
                 self.repo.get_station_id("thirsty too")
         
     
@@ -92,7 +94,7 @@ class TestStationRepository(BaseTestCase):
         self.assertEqual(expected, result)
         
         # Test error when station is not found
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.get_last_seen("zzzzzzzzzz")
             
     
@@ -103,7 +105,7 @@ class TestStationRepository(BaseTestCase):
         self.assertNotEqual(previous, result)
         
         # Test to see if exception is raised if query returns None
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.update_last_seen(20)
         
         

@@ -2,6 +2,7 @@ import unittest
 
 from backend import create_app
 
+
 class TestUserApiUnit(unittest.TestCase):
     """
     Unit tests for user blueprint routes

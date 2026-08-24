@@ -1,15 +1,15 @@
 import hashlib
 import secrets
 
-from email_validator import validate_email, EmailNotValidError
+from email_validator import EmailNotValidError, validate_email
 
 # from werkzeug.security import check_password_hash, generate_password_hash
-
 from ... import bcrypt
-from .service_core import SError, ServiceErrorWrapper, ServiceErrorInvoker
 from ..db.station_repo import StationRepository
 from ..db.user_repo import UserRepository
-from ..service.email_service import email_service #instantiated 
+from ..service.email_service import email_service  #instantiated 
+from .service_core import SError, ServiceErrorInvoker, ServiceErrorWrapper
+
 
 class UserService(ServiceErrorWrapper, ServiceErrorInvoker):
     """Service layer for user account and preference managemennt

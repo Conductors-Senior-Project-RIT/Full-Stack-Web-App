@@ -1,12 +1,12 @@
+import unittest
 from datetime import datetime
 from unittest.mock import patch
-from sqlalchemy.exc import IntegrityError, ProgrammingError
-import unittest
 
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from backend.database import db
-from backend.src.db.db_core.exceptions import RepositoryExistingRowError, RepositoryInvalidArgumentError, RepositoryNotFoundError, RepositoryParsingError, RepositorySessionError
+from backend.src.db.db_core.exceptions import RError
 from backend.src.db.db_core.repository import BaseRepository
 from backend.test.base_test_case import BaseTestCase
 from backend.test.db.test_utils import TestModel, return_test_data
@@ -46,10 +46,10 @@ class TestBaseRepository(BaseTestCase):
         self.assertEqual("id", self.repo.pkey)
         
         # Test that an exception is raised when either session or model is not provided
-        with self.assertRaises(RepositoryInvalidArgumentError):
+        with self.assertRaises(RError.INVALID_ARG):
             self.repo = BaseRepository(None, self.session)
         
-        with self.assertRaises(RepositorySessionError):
+        with self.assertRaises(RError.SESSION):
             self.repo = BaseRepository(TestModel, None)
             
         # Test if inspection doesn't find primary key
@@ -69,7 +69,7 @@ class TestBaseRepository(BaseTestCase):
         self.assertEqual(expected, result)
         
         # Test that an exception is raised when a row cannot be found
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.get(100)
             
     def testRepositoryUpdate(self):
@@ -109,15 +109,15 @@ class TestBaseRepository(BaseTestCase):
 
     def testRepositoryUpdateErrors(self):
         # Test that an object key of an incorrect type raises InvalidArgumentError
-        with self.assertRaises(RepositoryInvalidArgumentError):
+        with self.assertRaises(RError.INVALID_ARG):
             self.repo.update([(1, {'unit_addr': '9999'})])
             
         # Test exception is raised if TypeError is raised
-        with self.assertRaises(RepositoryParsingError):
+        with self.assertRaises(RError.PARSING):
             self.repo.update({self.test_data[0]: {'unit_addr': '9999'}})
             
         # Test exception is raised if field to update is not in ORM
-        with self.assertRaises(RepositoryInvalidArgumentError):
+        with self.assertRaises(RError.INVALID_ARG):
             self.repo.update([(self.test_data[0], {'boom': 'bap'})])
             
     
@@ -134,7 +134,7 @@ class TestBaseRepository(BaseTestCase):
         self.assertEqual(updated_data['unit_addr'], result_session['unit_addr'])
         
         # Test that if get fails to find the object, an exception is raised
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.update_with_pk(100, updated_data)
             
         # Test that if no changes are made, then None is returned
@@ -189,7 +189,7 @@ class TestBaseRepository(BaseTestCase):
         self.repo.session.flush()
         
         # Test that if a primary key collision occurs, then error is raised
-        with self.assertRaises(RepositoryExistingRowError) as exc:
+        with self.assertRaises(RError.EXISTING) as exc:
             sp = self.repo.session.begin_nested()
             self.repo.create({"id": 999, "date_rec": datetime.now(), "station_recorded": 2}, False) 
         # The exception should contain the root cause (IntegrityError) if primary key collision occurs
@@ -204,14 +204,14 @@ class TestBaseRepository(BaseTestCase):
         self.assertEqual(station_rec, instance.station_recorded)
             
         # Test that a parsing error is raised when the input data is not a dict or list of dicts
-        with self.assertRaises(RepositoryParsingError) as exc:
+        with self.assertRaises(RError.PARSING) as exc:
             self.repo.create(["not a dict"])
         # The exception should contain the root cause (TypeError)
         e = exc.exception            
         self.assertIsInstance(e.__cause__(), TypeError)
             
         # Test that a parsing error is raised when the input data dict is has incompatible types for the model
-        with self.assertRaises(RepositoryParsingError) as exc:
+        with self.assertRaises(RError.PARSING) as exc:
             sp = self.session.begin_nested()
             self.repo.create([{"date_rec": Exception, "station_recorded": station_rec}])
         # The exception should contain the root cause (ProgrammingError)
@@ -220,7 +220,7 @@ class TestBaseRepository(BaseTestCase):
         self.assertIsInstance(e.__cause__(), ProgrammingError)
         
         # Test that a parsing error is raised when null constraint is violated
-        with self.assertRaises(RepositoryParsingError) as exc:
+        with self.assertRaises(RError.PARSING) as exc:
             sp = self.session.begin_nested()
             self.repo.create([{"station_recorded": station_rec}])
         # The exception should contain the root cause (IntegrityError)
@@ -232,16 +232,16 @@ class TestBaseRepository(BaseTestCase):
     def testRepositoryDelete(self):
         # Test that deleting a record with an ORM instance works correctly
         self.repo.delete(self.test_data[0])
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.get(1)
             
         # Test that deleting a record with a primary key value works correctly
         self.repo.delete(2)
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.get(2)
             
         # Test that trying to delete a non-existent record raises an exception
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.delete(100)
             
     
@@ -279,7 +279,7 @@ class TestBaseRepository(BaseTestCase):
         self.assertEqual({"id": 1, "station_recorded": 1}, result)
         
         # Test that invalid types raise an exception
-        with self.assertRaises(RepositoryParsingError):
+        with self.assertRaises(RError.PARSING):
             self.repo.objs_to_dicts(123)  
 
         # Test conversion to string works correctly

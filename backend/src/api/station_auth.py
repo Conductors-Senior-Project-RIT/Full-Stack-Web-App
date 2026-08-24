@@ -1,7 +1,8 @@
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
-from backend.src.service.station_service import StationService
+
 from backend.database import db
+from backend.src.service.station_service import StationService
 
 
 class StationAuth(Resource):

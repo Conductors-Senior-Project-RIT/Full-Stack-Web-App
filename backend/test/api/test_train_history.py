@@ -1,10 +1,9 @@
 import unittest
-from unittest.mock import Mock, patch
-from werkzeug.exceptions import BadRequest
 from datetime import datetime
+from unittest.mock import Mock, patch
 
 from backend import create_app
-from backend.src.api.train_history import HistoryDB
+
 
 class TestTrainHistory(unittest.TestCase):
     def setUp(self):

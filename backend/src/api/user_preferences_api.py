@@ -1,12 +1,12 @@
 from flask import request
-from flask_restful import Resource
 from flask_jwt_extended import get_jwt_identity
+from flask_restful import Resource
 
+from backend.database import db
 from backend.src.api.api_core.decorators import role_required
 
 from ..service.user_service import UserService
 
-from backend.database import db
 
 class UserPreferences(Resource):
     """Flask REST resource for retrieving and updating user station preferences.

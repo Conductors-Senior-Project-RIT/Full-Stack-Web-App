@@ -1,12 +1,14 @@
 import http.client
 import urllib
-from ..db.trackSense_db_commands import *
+
 from flask import request
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
 
 from backend.database import db
 from backend.src.service.record_service import RecordService
+
+from ..db.trackSense_db_commands import *
 
 # load_dotenv()
 

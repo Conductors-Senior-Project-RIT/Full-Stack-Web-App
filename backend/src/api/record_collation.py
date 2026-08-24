@@ -1,8 +1,10 @@
 from flask import request
 from flask_restful import Resource
-from backend.database import db
-from ..service.record_service import RecordService
 from werkzeug.exceptions import BadRequest
+
+from backend.database import db
+
+from ..service.record_service import RecordService
 
 
 class RecordCollation(Resource):
@@ -45,3 +47,4 @@ class RecordCollation(Resource):
         
         # The service already returns a JSON-serializable response, so just return the result
         return results, 200
+    

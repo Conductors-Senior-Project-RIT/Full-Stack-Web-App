@@ -24,7 +24,7 @@ class TestBaseDB(BaseTestCase):
         self.repo = BaseRepository(TestModel, db.session)
                 
         # Make sure primary key is populated
-        self.test = TestModel(**{"something": "nothing"})
+        self.test = TestModel(something="nothing")
         db.session.add(self.test)
         db.session.flush()
         

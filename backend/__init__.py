@@ -11,9 +11,10 @@ from flask_cors.extension import CORS
 from flask_restful import Api
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from backend.extensions import jwt, bcrypt
-from backend.src.api.api_core.decorators import register_jwt_access_token_refresh
+from backend.extensions import bcrypt, jwt
 from backend.src.api.api_core import exceptions
+from backend.src.api.api_core.decorators import register_jwt_access_token_refresh
+
 from .config.settings import config_selection
 from .database import db
 
@@ -69,7 +70,6 @@ def create_app(config_name=None):
         api.resources = []  # Necessary to reset instances between tests
     
     # Import unique to specific app instance
-    from .src.api.user_preferences_api import UserPreferences
     from .src.api.load_example_data import LoadExampleData
     from .src.api.notification_handler import NotificationService
     from .src.api.pushover_updater import PushoverUpdater
@@ -77,9 +77,11 @@ def create_app(config_name=None):
     from .src.api.signal_update_handler import SignalUpdater
     from .src.api.station_auth import StationAuth
     from .src.api.station_online import StationOnline
+
     # from .src.api.symbol_api import SymbolAPI  # moved to volunteer handler since only volunteers need to interact with symbols
     from .src.api.time_frame_pull import RecentActivities
     from .src.api.train_history import HistoryDB
+    from .src.api.user_preferences_api import UserPreferences
 
     # register routes (some are useless)
     api.add_resource(HistoryDB, "/api/history")

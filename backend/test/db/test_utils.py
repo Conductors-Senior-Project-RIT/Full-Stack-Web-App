@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, configure_mappers, mapped_column
 
 from backend.src.db.db_core.models import Base
 
+
 class TestModel(Base):
     __tablename__ = "testtable"
     __table_args__ = {'extend_existing': True}

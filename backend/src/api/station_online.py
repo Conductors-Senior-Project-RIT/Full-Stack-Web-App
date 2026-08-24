@@ -2,8 +2,10 @@ from flask import request
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest
 
-from ..service.station_service import StationService
 from backend.database import db
+
+from ..service.station_service import StationService
+
 
 class StationOnline(Resource):
     def get(self):

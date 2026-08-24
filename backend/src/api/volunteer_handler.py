@@ -8,14 +8,15 @@ from werkzeug.exceptions import BadRequest
 
 from backend.database import db
 from backend.src.api.api_core.decorators import role_required
+
 from ..service.record_service import RecordService
 from ..service.symbol_service import SymbolService
 
 volunteer_bp = Blueprint("volunteer_bp", __name__)
 
 
-# The following endpoints were originally intended to manage map pins, but the feature was unused when we received the project. 
-# The code is left here for reference, but the endpoints are currently disabled.
+# The following route were originally intended to manage map pins, but the feature was unused when we received the project. 
+# The code is left here for reference, but the route is currently disabled.
 # @volunteer_bp.route("/api/add-pin", methods=["POST"])
 # @role_required(0, 1)
 # def add_pin():

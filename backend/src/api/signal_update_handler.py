@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
 
 from backend.database import db
+
 from ..service.record_service import RecordService
 
 

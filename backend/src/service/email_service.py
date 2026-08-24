@@ -1,9 +1,11 @@
 import os
 from threading import Thread
+
 from brevo import Brevo, SendTransacEmailRequestSender, SendTransacEmailRequestToItem
 from brevo.core.api_error import ApiError
 
-from .service_core import ServiceErrorInvoker, SError
+from .service_core import SError, ServiceErrorInvoker
+
 
 class EmailService(ServiceErrorInvoker):
     """ 

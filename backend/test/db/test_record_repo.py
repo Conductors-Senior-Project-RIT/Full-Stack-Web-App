@@ -6,13 +6,7 @@ from unittest.mock import patch
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.session import Session
 
-from backend.src.db.db_core.exceptions import (
-    RepositoryError,
-    RepositoryInternalError,
-    RepositoryInvalidArgumentError,
-    RepositoryNotFoundError,
-    RepositoryParsingError,
-)
+from backend.src.db.db_core.exceptions import RepositoryError, RError
 from backend.src.db.record_repo import RecordRepository
 from backend.src.db.record_types import RecordFactory
 from backend.test.base_test_case import BaseTestCase
@@ -66,13 +60,13 @@ class RecordRepositoryTestMixin:
         self.assertNotIn("armed", new_record)
 
         # Test datetime not provided raises exception
-        with self.assertRaises(RepositoryInvalidArgumentError):
+        with self.assertRaises(RError.INVALID_ARG):
             self.repo.create_train_record(data, None)
 
         # Test create returning nothing raises error
         with patch.object(self.repo, "create") as mock:
             mock.return_value = None
-            with self.assertRaises(RepositoryInternalError):
+            with self.assertRaises(RError.INTERNAL):
                 self.repo.create_train_record(data, date_rec)
 
     def test_get_unit_record_ids(self):
@@ -87,7 +81,7 @@ class RecordRepositoryTestMixin:
         self.assertEqual(TEST_RECORD_COUNT, result)
 
         # Test that an exception is raised when nothing is found
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.get_unit_record_ids("unit", True)
 
     def test_get_recent_trains(self):
@@ -159,10 +153,10 @@ class RecordRepositoryTestMixin:
                 self.assertEqual(exp, result)
 
         # Make sure exception raised if not valid column
-        with self.assertRaises(RepositoryInvalidArgumentError):
+        with self.assertRaises(RError.INVALID_ARG):
             self.repo.get_record_column_by_unit_addr("5545", "Bob")
 
-        with self.assertRaises(RepositoryParsingError):
+        with self.assertRaises(RError.PARSING):
             self.repo.get_record_column_by_unit_addr("1111", "engine_num", "Bob")
 
     def test_update_signal_values(self):
@@ -195,7 +189,7 @@ class RecordRepositoryTestMixin:
 
         with patch.object(RecordRepository, "update_with_pk") as mock:
             mock.side_effect = SQLAlchemyError
-            with self.assertRaises(RepositoryInternalError):
+            with self.assertRaises(RError.INVALID_ARG):
                 self.repo.verify_record(1, sym, loc)
 
     def test_get_records_at_station(self):
@@ -254,7 +248,7 @@ class RecordRepositoryTestMixin:
         valid, msg = compare_results_ordered([results], [expected_record])
         self.assertTrue(valid, msg)
 
-        with self.assertRaises(RepositoryNotFoundError):
+        with self.assertRaises(RError.NOT_FOUND):
             self.repo.get_train_history(17)
 
     def test_get_record_collation(self):
@@ -361,11 +355,11 @@ class RecordRepositoryTestMixin:
             mock_session.return_value.scalars.return_value.all.side_effect = (
                 SQLAlchemyError
             )
-            with self.assertRaises(RepositoryInternalError):
+            with self.assertRaises(RError.INTERNAL):
                 self.repo.get_record_collation(1, 250, None)
 
         with patch("backend.src.db.record_repo.ceil", side_effect=ValueError()):
-            with self.assertRaises(RepositoryParsingError):
+            with self.assertRaises(RError.PARSING):
                 self.repo.get_record_collation(1, 250, None)
 
 

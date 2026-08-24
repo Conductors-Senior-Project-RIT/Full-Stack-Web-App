@@ -1,13 +1,13 @@
 import datetime
-import sys
-from typing import Any, Optional
 import zoneinfo
+from typing import Any, Optional
 
 from sqlalchemy.orm.session import Session
 
 from backend.src.db.record_types import RecordFactory
+
 from ..db.record_repo import RecordRepository
-from ..service.service_core import ServiceErrorWrapper, ServiceErrorInvoker, SError
+from ..service.service_core import SError, ServiceErrorInvoker, ServiceErrorWrapper
 
 # Constant for number of results per page during collation
 RESULTS_NUM = 50

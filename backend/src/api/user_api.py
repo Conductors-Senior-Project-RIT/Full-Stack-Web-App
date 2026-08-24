@@ -1,17 +1,21 @@
 """
 User authentication and account management related endpoints 
 """
-from flask import Blueprint, request, make_response
+from flask import Blueprint, make_response, request
 from flask_jwt_extended import (
     create_access_token,
+    get_jwt,
+    get_jwt_identity,
     jwt_required,
-    get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies,
+    set_access_cookies,
+    unset_jwt_cookies,
 )
+from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
 
-from backend.src.api.api_core.decorators import role_required
-from ..service.user_service import UserService
-from werkzeug.exceptions import BadRequest, Unauthorized, NotFound
 from backend.database import db
+from backend.src.api.api_core.decorators import role_required
+
+from ..service.user_service import UserService
 
 user_bp = Blueprint("user_bp", __name__)
 @user_bp.route("/api/register", methods=["POST"])

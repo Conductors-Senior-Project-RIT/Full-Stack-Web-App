@@ -1,9 +1,10 @@
 import os
 import unittest
+
 from sqlalchemy import text
 
-
 from backend import create_app
+
 from ..database import db
 
 """
