@@ -1,4 +1,13 @@
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+env_path = Path(__file__).parents[2] / ".env"
+print(f"Looking for .env at: {env_path}")
+print(f"Exists: {env_path.exists()}")
+load_dotenv(env_path)
+
 class Config(object):
     """Base configuration class"""
     # default config setting(s)
