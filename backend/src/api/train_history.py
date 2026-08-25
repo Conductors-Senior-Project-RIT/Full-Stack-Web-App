@@ -1,110 +1,107 @@
-import datetime
 import http.client
 import urllib
-from ..db.trackSense_db_commands import *
+
 from flask import request
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
-from urllib.parse import urlencode
 
 from backend.database import db
 from backend.src.service.record_service import RecordService
 
+from ..db.trackSense_db_commands import *
+
 # load_dotenv()
 
-def validate_int_argument(value: int, name: str, min_value: int):
-    if not isinstance(value, int):
-        raise BadRequest(f"{name} ({value}) is not an integer!")
-    if not isinstance(min_value, int):
-        raise BadRequest(f"{name} minimum value {min_value} is not an integer.")
-    if value < min_value:
-        raise BadRequest(f"Provided {name} must be greater than {min_value} but was given {value}...")
 
 class HistoryDB(Resource):
+    """These endpoints deal mostly with retrieving EOT and HOT records. The creation of
+    these records lies in the stations receiving the radio data. The users then access
+    the data stored in the database.
+    """
+    
     def get(self):
-        """
-        Returns train records of a specified type using provided request parameters.
-        "typ": Specifies what type of train record(s) to return. 1: EOT, 2: HOT, 3: DPU (default -1: collection of EOT)
-        "id": The id of a train record to retrieve.
-        "page": The page of records to return.
+        """Returns a singular record depending on the signal type and ID provided. The
+        parameters should be provided as query parameters in the request URL.
+
+        Args:
+            type (int): The type of the train record that is being retrieved. EOT: `1`,
+            HOT: `2`, DPU: `3`. Currently, DPU is not supported.
+            id (int): The ID of the train record to retrieve.
 
         Returns:
-            Response: Returns an individual train record response payload with a status code. Response payload may include a
-            collection of EOT records if "type" is -1.
+            Response: Returns individual train record data with a status code.
         """
-        # Argument checking goes here
         typ = request.args.get("type", default=-1, type=int)
         id = request.args.get("id", default=-1, type=int)
-        page = request.args.get("page", default=1, type=int)
 
-        # Check our type and page arguments (typ checked in strategy creation)
-        validate_int_argument(id, "type", 1)
-        validate_int_argument(page, "page", 1)
+        # Check our type and page arguments, type is checked in service constructor.
+        if id < 1:
+            raise BadRequest(f"Record ID must be greater than 1! Provided: {id}")
         
+        # Create a request-specific database session, call the record service to retrieve the train record
         session = db.session
-        th_service = RecordService(session, typ)
-        results = th_service.get_train_history(id, page)
-        session.commit()
+        service = RecordService(session, typ)
+        results = service.get_train_record(id)
         
+        # The service already returns a JSON-serializable response, so just return the result
         return results, 200
             
 
     def post(self):
-        """
-        Inserts a new train record of a specified type into the database.
+        """Adds new record to the database. 
+        
+        Additionally, handles logic for updating the
+        map pins to know which signals are the most recently detected with that unit
+        address. The notification system was broken when we received the project;
+        however, the request should also determine whether input data warrants sending a
+        notification, and then make the appropriate calls to notify users about the new
+        train data.
+
+        The parameters should be provided in the request body as a JSON object.
 
         Returns:
             Response: Returns the status code of the request.
         """
-        resp = None
-        date_rec = datetime.datetime.now()
-        dt_str = date_rec.strftime("%Y-%m-%d %H:%M:%S")
-        
         parser = reqparse.RequestParser()
         parser.add_argument("date_rec", default=None, type=str)
         parser.add_argument("type", default=-1, type=int)
         parser.add_argument("station_id", default=0, type=int)
-        parser.add_argument("symbol_id", type=str, default=None)
-        parser.add_argument("unit_addr", type=str, default="")
-        parser.add_argument("brake_pressure", type=str, default="")
-        parser.add_argument("motion", type=str, default="")
-        parser.add_argument("marker_light", type=str, default="")
-        parser.add_argument("turbine", type=str, default="")
-        parser.add_argument("battery_cond", type=str, default="")
-        parser.add_argument("battery_charge", type=str, default="")
-        parser.add_argument("arm_status", type=str, default="")
+        parser.add_argument("symbol_id", type=int, default=None)
+        parser.add_argument("unit_addr", type=str, default=None)
+        parser.add_argument("brake_pressure", type=str, default=None)
+        parser.add_argument("motion", type=str, default=None)
+        parser.add_argument("marker_light", type=str, default=None)
+        parser.add_argument("turbine", type=str, default=None)
+        parser.add_argument("battery_cond", type=str, default=None)
+        parser.add_argument("battery_charge", type=str, default=None)
+        parser.add_argument("arm_status", type=str, default=None)
         parser.add_argument("signal_strength", type=float, default=0)
-        parser.add_argument("frame_sync", type=str, default="")
-        parser.add_argument("command", type=str, default="")
-        parser.add_argument("checkbits", type=str, default="")
-        parser.add_argument("parity", type=str, default="")
-        args = parser.parse_args()
+        parser.add_argument("frame_sync", type=str, default=None)
+        parser.add_argument("command", type=str, default=None)
+        parser.add_argument("checkbits", type=str, default=None)
+        parser.add_argument("parity", type=str, default=None)
+        args = dict(parser.parse_args())
         
-        # right now this has 0 authentication. Too bad!
-        typ = args["type"]
+        # 'station_recorded' is the correct column name in the database, 
+        # but we use 'station_id' as the argument name in the request body for clarity
+        args["station_recorded"] = args["station_id"]
+        typ = args.pop("type")
         
+        # Create a request-specific database session
         session = db.session
 
-        th_service = RecordService(session, typ)
-        results = th_service.post_train_history(args, dt_str)
+        # Call the record service to create a new train record, and commit the changes to the database if successful
+        service = RecordService(session, typ)
+        new_id = service.create_train_record(args)
         session.commit()
         
-        return results, 201
+        return new_id, 201
     
 
-    # Commenting out the below for code coverage reasons.
-    # def delete(self):  # not sure if this is needed
-    #     print("delete goes here!")
-    #     return
-
-    # def put(self):  # Not needed - if this is called then idk what happened
-    #     print("put goes here!")
-    #     return
-
+    # TODO: Below is the follow code for the old notification system, which is currently unused. 
+    # We will need to update this code to work with the new notification system once it is implemented.
     def notif_send(self, laptop_id):
-        """
-        CURRENTLY NOT USED, DO NOT TEST. NEED NEW NOTI SYSTEM
-        """
+        """CURRENTLY NOT USED, DO NOT TEST. NEED NEW NOTI SYSTEM"""
         sql = """
             SELECT user_id, pushover_id from UserPreferences
             INNER JOIN Users on Users.id = user_id
@@ -142,9 +139,7 @@ class HistoryDB(Resource):
 
 
     def check_for_notification(self, unit_addr, station_id, typ):
-        """
-        CURRENTLY NOT USED, DO NOT TEST. NEED NEW NOTI SYSTEM
-        """
+        """CURRENTLY NOT USED, DO NOT TEST. NEED NEW NOTI SYSTEM"""
         # print("here")
         # check if there are any recent trains logged with this unit address and station id
         # if one was logged within the last 10 minutes, return True

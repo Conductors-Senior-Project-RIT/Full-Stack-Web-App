@@ -1,4 +1,6 @@
 [report]
 exclude_lines =
-    raise NotImplementedError
-    pass
+    pragma: no cover
+    pragma: no branch
+    ^\s*raise NotImplementedError\s*$
+    ^\s*pass\s*$

@@ -1,0 +1,52 @@
+site_name: Tracksense Backend Documentation
+theme:
+  name: "material"
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            "import sys, os; sys.path.insert(0, os.path.abspath('.'))"
+          options:
+            relative_crossrefs: true
+  - autorefs
+markdown_extensions:
+  - attr_list
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - tables
+nav:
+  - Home: index.md
+  - API: 
+    - Overview: api/overview.md
+    - Core:
+      - Decorators: api/core/decorators.md
+      - Exceptions: api/core/exceptions.md
+    - User: api/user.md
+    - User Preferences: api/user_preferences.md
+    - Volunteer: api/volunteer.md
+    - Station: api/station.md
+    - Train History: api/history.md
+    - Recent Activities: api/recent.md
+    - Record Collation: api/collation.md
+  - Service:
+    - Overview: service/overview.md
+    - Service Core: service/service_core.md
+    - Record Service: service/record_service.md
+    - Station Service: service/station_service.md
+    - Symbol Service: service/symbol_service.md
+    - User Service: service/user_service.md
+    - Email Service: service/email_service.md
+  - Repository:
+    - Overview: repository/overview.md
+    - Core:
+      - Exceptions: repository/core/exceptions.md
+      - Models: repository/core/models.md
+      - Repository: repository/core/repository.md
+    - Record Repository: repository/record_repo.md
+    - Record Types: repository/record_types.md
+    - Station Repository: repository/station_repo.md
+    - Symbol Repository: repository/symbol_repo.md
+    - User Repository: repository/user_repo.md
+  - Error Handling: error/docs.md
+  - Testing: testing/tests.md

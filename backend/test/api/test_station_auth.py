@@ -1,12 +1,14 @@
 # import unittest
 # from unittest.mock import Mock
+
 # from backend.src.api import station_auth
+
 
 # class TestStationAuth(unittest.TestCase):
 #     def setUp(self):
 #         station_auth.random = Mock()
 #         self.station_auth = station_auth.StationAuth()
-#
+
 #     def test_generate_password_string(self):
 #         station_auth.random.randint = Mock(return_value=12)
 #         station_auth.random.choice = Mock(return_value="A")

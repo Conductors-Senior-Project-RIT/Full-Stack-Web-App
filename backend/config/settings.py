@@ -1,39 +1,36 @@
-# doc says config .py files should have all uppercase for config keys
-# default settings would refer to dev environment
-# TODO: def missing some variables to set, but will add along the way
 import os
-
 class Config(object):
-    """
-    Base configuration class
-    """
+    """Base configuration class"""
     # default config setting(s)
-    SECRET_KEY = os.environ.get("SECRET_KEY", "secret-key-def")
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "jwt-secret-key-def")
+    SECRET_KEY = os.environ.get("SECRET_KEY")
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
+    JWT_TOKEN_LOCATION = ["cookies"]
+    JWT_COOKIE_SECURE = False
+    JWT_COOKIE_CSRF_PROTECT = False
 
 class ProdConfig(Config):
     """
-    Production environment configuration - note sure if raising errors is necessary here but ill leave it for now
+    Production environment config
     """
-    # DEBUG = False by default
     TESTING = False
-    JWT_COOKIE_CSRF_PROTECT = True
-    JWT_COOKIE_SECURE = True
-    JWT_TOKEN_LOCATION = ["headers", "cookies"]
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://tracksense:skillissue@localhost:5432/tracksense"
+    JWT_TOKEN_LOCATION = ["cookies"]
+    JWT_COOKIE_SECURE = True # HTTPS only
+    JWT_COOKIE_CSRF_PROTECT = True # enabling CSRF in prod
+    JWT_COOKIE_SAMESITE = "Lax"   
+    SQLALCHEMY_DATABASE_URI = os.environ.get("PROD_DATABASE_URI")
 
 class DevConfig(Config):
     """
-    Dev environment configuration
+    Dev environment config
     """
-    # DEBUG = True | use --debug flag for the development environment (as per docs; script does this).
-    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret")
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "dev-jwt")
+    JWT_COOKIE_SAMESITE = "Lax"
     SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI", "postgresql+psycopg2://test_user:pass@localhost:5432/test_db") # falls back to default testing db
+    SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret")
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "test-jwt")
 
 class TestConfig(Config):
     """
-    Test environment configuration
+    Test environment config
     """
     TESTING = True
     SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret")

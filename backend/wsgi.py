@@ -1,3 +1,7 @@
+"""
+WSGI entry point for production deployments (e.g. uWSGI, and more).
+"""
+
 from backend import create_app
 
-app = create_app("prod")
+application = create_app("prod")
