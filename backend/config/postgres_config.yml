@@ -1,5 +1,5 @@
 host:localhost
-database:tmg2102
-user:tmg2102
-password:pass
+database:tracksense
+user:tracksense
+password:skillissue
 port:5432

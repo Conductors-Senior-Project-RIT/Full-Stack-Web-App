@@ -42,7 +42,8 @@ const Login = () => {
         await login();
         setSuccessPopup(true);
       } else {
-        setMessage(data.error || 'Error logging in');
+        console.error('Error:', data.error);
+        setMessage('Error logging in');
       }
     } catch (error) {
       console.error('Error:', error);
