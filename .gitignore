@@ -95,5 +95,5 @@ venv.bak/
 
 # ===Python===
 *.pyc
-backend/config/settings.py
-backend/config/postgres_config.yml
+
+# Database secrets
