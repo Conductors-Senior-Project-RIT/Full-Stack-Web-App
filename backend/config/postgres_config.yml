@@ -1,0 +1,5 @@
+host:localhost
+database:tracksense
+user:postgres
+password:[password]
+port:5432
