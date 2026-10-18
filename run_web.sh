@@ -1,0 +1,2 @@
+cd tracksenseweb
+npm start

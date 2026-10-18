@@ -1,0 +1,1 @@
+/deployment/Full-Stack-Web-App/.venv/bin/uwsgi uwsgi.ini

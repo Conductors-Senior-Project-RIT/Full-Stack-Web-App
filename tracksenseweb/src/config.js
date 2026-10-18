@@ -1,5 +1,5 @@
 const config = {
-  apiUrl: 'https://followthatfred.com/api'
+  apiUrl: 'http://localhost:5000/api'
 };
 
 export default config;
