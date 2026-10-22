@@ -20,10 +20,12 @@ class NotificationService(Resource):
 
         def_string = f"A train was just logged at {location_name}. Please check and validate this information."
 
+        location_name_url = location_name.replace(" ", "-")
+
         res = requests.put(
-            "http://tracksense.se.rit.edu:6161/followthatfred",
+            f"http://tracksense.se.rit.edu:6161/{location_name_url}",
             data=def_string,
-            headers={ "Title": "Train spotted." }
+            headers={ "Title": f"Train spotted at {location_name}" }
         )
 
         return f"Successful: {res.ok}", 200 if res.ok else 500
