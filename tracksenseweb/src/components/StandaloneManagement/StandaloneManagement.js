@@ -4,6 +4,8 @@ import styles from './StandaloneManagement.scss';
 import config from '../../config';
 
 const StandaloneManagement = props => {
+	const [data, setData] = useState(null);
+
 	//TODO: Add coordinates to this. Will also need to add to API
 
 	const handleStandaloneAdd = async (e) => {
@@ -19,12 +21,15 @@ const StandaloneManagement = props => {
 					credentials: "include",
 					body: JSON.stringify({ station_name: station }),
 				});
-				const data = await response.json();
-				console.log('Response data:', data);
+				const result = await response.json();
+				console.log('Response data:', result);
 
 				if (!response.ok) {
-					console.error('Error:', data.error);
+					console.error('Error:', result.error);
 				}
+
+				setData(result)
+
 			} catch (error) {
 				console.error('Error:', error);
 			}
@@ -36,6 +41,7 @@ const StandaloneManagement = props => {
 		<div>
 			This is a component called StandaloneManagement.
 			<button onClick={handleStandaloneAdd}>Add Test Standalone</button>
+			{data && <p>Station password: <code>{data.password}</code></p>}
 		</div>
 	);
 };
