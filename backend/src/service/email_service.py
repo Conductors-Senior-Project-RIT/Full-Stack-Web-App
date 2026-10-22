@@ -1,9 +1,6 @@
 import os
 from threading import Thread
 
-from brevo import Brevo, SendTransacEmailRequestSender, SendTransacEmailRequestToItem
-from brevo.core.api_error import ApiError
-
 from .service_core import SError, ServiceErrorInvoker
 
 
@@ -15,10 +12,7 @@ class EmailService(ServiceErrorInvoker):
     """
 
     def __init__(self) -> None:
-        self.client = Brevo(api_key=os.getenv("BREVO_API_KEY"))
-        self.website_domain = os.getenv("WEBSITE_DOMAIN")
-        self.sent_from_name = os.getenv("BREVO_SENDER_NAME", "FollowThatFRED")
-        self.sent_from_email = os.getenv("BREVO_SENDER_EMAIL", "hello@brevo.com") # change this if email ever switches https://help.brevo.com/hc/en-us/articles/12163873383186-Authenticate-your-domain-with-Brevo-Brevo-code-DKIM-DMARC + https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email
+        pass
     
 
     def _send(self, subject: str, email_body: str, send_to_email: str, send_to_name: str | None):
