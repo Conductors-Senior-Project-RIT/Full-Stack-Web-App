@@ -39,17 +39,17 @@ const Data = () => {
         const filtered = data.filter(item => {
             // Exact match fields
             const exactMatchFields = [
-                item.motion.toLowerCase(),
-                item.marker_light.toLowerCase(),
-                item.arm_status.toLowerCase(),
-                item.ocurrence_count.toLowerCase()
+                item.motion?.toLowerCase(),
+                item.marker_light?.toLowerCase(),
+                item.arm_status?.toLowerCase(),
+                item.ocurrence_count?.toLowerCase()
             ];
     
             // Partial match fields
             const partialMatchFields = [
-                item.station_name.toLowerCase(),
-                item.date_rec.toLowerCase(),
-                item.unit_addr.toLowerCase()
+                item.station_name?.toLowerCase(),
+                item.date_rec?.toLowerCase(),
+                item.unit_addr?.toLowerCase()
             ];
     
             // Check for exact matches
