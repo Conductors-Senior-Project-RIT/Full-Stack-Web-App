@@ -33,7 +33,7 @@ class DevConfig(Config):
     Dev environment config
     """
     JWT_COOKIE_SAMESITE = "Lax"
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI", "postgresql+psycopg2://postgres:[password]@127.0.0.1:5432/tracksense") # falls back to default testing db
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI", "postgresql+psycopg2://test_user:pass@127.0.0.1:5432/tracksense") # falls back to default testing db
     SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret")
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "test-jwt")
 
