@@ -1,5 +1,5 @@
 host:localhost
 database:tracksense
-user:tracksense
-password:skillissue
+user:postgres
+password:[password]
 port:5432

@@ -21,7 +21,7 @@ class ProdConfig(Config):
     """
     Production environment config
     """
-    TESTING = False
+    TESTING = True
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_COOKIE_SECURE = True # HTTPS only
     JWT_COOKIE_CSRF_PROTECT = True # enabling CSRF in prod
@@ -33,7 +33,7 @@ class DevConfig(Config):
     Dev environment config
     """
     JWT_COOKIE_SAMESITE = "Lax"
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI", "postgresql+psycopg2://test_user:pass@localhost:5432/test_db") # falls back to default testing db
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI", "postgresql+psycopg2://test_user:pass@127.0.0.1:5432/test_db") # falls back to default testing db
     SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret")
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "test-jwt")
 

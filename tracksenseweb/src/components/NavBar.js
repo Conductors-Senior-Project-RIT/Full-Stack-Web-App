@@ -27,7 +27,10 @@ const NavBar = () => {
                             <li><Link to="/verify-hot">Verify HOT</Link></li>
                         )}
                         {userRole === 0 && ( // Only show Admin link for Admins (0)
-                            <li><Link to="/admin">Admin</Link></li>
+                            <>
+                                <li><Link to="/admin">Admin</Link></li>
+                                <li><Link to="/standalone-management">Standalone</Link></li>
+                            </>
                         )}
                         <li><Link to="/options">Options</Link></li>
                         <li><button onClick={logout} className="logout-button">Log Out</button></li>

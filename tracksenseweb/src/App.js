@@ -25,6 +25,7 @@ import ResetPassword from './components/ResetPassword';
 import Options from './components/Options';
 import Admin from './components/Admin';
 import HotData from './components/HOT_Data';
+import StandaloneManagement from './components/StandaloneManagement';
 
 //reorder to the right order
 
@@ -57,6 +58,7 @@ const App = () => {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/options" element={<ProtectedRoute element={Options} requiredRole={2} />} />
             <Route path="/admin" element={<ProtectedRoute element={Admin} requiredRole={0} />} />
+            <Route path="/standalone-management" element={<ProtectedRoute element={StandaloneManagement} requiredRole={0} />} />
           </Routes>
         </div>
       </Router>
