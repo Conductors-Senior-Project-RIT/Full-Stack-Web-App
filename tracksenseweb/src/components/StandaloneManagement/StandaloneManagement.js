@@ -6,7 +6,8 @@ import config from '../../config';
 const StandaloneManagement = props => {
 	const [addData, setAddData] = useState(null);
 	const [getData, setGetData] = useState([]);
-	const [name, setName] = useState(null);
+	const [getName, setName] = useState(null);
+	const [getIdToRemove, setIdToRemove] = useState('');
 
 	//TODO: Add coordinates to this. Will also need to add to API
 
@@ -20,7 +21,7 @@ const StandaloneManagement = props => {
 				'Content-Type': 'application/json',
 				},
 				credentials: "include",
-				body: JSON.stringify({ station_name: name }),
+				body: JSON.stringify({ station_name: getName }),
 			});
 			const result = await response.json();
 
@@ -29,6 +30,8 @@ const StandaloneManagement = props => {
 			}
 
 			setAddData(result)
+
+			await handleStandaloneGet();
 
 		} catch (error) {
 			console.error('Error:', error);
@@ -60,8 +63,35 @@ const StandaloneManagement = props => {
 			a.station_name.localeCompare(b.station_name)
 		)
 		setGetData(sorted);
-		console.log('Response data:', getData);
 	};
+
+	const handleStandaloneRemove = async (e) => {
+		e.preventDefault();
+
+		try {
+			const response = await fetch(`${config.apiUrl}/station_auth?id=${getIdToRemove}`, {
+				method: 'DELETE',
+				headers: {
+				'Content-Type': 'application/json',
+				},
+				credentials: "include",
+			});
+			const result = await response.json();
+
+			if (!response.ok) {
+				console.error('Error:', result.error);
+			}
+		
+			await handleStandaloneGet();
+
+		} catch (error) {
+			console.error('Error:', error);
+		}
+	};
+
+	const handleSetIdToDelete = async (id) => {
+		setIdToRemove(id);
+	}
 
 	useEffect(() => {
 		handleStandaloneGet();
@@ -73,19 +103,20 @@ const StandaloneManagement = props => {
 			<input
 				type="text"
 				placeholder="Enter name of station"
-				value={name ?? ''}
+				value={getName ?? ''}
 				onChange={e => setName(e.target.value)}
 			/>
-			<button onClick={handleStandaloneAdd}>Add Test Standalone</button>
+			<button onClick={handleStandaloneAdd}>Add Standalone</button>
 			{addData && <p>Station password: <code>{addData.password}</code></p>}
 			<h2>Remove Standalone</h2>
-			<select>
+			<select value={getIdToRemove} onChange={e => handleSetIdToDelete(e.target.value)}>
 				{getData.map((standalone) => (
-					<option key={standalone.station_name} value={standalone.station_name}>
-					{standalone.station_name}
+					<option key={standalone.station_name} value={standalone.id}>
+						{standalone.station_name}
 					</option>
 				))}
 			</select>
+			<button onClick={handleStandaloneRemove}>Remove Standalone</button>
 		</div>
 	);
 };
