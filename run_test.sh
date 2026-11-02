@@ -10,3 +10,4 @@ set +a              # Turn off auto-export
 folder="reports/tests/run_$(date '+%Y-%m-%d_%H-%M-%S')"
 mkdir -p "$folder"
 pytest backend/test/ --md-report --md-report-output "$folder/test_report.md" > "$folder/test_output.log"
+python -m coverage run --source=src -m pytest backend/tests > "$folder/test_coverage.log"
