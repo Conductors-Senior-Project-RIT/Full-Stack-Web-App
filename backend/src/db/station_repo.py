@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, update, delete
 from sqlalchemy.orm import Session
 
 from .db_core.exceptions import RepositoryErrorHandler as RHandler
@@ -84,6 +84,39 @@ class StationRepository(BaseRepository[Station]):
         return new_station.id
 
 
+    @RHandler.layer_error_decorator()
+    def delete_station(self, station_id: int) -> bool:
+        """Remove a station with matching `station_id` if it exists.
+
+        Args:
+            station_id (int): The ID of the station to remove.
+
+        Raises:
+            RepositoryNotFoundError: Raised if a station with `station_id` does not exist.
+            RepositoryInvalidArgumentError: Raised if either argument is of the incorrect
+                type.
+
+        Returns:
+            (bool): True if the station was able to be removed.
+        """
+
+        sql = """
+            DELETE FROM Stations
+            WHERE station_id = :station_id
+            RETURNING station_id
+        """
+        args = {"station_id": station_id}
+
+        self._validate(
+            condition=isinstance(station_id, int), 
+            error_class=E.INVALID_ARG, 
+            message=f"Invalid argument type provided when removing: {station_id}!"
+        )
+
+        self.delete(station_id)
+        
+        return True
+    
 
     @RHandler.layer_error_decorator()
     def update_station_password(self, station_id: int, hashed_password: str) -> str:

@@ -80,3 +80,33 @@ class StationAuth(Resource):
         
         # Return the updated password to the user
         return {"new_pw": pw}, 200
+
+    def remove(self):
+            """Removes a station via the station's id.
+    
+            Args:
+                id (int): The ID of the station to remove. Must be greater than 0.
+    
+            Returns:
+                Response: Returns true is the removal is successful; otherwise, an error 
+                    message is returned.
+            """
+            parser = reqparse.RequestParser()
+            parser.add_argument("id", type=int, default=-1)
+            args = parser.parse_args()
+            
+            # Ensure that the primary key of the station is valid
+            if args["id"] < 1:
+                raise BadRequest("An invalid station ID was provided!")
+            
+            # Flask creates a request-specific database session
+            session = db.session
+            
+            # Returns the success value
+            success = StationService(session).remove_station(args["id"])
+            
+            # Commit the changes if everything is successful
+            session.commit()
+            
+            # Return the success value to the user
+            return {"success": success}, 200

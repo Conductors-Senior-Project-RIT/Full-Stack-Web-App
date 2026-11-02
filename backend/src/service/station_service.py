@@ -59,6 +59,17 @@ class StationService(ServiceErrorWrapper):
         self.station_repo.create_new_station(station_name, hashed_pw)
         return unhashed_pw
 
+    def remove_station(self, station_id: int) -> bool:
+        """Removes a specific station.
+
+        Args:
+            station_id (int): The ID corresponding to the station to remove.
+
+        Returns:
+            (bool): True if the station was removed.
+        """
+        return self.station_repo.delete_station(station_id)
+
     def update_station_password(self, station_id: int) -> str:
         """Generates and updates the password of a specified station.
 
