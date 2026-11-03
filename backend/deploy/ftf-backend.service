@@ -1,0 +1,13 @@
+[Unit]
+Description=Follow That FRED backend uWSGI + Flask
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+WorkingDirectory=/deployment/Full-Stack-Web-App
+ExecStart=/usr/local/bin/uwsgi uwsgi.ini
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
