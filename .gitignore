@@ -95,3 +95,6 @@ venv.bak/
 
 # ===Python===
 *.pyc
+
+reports
+*/htmlcov
