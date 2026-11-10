@@ -1,6 +1,3 @@
-import http.client
-import urllib
-
 from flask import request
 from flask_restful import Resource, reqparse
 from werkzeug.exceptions import BadRequest
@@ -9,8 +6,6 @@ from backend.database import db
 from backend.src.service.record_service import RecordService
 
 from ..db.trackSense_db_commands import *
-
-# load_dotenv()
 
 
 class HistoryDB(Resource):
@@ -96,76 +91,3 @@ class HistoryDB(Resource):
         session.commit()
         
         return new_id, 201
-    
-
-    # TODO: Below is the follow code for the old notification system, which is currently unused. 
-    # We will need to update this code to work with the new notification system once it is implemented.
-    def notif_send(self, laptop_id):
-        """CURRENTLY NOT USED, DO NOT TEST. NEED NEW NOTI SYSTEM"""
-        sql = """
-            SELECT user_id, pushover_id from UserPreferences
-            INNER JOIN Users on Users.id = user_id
-            WHERE station_id = %(loc_id)s
-            AND Users.starting_time <= CURRENT_TIME::TIME WITH TIME ZONE
-            AND Users.ending_time >= CURRENT_TIME::TIME WITH TIME ZONE
-        """
-        users = run_get_cmd(sql, args={"loc_id": laptop_id})
-        print(users)
-        pushover_token = os.getenv("Pushover_Token")
-        print(pushover_token)
-        location_name = run_get_cmd(
-            "SELECT station_name FROM Stations WHERE id = %(laptop_id)s",
-            args={"laptop_id": laptop_id},
-        )[0][0]
-        def_string = f"A train was just logged at {location_name}. Please check and validate this information."
-        for tup in users:
-            conn = http.client.HTTPSConnection("api.pushover.net:443")
-            conn.request(
-                "POST",
-                "/1/messages.json",
-                urllib.parse.urlencode(
-                    {
-                        "token": pushover_token,
-                        "user": tup[1],
-                        "title": "FollowThatFred Notification",
-                        "message": def_string,
-                    }
-                ),
-                {"Content-type": "application/x-www-form-urlencoded"},
-            )
-        resp = conn.getresponse()
-        print(resp.status)
-        return
-
-
-    def check_for_notification(self, unit_addr, station_id, typ):
-        """CURRENTLY NOT USED, DO NOT TEST. NEED NEW NOTI SYSTEM"""
-        # print("here")
-        # check if there are any recent trains logged with this unit address and station id
-        # if one was logged within the last 10 minutes, return True
-        # else return false
-        # Typ == type - since type is a function in python we use typ
-
-        # TODO: add logic to actually check for stuff
-        if typ == 1:  # EOT
-            sql = """
-                SELECT * FROM EOTRecords
-                WHERE unit_addr = %(unit_address)s AND station_recorded = %(station_id)s AND date_rec >= NOW() - INTERVAL '10 minutes'
-            """
-            resp = run_get_cmd(
-                sql, args={"unit_address": unit_addr, "station_id": station_id}
-            )
-            # print(len(resp))
-            if len(resp) > 1:  # arbitrary number that will make this work
-                return True
-        if typ == 2:  # HOT
-            sql = """
-                SELECT * FROM HOTRecords
-                WHERE unit_addr = %(unit_address)s AND station_recorded = %(station_id)s AND date_rec >= NOW() - INTERVAL '10 minutes'
-            """
-            resp = run_get_cmd(
-                sql, args={"unit_address": unit_addr, "station_id": station_id}
-            )
-            if len(resp) > 1:  # arbitrary number that will make this work
-                return True
-        return False

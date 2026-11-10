@@ -2,52 +2,30 @@ from flask_restful import Resource, reqparse
 from ..db.trackSense_db_commands import *
 import http.client, urllib
 import os
-from dotenv import *
-
-load_dotenv()
-
+import requests
 
 class NotificationService(Resource):
-    """
-    example code from Pushover API documentation
-    import http.client, urllib
-    conn = http.client.HTTPSConnection("api.pushover.net:443")
-    conn.request("POST", "/1/messages.json",
-    urllib.parse.urlencode({
-        "token": "APP_TOKEN",
-        "user": "USER_KEY",
-        "message": "hello world",
-    }), { "Content-type": "application/x-www-form-urlencoded" })
-    conn.getresponse()
-    """
 
     def post(self):
 
-        load_dotenv()
-        TOKEN = os.getenv("Pushover_Token")
-
         # get params from request
         parser = reqparse.RequestParser()
-        parser.add_argument("userid", default="", type=str)
-        parser.add_argument("stationname", default="UNKNOWN", type=str)
+        parser.add_argument("station_id", default=0, type=int)
         args = parser.parse_args()
 
-        def_string = f"A train was just logged at {args['stationname']}. Please check and validate this information."
-        user_id = args["userid"]
+        location_name = run_get_cmd(
+            "SELECT station_name FROM Stations WHERE id = %(laptop_id)s",
+            args={"laptop_id": args["station_id"]},
+        )[0][0]
 
-        conn = http.client.HTTPSConnection("api.pushover.net:443")
-        conn.request(
-            "POST",
-            "/1/messages.json",
-            urllib.parse.urlencode(
-                {
-                    "token": TOKEN,
-                    "user": user_id,
-                    "title": "Tracksense Notification",
-                    "message": def_string,
-                }
-            ),
-            {"Content-type": "application/x-www-form-urlencoded"},
+        def_string = f"A train was just logged at {location_name}. Please check and validate this information."
+
+        location_name_url = location_name.replace(" ", "-")
+
+        res = requests.put(
+            f"http://tracksense.se.rit.edu:6161/{location_name_url}",
+            data=def_string,
+            headers={ "Title": f"Train spotted at {location_name}" }
         )
-        conn.getresponse()
-        return
+
+        return f"Successful: {res.ok}", 200 if res.ok else 500
