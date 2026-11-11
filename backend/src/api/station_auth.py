@@ -1,9 +1,10 @@
 from flask_restful import Resource, reqparse
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 from backend.database import db
 from backend.src.service.station_service import StationService
 
+from flask_jwt_extended import get_jwt, jwt_required
 
 class StationAuth(Resource):
     def get(self):
@@ -21,6 +22,7 @@ class StationAuth(Resource):
         
         return results, 200
 
+    @jwt_required()
     def post(self):
         """Creates a new station with a randomly generated password in the database with
         the provided the name of a new station.
@@ -39,15 +41,22 @@ class StationAuth(Resource):
         
         # Flask creates a request-specific database session
         session = db.session
-        
-        # Creates a new station with the given name, and returns the generated password associated with it
-        pw = StationService(session).create_station(args["station_name"])
-        
-        # Commit the changes if everything is successful
-        session.commit()
-        
-        # Return the new password to the user
-        return {"password": pw}, 201
+
+        # Gets the role of the user
+        claims = get_jwt()
+        user_role = claims.get("user_role")
+
+        if (user_role == 0):
+            # Creates a new station with the given name, and returns the generated password associated with it
+            pw = StationService(session).create_station(args["station_name"])
+            
+            # Commit the changes if everything is successful
+            session.commit()
+            
+            # Return the new password to the user
+            return {"password": pw}, 201
+        else:
+            return {"password": user_role}, 201
       
       
     def put(self):
