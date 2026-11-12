@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import './css/Home.css';
 import nys_trains from '../media/images/nys_trains.png';
-import churchville_marker from '../media/images/blackpin.png';
-import hornell_marker from '../media/images/blackpin.png';
-import macedon_marker from '../media/images/blackpin.png';
-import rotterdam_marker from '../media/images/blackpin.png';
-import silversprings_marker from '../media/images/blackpin.png';
-import fairport_marker from '../media/images/blackpin.png';
-import pittsford_marker from '../media/images/blackpin.png';
-import solvay_marker from '../media/images/blackpin.png';
+import marker from '../media/images/blackpin.png';
 
 const Home = () => {
   const [hoveredStation, setHoveredStation] = useState(null);
@@ -44,7 +37,7 @@ const Home = () => {
           onMouseLeave={handleMouseLeave}
         />
         <img
-          src={churchville_marker}
+          src={marker}
           alt="Pin"
           className="location-image"
           style={{position: "absolute", top: '38.6804%', left: '20.6628%', objectfit:"contain", width:25, height:25 }}
@@ -53,7 +46,7 @@ const Home = () => {
           onMouseLeave={handleMouseLeave}
         />
         <img
-          src={macedon_marker}
+          src={marker}
           alt="Pin"
           className="location-image"
           style={{ position: "absolute", top: '39.1979%', left: '25.9001%', objectfit:"contain", width:25, height:25 }}
@@ -62,7 +55,7 @@ const Home = () => {
           onMouseLeave={handleMouseLeave}
         />
         <img
-          src={rotterdam_marker}
+          src={marker}
           alt="Pin"
           className="location-image"
           style={{ position: "absolute", top: '45.5368%', left: '56.5057%', objectfit:"contain", width:25, height:25 }}
@@ -71,7 +64,7 @@ const Home = () => {
           onMouseLeave={handleMouseLeave}
         />
         <img
-          src={silversprings_marker}
+          src={marker}
           alt="Pin"
           className="location-image"
           style={{ position: "absolute", top: '47.2186%', left: '18.4533%', objectfit:"contain", width:25, height:25 }}
@@ -80,7 +73,7 @@ const Home = () => {
           onMouseLeave={handleMouseLeave}
         />
         <img
-          src={hornell_marker}
+          src={marker}
           alt="Pin"
           className="location-image"
           style={{ position: "absolute", top: '54.2043%', left: '22.2176%', objectfit:"contain", width:25, height:25 }}
@@ -104,6 +97,15 @@ const Home = () => {
           style={{ position: "absolute", top: '39.5%', left: '35.5%', objectfit:"contain", width:25, height:25 }}
           onClick={() => handlePinClick('solvay')}
           onMouseEnter={(e) => handleMouseEnter('Solvay', e)}
+          onMouseLeave={handleMouseLeave}
+        />
+        <img
+          src={marker}
+          alt="Pin"
+          className="location-image"
+          style={{ position: "absolute", top: '38.8%', left: '30%', objectfit:"contain", width:25, height:25 }}
+          onClick={() => handlePinClick('clyde')}
+          onMouseEnter={(e) => handleMouseEnter('Clyde', e)}
           onMouseLeave={handleMouseLeave}
         />
       </div>
