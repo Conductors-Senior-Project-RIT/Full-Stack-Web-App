@@ -28,7 +28,7 @@ const Home = () => {
       <div className="map-container">
         <img src={nys_trains} alt="Map" className="map-image" />
         <img
-          src={fairport_marker}
+          src={marker}
           alt="Pin"
           className="location-image"
           style={{ position: "absolute", top: '38.8157%', left: '24.5908%', objectfit:"contain", width:25, height:25 }}
@@ -82,7 +82,7 @@ const Home = () => {
           onMouseLeave={handleMouseLeave}
         />
         <img
-          src={pittsford_marker}
+          src={marker}
           alt="Pin"
           className="location-image"
           style={{ position: "absolute", top: '40%', left: '23%', objectfit:"contain", width:25, height:25 }}
@@ -91,7 +91,7 @@ const Home = () => {
           onMouseLeave={handleMouseLeave}
         />
         <img
-          src={solvay_marker}
+          src={marker}
           alt="Pin"
           className="location-image"
           style={{ position: "absolute", top: '39.5%', left: '35.5%', objectfit:"contain", width:25, height:25 }}

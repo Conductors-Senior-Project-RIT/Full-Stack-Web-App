@@ -4,10 +4,10 @@ import sign from '../media/images/clyde_sign_icon.png';
 import Station from './Station'
 
 
-const Solvay = () => {
+const Clyde = () => {
   return (
     <Station station="Clyde" image={clyde} locationImage={sign} />
   );
 };
 
-export default Solvay;
+export default Clyde;

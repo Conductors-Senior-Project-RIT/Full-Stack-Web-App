@@ -26,6 +26,7 @@ import Options from './components/Options';
 import Admin from './components/Admin';
 import HotData from './components/HOT_Data';
 import StandaloneManagement from './components/StandaloneManagement';
+import Clyde from './components/Clyde';
 
 //reorder to the right order
 
@@ -54,6 +55,7 @@ const App = () => {
             <Route path="/hornell" element={<Hornell />} />
             <Route path="/pittsford" element={<Pittsford />} />
             <Route path="/solvay" element={<Solvay />} />
+            <Route path="/clyde" element={<Clyde />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/options" element={<ProtectedRoute element={Options} requiredRole={2} />} />
