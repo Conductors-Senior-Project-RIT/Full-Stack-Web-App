@@ -7,6 +7,8 @@ from backend.src.service.station_service import StationService
 from flask_jwt_extended import get_jwt, jwt_required
 
 class StationAuth(Resource):
+
+    @jwt_required()
     def get(self):
         """Returns a complete list of station IDs and names in the database.
 
@@ -14,13 +16,21 @@ class StationAuth(Resource):
             Response: Returns an array of ID and name pairs in JSON objects if the
                 retrieval was successful; otherwise, an error message is returned.
         """
-        # Flask creates a request-specific database session
-        session = db.session
-        
-        # Get all station ids and names from the database as a collection of dictionaries
-        results = StationService(session).get_stations()
-        
-        return results, 200
+
+        # Gets the role of the user
+        claims = get_jwt()
+        user_role = claims.get("user_role")
+
+        if (user_role == 0):
+            # Flask creates a request-specific database session
+            session = db.session
+
+            # Get all station ids and names from the database as a collection of dictionaries
+            results = StationService(session).get_stations()
+            
+            return results, 200
+        else:
+            raise Unauthorized(description="User is not an admin!")
 
     @jwt_required()
     def post(self):
@@ -38,15 +48,15 @@ class StationAuth(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("station_name", type=str, default="unnamed")
         args = parser.parse_args()
-        
-        # Flask creates a request-specific database session
-        session = db.session
 
         # Gets the role of the user
         claims = get_jwt()
         user_role = claims.get("user_role")
 
         if (user_role == 0):
+            # Flask creates a request-specific database session
+            session = db.session
+
             # Creates a new station with the given name, and returns the generated password associated with it
             pw = StationService(session).create_station(args["station_name"])
             
@@ -56,9 +66,9 @@ class StationAuth(Resource):
             # Return the new password to the user
             return {"password": pw}, 201
         else:
-            return {"password": user_role}, 201
+            raise Unauthorized(description="User is not an admin!")
       
-      
+    @jwt_required()
     def put(self):
         """Updates a station's password in the database specified by a provided station ID.
 
@@ -73,23 +83,31 @@ class StationAuth(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("id", type=int, default=-1)
         args = parser.parse_args()
-        
-        # Ensure that the primary key of the station is valid
-        if args["id"] < 1:
-            raise BadRequest("An invalid station ID was provided!")
-        
-        # Flask creates a request-specific database session
-        session = db.session
-        
-        # Returns the updated station password
-        pw = StationService(session).update_station_password(args["id"])
-        
-        # Commit the changes if everything is successful
-        session.commit()
-        
-        # Return the updated password to the user
-        return {"new_pw": pw}, 200
 
+        # Gets the role of the user
+        claims = get_jwt()
+        user_role = claims.get("user_role")
+
+        if (user_role == 0):
+            # Ensure that the primary key of the station is valid
+            if args["id"] < 1:
+                raise BadRequest("An invalid station ID was provided!")
+            
+            # Flask creates a request-specific database session
+            session = db.session
+            
+            # Returns the updated station password
+            pw = StationService(session).update_station_password(args["id"])
+            
+            # Commit the changes if everything is successful
+            session.commit()
+            
+            # Return the updated password to the user
+            return {"new_pw": pw}, 200
+        else:
+            raise Unauthorized(description="User is not an admin!")
+
+    @jwt_required()
     def delete(self):
         """Removes a station via the station's id.
 
@@ -103,19 +121,26 @@ class StationAuth(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("id", type=int, location="args", default=-1)
         args = parser.parse_args()
-        
-        # Ensure that the primary key of the station is valid
-        if args["id"] < 1:
-            raise BadRequest("An invalid station ID was provided!")
-        
-        # Flask creates a request-specific database session
-        session = db.session
-        
-        # Returns the success value
-        success = StationService(session).remove_station(args["id"])
-        
-        # Commit the changes if everything is successful
-        session.commit()
-        
-        # Return the success value to the user
-        return {"success": success}, 200
+
+        # Gets the role of the user
+        claims = get_jwt()
+        user_role = claims.get("user_role")
+
+        if (user_role == 0):
+            # Ensure that the primary key of the station is valid
+            if args["id"] < 1:
+                raise BadRequest("An invalid station ID was provided!")
+            
+            # Flask creates a request-specific database session
+            session = db.session
+            
+            # Returns the success value
+            success = StationService(session).remove_station(args["id"])
+            
+            # Commit the changes if everything is successful
+            session.commit()
+            
+            # Return the success value to the user
+            return {"success": success}, 200
+        else:
+            raise Unauthorized(description="User is not an admin!")
