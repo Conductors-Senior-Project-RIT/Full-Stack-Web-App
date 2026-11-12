@@ -41,6 +41,7 @@ const Login = () => {
       if (response.ok) {
         await login();
         setSuccessPopup(true);
+        window.location.href = "/";
       } else {
         console.error('Error:', data.error);
         setMessage('Error logging in');
