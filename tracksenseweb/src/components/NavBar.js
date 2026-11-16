@@ -12,6 +12,7 @@ const NavBar = () => {
                 <li><Link to="/tracksense">Home</Link></li>
                 <li><Link to="/eot-data">EOT Data</Link></li>
                 <li><Link to="/hot-data">HOT Data</Link></li>
+                <li><Link to="/notifications">Notifications</Link></li>
                 <li><Link to="/aboutus">About Us</Link></li>
                 {!isAuthenticated && (
                     <>

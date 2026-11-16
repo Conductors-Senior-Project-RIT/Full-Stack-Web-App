@@ -26,6 +26,7 @@ import Options from './components/Options';
 import Admin from './components/Admin';
 import HotData from './components/HOT_Data';
 import StandaloneManagement from './components/StandaloneManagement';
+import NotificationApp from './components/NotificationApp';
 
 //reorder to the right order
 
@@ -41,6 +42,7 @@ const App = () => {
             <Route path="/tracksense" element={<Home />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/notifications" element={<NotificationApp />} />
             <Route path="/register" element={<Register />} />
             <Route path="/eot-data" element={<ProtectedRoute element={Data} requiredRole={2}/>} />
             <Route path="/hot-data" element={<ProtectedRoute element={HotData} requiredRole={2}/>} />
