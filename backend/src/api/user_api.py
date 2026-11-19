@@ -74,7 +74,6 @@ def login():
     return response
 
 @user_bp.route("/api/logout", methods=["POST"])
-@role_required()
 def logout():
     """Clears a user's JWT access cookie, logging them out.
 

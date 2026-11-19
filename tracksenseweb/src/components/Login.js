@@ -25,8 +25,8 @@ const Login = () => {
     e.preventDefault();
 
     const user = { email, password };
-    console.log(user);
-    try{
+
+    try {
       const response = await fetch(`${config.apiUrl}/login`, {
         method: 'POST',
         headers: {
@@ -36,43 +36,18 @@ const Login = () => {
         body: JSON.stringify(user),
       });
       const data = await response.json();
-      console.log('Response data:', data);
 
       if (response.ok) {
         await login();
         setSuccessPopup(true);
+        window.location.href = "/";
       } else {
-        console.error('Error:', data.error);
         setMessage('Error logging in');
       }
     } catch (error) {
-      console.error('Error:', error);
       setMessage('Error logging in');
     }
   };
-  //   fetch(`${config.apiUrl}/login`, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify(user),
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log('Response data:', data);
-  //       if (data.access_token) {
-  //         document.cookie = `token=${data.access_token}; path=/; max-age=${7 * 24 * 60 * 60}`; // Store token in a cookie for 7 days
-  //         login(); // Update the authentication state
-  //         setSuccessPopup(true); // Show success popup
-  //       } else {
-  //         setMessage(data.message);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error:', error);
-  //       setMessage('Error logging in');
-  //     });
-  // };
 
   return (
     <div className="login-container">

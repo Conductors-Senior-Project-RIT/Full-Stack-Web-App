@@ -27,6 +27,7 @@ import Admin from './components/Admin';
 import HotData from './components/HOT_Data';
 import StandaloneManagement from './components/StandaloneManagement';
 import Clyde from './components/Clyde';
+import NotFound from './components/NotFound';
 
 //reorder to the right order
 
@@ -37,6 +38,7 @@ const App = () => {
         <div className="App">
           <NavBar />
           <Routes>
+            <Route path="*" element={<NotFound />} />
             <Route path="/" element={<Home />} />
             <Route path="/tracksense/" element={<Home />} />
             <Route path="/tracksense" element={<Home />} />
