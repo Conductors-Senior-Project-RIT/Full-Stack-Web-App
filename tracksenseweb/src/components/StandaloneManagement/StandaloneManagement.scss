@@ -60,6 +60,11 @@ p {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Label styling */
+label {
+    width: 100%;
+}
+
 /* Accessibility for larger screens */
 @media (min-width: 768px) {
     .container {
@@ -100,7 +105,7 @@ p {
 
 /* Add hover effects for interactivity */
 section:hover {
-    transform: translateY(-5px);
+    transform: translateY(0px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }

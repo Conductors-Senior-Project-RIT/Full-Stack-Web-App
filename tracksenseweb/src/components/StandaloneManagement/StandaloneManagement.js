@@ -110,12 +110,15 @@ const StandaloneManagement = props => {
 		<div class="container">
 			<section>
 				<h2>Add Standalone</h2>
-				<input
-					type="text"
-					placeholder="Enter name of station"
-					value={getName ?? ''}
-					onChange={e => setName(e.target.value)}
-				/>
+				<label>
+					New Standalone Name:
+					<input
+						type="text"
+						placeholder="Enter name of station"
+						value={getName ?? ''}
+						onChange={e => setName(e.target.value)}
+					/>
+				</label>
 				<button onClick={handleStandaloneAdd}>Add Standalone</button>
 				{addData && <p>Station password: <code>{addData.password}</code></p>}
 			</section>
