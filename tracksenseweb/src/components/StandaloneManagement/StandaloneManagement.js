@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styles from './StandaloneManagement.scss';
 import config from '../../config';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 const StandaloneManagement = props => {
 	const [addData, setAddData] = useState(null);
@@ -107,7 +109,7 @@ const StandaloneManagement = props => {
 	}, []);
 
 	return (
-		<div class="container">
+		<div className="container">
 			<section>
 				<h2>Add Standalone</h2>
 				<label>
@@ -125,13 +127,22 @@ const StandaloneManagement = props => {
 
 			<section>
 				<h2>Remove Standalone</h2>
-				<select value={getIdToRemove} onChange={e => handleSetIdToDelete(e.target.value)}>
-					{getData.map((standalone) => (
-						<option key={standalone.station_name} value={standalone.id}>
-							{standalone.station_name}
-						</option>
-					))}
-				</select>
+				<label>
+					<Row>
+						<Col>Select Standalone:</Col>
+					</Row>
+					<Row>
+						<Col>
+							<select value={getIdToRemove} onChange={e => handleSetIdToDelete(e.target.value)}>
+								{getData.map((standalone) => (
+									<option key={standalone.station_name} value={standalone.id}>
+										{standalone.station_name}
+									</option>
+								))}
+							</select>
+						</Col>
+					</Row>
+				</label>
 				<button onClick={handleStandaloneRemove}>Remove Standalone</button>
 			</section>
 		</div>
