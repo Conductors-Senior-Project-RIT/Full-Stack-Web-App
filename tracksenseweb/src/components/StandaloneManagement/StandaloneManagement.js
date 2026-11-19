@@ -107,25 +107,30 @@ const StandaloneManagement = props => {
 	}, []);
 
 	return (
-		<div>
-			<h2>Add Standalone</h2>
-			<input
-				type="text"
-				placeholder="Enter name of station"
-				value={getName ?? ''}
-				onChange={e => setName(e.target.value)}
-			/>
-			<button onClick={handleStandaloneAdd}>Add Standalone</button>
-			{addData && <p>Station password: <code>{addData.password}</code></p>}
-			<h2>Remove Standalone</h2>
-			<select value={getIdToRemove} onChange={e => handleSetIdToDelete(e.target.value)}>
-				{getData.map((standalone) => (
-					<option key={standalone.station_name} value={standalone.id}>
-						{standalone.station_name}
-					</option>
-				))}
-			</select>
-			<button onClick={handleStandaloneRemove}>Remove Standalone</button>
+		<div class="container">
+			<section>
+				<h2>Add Standalone</h2>
+				<input
+					type="text"
+					placeholder="Enter name of station"
+					value={getName ?? ''}
+					onChange={e => setName(e.target.value)}
+				/>
+				<button onClick={handleStandaloneAdd}>Add Standalone</button>
+				{addData && <p>Station password: <code>{addData.password}</code></p>}
+			</section>
+
+			<section>
+				<h2>Remove Standalone</h2>
+				<select value={getIdToRemove} onChange={e => handleSetIdToDelete(e.target.value)}>
+					{getData.map((standalone) => (
+						<option key={standalone.station_name} value={standalone.id}>
+							{standalone.station_name}
+						</option>
+					))}
+				</select>
+				<button onClick={handleStandaloneRemove}>Remove Standalone</button>
+			</section>
 		</div>
 	);
 };
