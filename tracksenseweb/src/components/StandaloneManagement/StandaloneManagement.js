@@ -9,6 +9,12 @@ const StandaloneManagement = props => {
 	const [getName, setName] = useState(null);
 	const [getIdToRemove, setIdToRemove] = useState('');
 
+	function getCsrfToken() {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; csrf_access_token=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+	}
+
 	//TODO: Add coordinates to this. Will also need to add to API
 
 	const handleStandaloneAdd = async (e) => {
@@ -18,7 +24,8 @@ const StandaloneManagement = props => {
 			const response = await fetch(`${config.apiUrl}/station_auth`, {
 				method: 'POST',
 				headers: {
-				'Content-Type': 'application/json',
+					'Content-Type': 'application/json',
+					"X-CSRF-TOKEN": getCsrfToken(),
 				},
 				credentials: "include",
 				body: JSON.stringify({ station_name: getName }),
@@ -45,7 +52,8 @@ const StandaloneManagement = props => {
 			const response = await fetch(`${config.apiUrl}/station_auth`, {
 				method: 'GET',
 				headers: {
-				'Content-Type': 'application/json',
+					'Content-Type': 'application/json',
+					"X-CSRF-TOKEN": getCsrfToken(),
 				},
 				credentials: "include",
 			});
@@ -72,7 +80,8 @@ const StandaloneManagement = props => {
 			const response = await fetch(`${config.apiUrl}/station_auth?id=${getIdToRemove}`, {
 				method: 'DELETE',
 				headers: {
-				'Content-Type': 'application/json',
+					'Content-Type': 'application/json',
+					"X-CSRF-TOKEN": getCsrfToken(),
 				},
 				credentials: "include",
 			});
