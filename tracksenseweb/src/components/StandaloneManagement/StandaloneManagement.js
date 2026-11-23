@@ -4,6 +4,7 @@ import styles from './StandaloneManagement.scss';
 import config from '../../config';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
 
 const StandaloneManagement = props => {
 	const [addData, setAddData] = useState(null);
@@ -132,18 +133,20 @@ const StandaloneManagement = props => {
 						<Col>Select Standalone:</Col>
 					</Row>
 					<Row>
-						<Col>
-							<select value={getIdToRemove} onChange={e => handleSetIdToDelete(e.target.value)}>
+						<Col sm={9}>
+							<Form.Select value={getIdToRemove} onChange={e => handleSetIdToDelete(e.target.value)}>
 								{getData.map((standalone) => (
 									<option key={standalone.station_name} value={standalone.id}>
 										{standalone.station_name}
 									</option>
 								))}
-							</select>
+							</Form.Select>
+						</Col>
+						<Col sm={3}>
+							<button className='red-button' onClick={handleStandaloneRemove}>Remove</button>
 						</Col>
 					</Row>
 				</label>
-				<button onClick={handleStandaloneRemove}>Remove Standalone</button>
 			</section>
 		</div>
 	);
