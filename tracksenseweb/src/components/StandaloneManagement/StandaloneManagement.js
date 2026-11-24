@@ -6,16 +6,17 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 
 const StandaloneManagement = props => {
 	const [addData, setAddData] = useState(null);
 	const [getData, setGetData] = useState([]);
 	const [getName, setName] = useState(null);
-	const [getIdToRemove, setIdToRemove] = useState(1);
-	const [getPasswordId, setPasswordId] = useState(1);
+	const [getIdToRemove, setIdToRemove] = useState(null);
+	const [nameToRemove, setNameToRemove] = useState(null);
+	const [getPasswordId, setPasswordId] = useState(null);
 	const [passwd, setPasswd] = useState(null);
 	const [addModalVisible, setAddModalVisible] = useState(false);
+	const [removeModalVisible, setRemoveModalVisible] = useState(false);
 
 	function getCsrfToken() {
 		const value = `; ${document.cookie}`;
@@ -89,6 +90,18 @@ const StandaloneManagement = props => {
 			a.station_name.localeCompare(b.station_name)
 		)
 
+		if (getIdToRemove === null) {
+			setIdToRemove(sorted[0].id)
+		}
+
+		if (nameToRemove === null) {
+			setNameToRemove(sorted[0].station_name)
+		}
+
+		if (getPasswordId === null) {
+			setPasswordId(sorted[0].id)
+		}
+
 		setGetData(sorted);
 	};
 
@@ -136,14 +149,25 @@ const StandaloneManagement = props => {
 			}
 		
 			await handleStandaloneGet();
+			setRemoveModalVisible(false);
 
 		} catch (error) {
 			console.error('Error:', error);
 		}
 	};
 
-	const handleSetIdToDelete = async (id) => {
+	const handleCloseRemove = (e) => {
+		setRemoveModalVisible(false);
+	};
+
+  	const handleShowRemove = (e) => {
+		e.preventDefault();
+		setRemoveModalVisible(true);
+	}
+
+	const handleSetStationToDelete = async (id, name) => {
 		setIdToRemove(id);
+		setNameToRemove(name);
 	}
 
 	const handleSetPasswordId = async (id) => {
@@ -152,6 +176,7 @@ const StandaloneManagement = props => {
 
 	useEffect(() => {
 		handleStandaloneGet();
+		handleSetPasswordId();
 	}, []);
 
 	return (
@@ -178,9 +203,9 @@ const StandaloneManagement = props => {
 					<Modal.Title>Do you want to add {getName}?</Modal.Title>
 				</Modal.Header>
 				<Modal.Footer>
-					<Button variant="primary" onClick={handleStandaloneAdd} className='right-justified'>
+					<button onClick={handleStandaloneAdd} className='right-justified'>
 						Add
-					</Button>
+					</button>
 				</Modal.Footer>
 			</Modal>
 
@@ -218,20 +243,34 @@ const StandaloneManagement = props => {
 					</Row>
 					<Row>
 						<Col sm={9}>
-							<Form.Select value={getIdToRemove} onChange={e => handleSetIdToDelete(e.target.value)}>
+							<Form.Select value={getIdToRemove} onChange={e => handleSetStationToDelete(e.target.value, e.target.selectedOptions[0].dataset.name)}>
 								{getData.map((standalone) => (
-									<option key={standalone.station_name} value={standalone.id}>
+									<option key={standalone.station_name} value={standalone.id} data-name={standalone.station_name}>
 										{standalone.station_name}
 									</option>
 								))}
 							</Form.Select>
 						</Col>
 						<Col sm={3}>
-							<button className='red-button' onClick={handleStandaloneRemove}>Remove</button>
+							<button className='red-button' onClick={handleShowRemove}>Remove</button>
 						</Col>
 					</Row>
 				</label>
 			</section>
+
+			<Modal show={removeModalVisible} onHide={handleCloseRemove}>
+				<Modal.Header closeButton>
+					<Modal.Title>Do you want to remove {nameToRemove}?</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					This action cannot be undone!
+				</Modal.Body>
+				<Modal.Footer>
+					<button onClick={handleStandaloneRemove} className='right-justified red-button'>
+						Remove
+					</button>
+				</Modal.Footer>
+			</Modal>
 		</div>
 	);
 };
