@@ -42,6 +42,17 @@ class StationService(ServiceErrorWrapper):
         """
         return self.station_repo.get_station_id(station_name)
 
+    def get_station_passwd(self, station_id: int) -> str:
+            """Returns the password of a station given its id.
+    
+            Args:
+                station_id (int): The ID of the station.
+    
+            Returns:
+                (str): The password of the station.
+            """
+            return self.station_repo.get_station_passwd(station_id)
+
     def create_station(self, station_name: str) -> str:
         """Creates a new station in the database with the provided name.
 

@@ -11,6 +11,7 @@ const StandaloneManagement = props => {
 	const [getData, setGetData] = useState([]);
 	const [getName, setName] = useState(null);
 	const [getIdToRemove, setIdToRemove] = useState('');
+	const [getPasswordId, setPasswordId] = useState('');
 
 	function getCsrfToken() {
 		const value = `; ${document.cookie}`;
@@ -73,6 +74,7 @@ const StandaloneManagement = props => {
 		const sorted = [...result].sort((a, b) =>
 			a.station_name.localeCompare(b.station_name)
 		)
+
 		setGetData(sorted);
 	};
 
@@ -105,6 +107,10 @@ const StandaloneManagement = props => {
 		setIdToRemove(id);
 	}
 
+	const handleSetPasswordId = async (id) => {
+		setPasswordId(id);
+	}
+
 	useEffect(() => {
 		handleStandaloneGet();
 	}, []);
@@ -113,17 +119,42 @@ const StandaloneManagement = props => {
 		<div className="container">
 			<section>
 				<h2>Add Standalone</h2>
+				<Form onSubmit={handleStandaloneAdd}>
+					<label>
+						New Standalone Name:
+						<input
+							type="text"
+							placeholder="Enter name of station"
+							value={getName ?? ''}
+							onChange={e => setName(e.target.value)}
+						/>
+					</label>
+					<button type='submit'>Add Standalone</button>
+					{addData && <p>Station password: <code>{addData.password}</code></p>}
+				</Form>
+			</section>
+
+			<section>
+				<h2>Get Standalone Password</h2>
 				<label>
-					New Standalone Name:
-					<input
-						type="text"
-						placeholder="Enter name of station"
-						value={getName ?? ''}
-						onChange={e => setName(e.target.value)}
-					/>
+					<Row>
+						<Col>Select Standalone:</Col>
+					</Row>
+					<Row>
+						<Col sm={9}>
+							<Form.Select value={getPasswordId} onChange={e => handleSetPasswordId(e.target.value)}>
+								{getData.map((standalone) => (
+									<option key={standalone.station_name} value={standalone.id}>
+										{standalone.station_name}
+									</option>
+								))}
+							</Form.Select>
+						</Col>
+						<Col sm={3}>
+							<button onClick={handleStandaloneRemove}>Get</button>
+						</Col>
+					</Row>
 				</label>
-				<button onClick={handleStandaloneAdd}>Add Standalone</button>
-				{addData && <p>Station password: <code>{addData.password}</code></p>}
 			</section>
 
 			<section>
