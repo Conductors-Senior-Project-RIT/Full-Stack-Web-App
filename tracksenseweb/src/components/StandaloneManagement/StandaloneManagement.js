@@ -5,14 +5,17 @@ import config from '../../config';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 const StandaloneManagement = props => {
 	const [addData, setAddData] = useState(null);
 	const [getData, setGetData] = useState([]);
 	const [getName, setName] = useState(null);
-	const [getIdToRemove, setIdToRemove] = useState('');
-	const [getPasswordId, setPasswordId] = useState('');
-	const [passwd, setPasswd] = useState(null)
+	const [getIdToRemove, setIdToRemove] = useState(1);
+	const [getPasswordId, setPasswordId] = useState(1);
+	const [passwd, setPasswd] = useState(null);
+	const [addModalVisible, setAddModalVisible] = useState(false);
 
 	function getCsrfToken() {
 		const value = `; ${document.cookie}`;
@@ -44,11 +47,21 @@ const StandaloneManagement = props => {
 			setAddData(result)
 
 			await handleStandaloneGet();
+			setAddModalVisible(false);
 
 		} catch (error) {
 			console.error('Error:', error);
 		}
 	};
+
+	const handleCloseAdd = (e) => {
+		setAddModalVisible(false);
+	};
+
+  	const handleShowAdd = (e) => {
+		e.preventDefault();
+		setAddModalVisible(true);
+	}
 
 	const handleStandaloneGet = async (e) => {
 		var result;
@@ -145,7 +158,7 @@ const StandaloneManagement = props => {
 		<div className="container">
 			<section>
 				<h2>Add Standalone</h2>
-				<Form onSubmit={handleStandaloneAdd}>
+				<Form onSubmit={handleShowAdd}>
 					<label>
 						New Standalone Name:
 						<input
@@ -159,6 +172,17 @@ const StandaloneManagement = props => {
 					{addData && <p>Station password: <code>{addData.password}</code></p>}
 				</Form>
 			</section>
+
+			<Modal show={addModalVisible} onHide={handleCloseAdd}>
+				<Modal.Header closeButton>
+					<Modal.Title>Do you want to add {getName}?</Modal.Title>
+				</Modal.Header>
+				<Modal.Footer>
+					<Button variant="primary" onClick={handleStandaloneAdd} className='right-justified'>
+						Add
+					</Button>
+				</Modal.Footer>
+			</Modal>
 
 			<section>
 				<h2>Get Standalone Password</h2>
@@ -180,10 +204,10 @@ const StandaloneManagement = props => {
 							<button onClick={handlePasswdGet}>Get</button>
 						</Col>
 					</Row>
-					<Row>
-						{passwd && <p>Station password: <code>{passwd}</code></p>}
-					</Row>
 				</label>
+				<Row>
+					{passwd && <p>Station password: <code>{passwd}</code></p>}
+				</Row>
 			</section>
 
 			<section>
