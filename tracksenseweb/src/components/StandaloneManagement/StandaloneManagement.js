@@ -12,6 +12,7 @@ const StandaloneManagement = props => {
 	const [getName, setName] = useState(null);
 	const [getIdToRemove, setIdToRemove] = useState('');
 	const [getPasswordId, setPasswordId] = useState('');
+	const [passwd, setPasswd] = useState(null)
 
 	function getCsrfToken() {
 		const value = `; ${document.cookie}`;
@@ -76,6 +77,31 @@ const StandaloneManagement = props => {
 		)
 
 		setGetData(sorted);
+	};
+
+	const handlePasswdGet = async (e) => {
+		var result;
+
+		try {
+			const response = await fetch(`${config.apiUrl}/station_passwd?id=${getPasswordId}`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					"X-CSRF-TOKEN": getCsrfToken(),
+				},
+				credentials: "include",
+			});
+			result = await response.json();
+
+			if (!response.ok) {
+				console.error('Error:', result.error);
+			}
+
+		} catch (error) {
+			console.error('Error:', error);
+		}
+
+		setPasswd(result.password);
 	};
 
 	const handleStandaloneRemove = async (e) => {
@@ -151,8 +177,11 @@ const StandaloneManagement = props => {
 							</Form.Select>
 						</Col>
 						<Col sm={3}>
-							<button onClick={handleStandaloneRemove}>Get</button>
+							<button onClick={handlePasswdGet}>Get</button>
 						</Col>
+					</Row>
+					<Row>
+						{passwd && <p>Station password: <code>{passwd}</code></p>}
 					</Row>
 				</label>
 			</section>

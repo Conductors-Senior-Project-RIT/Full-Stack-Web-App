@@ -21,7 +21,7 @@ class StationPasswd(Resource):
         Returns:
             Response: Returns the password of the station.
         """
-        stat_id = request.args.get("station_id", default=None, type=int)
+        stat_id = request.args.get("id", default=None, type=int)
 
         # Gets the role of the user
         claims = get_jwt()
