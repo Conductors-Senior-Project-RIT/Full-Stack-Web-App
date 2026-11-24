@@ -214,7 +214,38 @@ class StationRepository(BaseRepository[Station]):
         # Handle any errors that may occur, including the station name in the error message.
         except Exception as e:
             raise self._translate_and_raise(e, f"Could not retrieve a station id for {stat_name}!")
-        
+
+    def get_station_passwd(self, stat_id: int) -> str:
+            """Returns the password of a station with a matching station id.
+    
+            Args:
+                stat_id (id): The id of the station.
+    
+            Raises:
+                RepositoryNotFoundError: Raised if a station with `stat_id` 
+                    does not exist.
+    
+            Returns:
+                (str): The password of the station.
+            """
+            try:
+                # Select the station password where the station id matches the provided id.
+                stmt = select(self.model.passwd).where(self.model.id == stat_id)
+                result = self.session.execute(stmt).scalar_one_or_none()
+                
+                # If None, then a record was likely not found.
+                self._validate(
+                    condition=result is not None, 
+                    error_class=E.NOT_FOUND, 
+                    message=f"Could not find {stat_id}!", 
+                    show_error=True
+                )
+                
+                return result
+            
+            # Handle any errors that may occur, including the station name in the error message.
+            except Exception as e:
+                raise self._translate_and_raise(e, f"Could not retrieve a station id for {stat_id}!")
 
     @RHandler.layer_error_decorator()
     def get_last_seen(self, station_name: str) -> datetime:

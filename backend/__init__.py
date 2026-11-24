@@ -77,6 +77,7 @@ def create_app(config_name=None):
     from .src.api.signal_update_handler import SignalUpdater
     from .src.api.station_auth import StationAuth
     from .src.api.station_online import StationOnline
+    from .src.api.station_passwd import StationPasswd
 
     # from .src.api.symbol_api import SymbolAPI  # moved to volunteer handler since only volunteers need to interact with symbols
     from .src.api.time_frame_pull import RecentActivities
@@ -99,6 +100,7 @@ def create_app(config_name=None):
     api.add_resource(RecordCollation, "/api/record_collation")
     api.add_resource(UserPreferences, '/api/user_preferences')
     api.add_resource(StationOnline, "/api/station_online")
+    api.add_resource(StationPasswd, "/api/station_passwd")
 
     # blueprints + error handler registrations here
     from .src.api import user_api, volunteer_handler
